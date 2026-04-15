@@ -1,0 +1,173 @@
+# Requirements: Kleingarten-App (Spatenstich)
+
+**Defined:** 2026-04-15
+**Core Value:** Foto rein → Plan und Kalender raus: KI-gestützte Überführung einer realen Parzelle in einen digital planbaren, regelkonformen Kleingarten-Assistenten.
+
+## v1 Requirements
+
+### Foundation (Technische Basis)
+
+- [ ] **FOUND-01**: Monorepo mit pnpm workspaces läuft lokal (app/, supabase/, packages/shared)
+- [ ] **FOUND-02**: StorageAdapter-Interface abstrahiert expo-sqlite (native) und IndexedDB (web) — kein direkter SQLite-Aufruf in Feature-Code
+- [ ] **FOUND-03**: Supabase-Schema mit Row Level Security auf allen Tabellen aktiviert ab Migration 001
+- [ ] **FOUND-04**: Feature-Flag-System über Supabase-Tabelle (`feature_flags`) operabel
+- [ ] **FOUND-05**: EAS Build funktioniert in CI für iOS und Web-Export
+- [ ] **FOUND-06**: Alle KI-API-Keys (Claude, Pl@ntNet) nur server-seitig in Edge Functions, nie im Client
+- [ ] **FOUND-07**: pgmq-Queue für asynchrone KI-Jobs eingerichtet (retry-Semantik via visibility timeout)
+- [ ] **FOUND-08**: KI-Antworten werden vollständig persistiert (roh + geparst) in `ai_results`-Tabelle
+
+### Authentifizierung & Onboarding
+
+- [ ] **AUTH-01**: User kann Account mit E-Mail/Passwort anlegen (Supabase Auth)
+- [ ] **AUTH-02**: User kann sich einloggen und bleibt eingeloggt (persistente Session)
+- [ ] **AUTH-03**: User kann App ohne Account nutzen ("lokal nutzen"-Modus, Daten nur auf Gerät)
+- [ ] **AUTH-04**: User kann später aus lokalem Modus in Account-Modus wechseln (Sync bestehender Daten)
+- [ ] **AUTH-05**: Onboarding-Flow führt in < 5 Minuten zu erstem nutzbaren Plan: Account/lokal → PLZ → Archetyp → Vereinsregeln (optional) → Garten-Erfassung
+
+### Profil & Standort
+
+- [ ] **PROF-01**: User kann PLZ eingeben, App ordnet automatisch eine der 7 Klimazonen zu (statische Lookup-Tabelle)
+- [ ] **PROF-02**: User kann Garten-Archetyp wählen (6 Optionen: Selbstversorger, Familien-Naschgarten, Mix ausgewogen, Zier- & Erholungsgarten, Biodiversitäts-/Naturgarten, Kräuter-/Apothekergarten)
+- [ ] **PROF-03**: Profil-Daten (PLZ, Klimazone, Archetyp) beeinflussen Aussaatdaten und Sortenvorschläge
+- [ ] **PROF-04**: User kann Profil jederzeit ändern (Archetyp-Wechsel, PLZ-Korrektur)
+
+### Vereinsregeln
+
+- [ ] **RULES-01**: User kann PDF/Bild der Vereinssatzung hochladen; Claude extrahiert Regeln in strukturiertes JSON (VereinsRegel-Datenmodell)
+- [ ] **RULES-02**: User kann extrahierte Regeln bestätigen, korrigieren oder löschen
+- [ ] **RULES-03**: User kann alternativ Vereinsregeln über Checkliste gängiger Regeln eingeben (Heckenmaß, Laubenmaß, Baumverbote etc.)
+- [ ] **RULES-04**: BKleingG-Grundregeln sind immer aktiv (1/3-Nutzgartenpflicht, Hochstamm-Verbote)
+- [ ] **RULES-05**: App zeigt Warnung wenn Nutz/Zier-Verhältnis im Plan die 1/3-Nutzgarten-Schwelle unterschreitet
+
+### Garten-Erfassung (M1)
+
+- [ ] **PHOTO-01**: User kann mind. 3 Garten-Fotos aufnehmen oder hochladen (geführter Flow mit Winkel-Anleitung: Übersicht, Nord, Süd)
+- [ ] **PHOTO-02**: User gibt Garten-Maße ein (L×B in Metern; Formen: Rechteck, L-Form, Trapez, freie Eckpunkte)
+- [ ] **PHOTO-03**: Bilder werden client-seitig auf max. 1.15 MP skaliert vor Upload (Edge Function CPU-Limit-Schutz)
+- [ ] **PHOTO-04**: Claude Vision analysiert Fotos + Maße server-seitig und gibt strukturiertes JSON zurück (Elemente mit Typ, Position in Metern, Konfidenz)
+- [ ] **PHOTO-05**: Erkannte Elemente werden dem User einzeln zur Bestätigung oder Ablehnung angezeigt (Konfidenz-UI)
+- [ ] **PHOTO-06**: App rendert schematischen 2D-Plan aus bestätigtem JSON (gezeichneter Stil, nicht fotorealistisch)
+- [ ] **PHOTO-07**: Edge Case: nur 1 Foto → Warnung, Analyse trotzdem versucht
+- [ ] **PHOTO-08**: Edge Case: keine Elemente erkannt → leere Plan-Vorlage mit eingegebenen Maßen, User baut manuell
+
+### Plan-Editor (M2)
+
+- [ ] **EDIT-01**: Canvas mit Maß-Gitter (1×1 m, ein-/ausblendbar) — implementiert mit @shopify/react-native-skia (GPU-threaded, 60fps)
+- [ ] **EDIT-02**: Element-Palette (Seitenleiste/Drawer): Beete, Pflanzen (Gemüse, Kräuter, Blumen, Obstgehölze, Stauden), Infrastruktur (Weg, Zaun, Laube, Kompost, Wasserstelle, Sitzplatz)
+- [ ] **EDIT-03**: User kann Elemente per Drag & Drop auf Canvas platzieren (react-native-gesture-handler, nicht PanResponder)
+- [ ] **EDIT-04**: User kann Elemente rotieren und skalieren
+- [ ] **EDIT-05**: User kann Beete als Polygon zeichnen (Eckpunkte setzen)
+- [ ] **EDIT-06**: Koordinaten werden in Gartenmetern gespeichert (nicht Pixel) — Screen-Koordinaten nur für Rendering berechnet
+- [ ] **EDIT-07**: Pflanzen-Abstandshinweis erscheint beim Platzieren (aus Sorten-Metadaten, z.B. "Tomate: 60 cm Abstand")
+- [ ] **EDIT-08**: Zwei Layer: Infrastruktur (dauerhaft) und Jahresplan (saison-spezifisch, wechselbar)
+- [ ] **EDIT-09**: Auto-Save alle 5 Sekunden + manuelles Speichern
+- [ ] **EDIT-10**: Vereinsregel-Warnung erscheint inline wenn User regelwidriges Element platziert (z.B. verbotener Baum)
+- [ ] **EDIT-11**: Undo/Redo (mind. 20 Schritte, via zundo-Middleware auf Zustand-Store)
+- [ ] **EDIT-12**: Plan-Editor läuft mit 60fps bei bis zu 200 Elementen auf echtem iOS-Gerät
+
+### Saatgut-Inventar (M3)
+
+- [ ] **SEED-01**: User kann Samentüten fotografieren; Claude Vision extrahiert Sortenname, Aussaatzeitraum, Haltbarkeitsdatum
+- [ ] **SEED-02**: User kann Sorten per Texteingabe hinzufügen (Autocomplete gegen Sorten-DB)
+- [ ] **SEED-03**: User kann Inventar-Einträge bearbeiten und löschen
+- [ ] **SEED-04**: Sorten-DB enthält 100–150 häufige Kleingartenpflanzen (Gemüse, Kräuter, Blumen, Obstgehölze) mit vollständigen Metadaten
+- [ ] **SEED-05**: Sorte nicht in DB → Freitext-Eintrag möglich (wird nicht verworfen)
+- [ ] **SEED-06**: Inventar zeigt Haltbarkeits-Status (abgelaufen / läuft bald ab / ok)
+
+### Pflanz- & Aussaatkalender (M4)
+
+- [ ] **CAL-01**: Zeitachse (12 Monate, scrollbar) zeigt Aufgaben-Karten pro Sorte aus Inventar
+- [ ] **CAL-02**: Aufgaben-Daten werden klimazonenspezifisch berechnet (Offset ± Wochen vs. Referenz)
+- [ ] **CAL-03**: Kalender unterscheidet: Vorkultur (innen/Gewächshaus), Direktsaat, Auspflanzen, Ernte
+- [ ] **CAL-04**: Pro Sorte wird ein Platzierungs-Vorschlag auf dem Plan gemacht (freie Beetfläche + Standort-Anforderung)
+- [ ] **CAL-05**: User bestätigt oder ändert Platzierungs-Vorschlag → Pflanze landet im Plan, Kalender-Aufgabe wird aktiv
+- [ ] **CAL-06**: Einfache Fruchtfolge-Warnung: offensichtliche Fehler (gleiche Pflanzenfamilie wie Vorjahr) werden angezeigt
+
+### Offline & Sync
+
+- [ ] **SYNC-01**: App startet und zeigt letzten Plan ohne Netzverbindung
+- [ ] **SYNC-02**: Foto-Queue funktioniert offline (Fotos werden lokal gespeichert, KI-Analyse wird gequeued)
+- [ ] **SYNC-03**: Sync-Queue verarbeitet ausstehende Operationen automatisch beim Wiederherstellen der Verbindung (Last-Write-Wins, Single-User)
+- [ ] **SYNC-04**: User sieht Sync-Status (ausstehende Operationen, Fehler)
+
+### Nicht-funktionale Anforderungen
+
+- [ ] **NFR-01**: App ist auf iPhone und Desktop-Browser nutzbar, Daten synchron
+- [ ] **NFR-02**: KI-Analyse ist asynchron mit Loading-State (kein blockierendes UI)
+- [ ] **NFR-03**: KI-Budget-Limit: Soft-Warnung bei 50 Claude-Calls/User/Tag, Hard-Stop bei 200/Tag
+- [ ] **NFR-04**: Alle Fotos verschlüsselt at-rest (Supabase Storage, EU Frankfurt)
+- [ ] **NFR-05**: Geo-Daten (EXIF) nur mit explizitem Opt-in genutzt
+- [ ] **NFR-06**: UI-Strings zentralisiert in `de.json` (spätere Lokalisierung vorbereitet, nicht umgesetzt)
+- [ ] **NFR-07**: Haftungsausschluss im UI: "Die App gibt Empfehlungen ohne Gewähr. BKleingG-Compliance liegt in der Verantwortung des Nutzers."
+- [ ] **NFR-08**: Sentry (EU) für Crash-Reporting eingerichtet
+
+## v2 Requirements
+
+### Pflegeerinnerungen (S1)
+
+- **CARE-01**: Aufgaben-Engine generiert Erinnerungen auf Basis Plan (Zurückschneiden, Ernten, Jäten, Düngen)
+- **CARE-02**: Push-Notifications für fällige Aufgaben
+
+### Unkraut-Check per Foto (S2)
+
+- **WEED-01**: User fotografiert Beet, App vergleicht mit Soll-Plan und markiert Fremdgewächse
+- **WEED-02**: Kombination Claude Vision (Kontext) + Pl@ntNet (Identifikation)
+
+### AI-Bildvorschau (S3)
+
+- **PREV-01**: Geplanter Garten wird als fotorealistisches Rendering visualisiert
+
+### Fruchtfolge-Assistent (S4)
+
+- **CROP-01**: Mehrjährige Sicht auf Pflanzenfamilien-Rotation pro Beet
+- **CROP-02**: Automatischer Vorschlag für optimale Fruchtfolge
+
+### Mischkultur-Check (S5)
+
+- **COMP-01**: Beim Platzieren: gute/schlechte Nachbarn werden angezeigt
+- **COMP-02**: Mischkultur-Score pro Beet-Kombination
+
+### Barcode/EAN-Scan (S6)
+
+- **SCAN-01**: Samentüten per EAN-Barcode scannen und automatisch zuordnen
+
+## Out of Scope
+
+| Feature | Grund |
+|---------|-------|
+| Social features, Community, Chat | Kein Multi-User-Fokus im MVP; lenkt von Kern-USP ab |
+| Marktplatz für Samentausch | Außerhalb Kern-Use-Case; eigene Komplexität |
+| Eigenes trainiertes ML-Modell | Externe APIs (Claude, Pl@ntNet) reichen für MVP |
+| AT/CH-Lokalisierung | Anderes Regelwerk; nach MVP |
+| Wetter-Integration (Frost-/Hitzewarnung) | v2+; erhöht API-Abhängigkeiten |
+| PDF-Export Jahresplan | v2+; nice-to-have |
+| Mehrpersonen-Gärten (Shared Access) | Multi-Tenant-Komplexität; RLS vorbereitet, Feature nicht umgesetzt |
+| 3D-Visualisierung / AR | Kein Mehrwert für Kleingarten-Planung; Over-Engineering |
+| Krankheits-/Schädlingsdiagnose per Foto | v2+; eigene UX-Komplexität |
+| Ernte-Tagebuch / Jahresrückblick | v2+ |
+| Sprach-Notizen beim Rundgang | v2+ |
+| Vereins-Satzungsdatenbank (Community) | v2+; eigene Moderation nötig |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| FOUND-01–08 | Phase 1 | Pending |
+| AUTH-01–05 | Phase 2 | Pending |
+| PROF-01–04 | Phase 2 | Pending |
+| RULES-01–05 | Phase 2 | Pending |
+| PHOTO-01–08 | Phase 3 | Pending |
+| EDIT-01–12 | Phase 4 | Pending |
+| SEED-01–06 | Phase 5 | Pending |
+| CAL-01–06 | Phase 6 | Pending |
+| SYNC-01–04 | Phase 1+3 | Pending |
+| NFR-01–08 | Phase 1+7 | Pending |
+
+**Coverage:**
+- v1 requirements: 58 total
+- Mapped to phases: 58
+- Unmapped: 0 ✓
+
+---
+*Requirements defined: 2026-04-15*
+*Last updated: 2026-04-15 after initial definition*
