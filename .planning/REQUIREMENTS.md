@@ -152,22 +152,80 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01–08 | Phase 1 | Pending |
-| AUTH-01–05 | Phase 2 | Pending |
-| PROF-01–04 | Phase 2 | Pending |
-| RULES-01–05 | Phase 2 | Pending |
-| PHOTO-01–08 | Phase 3 | Pending |
-| EDIT-01–12 | Phase 4 | Pending |
-| SEED-01–06 | Phase 5 | Pending |
-| CAL-01–06 | Phase 6 | Pending |
-| SYNC-01–04 | Phase 1+3 | Pending |
-| NFR-01–08 | Phase 1+7 | Pending |
+| FOUND-01 | Phase 1 | Pending |
+| FOUND-02 | Phase 1 | Pending |
+| FOUND-03 | Phase 1 | Pending |
+| FOUND-04 | Phase 1 | Pending |
+| FOUND-05 | Phase 1 | Pending |
+| FOUND-06 | Phase 1 | Pending |
+| FOUND-07 | Phase 1 | Pending |
+| FOUND-08 | Phase 1 | Pending |
+| NFR-06 | Phase 1 | Pending |
+| NFR-08 | Phase 1 | Pending |
+| AUTH-01 | Phase 2 | Pending |
+| AUTH-02 | Phase 2 | Pending |
+| AUTH-03 | Phase 2 | Pending |
+| AUTH-04 | Phase 2 | Pending |
+| AUTH-05 | Phase 2 | Pending |
+| PROF-01 | Phase 2 | Pending |
+| PROF-02 | Phase 2 | Pending |
+| PROF-03 | Phase 2 | Pending |
+| PROF-04 | Phase 2 | Pending |
+| RULES-01 | Phase 2 | Pending |
+| RULES-02 | Phase 2 | Pending |
+| RULES-03 | Phase 2 | Pending |
+| RULES-04 | Phase 2 | Pending |
+| RULES-05 | Phase 2 | Pending |
+| NFR-07 | Phase 2 | Pending |
+| SYNC-01 | Phase 3 | Pending |
+| SYNC-02 | Phase 3 | Pending |
+| SYNC-03 | Phase 3 | Pending |
+| SYNC-04 | Phase 3 | Pending |
+| NFR-01 | Phase 3 | Pending |
+| NFR-04 | Phase 3 | Pending |
+| NFR-05 | Phase 3 | Pending |
+| PHOTO-01 | Phase 4 | Pending |
+| PHOTO-02 | Phase 4 | Pending |
+| PHOTO-03 | Phase 4 | Pending |
+| PHOTO-04 | Phase 4 | Pending |
+| PHOTO-05 | Phase 4 | Pending |
+| PHOTO-06 | Phase 4 | Pending |
+| PHOTO-07 | Phase 4 | Pending |
+| PHOTO-08 | Phase 4 | Pending |
+| NFR-02 | Phase 4 | Pending |
+| NFR-03 | Phase 4 | Pending |
+| EDIT-01 | Phase 5 | Pending |
+| EDIT-02 | Phase 5 | Pending |
+| EDIT-03 | Phase 5 | Pending |
+| EDIT-04 | Phase 5 | Pending |
+| EDIT-05 | Phase 5 | Pending |
+| EDIT-06 | Phase 5 | Pending |
+| EDIT-07 | Phase 5 | Pending |
+| EDIT-08 | Phase 5 | Pending |
+| EDIT-09 | Phase 5 | Pending |
+| EDIT-10 | Phase 5 | Pending |
+| EDIT-11 | Phase 5 | Pending |
+| EDIT-12 | Phase 5 | Pending |
+| SEED-01 | Phase 6 | Pending |
+| SEED-02 | Phase 6 | Pending |
+| SEED-03 | Phase 6 | Pending |
+| SEED-04 | Phase 6 | Pending |
+| SEED-05 | Phase 6 | Pending |
+| SEED-06 | Phase 6 | Pending |
+| CAL-01 | Phase 7 | Pending |
+| CAL-02 | Phase 7 | Pending |
+| CAL-03 | Phase 7 | Pending |
+| CAL-04 | Phase 7 | Pending |
+| CAL-05 | Phase 7 | Pending |
+| CAL-06 | Phase 7 | Pending |
 
 **Coverage:**
-- v1 requirements: 58 total
-- Mapped to phases: 58
+- v1 requirements: 66 total (FOUND×8, AUTH×5, PROF×4, RULES×5, PHOTO×8, EDIT×12, SEED×6, CAL×6, SYNC×4, NFR×8)
+- Mapped to phases: 66
 - Unmapped: 0 ✓
+
+**Note:** Earlier traceability listed 58 requirements. The correct count is 66 — the 8 NFR requirements were previously undercounted in phase assignments. All 66 are now individually mapped.
 
 ---
 *Requirements defined: 2026-04-15*
-*Last updated: 2026-04-15 after initial definition*
+*Last updated: 2026-04-14 — traceability updated after roadmap creation (7 phases)*
