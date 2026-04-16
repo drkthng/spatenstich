@@ -1,9 +1,17 @@
 ---
-milestone: 1
-phase: null
-status: planning
-phases_total: 7
-phases_complete: 0
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: executing
+stopped_at: Completed 01-01-PLAN.md (Monorepo + packages/shared + StorageAdapter)
+last_updated: "2026-04-16T08:29:58.613Z"
+last_activity: 2026-04-16
+progress:
+  total_phases: 7
+  completed_phases: 0
+  total_plans: 3
+  completed_plans: 1
+  percent: 33
 ---
 
 # Project State
@@ -13,20 +21,21 @@ phases_complete: 0
 See: .planning/PROJECT.md (updated 2026-04-14)
 
 **Core value:** Foto rein → Plan und Kalender raus
-**Current focus:** Ready to plan Phase 1
+**Current focus:** Phase 01 — foundation
 
 ## Current Position
 
-Phase: - of 7 (not started)
-Plan: - of - in current phase
-Status: Ready to plan
-Last activity: 2026-04-14 — Roadmap created (7 phases, 66 v1 requirements mapped)
+Phase: 01 (foundation) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-04-16
 
 Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
+
 - Total plans completed: 0
 - Average duration: -
 - Total execution time: 0 hours
@@ -38,10 +47,12 @@ Progress: [░░░░░░░░░░] 0%
 | - | - | - | - |
 
 **Recent Trend:**
+
 - Last 5 plans: none yet
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 01 P01 | 13 | 6 tasks | 33 files |
 
 ## Accumulated Context
 
@@ -54,6 +65,10 @@ Recent decisions affecting current work:
 - Roadmap: Custom outbox sync (not PowerSync/Legend-State). LWW semantics for single-user MVP.
 - Roadmap: Vereinsregeln placed in Phase 2 (onboarding) — rules feed editor warnings in Phase 5 but input is captured early.
 - Roadmap: Phase 6 (M3 Seed inventory) depends only on Phase 3 (Sync), not Phase 5 — it can be built in parallel with Phase 5 if timeline pressure rises.
+- [Phase 01]: Expo SDK 53 stable used instead of SDK 55 canary — upgrade path is a version bump when SDK 55 stable releases
+- [Phase 01]: StorageAdapter (D-08): CRUD-only interface + schema version, Platform.select export at storage/index.ts — callers never know which adapter
+- [Phase 01]: jest split-project config: node env for storage tests (ts-jest + fake-indexeddb), expo env for RN component tests
+- [Phase 01]: app typecheck script uses direct node invocation to bypass Windows/pnpm hoisted tsc shell wrapper bug
 
 ### Pending Todos
 
@@ -69,6 +84,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14
-Stopped at: Roadmap written, STATE.md initialized, REQUIREMENTS.md traceability updated
+Last session: 2026-04-16T08:29:58.607Z
+Stopped at: Completed 01-01-PLAN.md (Monorepo + packages/shared + StorageAdapter)
 Resume file: None

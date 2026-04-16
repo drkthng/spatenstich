@@ -7,8 +7,8 @@
 
 ### Foundation (Technische Basis)
 
-- [ ] **FOUND-01**: Monorepo mit pnpm workspaces läuft lokal (app/, supabase/, packages/shared)
-- [ ] **FOUND-02**: StorageAdapter-Interface abstrahiert expo-sqlite (native) und IndexedDB (web) — kein direkter SQLite-Aufruf in Feature-Code
+- [x] **FOUND-01**: Monorepo mit pnpm workspaces läuft lokal (app/, supabase/, packages/shared)
+- [x] **FOUND-02**: StorageAdapter-Interface abstrahiert expo-sqlite (native) und IndexedDB (web) — kein direkter SQLite-Aufruf in Feature-Code
 - [ ] **FOUND-03**: Supabase-Schema mit Row Level Security auf allen Tabellen aktiviert ab Migration 001
 - [ ] **FOUND-04**: Feature-Flag-System über Supabase-Tabelle (`feature_flags`) operabel
 - [ ] **FOUND-05**: EAS Build funktioniert in CI für iOS und Web-Export
@@ -97,7 +97,7 @@
 - [ ] **NFR-03**: KI-Budget-Limit: Soft-Warnung bei 50 Claude-Calls/User/Tag, Hard-Stop bei 200/Tag
 - [ ] **NFR-04**: Alle Fotos verschlüsselt at-rest (Supabase Storage, EU Frankfurt)
 - [ ] **NFR-05**: Geo-Daten (EXIF) nur mit explizitem Opt-in genutzt
-- [ ] **NFR-06**: UI-Strings zentralisiert in `de.json` (spätere Lokalisierung vorbereitet, nicht umgesetzt)
+- [x] **NFR-06**: UI-Strings zentralisiert in `de.json` (spätere Lokalisierung vorbereitet, nicht umgesetzt)
 - [ ] **NFR-07**: Haftungsausschluss im UI: "Die App gibt Empfehlungen ohne Gewähr. BKleingG-Compliance liegt in der Verantwortung des Nutzers."
 - [ ] **NFR-08**: Sentry (EU) für Crash-Reporting eingerichtet
 
@@ -152,15 +152,15 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 1 | Pending |
-| FOUND-02 | Phase 1 | Pending |
+| FOUND-01 | Phase 1 | Complete |
+| FOUND-02 | Phase 1 | Complete |
 | FOUND-03 | Phase 1 | Pending |
 | FOUND-04 | Phase 1 | Pending |
 | FOUND-05 | Phase 1 | Pending |
 | FOUND-06 | Phase 1 | Pending |
 | FOUND-07 | Phase 1 | Pending |
 | FOUND-08 | Phase 1 | Pending |
-| NFR-06 | Phase 1 | Pending |
+| NFR-06 | Phase 1 | Complete |
 | NFR-08 | Phase 1 | Pending |
 | AUTH-01 | Phase 2 | Pending |
 | AUTH-02 | Phase 2 | Pending |
