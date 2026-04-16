@@ -1,0 +1,6 @@
+# Monorepo — pnpm >= 10, Expo SDK 55 requires hoisted nodeLinker for RN native builds.
+packages:
+  - 'app'
+  - 'packages/*'
+  - 'supabase'
+nodeLinker: hoisted
