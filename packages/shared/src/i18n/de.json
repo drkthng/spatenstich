@@ -1,0 +1,14 @@
+{
+  "common": {
+    "ok": "OK",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "retry": "Erneut versuchen",
+    "loading": "Lädt…"
+  },
+  "errors": {
+    "network": "Keine Verbindung. Bitte prüfe dein Netz.",
+    "unknown": "Ein unerwarteter Fehler ist aufgetreten."
+  }
+}

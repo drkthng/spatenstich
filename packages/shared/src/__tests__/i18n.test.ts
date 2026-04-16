@@ -1,4 +1,7 @@
-import { describe, it } from '@jest/globals';
-describe('i18n', () => {
-  it.todo('de.json is valid JSON and contains a non-empty default namespace');
+import de from '../i18n/de.json';
+describe('de.json', () => {
+  it('is valid JSON and contains common.ok', () => {
+    expect(de).toBeTruthy();
+    expect((de as Record<string, Record<string, string>>)['common']?.['ok']).toBe('OK');
+  });
 });
