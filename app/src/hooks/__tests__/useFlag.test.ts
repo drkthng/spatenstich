@@ -1,6 +1,7 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { supabase } from '../../lib/supabase';
 import { useFlag } from '../useFlag';
 
 jest.mock('../../lib/supabase', () => ({
@@ -16,9 +17,10 @@ jest.mock('../../lib/supabase', () => ({
 }));
 
 function wrap(qc: QueryClient) {
-  return ({ children }: { children: React.ReactNode }) => (
-    React.createElement(QueryClientProvider, { client: qc }, children)
-  );
+  const Wrapper = ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: qc }, children);
+  Wrapper.displayName = 'TestQueryWrapper';
+  return Wrapper;
 }
 
 describe('useFlag', () => {
@@ -29,28 +31,26 @@ describe('useFlag', () => {
   });
 
   it('returns false when flag is missing (maybeSingle returns null)', async () => {
-    const { supabase } = require('../../lib/supabase');
-    supabase.from.mockReturnValueOnce({
+    jest.mocked(supabase.from).mockReturnValueOnce({
       select: jest.fn(() => ({
         eq: jest.fn(() => ({
           maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
         })),
       })),
-    });
+    } as never);
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const { result } = renderHook(() => useFlag('missing_flag'), { wrapper: wrap(qc) });
     await waitFor(() => expect(result.current).toBe(false));
   });
 
   it('returns false when there is a supabase error', async () => {
-    const { supabase } = require('../../lib/supabase');
-    supabase.from.mockReturnValueOnce({
+    jest.mocked(supabase.from).mockReturnValueOnce({
       select: jest.fn(() => ({
         eq: jest.fn(() => ({
           maybeSingle: jest.fn().mockResolvedValue({ data: null, error: { message: 'network error' } }),
         })),
       })),
-    });
+    } as never);
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const { result } = renderHook(() => useFlag('example_flag'), { wrapper: wrap(qc) });
     await waitFor(() => expect(result.current).toBe(false));

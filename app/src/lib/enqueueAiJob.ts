@@ -34,8 +34,7 @@ export async function enqueueAiJob(input: {
   // 2. Enqueue message in pgmq via pgmq_public schema (FOUND-07, Pitfall 3)
   // pgmq_public is not in the generated Database type — use untyped client via `any` cast.
   // This is intentional: pgmq_public is an internal Supabase extension schema.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const pgmqClient = (supabase as any).schema('pgmq_public');
+  const pgmqClient = (supabase as any).schema('pgmq_public'); // eslint-disable-line @typescript-eslint/no-explicit-any
   const { error: qErr } = await pgmqClient.rpc('send', {
     queue_name: QUEUES.AI_JOBS,
     message: { job_id: job.id, job_type: input.job_type, payload: input.data },
