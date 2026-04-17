@@ -20,11 +20,21 @@ const config: ExpoConfig = {
       },
     ],
   },
-  plugins: ['expo-router'],
+  plugins: [
+    'expo-router',
+    [
+      '@sentry/react-native/expo',
+      {
+        organization: process.env.SENTRY_ORG ?? 'spatenstich',
+        project: 'spatenstich-app',
+        url: 'https://sentry.io/',
+      },
+    ],
+  ],
   experiments: { typedRoutes: true },
   extra: {
     eas: {
-      projectId: '71458ebd-fa49-4abd-8310-70d92cce5261',
+      projectId: process.env.EAS_PROJECT_ID ?? '71458ebd-fa49-4abd-8310-70d92cce5261',
     },
   },
 };
