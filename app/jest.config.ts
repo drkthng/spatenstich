@@ -15,13 +15,19 @@ const config: Config = {
       },
     },
     {
-      // React Native / Expo environment tests
-      displayName: 'expo',
-      preset: 'jest-expo',
-      testMatch: ['**/__tests__/**/*.test.ts?(x)', '!**/src/storage/__tests__/**'],
-      transformIgnorePatterns: [
-        'node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-native-svg|@sentry/.*))',
-      ],
+      // Hook/component tests — ts-jest in node env, RN modules mocked
+      displayName: 'hooks',
+      preset: 'ts-jest',
+      testEnvironment: 'node',
+      testMatch: ['**/src/hooks/__tests__/**/*.test.ts?(x)'],
+      moduleNameMapper: {
+        '^@spatenstich/shared$': '<rootDir>/../packages/shared/src/index.ts',
+        '^react-native-url-polyfill/auto$': '<rootDir>/src/__mocks__/react-native-url-polyfill.ts',
+        '^react-native$': '<rootDir>/src/__mocks__/react-native.ts',
+      },
+      transform: {
+        '^.+\\.tsx?$': ['ts-jest', { tsconfig: { strict: true, esModuleInterop: true, resolveJsonModule: true, jsx: 'react' } }],
+      },
     },
   ],
   collectCoverageFrom: ['src/**/*.{ts,tsx}'],
