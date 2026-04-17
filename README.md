@@ -2,7 +2,7 @@
 
 > Persönlicher digitaler Kleingarten-Assistent für deutsche Kleingärtner.
 
-**Status:** MVP in Entwicklung · Saison 2026
+**Status:** MVP in Entwicklung · Saison 2026 · Phase 1 abgeschlossen ✓
 
 ---
 
