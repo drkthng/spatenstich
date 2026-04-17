@@ -9,12 +9,12 @@
 
 - [x] **FOUND-01**: Monorepo mit pnpm workspaces läuft lokal (app/, supabase/, packages/shared)
 - [x] **FOUND-02**: StorageAdapter-Interface abstrahiert expo-sqlite (native) und IndexedDB (web) — kein direkter SQLite-Aufruf in Feature-Code
-- [ ] **FOUND-03**: Supabase-Schema mit Row Level Security auf allen Tabellen aktiviert ab Migration 001
-- [ ] **FOUND-04**: Feature-Flag-System über Supabase-Tabelle (`feature_flags`) operabel
+- [x] **FOUND-03**: Supabase-Schema mit Row Level Security auf allen Tabellen aktiviert ab Migration 001
+- [x] **FOUND-04**: Feature-Flag-System über Supabase-Tabelle (`feature_flags`) operabel
 - [ ] **FOUND-05**: EAS Build funktioniert in CI für iOS und Web-Export
 - [ ] **FOUND-06**: Alle KI-API-Keys (Claude, Pl@ntNet) nur server-seitig in Edge Functions, nie im Client
-- [ ] **FOUND-07**: pgmq-Queue für asynchrone KI-Jobs eingerichtet (retry-Semantik via visibility timeout)
-- [ ] **FOUND-08**: KI-Antworten werden vollständig persistiert (roh + geparst) in `ai_results`-Tabelle
+- [x] **FOUND-07**: pgmq-Queue für asynchrone KI-Jobs eingerichtet (retry-Semantik via visibility timeout)
+- [x] **FOUND-08**: KI-Antworten werden vollständig persistiert (roh + geparst) in `ai_results`-Tabelle
 
 ### Authentifizierung & Onboarding
 
@@ -154,12 +154,12 @@
 |-------------|-------|--------|
 | FOUND-01 | Phase 1 | Complete |
 | FOUND-02 | Phase 1 | Complete |
-| FOUND-03 | Phase 1 | Pending |
-| FOUND-04 | Phase 1 | Pending |
+| FOUND-03 | Phase 1 | Complete |
+| FOUND-04 | Phase 1 | Complete |
 | FOUND-05 | Phase 1 | Pending |
 | FOUND-06 | Phase 1 | Pending |
-| FOUND-07 | Phase 1 | Pending |
-| FOUND-08 | Phase 1 | Pending |
+| FOUND-07 | Phase 1 | Complete |
+| FOUND-08 | Phase 1 | Complete |
 | NFR-06 | Phase 1 | Complete |
 | NFR-08 | Phase 1 | Pending |
 | AUTH-01 | Phase 2 | Pending |

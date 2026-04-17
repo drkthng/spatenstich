@@ -28,7 +28,7 @@ Seven phases take the project from empty monorepo to a fully working MVP: Dirk p
   5. A test AI job inserted into pgmq is picked up by the Edge Function consumer and the raw response is persisted in `ai_results` — Claude API key never appears in any client bundle
 **Plans**: 3 plans
   - [x] 01-01-PLAN.md — Monorepo + packages/shared + StorageAdapter (Wave 1)
-  - [ ] 01-02-PLAN.md — Supabase schema + RLS + pgmq + feature flags (Wave 2)
+  - [x] 01-02-PLAN.md — Supabase schema + RLS + pgmq + feature flags (Wave 2)
   - [ ] 01-03-PLAN.md — EAS CI + Edge Function consumer + E2E verification (Wave 3)
 **UI hint**: no
 
@@ -112,7 +112,7 @@ Seven phases take the project from empty monorepo to a fully working MVP: Dirk p
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 1/3 | In Progress|  |
+| 1. Foundation | 2/3 | In Progress|  |
 | 2. Auth, Profile & Vereinsregeln | 0/TBD | Not started | - |
 | 3. Offline & Sync | 0/TBD | Not started | - |
 | 4. Garten-Erfassung (M1) | 0/TBD | Not started | - |

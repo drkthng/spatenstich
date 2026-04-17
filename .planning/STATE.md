@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-01-PLAN.md (Monorepo + packages/shared + StorageAdapter)
-last_updated: "2026-04-16T08:29:58.613Z"
-last_activity: 2026-04-16
+stopped_at: Completed 01-02-PLAN.md (Supabase Foundation Schema + RLS + pgmq + Feature Flags)
+last_updated: "2026-04-17T07:17:15.290Z"
+last_activity: 2026-04-17
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
-  percent: 33
+  completed_plans: 2
+  percent: 67
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 ## Current Position
 
 Phase: 01 (foundation) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
-Last activity: 2026-04-16
+Last activity: 2026-04-17
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 01 P01 | 13 | 6 tasks | 33 files |
+| Phase 01 P02 | 14 | 5 tasks | 18 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,9 @@ Recent decisions affecting current work:
 - [Phase 01]: StorageAdapter (D-08): CRUD-only interface + schema version, Platform.select export at storage/index.ts — callers never know which adapter
 - [Phase 01]: jest split-project config: node env for storage tests (ts-jest + fake-indexeddb), expo env for RN component tests
 - [Phase 01]: app typecheck script uses direct node invocation to bypass Windows/pnpm hoisted tsc shell wrapper bug
+- [Phase 01]: SET LOCAL ROLE authenticated required in supabase db query RLS tests — Management API runs as postgres superuser, bypassing RLS without explicit role switch
+- [Phase 01]: jest hooks project uses ts-jest/node (not jest-expo) — jest-expo setup.js crashes in multi-project Node context; pattern extends Plan 01 fix
+- [Phase 01]: enqueueAiJob uses (supabase as any).schema('pgmq_public') — pgmq_public not in generated Database type; any-cast intentional and documented
 
 ### Pending Todos
 
@@ -84,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T08:29:58.607Z
-Stopped at: Completed 01-01-PLAN.md (Monorepo + packages/shared + StorageAdapter)
+Last session: 2026-04-17T07:17:15.283Z
+Stopped at: Completed 01-02-PLAN.md (Supabase Foundation Schema + RLS + pgmq + Feature Flags)
 Resume file: None
