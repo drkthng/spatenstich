@@ -22,5 +22,10 @@ const config: ExpoConfig = {
   },
   plugins: ['expo-router'],
   experiments: { typedRoutes: true },
+  extra: {
+    eas: {
+      projectId: '71458ebd-fa49-4abd-8310-70d92cce5261',
+    },
+  },
 };
 export default config;
