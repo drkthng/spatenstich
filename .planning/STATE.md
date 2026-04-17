@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 01-02-PLAN.md (Supabase Foundation Schema + RLS + pgmq + Feature Flags)
-last_updated: "2026-04-17T07:17:15.290Z"
+status: verifying
+stopped_at: "Checkpoint 1-03-05: awaiting human verification (PR CI run + EAS build + Sentry event)"
+last_updated: "2026-04-17T11:08:39.476Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 7
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
-  percent: 67
+  completed_plans: 3
+  percent: 100
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 
 Phase: 01 (foundation) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-17
 
 Progress: [░░░░░░░░░░] 0%
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 01 P01 | 13 | 6 tasks | 33 files |
 | Phase 01 P02 | 14 | 5 tasks | 18 files |
+| Phase 01 P03 | 10 | 4 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,10 @@ Recent decisions affecting current work:
 - [Phase 01]: SET LOCAL ROLE authenticated required in supabase db query RLS tests — Management API runs as postgres superuser, bypassing RLS without explicit role switch
 - [Phase 01]: jest hooks project uses ts-jest/node (not jest-expo) — jest-expo setup.js crashes in multi-project Node context; pattern extends Plan 01 fix
 - [Phase 01]: enqueueAiJob uses (supabase as any).schema('pgmq_public') — pgmq_public not in generated Database type; any-cast intentional and documented
+- [Phase 01]: supabase functions invoke removed in CLI v2.90.0 — deployment verified via functions list (ACTIVE status); manual invoke documented in e2e-pgmq-smoke.sql
+- [Phase 01]: SUPABASE_SERVICE_ROLE_KEY is NOT a GitHub secret — lives only in Supabase Function Secrets (T-3-06 mitigation)
+- [Phase 01]: Sentry.init guarded by !!process.env.EXPO_PUBLIC_SENTRY_DSN — no-op in local dev without DSN
+- [Phase 01]: EAS Build uses --no-wait flag — CI queues build on expo.dev without blocking runner
 
 ### Pending Todos
 
@@ -88,6 +93,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-17T07:17:15.283Z
-Stopped at: Completed 01-02-PLAN.md (Supabase Foundation Schema + RLS + pgmq + Feature Flags)
+Last session: 2026-04-17T11:08:39.469Z
+Stopped at: Checkpoint 1-03-05: awaiting human verification (PR CI run + EAS build + Sentry event)
 Resume file: None

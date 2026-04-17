@@ -6,7 +6,7 @@ Seven phases take the project from empty monorepo to a fully working MVP: Dirk p
 
 ## Phases
 
-- [ ] **Phase 1: Foundation** - Monorepo, StorageAdapter, Supabase schema + RLS, pgmq, feature flags, EAS CI
+- [x] **Phase 1: Foundation** - Monorepo, StorageAdapter, Supabase schema + RLS, pgmq, feature flags, EAS CI (completed 2026-04-17)
 - [ ] **Phase 2: Auth, Profile & Vereinsregeln** - Account or local mode, PLZ/Klimazone, Archetyp, Vereinsregeln input, onboarding flow
 - [ ] **Phase 3: Offline & Sync** - Outbox sync, network detection, cross-platform storage, photo queue
 - [ ] **Phase 4: Garten-Erfassung (M1)** - Guided photo capture, Claude Vision analysis, element confirmation, 2D plan render
@@ -29,7 +29,7 @@ Seven phases take the project from empty monorepo to a fully working MVP: Dirk p
 **Plans**: 3 plans
   - [x] 01-01-PLAN.md — Monorepo + packages/shared + StorageAdapter (Wave 1)
   - [x] 01-02-PLAN.md — Supabase schema + RLS + pgmq + feature flags (Wave 2)
-  - [ ] 01-03-PLAN.md — EAS CI + Edge Function consumer + E2E verification (Wave 3)
+  - [x] 01-03-PLAN.md — EAS CI + Edge Function consumer + E2E verification (Wave 3)
 **UI hint**: no
 
 ### Phase 2: Auth, Profile & Vereinsregeln
@@ -112,7 +112,7 @@ Seven phases take the project from empty monorepo to a fully working MVP: Dirk p
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 2/3 | In Progress|  |
+| 1. Foundation | 3/3 | Complete   | 2026-04-17 |
 | 2. Auth, Profile & Vereinsregeln | 0/TBD | Not started | - |
 | 3. Offline & Sync | 0/TBD | Not started | - |
 | 4. Garten-Erfassung (M1) | 0/TBD | Not started | - |

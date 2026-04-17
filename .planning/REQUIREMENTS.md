@@ -11,8 +11,8 @@
 - [x] **FOUND-02**: StorageAdapter-Interface abstrahiert expo-sqlite (native) und IndexedDB (web) — kein direkter SQLite-Aufruf in Feature-Code
 - [x] **FOUND-03**: Supabase-Schema mit Row Level Security auf allen Tabellen aktiviert ab Migration 001
 - [x] **FOUND-04**: Feature-Flag-System über Supabase-Tabelle (`feature_flags`) operabel
-- [ ] **FOUND-05**: EAS Build funktioniert in CI für iOS und Web-Export
-- [ ] **FOUND-06**: Alle KI-API-Keys (Claude, Pl@ntNet) nur server-seitig in Edge Functions, nie im Client
+- [x] **FOUND-05**: EAS Build funktioniert in CI für iOS und Web-Export
+- [x] **FOUND-06**: Alle KI-API-Keys (Claude, Pl@ntNet) nur server-seitig in Edge Functions, nie im Client
 - [x] **FOUND-07**: pgmq-Queue für asynchrone KI-Jobs eingerichtet (retry-Semantik via visibility timeout)
 - [x] **FOUND-08**: KI-Antworten werden vollständig persistiert (roh + geparst) in `ai_results`-Tabelle
 
@@ -99,7 +99,7 @@
 - [ ] **NFR-05**: Geo-Daten (EXIF) nur mit explizitem Opt-in genutzt
 - [x] **NFR-06**: UI-Strings zentralisiert in `de.json` (spätere Lokalisierung vorbereitet, nicht umgesetzt)
 - [ ] **NFR-07**: Haftungsausschluss im UI: "Die App gibt Empfehlungen ohne Gewähr. BKleingG-Compliance liegt in der Verantwortung des Nutzers."
-- [ ] **NFR-08**: Sentry (EU) für Crash-Reporting eingerichtet
+- [x] **NFR-08**: Sentry (EU) für Crash-Reporting eingerichtet
 
 ## v2 Requirements
 
@@ -156,12 +156,12 @@
 | FOUND-02 | Phase 1 | Complete |
 | FOUND-03 | Phase 1 | Complete |
 | FOUND-04 | Phase 1 | Complete |
-| FOUND-05 | Phase 1 | Pending |
-| FOUND-06 | Phase 1 | Pending |
+| FOUND-05 | Phase 1 | Complete |
+| FOUND-06 | Phase 1 | Complete |
 | FOUND-07 | Phase 1 | Complete |
 | FOUND-08 | Phase 1 | Complete |
 | NFR-06 | Phase 1 | Complete |
-| NFR-08 | Phase 1 | Pending |
+| NFR-08 | Phase 1 | Complete |
 | AUTH-01 | Phase 2 | Pending |
 | AUTH-02 | Phase 2 | Pending |
 | AUTH-03 | Phase 2 | Pending |
