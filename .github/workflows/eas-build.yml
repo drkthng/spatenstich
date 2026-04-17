@@ -1,0 +1,29 @@
+name: EAS Build (iOS + Web) — main only
+on:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: 18.7.0
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Web export
+        run: pnpm --filter app exec expo export --platform web
+      - name: Scan web bundle for secrets
+        run: bash scripts/check-claude-key-in-bundle.sh app/dist
+      - name: EAS Build iOS (non-interactive, no-wait)
+        working-directory: app
+        run: eas build --platform ios --profile production --non-interactive --no-wait
