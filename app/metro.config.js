@@ -1,3 +1,8 @@
+// Prevent Expo from using monorepo root as Metro server root — the SSR entry
+// path would otherwise be computed relative to the workspace root while Metro
+// resolves it from projectRoot, causing "cannot resolve expo-router/entry".
+process.env.EXPO_NO_METRO_WORKSPACE_ROOT = '1';
+
 const { getDefaultConfig } = require('expo/metro-config');
 const path = require('path');
 
@@ -11,7 +16,6 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(monorepoRoot, 'node_modules'),
 ];
-config.resolver.disableHierarchicalLookup = true;
 config.resolver.assetExts.push('wasm');
 
 // expo-sqlite Web: SharedArrayBuffer benötigt COOP+COEP-Header
