@@ -83,6 +83,12 @@ Recent decisions affecting current work:
 
 None yet.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260418-q01 | Fix CI: add react-native-web to app deps | 2026-04-18 | 12c988d | [260418-q01-fix-react-native-web-ci](.planning/quick/260418-q01-fix-react-native-web-ci/) |
+
 ### Blockers/Concerns
 
 - Open question: NativeWind v4 + Reanimated v3 compatibility on SDK 55 unconfirmed. Spike needed in Phase 1 before any styling work.
