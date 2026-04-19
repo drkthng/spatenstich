@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: "Phase 02 — Wave 1 merged; proceeding to Wave 2 (02-02 + 02-03)"
-last_updated: "2026-04-19T17:42:00.000Z"
-last_activity: 2026-04-19 -- Plan 02-01 complete (foundation)
+stopped_at: "Checkpoint 2-02-04: human-verify script pending (9-step AUTH-05 device QA under 5 min)"
+last_updated: "2026-04-19T18:10:00.000Z"
+last_activity: 2026-04-19 -- Plans 02-02 + 02-03 complete (Wave 2)
 progress:
   total_phases: 7
   completed_phases: 1
-  total_plans: 8
-  completed_plans: 4
-  percent: 50
+  total_plans: 10
+  completed_plans: 6
+  percent: 60
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 ## Current Position
 
 Phase: 02 (auth-profile-vereinsregeln) — EXECUTING
-Plan: 2 of 4 (02-01 complete)
-Status: Wave 1 merged; Wave 2 next (02-02 + 02-03)
-Last activity: 2026-04-19 -- Plan 02-01 complete (foundation)
+Plan: 4 of 4 (02-01, 02-02, 02-03 complete; 02-04 pending)
+Status: Wave 2 merged; human-verify checkpoint (2-02-04) outstanding; Wave 3 next (02-04)
+Last activity: 2026-04-19 -- Plans 02-02 + 02-03 complete (Wave 2)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -99,6 +99,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-17T11:08:39.469Z
-Stopped at: Checkpoint 1-03-05: awaiting human verification (PR CI run + EAS build + Sentry event)
+Last session: 2026-04-19T16:24:56.605Z
+Stopped at: context exhaustion at 91% (2026-04-19)
 Resume file: None

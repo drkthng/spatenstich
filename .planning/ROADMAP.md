@@ -45,8 +45,8 @@ Seven phases take the project from empty monorepo to a fully working MVP: Dirk p
 **Plans**: 4 plans
 Plans:
 - [x] 02-01-PLAN.md — Schema (profiles + vereinsregeln + storage bucket) + Auth core (LargeSecureStore + getOrCreateLocalUUID + authStore + NativeWind 4.1.23) + Domain types/i18n/seed (Wave 1)
-- [ ] 02-02-PLAN.md — Onboarding & Profile UI (Stack.Protected route guards, Auth-Wahl with NFR-07 Haftungsausschluss, signUp/signIn/verify-email, Garten-Plan-Placeholder, Profile-Übersicht with InlineBanner + TrafficLightBadge, PLZ + Archetype screens) (Wave 2)
-- [ ] 02-03-PLAN.md — Vereinsregeln Edge Function (synchronous Claude Files API extraction with 55s client AbortController, parseRules pure module, FOUND-06 inheritance) (Wave 2)
+- [x] 02-02-PLAN.md — Onboarding & Profile UI (Stack.Protected route guards, Auth-Wahl with NFR-07 Haftungsausschluss, signUp/signIn/verify-email, Garten-Plan-Placeholder, Profile-Übersicht with InlineBanner + TrafficLightBadge, PLZ + Archetype screens) (Wave 2)
+- [x] 02-03-PLAN.md — Vereinsregeln Edge Function (synchronous Claude Files API extraction with 55s client AbortController, parseRules pure module, FOUND-06 inheritance) (Wave 2)
 - [ ] 02-04-PLAN.md — Vereinsregeln UI (entry/upload/confirm/checklist) + VereinsregelRow + ExtractionLoader + Settings (Logout + Local→Account Migration per AUTH-04/D-12) + end-to-end manual checkpoint (Wave 3)
 **UI hint**: yes
 
