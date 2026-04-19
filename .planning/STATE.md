@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: "Checkpoint 2-02-04: human-verify script pending (9-step AUTH-05 device QA under 5 min)"
-last_updated: "2026-04-19T18:10:00.000Z"
-last_activity: 2026-04-19 -- Plans 02-02 + 02-03 complete (Wave 2)
+stopped_at: "Checkpoint 2-04-04: human-verify script written into 02-04-SUMMARY (web + native E2E, AUTH-05 <5min stopwatch, RULES-04 DOM spot check, cancellation test)"
+last_updated: "2026-04-19T21:10:30.000Z"
+last_activity: 2026-04-19 -- Plan 02-04 complete (Wave 3); Phase 02 code deliverables done, human-verify 2-04-04 + 2-02-04 outstanding
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 10
-  completed_plans: 6
-  percent: 60
+  completed_plans: 7
+  percent: 70
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 
 ## Current Position
 
-Phase: 02 (auth-profile-vereinsregeln) — EXECUTING
-Plan: 4 of 4 (02-01, 02-02, 02-03 complete; 02-04 pending)
-Status: Wave 2 merged; human-verify checkpoint (2-02-04) outstanding; Wave 3 next (02-04)
-Last activity: 2026-04-19 -- Plans 02-02 + 02-03 complete (Wave 2)
+Phase: 02 (auth-profile-vereinsregeln) — CODE COMPLETE; HUMAN-VERIFY PENDING
+Plan: 4 of 4 (02-01, 02-02, 02-03, 02-04 code complete)
+Status: Wave 3 merged; human-verify checkpoints 2-02-04 + 2-04-04 outstanding (scripts in respective SUMMARYs)
+Last activity: 2026-04-19 -- Plan 02-04 complete (6 atomic commits, TDD RED/GREEN for store/repo + migration)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [███████░░░] 70%
 
 ## Performance Metrics
 
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P01 | 13 | 6 tasks | 33 files |
 | Phase 01 P02 | 14 | 5 tasks | 18 files |
 | Phase 01 P03 | 10 | 4 tasks | 14 files |
+| Phase 02 P04 | 13 | 3 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,12 @@ Recent decisions affecting current work:
 - [Phase 01]: SUPABASE_SERVICE_ROLE_KEY is NOT a GitHub secret — lives only in Supabase Function Secrets (T-3-06 mitigation)
 - [Phase 01]: Sentry.init guarded by !!process.env.EXPO_PUBLIC_SENTRY_DSN — no-op in local dev without DSN
 - [Phase 01]: EAS Build uses --no-wait flag — CI queues build on expo.dev without blocking runner
+- [Phase 02-04]: Vereinsregeln checklist rendered flat (not 7-category) — VereinsregelChecklistItem in @spatenstich/shared has no `kategorie` field; grouping deferred pending shared-type extension
+- [Phase 02-04]: Migration rollback invariant — storage.delete STRICTLY AFTER every Supabase upsert succeeds (T-2-04-03); signUp failure or upsert failure leaves local data intact for retry
+- [Phase 02-04]: BKleingG seed rows keep deterministic `bk-<userId>-<index>` id across migration so DB CHECK constraint and client guard continue to recognise them
+- [Phase 02-04]: Settings logout uses inline confirmation expansion (no Modal, UI-SPEC line 234); Sentry.setUser(null) gated on EXPO_PUBLIC_SENTRY_DSN (T-2-04-04 mitigation, mirrors Plan 01-03 pattern)
+- [Phase 02-04]: Swipe-to-delete deferred — react-native-gesture-handler not in stack; tap-trash fallback used per plan Behavior 14 permission
+- [Phase 02-04]: ExtractionLoader uses NativeWind animate-pulse (not Reanimated worklet) — adequate for MVP, no added surface
 
 ### Pending Todos
 
@@ -99,6 +106,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-19T16:24:56.605Z
-Stopped at: context exhaustion at 91% (2026-04-19)
-Resume file: None
+Last session: 2026-04-19T21:10:30.000Z
+Stopped at: Plan 02-04 complete; human-verify checkpoint 2-04-04 deferred into SUMMARY (web+native E2E, AUTH-05 <5min stopwatch, RULES-04 spot check, cancellation test)
+Resume file: .planning/phases/02-auth-profile-vereinsregeln/02-04-SUMMARY.md

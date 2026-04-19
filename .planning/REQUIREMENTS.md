@@ -21,7 +21,7 @@
 - [ ] **AUTH-01**: User kann Account mit E-Mail/Passwort anlegen (Supabase Auth)
 - [ ] **AUTH-02**: User kann sich einloggen und bleibt eingeloggt (persistente Session)
 - [ ] **AUTH-03**: User kann App ohne Account nutzen ("lokal nutzen"-Modus, Daten nur auf Gerät)
-- [ ] **AUTH-04**: User kann später aus lokalem Modus in Account-Modus wechseln (Sync bestehender Daten)
+- [x] **AUTH-04**: User kann später aus lokalem Modus in Account-Modus wechseln (Sync bestehender Daten)
 - [ ] **AUTH-05**: Onboarding-Flow führt in < 5 Minuten zu erstem nutzbaren Plan: Account/lokal → PLZ → Archetyp → Vereinsregeln (optional) → Garten-Erfassung
 
 ### Profil & Standort
@@ -34,10 +34,10 @@
 ### Vereinsregeln
 
 - [ ] **RULES-01**: User kann PDF/Bild der Vereinssatzung hochladen; Claude extrahiert Regeln in strukturiertes JSON (VereinsRegel-Datenmodell)
-- [ ] **RULES-02**: User kann extrahierte Regeln bestätigen, korrigieren oder löschen
-- [ ] **RULES-03**: User kann alternativ Vereinsregeln über Checkliste gängiger Regeln eingeben (Heckenmaß, Laubenmaß, Baumverbote etc.)
-- [ ] **RULES-04**: BKleingG-Grundregeln sind immer aktiv (1/3-Nutzgartenpflicht, Hochstamm-Verbote)
-- [ ] **RULES-05**: App zeigt Warnung wenn Nutz/Zier-Verhältnis im Plan die 1/3-Nutzgarten-Schwelle unterschreitet
+- [x] **RULES-02**: User kann extrahierte Regeln bestätigen, korrigieren oder löschen
+- [x] **RULES-03**: User kann alternativ Vereinsregeln über Checkliste gängiger Regeln eingeben (Heckenmaß, Laubenmaß, Baumverbote etc.)
+- [x] **RULES-04**: BKleingG-Grundregeln sind immer aktiv (1/3-Nutzgartenpflicht, Hochstamm-Verbote)
+- [x] **RULES-05**: App zeigt Warnung wenn Nutz/Zier-Verhältnis im Plan die 1/3-Nutzgarten-Schwelle unterschreitet
 
 ### Garten-Erfassung (M1)
 
@@ -98,7 +98,7 @@
 - [ ] **NFR-04**: Alle Fotos verschlüsselt at-rest (Supabase Storage, EU Frankfurt)
 - [ ] **NFR-05**: Geo-Daten (EXIF) nur mit explizitem Opt-in genutzt
 - [x] **NFR-06**: UI-Strings zentralisiert in `de.json` (spätere Lokalisierung vorbereitet, nicht umgesetzt)
-- [ ] **NFR-07**: Haftungsausschluss im UI: "Die App gibt Empfehlungen ohne Gewähr. BKleingG-Compliance liegt in der Verantwortung des Nutzers."
+- [x] **NFR-07**: Haftungsausschluss im UI: "Die App gibt Empfehlungen ohne Gewähr. BKleingG-Compliance liegt in der Verantwortung des Nutzers."
 - [x] **NFR-08**: Sentry (EU) für Crash-Reporting eingerichtet
 
 ## v2 Requirements
@@ -165,18 +165,18 @@
 | AUTH-01 | Phase 2 | Pending |
 | AUTH-02 | Phase 2 | Pending |
 | AUTH-03 | Phase 2 | Pending |
-| AUTH-04 | Phase 2 | Pending |
+| AUTH-04 | Phase 2 | Complete (Plan 02-04, commit 2a621bd) |
 | AUTH-05 | Phase 2 | Pending |
 | PROF-01 | Phase 2 | Pending |
 | PROF-02 | Phase 2 | Pending |
 | PROF-03 | Phase 2 | Pending |
 | PROF-04 | Phase 2 | Pending |
 | RULES-01 | Phase 2 | Pending |
-| RULES-02 | Phase 2 | Pending |
-| RULES-03 | Phase 2 | Pending |
-| RULES-04 | Phase 2 | Pending |
-| RULES-05 | Phase 2 | Pending |
-| NFR-07 | Phase 2 | Pending |
+| RULES-02 | Phase 2 | Complete (Plan 02-04, commit fc2a665) |
+| RULES-03 | Phase 2 | Complete (Plan 02-04, commit fc2a665) |
+| RULES-04 | Phase 2 | Complete (Plan 02-04, commits 0dc915a + fc2a665 — three-layer defense: UI + store + repo + DB CHECK) |
+| RULES-05 | Phase 2 | Complete (Plan 02-04, neutral TrafficLightBadge render verified in profile) |
+| NFR-07 | Phase 2 | Complete (Plan 02-02, inherited; 02-04 preserves Haftungsausschluss on Auth-Wahl) |
 | SYNC-01 | Phase 3 | Pending |
 | SYNC-02 | Phase 3 | Pending |
 | SYNC-03 | Phase 3 | Pending |
