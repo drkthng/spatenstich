@@ -19,6 +19,8 @@
     "@supabase/supabase-js": "2.49.5",
     "@tanstack/react-query": "5.62.7",
     "aes-js": "^3.1.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "expo": "~53.0.0",
     "expo-constants": "~17.0.0",
     "expo-document-picker": "^55.0.13",
@@ -29,6 +31,7 @@
     "expo-sqlite": "~15.0.0",
     "expo-status-bar": "~2.0.0",
     "idb": "8.0.0",
+    "lucide-react-native": "^1.8.0",
     "nativewind": "4.1.23",
     "react": "18.3.1",
     "react-native": "0.76.7",
@@ -38,6 +41,7 @@
     "react-native-screens": "~4.4.0",
     "react-native-url-polyfill": "^3.0.0",
     "react-native-web": "^0.20.0",
+    "tailwind-merge": "^3.5.0",
     "zustand": "5.0.2"
   },
   "devDependencies": {

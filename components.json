@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "app/tailwind.config.js",
+    "css": "app/global.css",
+    "baseColor": "stone",
+    "cssVariables": false,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "app/src/components",
+    "utils": "app/src/lib/utils",
+    "ui": "app/src/components/ui",
+    "lib": "app/src/lib",
+    "hooks": "app/src/hooks"
+  },
+  "iconLibrary": "lucide-react-native",
+  "_note": "react-native-reusables manual install (Phase 2-02-01). Source: github.com/founded-labs/react-native-reusables (pinned @ 2026-04 snapshot). Using className-only NativeWind 4.1.23 pattern; no variants CSS."
+}
