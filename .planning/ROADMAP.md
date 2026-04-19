@@ -42,7 +42,12 @@ Seven phases take the project from empty monorepo to a fully working MVP: Dirk p
   3. User enters PLZ 12345 and the app displays the correct Klimazone label without network call; changing PLZ updates Klimazone immediately
   4. User selects an Archetyp (e.g. "Selbstversorger") and the selection is reflected in profile data that downstream features can read
   5. User uploads a Vereinssatzung PDF; the app shows extracted rules for confirmation; user can edit, delete, or accept each rule; the BKleingG 1/3-Nutzgartenpflicht warning appears in the profile when the plan violates the threshold
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 02-01-PLAN.md — Schema (profiles + vereinsregeln + storage bucket) + Auth core (LargeSecureStore + getOrCreateLocalUUID + authStore + NativeWind 4.1.23) + Domain types/i18n/seed (Wave 1)
+- [ ] 02-02-PLAN.md — Onboarding & Profile UI (Stack.Protected route guards, Auth-Wahl with NFR-07 Haftungsausschluss, signUp/signIn/verify-email, Garten-Plan-Placeholder, Profile-Übersicht with InlineBanner + TrafficLightBadge, PLZ + Archetype screens) (Wave 2)
+- [ ] 02-03-PLAN.md — Vereinsregeln Edge Function (synchronous Claude Files API extraction with 55s client AbortController, parseRules pure module, FOUND-06 inheritance) (Wave 2)
+- [ ] 02-04-PLAN.md — Vereinsregeln UI (entry/upload/confirm/checklist) + VereinsregelRow + ExtractionLoader + Settings (Logout + Local→Account Migration per AUTH-04/D-12) + end-to-end manual checkpoint (Wave 3)
 **UI hint**: yes
 
 ### Phase 3: Offline & Sync
@@ -113,7 +118,7 @@ Seven phases take the project from empty monorepo to a fully working MVP: Dirk p
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete   | 2026-04-17 |
-| 2. Auth, Profile & Vereinsregeln | 0/TBD | Not started | - |
+| 2. Auth, Profile & Vereinsregeln | 0/4 | Planned | - |
 | 3. Offline & Sync | 0/TBD | Not started | - |
 | 4. Garten-Erfassung (M1) | 0/TBD | Not started | - |
 | 5. Plan-Editor (M2) | 0/TBD | Not started | - |
