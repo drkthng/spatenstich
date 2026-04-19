@@ -7,3 +7,5 @@ web-build/
 coverage/
 .env
 .env.local
+# Deno generates deno.lock next to deno.json — not committed (matches Phase 01-03 ai-job-consumer convention)
+deno.lock
