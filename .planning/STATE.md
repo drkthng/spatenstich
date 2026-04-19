@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: "Checkpoint 1-03-05: awaiting human verification (PR CI run + EAS build + Sentry event)"
-last_updated: "2026-04-19T14:08:13.281Z"
-last_activity: 2026-04-19 -- Phase 02 planning complete
+stopped_at: "Phase 02 — Wave 1 merged; proceeding to Wave 2 (02-02 + 02-03)"
+last_updated: "2026-04-19T17:42:00.000Z"
+last_activity: 2026-04-19 -- Plan 02-01 complete (foundation)
 progress:
   total_phases: 7
   completed_phases: 1
-  total_plans: 7
-  completed_plans: 3
-  percent: 43
+  total_plans: 8
+  completed_plans: 4
+  percent: 50
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 
 ## Current Position
 
-Phase: 01 (foundation) — EXECUTING
-Plan: 3 of 3
-Status: Ready to execute
-Last activity: 2026-04-19 -- Phase 02 planning complete
+Phase: 02 (auth-profile-vereinsregeln) — EXECUTING
+Plan: 2 of 4 (02-01 complete)
+Status: Wave 1 merged; Wave 2 next (02-02 + 02-03)
+Last activity: 2026-04-19 -- Plan 02-01 complete (foundation)
 
 Progress: [░░░░░░░░░░] 0%
 
