@@ -143,6 +143,72 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          archetype: string | null
+          created_at: string
+          id: string
+          klimazone: number | null
+          plz: string | null
+          updated_at: string
+        }
+        Insert: {
+          archetype?: string | null
+          created_at?: string
+          id: string
+          klimazone?: number | null
+          plz?: string | null
+          updated_at?: string
+        }
+        Update: {
+          archetype?: string | null
+          created_at?: string
+          id?: string
+          klimazone?: number | null
+          plz?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      vereinsregeln: {
+        Row: {
+          aktiv: boolean
+          beschreibung: string | null
+          einheit: string | null
+          erstellt_am: string
+          id: string
+          ist_bkleingg: boolean
+          source: string
+          titel: string
+          user_id: string
+          wert: number | null
+        }
+        Insert: {
+          aktiv?: boolean
+          beschreibung?: string | null
+          einheit?: string | null
+          erstellt_am?: string
+          id?: string
+          ist_bkleingg?: boolean
+          source: string
+          titel: string
+          user_id: string
+          wert?: number | null
+        }
+        Update: {
+          aktiv?: boolean
+          beschreibung?: string | null
+          einheit?: string | null
+          erstellt_am?: string
+          id?: string
+          ist_bkleingg?: boolean
+          source?: string
+          titel?: string
+          user_id?: string
+          wert?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
