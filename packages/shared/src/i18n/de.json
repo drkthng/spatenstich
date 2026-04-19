@@ -5,10 +5,78 @@
     "save": "Speichern",
     "delete": "Löschen",
     "retry": "Erneut versuchen",
-    "loading": "Lädt…"
+    "loading": "Lädt…",
+    "disclaimer_body": "Die App gibt Empfehlungen ohne Gewähr. BKleingG-Compliance liegt in der Verantwortung des Nutzers.",
+    "error_network": "Keine Verbindung. Bitte Internetverbindung prüfen."
   },
   "errors": {
     "network": "Keine Verbindung. Bitte prüfe dein Netz.",
     "unknown": "Ein unerwarteter Fehler ist aufgetreten."
+  },
+  "auth": {
+    "choice": {
+      "create_account": "Account erstellen",
+      "local_start": "Lokal starten",
+      "tagline": "Dein digitaler Kleingarten-Assistent",
+      "disclaimer_label": "Rechtlicher Hinweis"
+    },
+    "register": {
+      "submit": "Konto erstellen",
+      "error_generic": "Registrierung fehlgeschlagen. Bitte prüfen ob diese E-Mail bereits verwendet wird.",
+      "verify_email": "Bitte bestätige deine E-Mail-Adresse. Wir haben dir eine E-Mail geschickt."
+    },
+    "login": {
+      "submit": "Anmelden",
+      "error_generic": "Anmeldung fehlgeschlagen. Bitte E-Mail und Passwort prüfen."
+    }
+  },
+  "profile": {
+    "plz": {
+      "submit": "Klimazone übernehmen",
+      "error_invalid": "Bitte eine gültige 5-stellige Postleitzahl eingeben."
+    },
+    "archetype": {
+      "submit": "Auswahl bestätigen"
+    },
+    "banner": {
+      "plz_missing": "PLZ noch nicht gesetzt — Klimazone unbekannt.",
+      "plz_action": "Jetzt eingeben",
+      "archetype_missing": "Kein Garten-Archetyp ausgewählt. Beeinflusst Pflanzenvorschläge.",
+      "rules_missing": "Keine Vereinsregeln hinterlegt. Regelwarnungen im Plan-Editor sind inaktiv."
+    },
+    "bkleingg": {
+      "no_plan": "Plan noch nicht vorhanden",
+      "tooltip": "Die Nutz/Zier-Berechnung steht bereit, sobald du deinen Gartenplan in Phase 4 angelegt hast."
+    }
+  },
+  "rules": {
+    "confirm": {
+      "submit": "Regeln speichern",
+      "empty": "Keine Regeln erkannt. Du kannst sie manuell hinzufügen.",
+      "empty_cta": "Zur Checkliste",
+      "bkleingg_group": "Gesetzliche Grundregeln (BKleingG)",
+      "user_group": "Deine Vereinsregeln",
+      "delete_rule": "Regel löschen"
+    },
+    "upload": {
+      "loading_title": "Regeln werden extrahiert…",
+      "loading_sub": "Das kann 10–30 Sekunden dauern.",
+      "error_timeout": "Extraktion fehlgeschlagen. Bitte versuche es erneut oder wähle die Checkliste.",
+      "retry": "Erneut versuchen",
+      "local_disabled": "PDF-Upload erfordert einen Account. Mit einem Account kannst du auch deine Daten sichern."
+    }
+  },
+  "settings": {
+    "logout": "Abmelden",
+    "logout_confirm": "Wirklich abmelden?",
+    "migration": {
+      "cta": "Account erstellen und Daten übertragen"
+    }
+  },
+  "app": {
+    "index": {
+      "placeholder": "Dein Gartenplan entsteht hier.",
+      "placeholder_sub": "Zuerst: PLZ und Archetyp eintragen, dann Fotos aufnehmen."
+    }
   }
 }

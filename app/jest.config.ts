@@ -11,22 +11,44 @@ const config: Config = {
         '^@spatenstich/shared$': '<rootDir>/../packages/shared/src/index.ts',
       },
       transform: {
-        '^.+\\.tsx?$': ['ts-jest', { tsconfig: { strict: true, esModuleInterop: true, resolveJsonModule: true } }],
+        '^.+\.tsx?$': ['ts-jest', { tsconfig: { strict: true, esModuleInterop: true, resolveJsonModule: true } }],
       },
     },
     {
-      // Hook/component tests — ts-jest in node env, RN modules mocked
+      // Hook/lib tests — ts-jest in node env, RN + secure-store + async-storage mocked
       displayName: 'hooks',
       preset: 'ts-jest',
       testEnvironment: 'node',
-      testMatch: ['**/src/hooks/__tests__/**/*.test.ts?(x)'],
+      testMatch: [
+        '**/src/hooks/__tests__/**/*.test.ts?(x)',
+        '**/src/lib/__tests__/**/*.test.ts?(x)',
+      ],
       moduleNameMapper: {
         '^@spatenstich/shared$': '<rootDir>/../packages/shared/src/index.ts',
         '^react-native-url-polyfill/auto$': '<rootDir>/src/__mocks__/react-native-url-polyfill.ts',
         '^react-native$': '<rootDir>/src/__mocks__/react-native.ts',
+        '^expo-secure-store$': '<rootDir>/src/__mocks__/expo-secure-store.ts',
+        '^@react-native-async-storage/async-storage$': '<rootDir>/src/__mocks__/async-storage.ts',
       },
       transform: {
-        '^.+\\.tsx?$': ['ts-jest', { tsconfig: { strict: true, esModuleInterop: true, resolveJsonModule: true, jsx: 'react' } }],
+        '^.+\.tsx?$': ['ts-jest', { tsconfig: { strict: true, esModuleInterop: true, resolveJsonModule: true, jsx: 'react' } }],
+      },
+    },
+    {
+      // Zustand stores tests — ts-jest in node env, RN + async-storage mocks
+      displayName: 'stores',
+      preset: 'ts-jest',
+      testEnvironment: 'node',
+      testMatch: ['**/src/stores/__tests__/**/*.test.ts?(x)'],
+      moduleNameMapper: {
+        '^@spatenstich/shared$': '<rootDir>/../packages/shared/src/index.ts',
+        '^react-native-url-polyfill/auto$': '<rootDir>/src/__mocks__/react-native-url-polyfill.ts',
+        '^react-native$': '<rootDir>/src/__mocks__/react-native.ts',
+        '^expo-secure-store$': '<rootDir>/src/__mocks__/expo-secure-store.ts',
+        '^@react-native-async-storage/async-storage$': '<rootDir>/src/__mocks__/async-storage.ts',
+      },
+      transform: {
+        '^.+\.tsx?$': ['ts-jest', { tsconfig: { strict: true, esModuleInterop: true, resolveJsonModule: true, jsx: 'react' } }],
       },
     },
   ],
