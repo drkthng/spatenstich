@@ -4,6 +4,7 @@
 process.env.EXPO_NO_METRO_WORKSPACE_ROOT = '1';
 
 const { getDefaultConfig } = require('expo/metro-config');
+const { withNativeWind } = require('nativewind/metro');
 const path = require('path');
 
 const projectRoot = __dirname;
@@ -27,4 +28,4 @@ config.server = {
   },
 };
 
-module.exports = config;
+module.exports = withNativeWind(config, { input: './global.css' });
