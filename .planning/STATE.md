@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: "Checkpoint 2-04-04: human-verify script written into 02-04-SUMMARY (web + native E2E, AUTH-05 <5min stopwatch, RULES-04 DOM spot check, cancellation test)"
-last_updated: "2026-04-19T21:10:30.000Z"
-last_activity: 2026-04-19 -- Plan 02-04 complete (Wave 3); Phase 02 code deliverables done, human-verify 2-04-04 + 2-02-04 outstanding
+stopped_at: "Phase 02 code-complete + re-verified PASS-pending-human-verify (gaps #1+#2 closed); deferred checkpoints 2-02-04 + 2-04-04 remain for device QA"
+last_updated: "2026-04-20T00:00:00.000Z"
+last_activity: 2026-04-20 -- Phase 02 gap fixes (Supabase column mapping + inline edit wire) landed; re-verification GREEN
 progress:
   total_phases: 7
   completed_phases: 1
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 
 ## Current Position
 
-Phase: 02 (auth-profile-vereinsregeln) — CODE COMPLETE; HUMAN-VERIFY PENDING
-Plan: 4 of 4 (02-01, 02-02, 02-03, 02-04 code complete)
-Status: Wave 3 merged; human-verify checkpoints 2-02-04 + 2-04-04 outstanding (scripts in respective SUMMARYs)
-Last activity: 2026-04-19 -- Plan 02-04 complete (6 atomic commits, TDD RED/GREEN for store/repo + migration)
+Phase: 02 (auth-profile-vereinsregeln) — CODE COMPLETE + VERIFIED; HUMAN-VERIFY PENDING
+Plan: 4 of 4 (02-01 … 02-04 code complete); 2 verifier-flagged gaps closed post-hoc
+Status: re-verified PASS-pending-human-verify; checkpoints 2-02-04 + 2-04-04 outstanding (scripts in respective SUMMARYs)
+Last activity: 2026-04-20 -- gap fixes (e6b8c30 Supabase column mapping + d885901 inline edit wire); 99/99 tests green, typecheck clean
 
 Progress: [███████░░░] 70%
 
@@ -85,6 +85,8 @@ Recent decisions affecting current work:
 - [Phase 02-04]: Settings logout uses inline confirmation expansion (no Modal, UI-SPEC line 234); Sentry.setUser(null) gated on EXPO_PUBLIC_SENTRY_DSN (T-2-04-04 mitigation, mirrors Plan 01-03 pattern)
 - [Phase 02-04]: Swipe-to-delete deferred — react-native-gesture-handler not in stack; tap-trash fallback used per plan Behavior 14 permission
 - [Phase 02-04]: ExtractionLoader uses NativeWind animate-pulse (not Reanimated worklet) — adequate for MVP, no added surface
+- [Phase 02-04 post-hoc]: Supabase column contract enforced via toRow/fromRow in vereinsregelnRepo — Postgres column is `ist_bkleingg` (snake_case); camelCase `istBKleingG` would be silently dropped on upsert. migrateLocalToAccount routed through toRow. Fix shipped 2026-04-20 (e6b8c30).
+- [Phase 02-04 post-hoc]: confirm.tsx inline-edit wires VereinsregelRow.onEdit → vereinsregelnStore.updateRule. Closes SC5 edit-reachability gap. Fix shipped 2026-04-20 (d885901).
 
 ### Pending Todos
 
@@ -106,6 +108,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-19T21:10:30.000Z
-Stopped at: Plan 02-04 complete; human-verify checkpoint 2-04-04 deferred into SUMMARY (web+native E2E, AUTH-05 <5min stopwatch, RULES-04 spot check, cancellation test)
-Resume file: .planning/phases/02-auth-profile-vereinsregeln/02-04-SUMMARY.md
+Last session: 2026-04-20T00:00:00.000Z
+Stopped at: Phase 02 re-verified PASS-pending-human-verify — gaps #1+#2 closed; deferred checkpoints 2-02-04 + 2-04-04 in respective SUMMARYs
+Resume file: .planning/phases/02-auth-profile-vereinsregeln/VERIFICATION.md
