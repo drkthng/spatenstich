@@ -110,4 +110,4 @@ None yet.
 
 Last session: 2026-04-20T00:00:00.000Z
 Stopped at: Phase 02 re-verified PASS-pending-human-verify — gaps #1+#2 closed; deferred checkpoints 2-02-04 + 2-04-04 in respective SUMMARYs
-Resume file: .planning/phases/02-auth-profile-vereinsregeln/VERIFICATION.md
+Resume file: .planning/phases/02-auth-profile-vereinsregeln/CHECKPOINT-HUMAN-VERIFY.md
