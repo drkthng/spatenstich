@@ -15,6 +15,7 @@
 import { supabase } from './supabase';
 import { storage } from '../storage';
 import { useAuthStore } from '../stores/authStore';
+import { toRow } from './vereinsregelnRepo';
 import type { UserProfile, VereinsRegel } from '@spatenstich/shared';
 
 export interface MigrateInput {
@@ -84,25 +85,29 @@ export async function migrateLocalToAccount(
   }
 
   // Step 4 — upsert vereinsregeln with re-stamped user_id.
+  // Run the domain→row mapper (toRow, vereinsregelnRepo.ts) so the Postgres
+  // column contract (`ist_bkleingg` snake_case) is honoured. camelCase
+  // `istBKleingG` would be silently dropped by Supabase otherwise.
   let vrCount = 0;
   if (vereinsregeln.length > 0) {
-    const remapped = vereinsregeln.map((r) => {
+    const restamped: VereinsRegel[] = vereinsregeln.map((r) => {
       if (r.istBKleingG) {
         // Keep the deterministic `bk-<userId>-<index>` shape from Plan 02-01
         // so the server-side CHECK constraint and the client-side guard
         // both continue to recognise BKleingG seed rows.
         const idx = r.id.split('-').pop() ?? '0';
-        return { ...r, id: `bk-${newUserId}-${idx}`, user_id: newUserId };
+        return { ...r, id: `bk-${newUserId}-${idx}` };
       }
-      return { ...r, id: randomId(), user_id: newUserId };
+      return { ...r, id: randomId() };
     });
+    const payload = restamped.map((r) => toRow(r, newUserId));
     const { error } = await supabase
       .from('vereinsregeln')
-      .upsert(remapped, { onConflict: 'id' });
+      .upsert(payload, { onConflict: 'id' });
     if (error) {
       throw new Error(`migration_partial_vereinsregeln: ${error.message}`);
     }
-    vrCount = remapped.length;
+    vrCount = payload.length;
   }
 
   // Step 5 — flip auth mode + clean local storage. Atomic tail.

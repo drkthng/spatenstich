@@ -103,22 +103,60 @@ describe('vereinsregelnRepo (account mode)', () => {
 
     expect(mockUpsert).toHaveBeenCalledTimes(1);
     const [rows] = mockUpsert.mock.calls[0]!;
-    const typed = rows as VereinsRegel[];
+    const typed = rows as Array<Record<string, unknown>>;
     // Expect BKleingG seeds prepended + user rules preserved (3 + 2 = 5 when seed has 3 entries)
     expect(typed.length).toBeGreaterThanOrEqual(5);
-    const bkCount = typed.filter((r) => r.istBKleingG).length;
+    const bkCount = typed.filter((r) => r['ist_bkleingg'] === true).length;
     expect(bkCount).toBeGreaterThanOrEqual(2);
     // user rules present
-    expect(typed.some((r) => r.id === 'u-1')).toBe(true);
-    expect(typed.some((r) => r.id === 'u-2')).toBe(true);
+    expect(typed.some((r) => r['id'] === 'u-1')).toBe(true);
+    expect(typed.some((r) => r['id'] === 'u-2')).toBe(true);
     // Local storage must NOT be touched in account mode
     expect(mockStorageSet).not.toHaveBeenCalled();
   });
 
-  it('Test 3: loadVereinsregeln selects by user_id and returns rows', async () => {
+  it('Test 1b: upsert payload uses snake_case `ist_bkleingg` + stamps `user_id` (DB-column contract)', async () => {
+    mockUpsert.mockResolvedValue({ error: null });
+
+    await saveVereinsregeln([USER_RULE], 'account', USER_ID);
+
+    const [rows] = mockUpsert.mock.calls[0]!;
+    const typed = rows as Array<Record<string, unknown>>;
+    for (const row of typed) {
+      // Snake-case column from `packages/shared/src/types/database.ts`
+      expect(row).toHaveProperty('ist_bkleingg');
+      // camelCase domain key must NOT leak to Postgres (Supabase would drop it)
+      expect(row).not.toHaveProperty('istBKleingG');
+      // RLS relies on user_id being stamped server-bound
+      expect(row['user_id']).toBe(USER_ID);
+    }
+  });
+
+  it('Test 3: loadVereinsregeln selects by user_id and maps snake_case rows to domain type', async () => {
+    // Supabase returns rows with the actual DB column names (snake_case).
     const serverRows = [
-      { ...USER_RULE, id: 'srv-1' },
-      { ...USER_RULE_2, id: 'srv-2' },
+      {
+        id: 'srv-1',
+        titel: USER_RULE.titel,
+        wert: USER_RULE.wert ?? null,
+        einheit: USER_RULE.einheit ?? null,
+        ist_bkleingg: false,
+        aktiv: true,
+        source: USER_RULE.source,
+        user_id: USER_ID,
+        erstellt_am: '2026-04-20T00:00:00Z',
+      },
+      {
+        id: 'srv-2',
+        titel: USER_RULE_2.titel,
+        wert: null,
+        einheit: null,
+        ist_bkleingg: false,
+        aktiv: true,
+        source: USER_RULE_2.source,
+        user_id: USER_ID,
+        erstellt_am: '2026-04-20T00:00:01Z',
+      },
     ];
     mockEq.mockResolvedValue({ data: serverRows, error: null });
 
@@ -126,7 +164,16 @@ describe('vereinsregelnRepo (account mode)', () => {
 
     expect(mockSelect).toHaveBeenCalledWith('*');
     expect(mockEq).toHaveBeenCalledWith('user_id', USER_ID);
-    expect(rules).toEqual(serverRows);
+    expect(rules).toHaveLength(2);
+    // Must come back in domain shape (camelCase, no server-only fields)
+    for (const r of rules) {
+      expect(r).toHaveProperty('istBKleingG');
+      expect(r).not.toHaveProperty('ist_bkleingg');
+      expect(r).not.toHaveProperty('user_id');
+      expect(r).not.toHaveProperty('erstellt_am');
+    }
+    expect(rules[0]!.id).toBe('srv-1');
+    expect(rules[0]!.istBKleingG).toBe(false);
   });
 });
 

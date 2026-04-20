@@ -132,9 +132,14 @@ describe('migrateLocalToAccount', () => {
     const [upsertArg] = mockVereinsregelnUpsert.mock.calls[0];
     expect(Array.isArray(upsertArg)).toBe(true);
     expect(upsertArg).toHaveLength(2);
-    // Every record must carry the NEW user_id (T-2-04-02 mitigation).
-    for (const row of upsertArg as Array<{ user_id: string }>) {
-      expect(row.user_id).toBe(NEW_USER_ID);
+    // Every record must carry the NEW user_id (T-2-04-02 mitigation) AND use
+    // snake_case `ist_bkleingg` — the Postgres column name (see
+    // packages/shared/src/types/database.ts). The camelCase domain key
+    // `istBKleingG` must not leak into the upsert payload.
+    for (const row of upsertArg as Array<Record<string, unknown>>) {
+      expect(row['user_id']).toBe(NEW_USER_ID);
+      expect(row).toHaveProperty('ist_bkleingg');
+      expect(row).not.toHaveProperty('istBKleingG');
     }
     expect(result.userId).toBe(NEW_USER_ID);
     expect(result.transferred.profile).toBe(true);
