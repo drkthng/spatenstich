@@ -66,4 +66,13 @@ describe('de.json', () => {
   it('app.index.placeholder exists', () => {
     expect(de['app']?.['index']?.['placeholder']).toBeTruthy();
   });
+
+  it('rules.confirm.edit keys exist for inline edit UI', () => {
+    const edit = de['rules']?.['confirm']?.['edit'];
+    expect(edit?.['titel_label']).toBeTruthy();
+    expect(edit?.['wert_label']).toBeTruthy();
+    expect(edit?.['einheit_label']).toBeTruthy();
+    expect(edit?.['save']).toBeTruthy();
+    expect(edit?.['cancel']).toBeTruthy();
+  });
 });

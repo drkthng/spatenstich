@@ -78,6 +78,27 @@ describe('vereinsregelnStore', () => {
     expect(ids).toHaveLength(2);
   });
 
+  it('Test 6b: updateRule patches titel / wert / einheit on a user rule', () => {
+    useVereinsregelnStore.getState().setRules([USER_RULE]);
+    useVereinsregelnStore
+      .getState()
+      .updateRule('u-1', { titel: 'Heckenhöhe seitlich', wert: 180, einheit: 'cm' });
+    const patched = useVereinsregelnStore.getState().rules[0]!;
+    expect(patched.titel).toBe('Heckenhöhe seitlich');
+    expect(patched.wert).toBe(180);
+    expect(patched.einheit).toBe('cm');
+    // id and istBKleingG stay untouched
+    expect(patched.id).toBe('u-1');
+    expect(patched.istBKleingG).toBe(false);
+  });
+
+  it('Test 6c: updateRule NO-OPS on istBKleingG=true (RULES-04 client guard)', () => {
+    useVereinsregelnStore.getState().setRules([BK_RULE]);
+    useVereinsregelnStore.getState().updateRule('bk-1', { titel: 'Hijacked' });
+    const still = useVereinsregelnStore.getState().rules[0]!;
+    expect(still.titel).toBe(BK_RULE.titel);
+  });
+
   it('Test 7: reset clears rules and resets hydrated to false', () => {
     useVereinsregelnStore.getState().setRules([USER_RULE]);
     useVereinsregelnStore.getState().reset();

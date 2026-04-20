@@ -15,6 +15,7 @@ import { useRouter } from 'expo-router';
 import de from '@spatenstich/shared/i18n/de';
 import { VereinsregelRow } from '@/src/components/VereinsregelRow';
 import { Button } from '@/src/components/ui/button';
+import { Input } from '@/src/components/ui/input';
 import { useAuthStore } from '@/src/stores/authStore';
 import { useVereinsregelnStore } from '@/src/stores/vereinsregelnStore';
 import { useVereinsregeln } from '@/src/hooks/useVereinsregeln';
@@ -38,12 +39,57 @@ export default function VereinsregelnConfirmScreen(): React.JSX.Element {
   const toggleAktiv = useVereinsregelnStore((s) => s.toggleAktiv);
   const removeRule = useVereinsregelnStore((s) => s.removeRule);
 
+  const updateRule = useVereinsregelnStore((s) => s.updateRule);
+
   const bkleingGRules = rules.filter((r) => r.istBKleingG);
   const userRules = rules.filter((r) => !r.istBKleingG);
 
   const [bkleingGBottomY, setBkleingGBottomY] = React.useState<number>(0);
   const [scrolledPastBKleingG, setScrolledPastBKleingG] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
+
+  // Inline edit state — only one row is editable at a time. `draft` mirrors
+  // the rule fields as text so numeric input can be partially typed.
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [draftTitel, setDraftTitel] = React.useState<string>('');
+  const [draftWert, setDraftWert] = React.useState<string>('');
+  const [draftEinheit, setDraftEinheit] = React.useState<string>('');
+
+  const handleEdit = React.useCallback(
+    (id: string) => {
+      const rule = rules.find((r) => r.id === id);
+      if (!rule || rule.istBKleingG) return;
+      setEditingId(id);
+      setDraftTitel(rule.titel);
+      setDraftWert(rule.wert != null ? String(rule.wert) : '');
+      setDraftEinheit(rule.einheit ?? '');
+    },
+    [rules],
+  );
+
+  const handleCancelEdit = React.useCallback(() => {
+    setEditingId(null);
+    setDraftTitel('');
+    setDraftWert('');
+    setDraftEinheit('');
+  }, []);
+
+  const handleSaveEdit = React.useCallback(() => {
+    if (!editingId) return;
+    const titel = draftTitel.trim();
+    if (titel.length === 0) return;
+    const wertParsed = draftWert.trim() === '' ? null : Number(draftWert);
+    const wert =
+      wertParsed != null && Number.isFinite(wertParsed) ? wertParsed : null;
+    const einheit = draftEinheit.trim();
+    const patch: Parameters<typeof updateRule>[1] = {
+      titel,
+      ...(wert != null ? { wert } : { wert: undefined }),
+      ...(einheit.length > 0 ? { einheit } : { einheit: undefined }),
+    };
+    updateRule(editingId, patch);
+    handleCancelEdit();
+  }, [editingId, draftTitel, draftWert, draftEinheit, updateRule, handleCancelEdit]);
 
   const onLastBkLayout = React.useCallback((e: LayoutChangeEvent) => {
     const { y, height } = e.nativeEvent.layout;
@@ -151,12 +197,74 @@ export default function VereinsregelnConfirmScreen(): React.JSX.Element {
                 key={r.id}
                 className="bg-white dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700"
               >
-                <VereinsregelRow
-                  rule={r}
-                  onToggle={toggleAktiv}
-                  onDelete={handleDelete}
-                  testID={`user-row-${r.id}`}
-                />
+                {editingId === r.id ? (
+                  <View className="p-3 gap-2" testID={`user-row-${r.id}-edit`}>
+                    <Text className="text-xs text-stone-500">
+                      {t('rules.confirm.edit.titel_label')}
+                    </Text>
+                    <Input
+                      value={draftTitel}
+                      onChangeText={setDraftTitel}
+                      accessibilityLabel={t('rules.confirm.edit.titel_label')}
+                      testID={`user-row-${r.id}-edit-titel`}
+                    />
+                    <View className="flex-row gap-2">
+                      <View className="flex-1">
+                        <Text className="text-xs text-stone-500">
+                          {t('rules.confirm.edit.wert_label')}
+                        </Text>
+                        <Input
+                          value={draftWert}
+                          onChangeText={setDraftWert}
+                          keyboardType="numeric"
+                          accessibilityLabel={t('rules.confirm.edit.wert_label')}
+                          testID={`user-row-${r.id}-edit-wert`}
+                        />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-xs text-stone-500">
+                          {t('rules.confirm.edit.einheit_label')}
+                        </Text>
+                        <Input
+                          value={draftEinheit}
+                          onChangeText={setDraftEinheit}
+                          accessibilityLabel={t('rules.confirm.edit.einheit_label')}
+                          testID={`user-row-${r.id}-edit-einheit`}
+                        />
+                      </View>
+                    </View>
+                    <View className="flex-row gap-2 mt-1">
+                      <Button
+                        variant="outline"
+                        onPress={handleCancelEdit}
+                        testID={`user-row-${r.id}-edit-cancel`}
+                        className="flex-1"
+                      >
+                        <Text className="text-stone-900 dark:text-stone-100">
+                          {t('rules.confirm.edit.cancel')}
+                        </Text>
+                      </Button>
+                      <Button
+                        onPress={handleSaveEdit}
+                        disabled={draftTitel.trim().length === 0}
+                        testID={`user-row-${r.id}-edit-save`}
+                        className="flex-1"
+                      >
+                        <Text className="text-white font-semibold">
+                          {t('rules.confirm.edit.save')}
+                        </Text>
+                      </Button>
+                    </View>
+                  </View>
+                ) : (
+                  <VereinsregelRow
+                    rule={r}
+                    onToggle={toggleAktiv}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    testID={`user-row-${r.id}`}
+                  />
+                )}
               </View>
             ))
           )}

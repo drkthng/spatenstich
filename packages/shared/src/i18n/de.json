@@ -56,7 +56,14 @@
       "empty_cta": "Zur Checkliste",
       "bkleingg_group": "Gesetzliche Grundregeln (BKleingG)",
       "user_group": "Deine Vereinsregeln",
-      "delete_rule": "Regel löschen"
+      "delete_rule": "Regel löschen",
+      "edit": {
+        "titel_label": "Titel",
+        "wert_label": "Wert",
+        "einheit_label": "Einheit",
+        "save": "Übernehmen",
+        "cancel": "Abbrechen"
+      }
     },
     "upload": {
       "loading_title": "Regeln werden extrahiert…",
