@@ -1,19 +1,23 @@
 ---
 phase: 02-auth-profile-vereinsregeln
 type: human-verify-checkpoint
-status: pending
+status: reduced-pending
 created: 2026-04-20
+reduced: 2026-04-21
 covers:
-  - 2-02-04 (AUTH-05 stopwatch onboarding)
-  - 2-04-04 (E2E PDF + Logout + Local→Account migration + edit-fix verification)
+  - 2-02-04 (AUTH-05 stopwatch onboarding) — AKTIV
+  - 2-04-04 Teil Migration + Logout — AKTIV
+  - 2-04-04 Teil PDF + Vereinsregeln — DEFERRED zu Phase 9
 resume_cmd: /gsd-progress
 ---
 
-# Phase 02 — Human-Verify Checkpoint (pending)
+# Phase 02 — Human-Verify Checkpoint (reduziert nach Pivot 2026-04-21)
 
 **Supabase:** `vitrqkzxkiqvadqfzrcx` (Frankfurt) — Dashboard: https://supabase.com/dashboard/project/vitrqkzxkiqvadqfzrcx
 
-**Status:** Phase 02 ist code-komplett + re-verified (PASS-pending-human-verify). Die letzten Code-Fixes (Supabase-Spalten-Mapping `e6b8c30` + Inline-Edit-Wire `d885901`) sind gemerged. Jetzt müssen die beiden aufgeschobenen Device-QA-Checkpoints manuell durchlaufen werden, bevor Phase 03 (Offline & Sync) startet.
+**Status:** Phase 02 ist code-komplett. Nach Roadmap-Pivot (Quick 260421-v43) ist die Vereinsregeln-Schicht per Feature-Flag deaktiviert und die zugehörigen Verify-Schritte (22–33) auf Phase 9 (v1.1) verschoben. Nur noch **4 Akzeptanz-Items** müssen manuell bestätigt werden, danach startet Phase 2.5 (Shared Garden Model).
+
+> **⏸ DEFERRED ZU PHASE 9:** Abschnitte 2.2 (Vereinsregeln-Checkliste im Profil), 3 (PDF-Upload-Flow + ExtractionLoader + Confirm-Screen + Edit-Wire-Verifikation), 4 (RULES-04 DOM-Spot-Check), 5 (Abbrechen-Test). Diese Schritte bleiben als Referenz unten stehen, sind aber im MVP nicht zu testen — sie werden in Phase 9 (Vereinsregeln-Aktivierung) abgearbeitet.
 
 ---
 
@@ -45,15 +49,10 @@ resume_cmd: /gsd-progress
 
 ---
 
-## 2. Checkpoint 2-04-04 A — Web, Vereinsregeln-Checkliste + Lokal→Account-Migration
+## 2. Checkpoint 2-04-04 A — Lokal→Account-Migration (reduziert)
 
-9. Zurück auf Profil → **Vereinsregeln-Banner** tippen
-10. **"PDF hochladen"-Karte muss ausgegraut sein** mit Lock-Icon (Local-Mode-Sperre); drauftippen → Info-Block + "Account erstellen"-Link (**kein Modal!** — Pitfall 4)
-11. "Checkliste ausfüllen" tippen → 12 Items als **flache Liste** (keine Kategorien — dokumentierte Abweichung); 3–4 anhaken, Werte eintragen; speichern
-12. **Confirm-Screen:**
-    - BKleingG-Gruppe **ganz oben**, Einträge mit Lock-Icon, **kein Switch**
-    - Save-Button **deaktiviert**
-    - Nach unten scrollen → Save **aktiv** → speichern
+> **⏸ Schritte 9–12 DEFERRED zu Phase 9** (Vereinsregeln-Banner + PDF-Karte + Checkliste + Confirm-Screen — Vereinsregeln-Scope ist per Feature-Flag aus).
+
 13. Settings öffnen → "Account erstellen und Daten übertragen"-CTA (kein Logout im Local-Mode)
 14. E-Mail `test+migrate-<timestamp>@example.com` + Passwort `Test1234!` → "Übertragen"
 15. Umleitung zurück auf `(app)/index` + Settings zeigt jetzt **Logout** (Mode geflippt)
@@ -61,54 +60,49 @@ resume_cmd: /gsd-progress
 
 ---
 
-## 3. Checkpoint 2-04-04 B — Native, Account + PDF + Logout
+## 3. Checkpoint 2-04-04 B — Native, Account + Logout (reduziert)
 
 17. Terminal: `pnpm --filter app start` → QR in **Expo Go** (iPhone/Android) scannen
 18. Auth-Wahl → "Account erstellen" → neue E-Mail + Passwort → absenden → entweder Verify-Email-Screen oder direkt `(app)/index`
 19. Falls Verify-Email: Link aus Mail öffnen, zurück, neu starten → `(app)/index`
 20. PLZ + Archetyp eintragen (wie Web 6–7)
-21. Vereinsregeln-Einstieg: **beide Karten aktiv** (Account-Mode)
-22. "PDF hochladen" → nativer DocumentPicker → Test-Satzung
-23. **ExtractionLoader** "Regeln werden extrahiert…" → 10–30 s warten
-24. Confirm-Screen: mind. 1 extrahierte Regel im User-Bereich
-    - **Eine Regel Stift tippen** → Inline-Editor erscheint → Titel ändern → "Übernehmen" → Änderung sichtbar. **Das verifiziert Fix `d885901`** (SC5 Edit-Capability)
-    - Eine Regel via Switch deaktivieren
-    - Eine Regel via Mülleimer löschen
-    - Nach unten scrollen → Save → zurück zum Profil
-25. Profil: Vereinsregeln-Banner weg; TrafficLightBadge bleibt neutral
+
+> **⏸ Schritte 21–25 DEFERRED zu Phase 9** (Vereinsregeln-Einstieg + PDF-Upload + ExtractionLoader + Confirm-Screen + Edit-Wire-Verifikation `d885901` + Profil-Banner — alle Vereinsregeln-Feature-Flag aus im MVP).
+
 26. Settings → "Abmelden" → Inline-Expansion "Wirklich abmelden?" (**kein Modal**) → "Ja, abmelden" → Umleitung auf `(auth)/index`
 27. Device-Back-Button bzw. Browser-Zurück: **darf nicht** wieder in `(app)` reinkommen
 
 ---
 
-## 4. Checkpoint 2-04-04 D — RULES-04 DOM-Spot-Check
+## 4. Checkpoint 2-04-04 D — RULES-04 DOM-Spot-Check ⏸ DEFERRED zu Phase 9
 
-28. Confirm-Screen (Web) → React DevTools öffnen
-29. BKleingG-Zeile inspizieren → **kein** `Switch` im Subtree, nur `Lock`-Icon + Text
-30. User-Zeile inspizieren → `Switch` vorhanden
+> Kompletter Abschnitt (Schritte 28–30) auf Phase 9 verschoben — RULES-04 betrifft nur die ausgeblendete Vereinsregeln-Confirm-Screen.
 
 ---
 
-## 5. Checkpoint 2-04-04 E — Abbrechen-Test
+## 5. Checkpoint 2-04-04 E — Abbrechen-Test ⏸ DEFERRED zu Phase 9
 
-31. Native, Account-Mode → "PDF hochladen" → PDF wählen
-32. Sobald ExtractionLoader erscheint: **innerhalb von 2 s** "Abbrechen" tippen
-33. Erwartung: zurück auf Upload-Einstieg, **kein Error-Toast**, **keine** Navigation zum Confirm-Screen
+> Kompletter Abschnitt (Schritte 31–33) auf Phase 9 verschoben — testet PDF-Upload-Abbruch (Vereinsregeln-Feature-Flag aus).
 
 ---
 
-## 6. Akzeptanz-Checkliste (alle 10 müssen ✅)
+## 6. Akzeptanz-Checkliste (4 aktive Items im MVP, reduziert nach Pivot 2026-04-21)
+
+**Aktiv (müssen ✅ für Phase 02 Abschluss):**
 
 - [ ] NFR-07 — Haftungsausschluss klappbar auf Auth-Wahl (Web + Native) — Schritt 2 + 17/18
 - [ ] AUTH-05 — Local-Onboarding unter 5 Min — Schritt 1–8
-- [ ] RULES-04 — BKleingG nicht toggelbar / löschbar — Schritt 12 + 29
-- [ ] RULES-05 — TrafficLightBadge neutral im Profil — Schritt 5 + 25
-- [ ] Pitfall 4 — Local-Mode PDF-Karte: ausgegraut + Inline-CTA, **kein Modal** — Schritt 10
 - [ ] AUTH-04 — Migration-Zeilen in Supabase mit neuem `user_id` — Schritt 16
-- [ ] **Column-Mapping** (Fix `e6b8c30`) — Supabase-Zeile hat Spalte `ist_bkleingg` nicht `istBKleingG` — Schritt 16
-- [ ] **Edit-Wire** (Fix `d885901`) — Inline-Editor, Titel-Änderung bleibt erhalten — Schritt 24 Mitte
-- [ ] RULES-01 — Edge Function liefert ≥ 1 Regel aus PDF in < 55 s — Schritt 23
 - [ ] Logout-Guard — Back-Nav blockiert — Schritt 27
+
+**⏸ DEFERRED zu Phase 9 (v1.1, Vereinsregeln-Aktivierung):**
+
+- RULES-04 — BKleingG nicht toggelbar / löschbar
+- RULES-05 — TrafficLightBadge neutral im Profil
+- Pitfall 4 — Local-Mode PDF-Karte ausgegraut
+- Column-Mapping Fix `e6b8c30` — `ist_bkleingg` statt `istBKleingG` (wird in Phase 9 re-verifiziert)
+- Edit-Wire Fix `d885901` — Inline-Editor Titel-Änderung (Phase 9)
+- RULES-01 — Edge Function liefert ≥ 1 Regel aus PDF in < 55 s (Phase 9)
 
 ---
 

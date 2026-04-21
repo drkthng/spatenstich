@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: "Phase 02 code-complete + re-verified PASS-pending-human-verify (gaps #1+#2 closed); deferred checkpoints 2-02-04 + 2-04-04 remain for device QA"
-last_updated: "2026-04-20T00:00:00.000Z"
-last_activity: 2026-04-20 -- Phase 02 gap fixes (Supabase column mapping + inline edit wire) landed; re-verification GREEN
+status: ready
+stopped_at: "Roadmap-Pivot 2026-04-21 — MVP-Scope auf Foto→Plan→Editor+Kalender fokussiert, Vereinsregeln + Fotorealismus auf v1.1 verschoben; Phase 02 gilt als durch (Vereinsregeln-Code per Flag aus, Phase 9)"
+last_updated: "2026-04-21T20:29:58.665Z"
+last_activity: 2026-04-21 -- Quick Task 260421-v43 Roadmap-Pivot: shared-garden MVP, defer vereinsregeln+photorealism to post-MVP
 progress:
-  total_phases: 7
-  completed_phases: 1
+  total_phases: 9
+  completed_phases: 2
   total_plans: 10
   completed_plans: 7
   percent: 70
@@ -20,17 +20,17 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-14)
 
-**Core value:** Foto rein → Plan und Kalender raus
-**Current focus:** Phase 01 — foundation
+**Core value:** Foto rein → Plan und Kalender raus (2-User Shared Garden seit Pivot 2026-04-21)
+**Current focus:** Phase 2.5 — Shared Garden Model (NEU nach Pivot)
 
 ## Current Position
 
-Phase: 02 (auth-profile-vereinsregeln) — CODE COMPLETE + VERIFIED; HUMAN-VERIFY PENDING
-Plan: 4 of 4 (02-01 … 02-04 code complete); 2 verifier-flagged gaps closed post-hoc
-Status: re-verified PASS-pending-human-verify; checkpoints 2-02-04 + 2-04-04 outstanding (scripts in respective SUMMARYs)
-Last activity: 2026-04-20 -- gap fixes (e6b8c30 Supabase column mapping + d885901 inline edit wire); 99/99 tests green, typecheck clean
+Phase: 2.5 (shared-garden-model) — NOT STARTED; nächstes Planungsziel
+Vorheriger Status: Phase 02 (auth-profile-vereinsregeln) — CODE COMPLETE; MVP-Scope-Verify reduziert auf NFR-07/AUTH-05/AUTH-04/Logout-Guard (4 Items statt 10); Vereinsregeln-Verify-Items (Schritte 22–33) auf Phase 9 deferred
+Plans: 7/10 completed (Phase 01: 3/3, Phase 02: 4/4)
+Last activity: 2026-04-21 -- Roadmap-Pivot via Quick Task 260421-v43 (Shared-Garden-MVP, Vereinsregeln+Fotorealismus auf v1.1)
 
-Progress: [███████░░░] 70%
+Progress: [███████░░░] 70% (7/10 Plans; neue Phasen 2.5, 8, 9 noch nicht geplant)
 
 ## Performance Metrics
 
@@ -64,9 +64,14 @@ Progress: [███████░░░] 70%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
+- **[Pivot 2026-04-21]**: 2-User Shared Garden Model (Dirk + Frau) — `gardens` + `garden_members` Tables, RLS auf Member-Check umgestellt, Invite-Code-Flow für zweiten Account. Neue Phase 2.5 eingeschoben.
+- **[Pivot 2026-04-21]**: Phase 02 Vereinsregeln-Schicht per Feature-Flag eingefroren — Code bleibt vollständig, keine Menüpunkte/UI sichtbar im MVP; reaktiviert in Phase 9 (v1.1).
+- **[Pivot 2026-04-21]**: Fotorealistisches Beet-Preview (Gemini 2.5 Flash Image / Nano Banana) als Phase 8 v1.1 hinzugefügt — Stretch-USP nach MVP.
+- **[Pivot 2026-04-21]**: Vereinsregeln-Aktivierung (inkl. PDF-Extraktion Edge Function live + Editor-Warnings + BKleingG 1/3-Warnung) als Phase 9 v1.1 hinzugefügt.
+- **[Pivot 2026-04-21]**: Human-verify Phase 02 reduziert von 10 auf 4 Akzeptanz-Items (nur NFR-07, AUTH-05, AUTH-04, Logout-Guard); Vereinsregeln-/PDF-Schritte auf Phase 9 deferred.
 - Roadmap: Start with react-native-svg in Phase 5; Skia upgrade decision gated at end of Phase 5 via profiling (100 elements on real device). Do not pre-emptively adopt Skia.
-- Roadmap: Custom outbox sync (not PowerSync/Legend-State). LWW semantics for single-user MVP.
-- Roadmap: Vereinsregeln placed in Phase 2 (onboarding) — rules feed editor warnings in Phase 5 but input is captured early.
+- Roadmap: Custom outbox sync (not PowerSync/Legend-State). LWW semantics (2-User Shared Garden, Konflikte selten erwartet).
+- ~~Roadmap: Vereinsregeln placed in Phase 2 (onboarding)~~ — superseded by Pivot 2026-04-21 (Vereinsregeln → Phase 9).
 - Roadmap: Phase 6 (M3 Seed inventory) depends only on Phase 3 (Sync), not Phase 5 — it can be built in parallel with Phase 5 if timeline pressure rises.
 - [Phase 01]: Expo SDK 53 stable used instead of SDK 55 canary — upgrade path is a version bump when SDK 55 stable releases
 - [Phase 01]: StorageAdapter (D-08): CRUD-only interface + schema version, Platform.select export at storage/index.ts — callers never know which adapter
@@ -97,6 +102,7 @@ None yet.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260418-q01 | Fix CI: add react-native-web to app deps | 2026-04-18 | 12c988d | [260418-q01-fix-react-native-web-ci](.planning/quick/260418-q01-fix-react-native-web-ci/) |
+| 260421-v43 | Roadmap-Pivot: shared-garden MVP, defer vereinsregeln+photorealism to post-MVP | 2026-04-21 | (pending) | [260421-v43-roadmap-pivot](.planning/quick/260421-v43-roadmap-pivot/) |
 
 ### Blockers/Concerns
 
@@ -105,9 +111,10 @@ None yet.
 - Open question: @supabase/supabase-js >= 2.49.5 stable release — check npm before first sprint.
 - Open question: pnpm + EAS Build compatibility (eas-cli issue #3247) — full EAS Build must be tested in Phase 1.
 - Risk: Claude Vision structural extraction quality for German allotment plots is MEDIUM confidence. Run 5-10 photo test harness before locking Phase 4 architecture.
+- **[Pivot 2026-04-21]** Open question: API-Key-Strategie für Phase 4 (Claude Vision Foto→Plan) + Phase 8 (Gemini Fotorealismus) + Phase 9 (Claude PDF-Extraktion) — Spike geplant: selbst-gehosteter Claude Code Proxy auf 24/7-Rechner vs. Ollama lokal vs. bezahlter API-Key. Betrifft Phase 4 Kickoff.
 
 ## Session Continuity
 
-Last session: 2026-04-20T00:00:00.000Z
-Stopped at: Phase 02 re-verified PASS-pending-human-verify — gaps #1+#2 closed; deferred checkpoints 2-02-04 + 2-04-04 in respective SUMMARYs
-Resume file: .planning/phases/02-auth-profile-vereinsregeln/CHECKPOINT-HUMAN-VERIFY.md
+Last session: 2026-04-21T20:29:58.636Z
+Stopped at: Roadmap-Pivot abgeschlossen (Quick Task 260421-v43) — bereit für Phase 2.5 Planung oder Phase 02 human-verify (4 aktive Items) oder API-Key-Spike
+Resume file: .planning/quick/260421-v43-roadmap-pivot/260421-v43-SUMMARY.md

@@ -2,11 +2,11 @@
 
 ## What This Is
 
-Persönlicher digitaler Kleingarten-Assistent für deutsche Kleingärtner. Die App übersetzt eine reale Parzelle per Foto-Analyse in einen interaktiven 2D-Plan und kombiniert jahreszyklische Aussaat-/Pflanzplanung mit rechtlich-regulatorischem Kontext (BKleingG + Vereinssatzungen). MVP für Einzelnutzer (Dirk), optimiert für iPhone und Desktop-Browser.
+Persönlicher digitaler Kleingarten-Assistent für deutsche Kleingärtner. Die App übersetzt eine reale Parzelle per Foto-Analyse in einen interaktiven 2D-Plan und kombiniert jahreszyklische Aussaat-/Pflanzplanung. MVP für **2 Nutzer (Dirk + Frau) im Shared Garden Model** — beide bearbeiten unabhängig über eigene Accounts/Geräte (iPhone + Desktop-Browser) denselben Kleingarten. BKleingG-Compliance und Vereinsregeln-Unterstützung sind Post-MVP (v1.1) nach Pivot 2026-04-21.
 
 ## Core Value
 
-Foto rein → Plan und Kalender raus: Die KI-gestützte Überführung einer realen Parzelle in einen digital planbaren, regelkonformen Kleingarten-Assistenten.
+Foto rein → Plan und Kalender raus: Die KI-gestützte Überführung einer realen Parzelle in einen digital planbaren Kleingarten-Assistenten, den Paare gemeinsam pflegen können.
 
 ## Requirements
 
@@ -51,34 +51,40 @@ Foto rein → Plan und Kalender raus: Die KI-gestützte Überführung einer real
 **M5 – Profil & Standort**
 - [ ] PLZ → Klimazone-Zuordnung (7 Zonen, statische Lookup-Tabelle)
 - [ ] Archetyp-Auswahl (6 Typen: Selbstversorger, Familien-Naschgarten, Mix ausgewogen, Zier- & Erholungsgarten, Biodiversitäts-/Naturgarten, Kräuter-/Apothekergarten)
-- [ ] BKleingG-Warnung wenn Nutz/Zier-Verhältnis unter 1/3 Nutzfläche fällt
-- [ ] Vereinsregeln-Input: PDF-Upload → Claude extrahiert Regeln → User bestätigt/korrigiert
-- [ ] Vereinsregeln alternativ: Checkliste gängiger Regeln (Heckenmaß, Laubengröße, Baumverbote etc.)
 - [ ] Option "lokal nutzen" ohne Account (spätere Sync-Option)
+
+**M6 – Shared Garden (Pivot 2026-04-21)**
+- [ ] `gardens`-Entity mit Owner + `garden_members`-Assoziation (mehrere Accounts pro Garten)
+- [ ] RLS-Policies auf Member-Check umgestellt (nicht mehr `user_id = auth.uid()` direkt)
+- [ ] Beide User (Dirk + Frau) sehen identischen Plan nach Sync
+- [ ] LWW-Konfliktauflösung bei gleichzeitigen Edits; UI zeigt zuletzt-bearbeitet-von
 
 **Onboarding**
 - [ ] In < 5 Minuten von Installation zu erstem nutzbaren Plan
-- [ ] Flow: Account oder lokal → PLZ → Archetyp → Vereinsregeln (optional) → Garten-Erfassung
+- [ ] Flow: Account (oder lokal) → PLZ → Archetyp → Garten erstellen oder beitreten (via Invite-Code) → Garten-Erfassung
 
 ### Out of Scope
 
-- Social features, Community, Chat — kein Multi-User-Fokus im MVP
+- Social features, Community, Chat — nicht Teil des Shared-Garden-Scopes (nur 2 Member pro Garten im MVP)
 - Marktplatz für Samentausch — außerhalb Kern-Use-Case
 - Eigenes trainiertes ML-Modell — externe APIs reichen für MVP
+- **Vereinsregeln PDF-Upload + Extraktion** — Code existiert (Phase 02), per Feature-Flag ausgeblendet; reaktiviert in Phase 9 (v1.1) nach Pivot 2026-04-21
+- **Vereinsregeln-Checkliste + Editor-Warnings** — v1.1 Phase 9
+- **BKleingG 1/3-Nutzgartenpflicht-Warnung** — v1.1 Phase 9 (gekoppelt an Vereinsregeln-Reaktivierung)
+- **S3 Fotorealistisches Beet-Preview (AI-Bildvorschau)** — v1.1 Phase 8 (Gemini 2.5 Flash Image / Nano Banana)
 - S1 Pflegeerinnerungen — v1.1
 - S2 Unkraut-Check per Foto — v1.1
-- S3 AI-Bildvorschau des geplanten Gartens — v1.1
 - S4 Fruchtfolge-Assistent — v1.1 (MVP: nur einfache Warnung bei offensichtlichen Fehlern)
 - S5 Mischkultur-Check beim Platzieren — v1.1
-- C1–C8 (Schädlingsdiagnose, Ernte-Tagebuch, Wetter, Bewässerung, Sprach-Notizen, Satzungs-DB, PDF-Export, Mehrpersonen) — v2+
+- C1–C8 (Schädlingsdiagnose, Ernte-Tagebuch, Wetter, Bewässerung, Sprach-Notizen, Satzungs-DB, PDF-Export, Mehr-als-2-Personen-Gärten) — v2+
 - AT/CH-Lokalisierung — nach MVP
 - Barcode-Scan Samentüten — v1.1
 
 ## Context
 
-- **Primärer Nutzer:** Dirk (Produktowner), Kleingärtner mit Balkon-Erfahrung, tech-affin, wenig Zeit für Recherche. App wird zuerst für eigene Parzelle eingesetzt (Saison 2026).
-- **Regulatorischer Kontext:** Bundeskleingartengesetz (BKleingG) verpflichtet zu mind. 1/3 Nutzgartenfläche. Viele Vereine haben zusätzliche Satzungsregeln (Baumverbote, Heckenmaße, Laubengröße). Bestehende Apps ignorieren diesen Kontext komplett.
-- **KI-Kern:** Claude API (Vision + Text) für Foto-Analyse, Plan-Extraktion, PDF-Regelextraktion. Pl@ntNet API für Pflanzenbestimmung (kostenlos bis 500 req/Tag, EU-basiert). KI-Calls laufen ausschließlich server-seitig (Supabase Edge Functions) — API-Keys nie im Client.
+- **Primäre Nutzer:** Dirk (Produktowner) + Frau — **Shared Garden Model seit Pivot 2026-04-21**. Beide arbeiten unabhängig über eigene Accounts/Geräte am selben Kleingarten. App wird für die eigene Parzelle eingesetzt (Saison 2026).
+- **Regulatorischer Kontext (Post-MVP):** Bundeskleingartengesetz (BKleingG) verpflichtet zu mind. 1/3 Nutzgartenfläche; viele Vereine haben zusätzliche Satzungsregeln. Im MVP nicht adressiert — Phase 9 (v1.1) reaktiviert die in Phase 02 bereits implementierte Vereinsregeln-Infrastruktur.
+- **KI-Kern (MVP):** Claude API (Vision) für Foto→Plan-Extraktion in Phase 4. Pl@ntNet API für Pflanzenbestimmung (kostenlos bis 500 req/Tag, EU-basiert). Post-MVP (Phase 8): Gemini 2.5 Flash Image / Nano Banana für fotorealistisches Beet-Preview. Post-MVP (Phase 9): Claude API für PDF-Regelextraktion. KI-Calls laufen ausschließlich server-seitig (Supabase Edge Functions) — API-Keys nie im Client.
 - **Geo-Scope MVP:** Deutschland. 7 Klimazonen via PLZ-Lookup (DWD-Daten als Grundlage).
 - **Open-Source-Kern:** Lizenz AGPL-3.0. Langfristige Vision: kommerziell erweiterbar (Premium-Features, Vereins-Datenbank).
 - **Inspirations-Apps:** GrowVeg/GardenPlanner (Plan-Editor-Referenz), Vera (DE UX), Seek/Pl@ntNet (Erkennungs-Flow). Stil: gezeichnet, warm, nicht-klinisch — kein Fotorealismus.
@@ -89,7 +95,7 @@ Foto rein → Plan und Kalender raus: Die KI-gestützte Überführung einer real
 - **Backend:** Supabase (Frankfurt, EU) — Postgres + Auth + Storage + Edge Functions. DSGVO-konform.
 - **Offline:** App startet und zeigt letzten Plan ohne Netz; Foto-Queue offline. KI-Calls und Sync erfordern Verbindung.
 - **Plan-Rendering:** SVG-basiert (react-native-svg / natives SVG im Web). Bei > 50 Elementen: Upgrade auf @shopify/react-native-skia erwogen.
-- **Lokale Persistenz:** expo-sqlite (strukturierte Daten) + expo-file-system (Foto-Queue). Sync-Layer: eigene simple Operation-Log-Queue, Last-Write-Wins (Single-User).
+- **Lokale Persistenz:** expo-sqlite (strukturierte Daten) + expo-file-system (Foto-Queue). Sync-Layer: eigene simple Operation-Log-Queue, Last-Write-Wins (2-User Shared Garden, Konflikte bei gleichzeitigen Edits selten erwartet).
 - **KI-Budget:** Soft-Limit 50 Claude-Calls/User/Tag, Hard-Limit 200/Tag.
 - **Datenschutz:** Fotos verschlüsselt at-rest, Geo-Daten opt-in, DSGVO-Konformität (EU-Hosting).
 - **Monorepo:** pnpm workspaces mit `app/`, `supabase/` (Migrations + Edge Functions), `packages/shared`.
@@ -106,10 +112,12 @@ Foto rein → Plan und Kalender raus: Die KI-gestützte Überführung einer real
 | Pl@ntNet als Pflanzenbestimmungs-API | Spezialisiert, kostenlos bis 500/Tag, EU-basiert; Flora Incognita ohne offene API | — Pending |
 | Foto-Analyse ist Kern-Feature (nicht optional) | Differenzierender USP; Risiko bewusst akzeptiert; manueller Editor als Fallback | — Pending |
 | AGPL-3.0 Lizenz | Schützt vor proprietären Clones; ermöglicht spätere Dual-Lizenz für Kommerz | — Pending |
-| Single-User MVP (kein Multi-Tenant) | Komplexitätsreduktion; Dirk ist Test-User Nr. 1; RLS-Vorbereitung für später | — Pending |
+| 2-User Shared Garden (Dirk + Frau) | Nutzungsrealität: Paar bewirtschaftet gemeinsam einen Kleingarten; unabhängige Geräte; kein Multi-Tenant (nur 2 Member/Garten im MVP) | **Pivot 2026-04-21** |
+| Vereinsregeln + BKleingG → v1.1 Phase 9 | API-Kosten (Claude Vision/PDF) + nicht differenzierend für Saison 2026; Code aus Phase 02 bleibt, Feature-Flag aus | **Pivot 2026-04-21** |
+| Fotorealistisches Beet-Preview → v1.1 Phase 8 | Stretch-USP; erst M1+M2+M3+M4 rund kriegen; Gemini 2.5 Flash Image / Nano Banana evaluieren | **Pivot 2026-04-21** |
 | KI-Calls server-seitig (Edge Functions) | API-Key-Schutz; Rate-Limiting; Caching-Option; Persistierung aller KI-Antworten (roh + geparst) | — Pending |
 | "Lokal nutzen" ohne Account erlaubt | Niedrigere Einstiegshürde; spätere Sync-Option bei Login | — Pending |
-| Feature-Flags von Anfang an (Supabase Table) | Schnelle Experimente ohne Deploy; vorbereitet für Post-MVP | — Pending |
+| Feature-Flags von Anfang an (Supabase Table) | Schnelle Experimente ohne Deploy; Vereinsregeln-Code per Flag ausgeblendet bis Phase 9 | — Pending |
 
 ## Evolution
 
@@ -129,4 +137,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-14 after initialization*
+*Last updated: 2026-04-21 — Shared-Garden-MVP pivot (Quick Task 260421-v43)*
