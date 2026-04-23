@@ -65,8 +65,17 @@ function GuardedStack(): React.JSX.Element {
   // DB cases where migration seed did not land, (d) post-delete-garden (D-16)
   // where user deleted their only garden and a new default must be provisioned.
   // RPC is server-idempotent.
+  //
+  // Reentrancy-Schutz (WR-02): inFlight-Ref verhindert doppeltes RPC-Feuern,
+  // wenn React das Effect mehrfach dispatcht (StrictMode, Hot-Reload, rapide
+  // auth-store-Mutationen wie Delete-Garden → setActiveGarden(null) → Re-Run).
+  // Server ist idempotent, aber wir vermeiden unnötige Round-Trips + race mit
+  // setActiveGarden, während der erste Call noch pending ist.
+  const inFlight = React.useRef(false);
   React.useEffect(() => {
-    if (!identity || mode !== 'account' || activeGardenId) return;
+    if (!identity || mode !== 'account' || activeGardenId || inFlight.current)
+      return;
+    inFlight.current = true;
     let cancelled = false;
     (async () => {
       try {
@@ -75,6 +84,8 @@ function GuardedStack(): React.JSX.Element {
       } catch (e) {
         // Non-fatal at bootstrap — UI screens will show per-screen errors.
         if (__DEV__) console.warn('ensureDefaultGardenForUser failed', e);
+      } finally {
+        inFlight.current = false;
       }
     })();
     return () => {
