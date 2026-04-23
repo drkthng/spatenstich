@@ -184,10 +184,10 @@
 | RULES-04 | Phase 2 | Complete (Plan 02-04, commits 0dc915a + fc2a665 — three-layer defense: UI + store + repo + DB CHECK) |
 | RULES-05 | Phase 2 | Complete (Plan 02-04, neutral TrafficLightBadge render verified in profile) |
 | NFR-07 | Phase 2 | Complete (Plan 02-02, inherited; 02-04 preserves Haftungsausschluss on Auth-Wahl) |
-| GARDEN-01 | Phase 2.5 | Pending |
-| GARDEN-02 | Phase 2.5 | Pending |
-| GARDEN-03 | Phase 2.5 | Pending |
-| GARDEN-04 | Phase 2.5 | Pending |
+| GARDEN-01 | Phase 2.5 | Schema Complete (Plan 02.5-02, commits 1c45236 + 9c45b48 — gardens + garden_members + 2-member-trigger + member-check RLS via SECURITY DEFINER helpers. Client wiring in Plan 03.) |
+| GARDEN-02 | Phase 2.5 | RPCs Complete (Plan 02.5-02, commits 1c45236 + 9c45b48 — create_invite_for_garden + consume_invite_code + delete_garden + transfer_ownership live; invite_code.sql + 5 D-16 SQL tests green. UI join-by-code in Plan 04.) |
+| GARDEN-03 | Phase 2.5 | Schema Complete / Client Pending (Plan 02.5-02 Migration 003 seeded Default-Gärten + backfilled garden_id. migrateLocalToAccount.ts Body-Erweiterung kommt in Plan 03.) |
+| GARDEN-04 | Phase 2.5 | DB Triggers Complete / UI Pending (Plan 02.5-02, commit 1c45236 — updated_at + updated_by_user_id Trigger installiert auf gardens, vereinsregeln, ai_jobs. UI "zuletzt bearbeitet von …" in Plan 04.) |
 | SYNC-01 | Phase 3 | Pending |
 | SYNC-02 | Phase 3 | Pending |
 | SYNC-03 | Phase 3 | Pending |

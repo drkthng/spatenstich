@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
 status: Executing
-stopped_at: Phase 2.5 Plan 01 abgeschlossen (Wave 1 done, nächstes Ziel Plan 02 Migration 003)
-last_updated: "2026-04-23T13:25:00.000Z"
-last_activity: 2026-04-23 -- Phase 02.5 Plan 01 (Types + i18n + Test-Stubs) complete
+stopped_at: Phase 2.5 Plan 02 abgeschlossen (Wave 2 done; 6 Supabase-Migrations live; 11/11 SQL-Tests green; nächstes Ziel Plan 03 Repos)
+last_updated: "2026-04-23T14:40:00.000Z"
+last_activity: 2026-04-23 -- Phase 02.5 Plan 02 (Migration 003 + Rule-1-Fix-Migrations 004/005/006 + type-regen + 11 SQL tests) complete
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 11
-  completed_plans: 8
-  percent: 73
+  completed_plans: 9
+  percent: 82
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 
 ## Current Position
 
-Phase: 2.5 (shared-garden-model) — IN PROGRESS; Wave 1 (Plan 01) complete 2026-04-23; Wave 2 (Plan 02 Migration 003) als nächstes
+Phase: 2.5 (shared-garden-model) — IN PROGRESS; Wave 1 (Plan 01) complete 2026-04-23; Wave 2 (Plan 02 Migration 003 + Rule-1-Fix-Migrations 004/005/006) complete 2026-04-23; Wave 3 (Plans 03 + 04) als nächstes
 Vorheriger Status: Phase 02 (auth-profile-vereinsregeln) — CODE COMPLETE; MVP-Scope-Verify reduziert auf NFR-07/AUTH-05/AUTH-04/Logout-Guard (4 Items statt 10); Vereinsregeln-Verify-Items (Schritte 22–33) auf Phase 9 deferred
-Plans: 8/11 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 1/4)
-Last activity: 2026-04-23 -- Phase 02.5 Plan 01 execution complete (Types + i18n + Test-Stubs)
+Plans: 9/11 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 2/4)
+Last activity: 2026-04-23 -- Phase 02.5 Plan 02 execution complete (Migration 003 live; 11/11 SQL-Tests green; types regen; 3 Rule-1-Fix-Migrations)
 
-Progress: [████████░░] 73% (8/11 Plans; neue Phasen 8, 9 noch nicht geplant)
+Progress: [█████████░] 82% (9/11 Plans; neue Phasen 8, 9 noch nicht geplant)
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Progress: [████████░░] 73% (8/11 Plans; neue Phasen 8, 9 noc
 | Phase 01 P03 | 10 | 4 tasks | 14 files |
 | Phase 02 P04 | 13 | 3 tasks | 17 files |
 | Phase 02.5 P01 | 9 | 5 tasks | 10 files |
+| Phase 02.5 P02 | 45 | 5 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,13 @@ Recent decisions affecting current work:
 - [Phase 02.5 P01]: Test-Framework — Jest (nicht Vitest wie im Plan-Text beschrieben). Jest-Globals via jest-expo, kein expliziter Import nötig. Pattern identisch zu vereinsregelnRepo.test.ts (Rule-1-Fix).
 - [Phase 02.5 P01]: migrateLocalToAccount.ts Typ-Signatur UserProfile → LocalProfile als Rule-3-Blocking-Fix; Body-Erweiterung (ensure_default_garden_for_user RPC + gardenId-Stempel) folgt in Plan 03.
 - [Phase 02.5 P01]: SQL-Test-Stubs nutzen Crockford-Alphabet-Check `[0OILU]` via regex match im invite_code.sql — konsistent mit GARDEN-02 Requirement-Wording.
+- [Phase 02.5 P02]: SECURITY-DEFINER-Helper-Pattern für selbst-referenzielle RLS — `public.is_garden_member(uuid)` + `public.is_garden_owner(uuid)` (STABLE + SET search_path = public, pg_temp) bypassen RLS im Subquery. Behebt Infinite-Recursion 42P17 auf garden_members. Alle 11 Member-Check-Policies nutzen Helper statt rekursivem Subquery. Eingeführt in Migration 004.
+- [Phase 02.5 P02]: pgcrypto-Schema-Awareness — `gen_random_bytes` lebt in `extensions`-Schema (nicht `public`). SECURITY DEFINER functions, die pgcrypto-Primitiven nutzen, müssen `SET search_path = public, extensions, pg_temp` setzen. Fix in Migration 005.
+- [Phase 02.5 P02]: Migration-History ist append-only — Supabase CLI speichert Migration-Hash in schema_migrations; post-push-Edits brechen den nächsten `supabase db push`. Rule-1-Bug-Fixes an vorherigen Migrations gehen in numerisch-höhere Follow-up-Migrations (Pattern: 004/005/006).
+- [Phase 02.5 P02]: Supabase CLI 2.90 surfacet `raise notice` NICHT mehr in JSON-output — SQL-Test-Success-Detection via absence of `ERROR:` / `unexpected status 4xx` im stderr. Alte Plan-Text-`grep -q "ok"`-Assertions sind obsolete.
+- [Phase 02.5 P02]: SQL-Test-Setup-Phasen-Trennung — profiles + direct garden_members-INSERTs laufen als postgres superuser (ohne `set local role authenticated`), weil profiles-RLS `auth.uid() = id` zweiten User blockiert UND garden_members keine INSERT-Policy hat (productive code: consume_invite_code RPC). Nur RPC-Calls + Assertions laufen als authenticated. UUIDs via `set_config`/`current_setting` über role-switches.
+- [Phase 02.5 P02]: profiles.plz/klimazone/archetype bleiben weiterhin INTAKT (Pitfall 4 Two-phase-refactor) — Migration 007 dropt sie, sobald Plan 04 alle Reads auf gardens-Row migriert hat.
+- [Phase 02.5 P02]: Enqueue/repo-Column-Rename-Breaks (enqueueAiJob.ts `user_id` + vereinsregelnRepo.ts `user_id`) werden bewusst NICHT in Plan 02 gefixt — Plan-Text sagt explizit "fix those consumers in Plan 03, not here". Handoff dokumentiert in 02.5-02-SUMMARY.md.
 
 ### Pending Todos
 
@@ -121,6 +129,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-23T13:25:00.000Z
-Stopped at: Phase 2.5 Plan 01 complete (5/5 tasks, 5 commits, SUMMARY written) — nächstes Ziel Plan 02 Migration 003
-Resume file: .planning/phases/02.5-shared-garden-model/02.5-02-PLAN.md
+Last session: 2026-04-23T14:40:00.000Z
+Stopped at: Phase 2.5 Plan 02 complete (5/5 tasks, 5 commits, SUMMARY written, 11/11 SQL-Tests green, 6 Supabase-Migrations live) — nächstes Ziel Plan 03 Repos + activeGardenId
+Resume file: .planning/phases/02.5-shared-garden-model/02.5-03-PLAN.md
