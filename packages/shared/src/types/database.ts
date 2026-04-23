@@ -42,6 +42,8 @@ export type Database = {
       ai_jobs: {
         Row: {
           created_at: string
+          created_by_user_id: string
+          garden_id: string
           id: string
           job_type: string
           last_error: string | null
@@ -49,10 +51,12 @@ export type Database = {
           pgmq_msg_id: number | null
           status: string
           updated_at: string
-          user_id: string
+          updated_by_user_id: string | null
         }
         Insert: {
           created_at?: string
+          created_by_user_id: string
+          garden_id: string
           id?: string
           job_type: string
           last_error?: string | null
@@ -60,10 +64,12 @@ export type Database = {
           pgmq_msg_id?: number | null
           status?: string
           updated_at?: string
-          user_id: string
+          updated_by_user_id?: string | null
         }
         Update: {
           created_at?: string
+          created_by_user_id?: string
+          garden_id?: string
           id?: string
           job_type?: string
           last_error?: string | null
@@ -71,42 +77,60 @@ export type Database = {
           pgmq_msg_id?: number | null
           status?: string
           updated_at?: string
-          user_id?: string
+          updated_by_user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ai_jobs_garden_id_fkey"
+            columns: ["garden_id"]
+            isOneToOne: false
+            referencedRelation: "gardens"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ai_results: {
         Row: {
           created_at: string
+          created_by_user_id: string
+          garden_id: string
           id: string
           job_id: string
           latency_ms: number | null
           model_used: string | null
           parsed_result: Json | null
           raw_response: Json
-          user_id: string
         }
         Insert: {
           created_at?: string
+          created_by_user_id: string
+          garden_id: string
           id?: string
           job_id: string
           latency_ms?: number | null
           model_used?: string | null
           parsed_result?: Json | null
           raw_response: Json
-          user_id: string
         }
         Update: {
           created_at?: string
+          created_by_user_id?: string
+          garden_id?: string
           id?: string
           job_id?: string
           latency_ms?: number | null
           model_used?: string | null
           parsed_result?: Json | null
           raw_response?: Json
-          user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ai_results_garden_id_fkey"
+            columns: ["garden_id"]
+            isOneToOne: false
+            referencedRelation: "gardens"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ai_results_job_id_fkey"
             columns: ["job_id"]
@@ -143,10 +167,117 @@ export type Database = {
         }
         Relationships: []
       }
+      garden_members: {
+        Row: {
+          garden_id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          garden_id: string
+          joined_at?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          garden_id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "garden_members_garden_id_fkey"
+            columns: ["garden_id"]
+            isOneToOne: false
+            referencedRelation: "gardens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gardens: {
+        Row: {
+          archetype: string | null
+          created_at: string
+          created_by_user_id: string | null
+          id: string
+          klimazone: number | null
+          name: string
+          plz: string | null
+          updated_at: string
+          updated_by_user_id: string | null
+        }
+        Insert: {
+          archetype?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          id?: string
+          klimazone?: number | null
+          name: string
+          plz?: string | null
+          updated_at?: string
+          updated_by_user_id?: string | null
+        }
+        Update: {
+          archetype?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          id?: string
+          klimazone?: number | null
+          name?: string
+          plz?: string | null
+          updated_at?: string
+          updated_by_user_id?: string | null
+        }
+        Relationships: []
+      }
+      invite_codes: {
+        Row: {
+          code: string
+          consumed_at: string | null
+          consumed_by_user_id: string | null
+          created_at: string
+          created_by_user_id: string
+          expires_at: string
+          garden_id: string
+          id: string
+        }
+        Insert: {
+          code: string
+          consumed_at?: string | null
+          consumed_by_user_id?: string | null
+          created_at?: string
+          created_by_user_id: string
+          expires_at?: string
+          garden_id: string
+          id?: string
+        }
+        Update: {
+          code?: string
+          consumed_at?: string | null
+          consumed_by_user_id?: string | null
+          created_at?: string
+          created_by_user_id?: string
+          expires_at?: string
+          garden_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invite_codes_garden_id_fkey"
+            columns: ["garden_id"]
+            isOneToOne: false
+            referencedRelation: "gardens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           archetype: string | null
           created_at: string
+          display_name: string | null
           id: string
           klimazone: number | null
           plz: string | null
@@ -155,6 +286,7 @@ export type Database = {
         Insert: {
           archetype?: string | null
           created_at?: string
+          display_name?: string | null
           id: string
           klimazone?: number | null
           plz?: string | null
@@ -163,6 +295,7 @@ export type Database = {
         Update: {
           archetype?: string | null
           created_at?: string
+          display_name?: string | null
           id?: string
           klimazone?: number | null
           plz?: string | null
@@ -174,47 +307,75 @@ export type Database = {
         Row: {
           aktiv: boolean
           beschreibung: string | null
+          created_by_user_id: string
           einheit: string | null
           erstellt_am: string
+          garden_id: string
           id: string
           ist_bkleingg: boolean
           source: string
           titel: string
-          user_id: string
+          updated_at: string
+          updated_by_user_id: string | null
           wert: number | null
         }
         Insert: {
           aktiv?: boolean
           beschreibung?: string | null
+          created_by_user_id: string
           einheit?: string | null
           erstellt_am?: string
+          garden_id: string
           id?: string
           ist_bkleingg?: boolean
           source: string
           titel: string
-          user_id: string
+          updated_at?: string
+          updated_by_user_id?: string | null
           wert?: number | null
         }
         Update: {
           aktiv?: boolean
           beschreibung?: string | null
+          created_by_user_id?: string
           einheit?: string | null
           erstellt_am?: string
+          garden_id?: string
           id?: string
           ist_bkleingg?: boolean
           source?: string
           titel?: string
-          user_id?: string
+          updated_at?: string
+          updated_by_user_id?: string | null
           wert?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vereinsregeln_garden_id_fkey"
+            columns: ["garden_id"]
+            isOneToOne: false
+            referencedRelation: "gardens"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      consume_invite_code: { Args: { p_code: string }; Returns: string }
+      create_invite_for_garden: {
+        Args: { p_garden_id: string }
+        Returns: string
+      }
+      delete_garden: { Args: { p_garden_id: string }; Returns: Json }
+      ensure_default_garden_for_user: { Args: never; Returns: string }
+      gen_invite_code: { Args: never; Returns: string }
+      transfer_ownership: {
+        Args: { p_garden_id: string; p_to_user_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
