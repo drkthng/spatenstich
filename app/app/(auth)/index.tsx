@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { UserPlus, Smartphone, ChevronDown, ChevronUp } from 'lucide-react-native';
+import { UserPlus, Smartphone, UsersRound, ChevronDown, ChevronUp } from 'lucide-react-native';
 import de from '@spatenstich/shared/i18n/de';
 import { AuthChoiceCard } from '@/src/components/AuthChoiceCard';
 import { getOrCreateLocalUUID } from '@/src/lib/auth';
@@ -56,6 +56,13 @@ export default function AuthChoiceScreen(): React.JSX.Element {
             description="Daten nur auf diesem Gerät, kein Account nötig"
             onPress={handleLocal}
             testID="auth-choice-local"
+          />
+          <AuthChoiceCard
+            icon={UsersRound}
+            title={t('auth.choice.join_garden')}
+            description={t('auth.choice.join_garden_desc')}
+            onPress={() => router.push('/(auth)/join-by-code' as any)}
+            testID="auth-choice-join"
           />
         </View>
 

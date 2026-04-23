@@ -2,6 +2,7 @@
   "common": {
     "ok": "OK",
     "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
     "save": "Speichern",
     "delete": "Löschen",
     "retry": "Erneut versuchen",
@@ -11,6 +12,7 @@
   },
   "errors": {
     "network": "Keine Verbindung. Bitte prüfe dein Netz.",
+    "not_owner": "Nur der Besitzer kann diese Aktion ausführen.",
     "unknown": "Ein unerwarteter Fehler ist aufgetreten."
   },
   "auth": {
@@ -18,6 +20,7 @@
       "create_account": "Account erstellen",
       "local_start": "Lokal starten",
       "join_garden": "Einem Garten beitreten",
+      "join_garden_desc": "Mit Einladungs-Code einem geteilten Garten beitreten",
       "tagline": "Dein digitaler Kleingarten-Assistent",
       "disclaimer_label": "Rechtlicher Hinweis"
     },
@@ -32,9 +35,11 @@
     },
     "join": {
       "title": "Einladungs-Code eingeben",
+      "subtitle": "Gib den 6-stelligen Code ein, den dir die Person gegeben hat.",
       "code_label": "6-stelliger Code",
       "code_placeholder": "Z. B. ABC7X9",
       "submit": "Beitreten",
+      "need_account": "Du brauchst einen Account, um einem Garten beizutreten.",
       "error_invalid": "Code ungültig oder abgelaufen.",
       "error_full": "Dieser Garten hat bereits 2 Mitglieder.",
       "error_generic": "Beitritt fehlgeschlagen. Bitte erneut versuchen.",
@@ -101,10 +106,14 @@
     "settings_link": "Mein Garten",
     "section_title": "Garten",
     "name_label": "Name des Gartens",
+    "plz_label": "PLZ",
     "members_title": "Mitglieder",
     "owner_badge": "Besitzer",
     "member_badge": "Mitglied",
     "empty_state": "Noch kein Garten angelegt.",
+    "not_found": "Garten nicht gefunden.",
+    "local_mode_notice": "Gärten sind nur im Account-Modus verfügbar.",
+    "choice_join_desc": "Mit Einladungs-Code einem geteilten Garten beitreten",
     "invite": {
       "create": "Person einladen",
       "code_display_title": "Dein Einladungs-Code",
@@ -112,10 +121,12 @@
       "copy": "Kopieren",
       "copied": "Kopiert",
       "share": "Teilen",
+      "share_message": "Tritt meinem Garten bei mit Code: {code}",
       "regenerate": "Neuen Code erzeugen",
       "regenerate_confirm": "Neuer Code wird erzeugt — der alte Code wird ungültig.",
       "expires_in_hours": "Gültig für 24 Stunden",
       "error_not_owner": "Nur der Besitzer kann Einladungs-Codes erzeugen.",
+      "error_already_full": "Dein Garten hat bereits 2 Mitglieder.",
       "error_generic": "Code konnte nicht erzeugt werden."
     },
     "member": {
