@@ -77,7 +77,11 @@
   2. Owner kann einen 6-stelligen Invite-Code generieren; zweiter Account kann per Code beitreten → landet als Member im selben `garden_id`
   3. Alle bestehenden Phase-02-Daten (profiles, vereinsregeln, plans — sobald vorhanden) werden bei Migration pro User einer Default-Garden-Entität zugeordnet; Dirks lokaler Datenbestand bleibt erhalten
   4. Wenn beide Accounts dieselbe Zeile innerhalb von 30 s editieren, gewinnt der spätere Schreibvorgang (LWW über `updated_at`-Timestamp); UI zeigt "zuletzt bearbeitet von <Name>"
-**Plans**: TBD
+**Plans**: 4 plans
+  - [ ] 02.5-01-PLAN.md — Requirements + Domain-Typen + i18n + Wave-0 Test-Stubs (SQL + Jest) (Wave 1)
+  - [ ] 02.5-02-PLAN.md — Migration 003 (gardens + garden_members + invite_codes + RLS-Refactor + RPCs) + supabase db push --linked + types regen (Wave 2)
+  - [ ] 02.5-03-PLAN.md — Repos (gardenRepo + inviteCodeRepo new; profileRepo shrink; vereinsregelnRepo extend) + authStore activeGardenId + migrateLocalToAccount extension (Wave 3)
+  - [ ] 02.5-04-PLAN.md — UI (join-by-code + settings/garden + 3rd AuthChoiceCard + settings link + _layout bootstrap useEffect) + human-verify checkpoint (Wave 3)
 **UI hint**: yes (Invite-Code-Screen + Member-Liste in Settings)
 
 ### Phase 3: Offline & Sync (2-User Shared State)
@@ -181,7 +185,7 @@
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-04-17 |
 | 2. Auth & Profile (Vereinsregeln flagged off) | 4/4 | Code Complete (MVP-scope verify pending: NFR-07, AUTH-05, AUTH-04, Logout-Guard) | 2026-04-20 |
-| 2.5. Shared Garden Model | 0/TBD | Not started (NEU — Pivot) | - |
+| 2.5. Shared Garden Model | 0/4 | Planned (NEU — Pivot) | - |
 | 3. Offline & Sync | 0/TBD | Not started | - |
 | 4. Garten-Erfassung (M1) | 0/TBD | Not started | - |
 | 5. Plan-Editor (M2) | 0/TBD | Not started | - |
