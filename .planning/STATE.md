@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: Ready to execute
-stopped_at: Phase 2.5 context gathered (19 decisions across 4 areas)
-last_updated: "2026-04-23T13:11:33.066Z"
-last_activity: 2026-04-23 -- Phase 02.5 planning complete
+status: Executing
+stopped_at: Phase 2.5 Plan 01 abgeschlossen (Wave 1 done, nächstes Ziel Plan 02 Migration 003)
+last_updated: "2026-04-23T13:25:00.000Z"
+last_activity: 2026-04-23 -- Phase 02.5 Plan 01 (Types + i18n + Test-Stubs) complete
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 11
-  completed_plans: 7
-  percent: 64
+  completed_plans: 8
+  percent: 73
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 
 ## Current Position
 
-Phase: 2.5 (shared-garden-model) — NOT STARTED; nächstes Planungsziel
+Phase: 2.5 (shared-garden-model) — IN PROGRESS; Wave 1 (Plan 01) complete 2026-04-23; Wave 2 (Plan 02 Migration 003) als nächstes
 Vorheriger Status: Phase 02 (auth-profile-vereinsregeln) — CODE COMPLETE; MVP-Scope-Verify reduziert auf NFR-07/AUTH-05/AUTH-04/Logout-Guard (4 Items statt 10); Vereinsregeln-Verify-Items (Schritte 22–33) auf Phase 9 deferred
-Plans: 7/10 completed (Phase 01: 3/3, Phase 02: 4/4)
-Last activity: 2026-04-23 -- Phase 02.5 planning complete
+Plans: 8/11 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 1/4)
+Last activity: 2026-04-23 -- Phase 02.5 Plan 01 execution complete (Types + i18n + Test-Stubs)
 
-Progress: [███████░░░] 70% (7/10 Plans; neue Phasen 2.5, 8, 9 noch nicht geplant)
+Progress: [████████░░] 73% (8/11 Plans; neue Phasen 8, 9 noch nicht geplant)
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [███████░░░] 70% (7/10 Plans; neue Phasen 2.5, 8, 
 | Phase 01 P02 | 14 | 5 tasks | 18 files |
 | Phase 01 P03 | 10 | 4 tasks | 14 files |
 | Phase 02 P04 | 13 | 3 tasks | 17 files |
+| Phase 02.5 P01 | 9 | 5 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -92,6 +93,11 @@ Recent decisions affecting current work:
 - [Phase 02-04]: ExtractionLoader uses NativeWind animate-pulse (not Reanimated worklet) — adequate for MVP, no added surface
 - [Phase 02-04 post-hoc]: Supabase column contract enforced via toRow/fromRow in vereinsregelnRepo — Postgres column is `ist_bkleingg` (snake_case); camelCase `istBKleingG` would be silently dropped on upsert. migrateLocalToAccount routed through toRow. Fix shipped 2026-04-20 (e6b8c30).
 - [Phase 02-04 post-hoc]: confirm.tsx inline-edit wires VereinsregelRow.onEdit → vereinsregelnStore.updateRule. Closes SC5 edit-reachability gap. Fix shipped 2026-04-20 (d885901).
+- [Phase 02.5 P01]: Clean-Cut-Typen — UserProfile reduziert auf Account-Scope (userId/mode/displayName/createdAt/updatedAt); LocalProfile extends UserProfile mit plz/klimazone/archetype. D-01-Pivot (Garden-Scope) eingefroren in packages/shared.
+- [Phase 02.5 P01]: D-16 Owner-Rights-Keys (14) unter garden.transferOwnership.* + garden.delete.* verankert — Plan 04 darf keine weiteren Keys einführen.
+- [Phase 02.5 P01]: Test-Framework — Jest (nicht Vitest wie im Plan-Text beschrieben). Jest-Globals via jest-expo, kein expliziter Import nötig. Pattern identisch zu vereinsregelnRepo.test.ts (Rule-1-Fix).
+- [Phase 02.5 P01]: migrateLocalToAccount.ts Typ-Signatur UserProfile → LocalProfile als Rule-3-Blocking-Fix; Body-Erweiterung (ensure_default_garden_for_user RPC + gardenId-Stempel) folgt in Plan 03.
+- [Phase 02.5 P01]: SQL-Test-Stubs nutzen Crockford-Alphabet-Check `[0OILU]` via regex match im invite_code.sql — konsistent mit GARDEN-02 Requirement-Wording.
 
 ### Pending Todos
 
@@ -115,6 +121,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-23T07:58:29.184Z
-Stopped at: Phase 2.5 context gathered (19 decisions across 4 areas)
-Resume file: .planning/phases/02.5-shared-garden-model/02.5-CONTEXT.md
+Last session: 2026-04-23T13:25:00.000Z
+Stopped at: Phase 2.5 Plan 01 complete (5/5 tasks, 5 commits, SUMMARY written) — nächstes Ziel Plan 02 Migration 003
+Resume file: .planning/phases/02.5-shared-garden-model/02.5-02-PLAN.md

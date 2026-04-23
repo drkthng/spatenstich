@@ -77,8 +77,8 @@
   2. Owner kann einen 6-stelligen Invite-Code generieren; zweiter Account kann per Code beitreten → landet als Member im selben `garden_id`
   3. Alle bestehenden Phase-02-Daten (profiles, vereinsregeln, plans — sobald vorhanden) werden bei Migration pro User einer Default-Garden-Entität zugeordnet; Dirks lokaler Datenbestand bleibt erhalten
   4. Wenn beide Accounts dieselbe Zeile innerhalb von 30 s editieren, gewinnt der spätere Schreibvorgang (LWW über `updated_at`-Timestamp); UI zeigt "zuletzt bearbeitet von <Name>"
-**Plans**: 4 plans
-  - [ ] 02.5-01-PLAN.md — Requirements + Domain-Typen + i18n + Wave-0 Test-Stubs (SQL + Jest) (Wave 1)
+**Plans**: 4 plans (1/4 complete)
+  - [x] 02.5-01-PLAN.md — Requirements + Domain-Typen + i18n + Wave-0 Test-Stubs (SQL + Jest) (Wave 1) — completed 2026-04-23
   - [ ] 02.5-02-PLAN.md — Migration 003 (gardens + garden_members + invite_codes + RLS-Refactor + RPCs) + supabase db push --linked + types regen (Wave 2)
   - [ ] 02.5-03-PLAN.md — Repos (gardenRepo + inviteCodeRepo new; profileRepo shrink; vereinsregelnRepo extend) + authStore activeGardenId + migrateLocalToAccount extension (Wave 3)
   - [ ] 02.5-04-PLAN.md — UI (join-by-code + settings/garden + 3rd AuthChoiceCard + settings link + _layout bootstrap useEffect) + human-verify checkpoint (Wave 3)
