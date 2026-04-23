@@ -24,6 +24,13 @@
 - [x] **AUTH-04**: User kann später aus lokalem Modus in Account-Modus wechseln (Sync bestehender Daten)
 - [ ] **AUTH-05**: Onboarding-Flow führt in < 5 Minuten zu erstem nutzbaren Plan: Account/lokal → PLZ → Archetyp → Vereinsregeln (optional) → Garten-Erfassung
 
+### Shared Garden (Phase 2.5 — Pivot 2026-04-21)
+
+- [ ] **GARDEN-01**: `gardens`-Tabelle + `garden_members`-Tabelle + RLS-Policies auf Member-Check (`(select auth.uid()) IN (SELECT user_id FROM public.garden_members WHERE garden_id = <row>.garden_id)`) auf allen Phase-2-Tabellen (vereinsregeln, ai_jobs, ai_results) statt direktem `user_id = auth.uid()`-Check. Max 2 Member pro Garten enforced via `BEFORE INSERT TRIGGER` auf `garden_members` (CHECK mit Subquery ist in Postgres nicht erlaubt).
+- [ ] **GARDEN-02**: 6-stelliger Invite-Code-Flow über Postgres-RPCs (SECURITY DEFINER): `create_invite_for_garden(p_garden_id uuid) → text` (Owner-only, invalidiert alten Code vor Erzeugung — D-11) und `consume_invite_code(p_code text) → uuid` (atomic UPDATE … RETURNING, 24 h TTL, single-use via `consumed_at`-Spalte). Alphabet `123456789ABCDEFGHJKMNPQRSTVWXYZ` (Crockford ohne 0/O/I/L/U). Ergänzend (D-16 Owner-Rights): `delete_garden(p_garden_id uuid)` (nur Owner; blockt wenn weitere Member existieren) + `transfer_ownership(p_garden_id uuid, p_to_user_id uuid)` (atomic Role-Swap zwischen Owner und Ziel-Member).
+- [ ] **GARDEN-03**: Migration 003 seeded Default-Garten pro Bestands-`profiles`-Row (`INSERT INTO gardens … FROM profiles`) + Backfill aller vereinsregeln/ai_jobs/ai_results-Rows mit `garden_id` → `SET NOT NULL`. `migrateLocalToAccount.ts` wird erweitert: nach signUp `ensure_default_garden_for_user()` RPC → gardenId im anschließenden profile/vereinsregeln-Upsert mit-einstempeln. Lokal-Modus bleibt single-user (kein Garten-Konzept in StorageAdapter, D-13).
+- [ ] **GARDEN-04**: LWW-Tracking via `updated_at timestamptz` (BEFORE UPDATE Trigger `public.tg_set_updated_at` aus Migration 001 wiederverwendet) + `updated_by_user_id uuid REFERENCES auth.users(id)` (Client-first fill in `toRow`, BEFORE UPDATE Trigger `tg_set_updated_by_user_id` als Fallback). UI zeigt inline unter garden-scoped Rows "zuletzt bearbeitet von {display_name}, {relative-time}" — Source für Name ist `profiles.display_name` des User mit `id = updated_by_user_id`.
+
 ### Profil & Standort
 
 - [ ] **PROF-01**: User kann PLZ eingeben, App ordnet automatisch eine der 7 Klimazonen zu (statische Lookup-Tabelle)
@@ -177,6 +184,10 @@
 | RULES-04 | Phase 2 | Complete (Plan 02-04, commits 0dc915a + fc2a665 — three-layer defense: UI + store + repo + DB CHECK) |
 | RULES-05 | Phase 2 | Complete (Plan 02-04, neutral TrafficLightBadge render verified in profile) |
 | NFR-07 | Phase 2 | Complete (Plan 02-02, inherited; 02-04 preserves Haftungsausschluss on Auth-Wahl) |
+| GARDEN-01 | Phase 2.5 | Pending |
+| GARDEN-02 | Phase 2.5 | Pending |
+| GARDEN-03 | Phase 2.5 | Pending |
+| GARDEN-04 | Phase 2.5 | Pending |
 | SYNC-01 | Phase 3 | Pending |
 | SYNC-02 | Phase 3 | Pending |
 | SYNC-03 | Phase 3 | Pending |
@@ -220,11 +231,11 @@
 | CAL-06 | Phase 7 | Pending |
 
 **Coverage:**
-- v1 requirements: 66 total (FOUND×8, AUTH×5, PROF×4, RULES×5, PHOTO×8, EDIT×12, SEED×6, CAL×6, SYNC×4, NFR×8)
-- Mapped to phases: 66
+- v1 requirements: 70 total (FOUND×8, AUTH×5, PROF×4, RULES×5, GARDEN×4, PHOTO×8, EDIT×12, SEED×6, CAL×6, SYNC×4, NFR×8)
+- Mapped to phases: 70
 - Unmapped: 0 ✓
 
-**Note:** Earlier traceability listed 58 requirements. The correct count is 66 — the 8 NFR requirements were previously undercounted in phase assignments. All 66 are now individually mapped.
+**Note:** Earlier traceability listed 58 requirements. The correct count is 66 — the 8 NFR requirements were previously undercounted in phase assignments. All 66 are now individually mapped. Phase 2.5 pivot (2026-04-21) added 4 GARDEN requirements, bringing the total to 70.
 
 ---
 *Requirements defined: 2026-04-15*
