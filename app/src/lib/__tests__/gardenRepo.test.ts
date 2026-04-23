@@ -216,7 +216,17 @@ describe('gardenRepo.deleteGarden [D-16]', () => {
     });
   });
 
-  it('throws GardenHasMembersError when RPC returns SQLSTATE P0003', async () => {
+  it('throws GardenHasMembersError when RPC returns SQLSTATE P9003 (WR-04 custom code)', async () => {
+    mockRpc.mockResolvedValue({
+      data: null,
+      error: { code: 'P9003', message: 'garden_has_members' },
+    });
+    await expect(repo.deleteGarden('account', 'g-1')).rejects.toBeInstanceOf(
+      GardenHasMembersError,
+    );
+  });
+
+  it('throws GardenHasMembersError when RPC returns legacy P0003 (pre-migration-010)', async () => {
     mockRpc.mockResolvedValue({
       data: null,
       error: { code: 'P0003', message: 'garden_has_members' },
@@ -264,7 +274,17 @@ describe('gardenRepo.transferOwnership [D-16]', () => {
     ).rejects.toBeInstanceOf(NotOwnerError);
   });
 
-  it('throws CannotTransferToSelfError for SQLSTATE P0004', async () => {
+  it('throws CannotTransferToSelfError for SQLSTATE P9004 (WR-04 custom code)', async () => {
+    mockRpc.mockResolvedValue({
+      data: null,
+      error: { code: 'P9004', message: 'cannot_transfer_to_self' },
+    });
+    await expect(
+      repo.transferOwnership('account', 'g-1', 'u-1'),
+    ).rejects.toBeInstanceOf(CannotTransferToSelfError);
+  });
+
+  it('throws CannotTransferToSelfError for legacy P0004 (pre-migration-010)', async () => {
     mockRpc.mockResolvedValue({
       data: null,
       error: { code: 'P0004', message: 'cannot_transfer_to_self' },
@@ -274,7 +294,17 @@ describe('gardenRepo.transferOwnership [D-16]', () => {
     ).rejects.toBeInstanceOf(CannotTransferToSelfError);
   });
 
-  it('throws TargetNotMemberError for SQLSTATE P0005', async () => {
+  it('throws TargetNotMemberError for SQLSTATE P9005 (WR-04 custom code)', async () => {
+    mockRpc.mockResolvedValue({
+      data: null,
+      error: { code: 'P9005', message: 'target_not_member' },
+    });
+    await expect(
+      repo.transferOwnership('account', 'g-1', 'u-99'),
+    ).rejects.toBeInstanceOf(TargetNotMemberError);
+  });
+
+  it('throws TargetNotMemberError for legacy P0005 (pre-migration-010)', async () => {
     mockRpc.mockResolvedValue({
       data: null,
       error: { code: 'P0005', message: 'target_not_member' },

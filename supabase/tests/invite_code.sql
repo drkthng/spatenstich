@@ -1,9 +1,12 @@
 -- Phase 2.5 Invite-Code Flow Test — Plan 02.5-01-04 (stub) / Plan 02.5-02 (green)
--- Erwartet nach Migration 003:
+-- Erwartet nach Migration 003 + 010 (WR-04 custom SQLSTATE):
 --   1) create_invite_for_garden returns 6-char code (Crockford-alphabet, no 0/O/I/L/U)
 --   2) consume_invite_code with valid code returns garden_id + adds user as member
---   3) Double-consume throws SQLSTATE P0002 (invite_invalid_or_expired)
---   4) Expired consume throws SQLSTATE P0002
+--   3) Double-consume throws SQLSTATE P9001 (invite_invalid_or_expired)
+--      Pre-migration-010 dies unter P0002 (= no_data_found built-in). Test prüft
+--      message-basiert via sqlmsg LIKE '%invite_invalid_or_expired%' — funktioniert
+--      für beide Varianten.
+--   4) Expired consume throws SQLSTATE P9001
 BEGIN;
   select set_config('request.jwt.claim.sub', 'b9667f2a-7e86-497b-9cff-3ae320c7ff2c', true);
   select set_config('request.jwt.claim.role', 'authenticated', true);
@@ -19,6 +22,7 @@ BEGIN;
     code_txt text;
     returned_gid uuid;
     sqlstate_caught text;
+    sqlmsg text;
   begin
     ga_id := public.ensure_default_garden_for_user();
 
@@ -37,12 +41,19 @@ BEGIN;
     raise notice 'invite_code_consumed_ok: garden_id=%', returned_gid;
 
     -- 3) Double-consume must fail
+    -- WR-04: message-basiert statt SQLSTATE-gebunden, da Migration 010 den
+    -- SQLSTATE auf P9001 (custom) wechselt. Alte Deployments werfen noch
+    -- P0002 (= no_data_found built-in). Message bleibt stabil.
     begin
       perform public.consume_invite_code(code_txt);
       raise exception 'double_consume_not_blocked';
-    exception when no_data_found then
-      get stacked diagnostics sqlstate_caught = returned_sqlstate;
-      raise notice 'double_consume_blocked: SQLSTATE=% as expected', sqlstate_caught;
+    exception when others then
+      get stacked diagnostics sqlstate_caught = returned_sqlstate, sqlmsg = message_text;
+      if sqlmsg like '%invite_invalid_or_expired%' then
+        raise notice 'double_consume_blocked: SQLSTATE=% message=% as expected', sqlstate_caught, sqlmsg;
+      else
+        raise;
+      end if;
     end;
   end $$;
 ROLLBACK;

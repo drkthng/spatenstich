@@ -60,8 +60,12 @@ export default function JoinByCodeScreen(): React.JSX.Element {
       setActiveGarden(gardenId);
       router.replace('/(app)' as any);
     } catch (e) {
+      // WR-04: Primärer SQLSTATE aus Migration 010 ist P9001
+      // (invite_invalid_or_expired). Alte Deployments liefern noch P0002 —
+      // beide werden erkannt bis die Migration überall gerollt ist.
       const err = e as { code?: string; message?: string };
-      if (err.code === 'P0002') setError(t('auth.join.error_invalid'));
+      if (err.code === 'P9001' || err.code === 'P0002')
+        setError(t('auth.join.error_invalid'));
       else if (err.code === '23514') setError(t('auth.join.error_full'));
       else setError(t('auth.join.error_generic'));
     } finally {

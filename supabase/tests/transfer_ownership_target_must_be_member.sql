@@ -1,6 +1,8 @@
 -- Phase 2.5 D-16 Test — transfer_ownership target must be existing member (Plan 02.5-02)
 -- Ausführung: supabase db query -f supabase/tests/transfer_ownership_target_must_be_member.sql --linked
--- Erwartet: NOTICE 'transfer_ownership_target_must_be_member ok' (Owner bekommt P0005 / target_not_member)
+-- Erwartet nach Migration 010 (WR-04): NOTICE 'transfer_ownership_target_must_be_member ok'
+--   (Owner bekommt P9005 / target_not_member; pre-Migration-010 P0005)
+-- Test ist message-basiert (sqlmsg LIKE '%target_not_member%') — funktioniert für beide Codes.
 --
 -- Pattern: rls_phase2.sql — BEGIN/ROLLBACK mit set_config + SET LOCAL ROLE authenticated.
 

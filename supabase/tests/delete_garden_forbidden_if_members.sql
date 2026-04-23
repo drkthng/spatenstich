@@ -1,6 +1,8 @@
 -- Phase 2.5 D-16 Test — delete_garden refuses when member_count > 1 (Plan 02.5-02)
 -- Ausführung: supabase db query -f supabase/tests/delete_garden_forbidden_if_members.sql --linked
--- Erwartet: NOTICE 'delete_garden_forbidden_if_members ok' (Owner bekommt P0003 / garden_has_members)
+-- Erwartet nach Migration 010 (WR-04): NOTICE 'delete_garden_forbidden_if_members ok'
+--   (Owner bekommt P9003 / garden_has_members; pre-Migration-010 P0003)
+-- Test ist message-basiert (sqlmsg LIKE '%garden_has_members%') — funktioniert für beide Codes.
 --
 -- Setup-Phase als superuser (profiles + garden_members direct inserts).
 -- Assertion-Phase als authenticated-user A.

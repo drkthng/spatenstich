@@ -99,7 +99,17 @@ describe('inviteCodeRepo.consumeInviteCode', () => {
     expect(gardenId).toBe('g-42');
   });
 
-  it('rethrows P0002 for invalid/expired code', async () => {
+  it('rethrows P9001 for invalid/expired code (WR-04 custom SQLSTATE)', async () => {
+    mockRpc.mockResolvedValue({
+      data: null,
+      error: { code: 'P9001', message: 'invite_invalid_or_expired' },
+    });
+    await expect(
+      repo.consumeInviteCode('account', 'WRONG1'),
+    ).rejects.toMatchObject({ code: 'P9001' });
+  });
+
+  it('rethrows legacy P0002 for invalid/expired code (pre-migration-010)', async () => {
     mockRpc.mockResolvedValue({
       data: null,
       error: { code: 'P0002', message: 'invite_code_invalid_or_expired' },

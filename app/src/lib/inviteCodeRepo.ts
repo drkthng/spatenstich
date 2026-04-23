@@ -1,9 +1,15 @@
 // Invite-Code RPC wrapper — Plan 02.5-03.
 // Pattern: PATTERNS §4. Account-only (D-13); lokal-mode throws.
 // Error codes propagated (UI classifies):
-//   P0002 = invalid/expired code
-//   23514 = garden at 2-member limit
-//   42501 = insufficient_privilege (not owner)
+//   WR-04: Custom P9xxx SQLSTATEs (Migration 010) vermeiden Kollision mit
+//   PL/pgSQL-Built-ins:
+//     P9001 = invalid/expired code (ersetzt P0002 = no_data_found built-in)
+//     P9006 = garden at 2-member limit (neuer Code aus Migration 011)
+//     23514 = generic check_violation (tg_garden_members_limit_2 trigger)
+//     42501 = insufficient_privilege (not owner)
+//
+//   Ältere Deployments ohne Migration 010/011 liefern noch P0002 / 23514 —
+//   die UI-Mapping-Stellen erkennen beide Varianten für Robustness.
 import { supabase } from './supabase';
 import type { AuthMode } from '../stores/authStore';
 

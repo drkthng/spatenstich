@@ -175,11 +175,17 @@ export async function leaveGarden(
  * Delete an entire garden and all dependent rows (members, invites,
  * vereinsregeln, ai_jobs, ai_results — via FK CASCADE or explicit RPC body).
  * Only the current owner may call this; the RPC also refuses when the garden
- * still has other members (P0003 → GardenHasMembersError) to force an
+ * still has other members (P9003 → GardenHasMembersError) to force an
  * explicit "remove members first" flow (prevents accidental co-member data wipe).
  *
  * Caller responsibility: clear `authStore.activeGardenId` + navigate away
  * after this resolves successfully.
+ *
+ * WR-04: Custom P9xxx SQLSTATEs (Migration 010) vermeiden Kollision mit
+ * PL/pgSQL-Built-ins (P0002 no_data_found, P0003 too_many_rows, P0004
+ * assert_failure). Ältere Deployments, die noch Migration 003/009 ohne 010
+ * haben, nutzen P0003/P0004/P0005 — wir mappen aus Robustness-Gründen beide
+ * während der Transition.
  */
 export async function deleteGarden(
   mode: AuthMode,
@@ -191,7 +197,8 @@ export async function deleteGarden(
   });
   if (error) {
     const code = (error as { code?: string }).code;
-    if (code === 'P0003') throw new GardenHasMembersError(error);
+    if (code === 'P9003' || code === 'P0003')
+      throw new GardenHasMembersError(error);
     if (code === '42501') throw new NotOwnerError(error);
     throw error;
   }
@@ -203,10 +210,13 @@ export async function deleteGarden(
  * target has role='owner'. Both roles flip in one RPC body (implicit
  * transaction) so there is no intermediate "two owners" or "no owner" state.
  *
- * Error mapping:
- *   42501 → NotOwnerError (caller is not the owner)
- *   P0004 → CannotTransferToSelfError (toUserId === caller)
- *   P0005 → TargetNotMemberError (toUserId is not a member of gardenId)
+ * Error mapping (WR-04: P9xxx custom SQLSTATEs, Migration 010):
+ *   42501         → NotOwnerError (caller is not the owner)
+ *   P9004 / P0004 → CannotTransferToSelfError (toUserId === caller)
+ *   P9005 / P0005 → TargetNotMemberError (toUserId is not a member of gardenId)
+ *
+ * Beide Varianten (P0xxx und P9xxx) werden aus Robustness-Gründen erkannt,
+ * solange ältere Deployments noch nicht Migration 010 haben.
  */
 export async function transferOwnership(
   mode: AuthMode,
@@ -221,8 +231,10 @@ export async function transferOwnership(
   if (error) {
     const code = (error as { code?: string }).code;
     if (code === '42501') throw new NotOwnerError(error);
-    if (code === 'P0004') throw new CannotTransferToSelfError(error);
-    if (code === 'P0005') throw new TargetNotMemberError(error);
+    if (code === 'P9004' || code === 'P0004')
+      throw new CannotTransferToSelfError(error);
+    if (code === 'P9005' || code === 'P0005')
+      throw new TargetNotMemberError(error);
     throw error;
   }
 }
