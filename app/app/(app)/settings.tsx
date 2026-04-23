@@ -116,6 +116,16 @@ export default function SettingsScreen(): React.JSX.Element | null {
           </View>
         ) : null}
 
+        <Button
+          variant="ghost"
+          onPress={() => router.push('/(app)/settings/garden' as any)}
+          testID="settings-garden-link"
+        >
+          <Text className="text-stone-700 dark:text-stone-200 font-semibold">
+            {t('garden.settings_link')}
+          </Text>
+        </Button>
+
         {!showConfirmLogout ? (
           <Button
             variant="ghost"
