@@ -15,6 +15,8 @@ import * as React from 'react';
 import * as Sentry from '@sentry/react-native';
 import { Stack, SplashScreen, Redirect, useSegments } from 'expo-router';
 import { AuthProvider, useAuth } from '@/src/lib/auth';
+import { useAuthStore } from '@/src/stores/authStore';
+import { ensureDefaultGardenForUser } from '@/src/lib/inviteCodeRepo';
 import '../global.css';
 
 Sentry.init({
@@ -52,6 +54,33 @@ function GuardedStack(): React.JSX.Element {
   const segments = useSegments();
   const inAuthGroup = segments[0] === '(auth)';
   const inAppGroup = segments[0] === '(app)';
+
+  const mode = useAuthStore((s) => s.mode);
+  const activeGardenId = useAuthStore((s) => s.activeGardenId);
+  const setActiveGarden = useAuthStore((s) => s.setActiveGarden);
+
+  // Phase 2.5 / D-12 — Defense-in-Depth: resolve default garden if store is empty.
+  // Covers (a) new signUps post-deploy where migrate-flow did not run, (b) v0
+  // persist blobs rehydrated with activeGardenId: null, (c) pathological
+  // DB cases where migration seed did not land, (d) post-delete-garden (D-16)
+  // where user deleted their only garden and a new default must be provisioned.
+  // RPC is server-idempotent.
+  React.useEffect(() => {
+    if (!identity || mode !== 'account' || activeGardenId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const gardenId = await ensureDefaultGardenForUser();
+        if (!cancelled) setActiveGarden(gardenId);
+      } catch (e) {
+        // Non-fatal at bootstrap — UI screens will show per-screen errors.
+        if (__DEV__) console.warn('ensureDefaultGardenForUser failed', e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [identity, mode, activeGardenId, setActiveGarden]);
 
   if (isLoading) {
     // Splash still shown via SplashController; render nothing underneath.
