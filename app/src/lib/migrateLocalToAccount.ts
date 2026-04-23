@@ -1,21 +1,32 @@
 // Local→Account migration (AUTH-04).
-// Plan 02-04 Task 2-04-03; D-12 requires an explicit user-initiated migration.
+// Plan 02-04 Task 2-04-03; Phase 2.5 extension in Plan 02.5-03 Task 04
+// (D-12 requires an explicit user-initiated migration).
 //
-// Invariant (T-2-04-03, rollback safety):
-//   storage.delete('profile') and storage.delete('vereinsregeln') MUST run
-//   strictly AFTER every Supabase upsert has succeeded. A signUp success
-//   followed by an upsert failure leaves the local JSON intact so the user
-//   can retry. authStore is flipped to 'account' only when the entire
-//   server-side copy has landed.
+// Atomic-tail invariant (T-2-04-03, Phase 2.5 extension):
+//   8 steps total. storage.delete(*) MUST run strictly AFTER every Supabase
+//   side-effect (signUp, RPC, 3× upsert). Any earlier throw leaves the local
+//   JSON blob intact so the user can retry safely. authStore is flipped to
+//   'account' + activeGardenId is set AFTER all server-side writes land.
 //
 // Invariant (T-2-04-02, user_id re-stamping):
-//   Every vereinsregeln row is re-stamped with the NEW Supabase user id
-//   before upsert. Server RLS (`auth.uid() = user_id`, Plan 02-01) is the
-//   second line of defense.
+//   Every vereinsregeln row is re-stamped with the NEW Supabase user id AND
+//   scoped to the default garden id (Phase 2.5 D-02 NOT NULL). Server RLS
+//   (member-check via is_garden_member) is the second line of defense.
+//
+// 8-step flow (Phase 2.5):
+//   1. supabase.auth.signUp → newUserId
+//   2. ensureDefaultGardenForUser() → gardenId (RPC; server-idempotent)
+//   3. Read local blob (profile + vereinsregeln)
+//   4. profiles.upsert({id, display_name: emailPrefix}) (display_name ONLY — D-01)
+//   5. gardens.update({plz, klimazone, archetype, updated_by_user_id}) (metadata from local)
+//   6. vereinsregeln.upsert(toRow(r, newUserId, gardenId)) (re-stamped + garden-scoped)
+//   7. authStore.setAccountMode(newUserId) + setActiveGarden(gardenId)
+//   8. storage.delete('profile') + storage.delete('vereinsregeln')
 import { supabase } from './supabase';
 import { storage } from '../storage';
 import { useAuthStore } from '../stores/authStore';
 import { toRow } from './vereinsregelnRepo';
+import { ensureDefaultGardenForUser } from './inviteCodeRepo';
 import type { LocalProfile, VereinsRegel } from '@spatenstich/shared';
 
 export interface MigrateInput {
@@ -25,6 +36,7 @@ export interface MigrateInput {
 
 export interface MigrateResult {
   userId: string;
+  gardenId: string;
   transferred: {
     profile: boolean;
     vereinsregeln: number;
@@ -59,11 +71,21 @@ export async function migrateLocalToAccount(
   const newUserId = signUpData?.user?.id;
   if (!newUserId) throw new Error('signup_no_user');
 
-  // Step 2 — read local data (read-only; storage untouched).
+  // Step 2 (NEW, Phase 2.5) — ensure a default garden exists for this user.
+  // RPC is server-idempotent: returns existing garden_id if already present
+  // (from a prior partial migration retry). Atomic-tail: failure here leaves
+  // profiles/vereinsregeln untouched AND local storage intact.
+  let gardenId: string;
+  try {
+    gardenId = await ensureDefaultGardenForUser();
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    throw new Error(`migration_partial_garden_seed: ${msg}`);
+  }
+
+  // Step 3 — read local data (read-only; storage untouched).
   const profileJson = await storage.get(PROFILE_KEY);
   const vereinsregelnJson = await storage.get(VEREINSREGELN_KEY);
-  // Lokal-Modus-Blob hält PLZ/Klimazone/Archetyp am Profil — LocalProfile per D-01.
-  // Plan 03 wird den Block erweitern (ensure_default_garden_for_user RPC + garden_id-Stempel).
   const profile: Partial<LocalProfile> | null = profileJson
     ? (JSON.parse(profileJson) as Partial<LocalProfile>)
     : null;
@@ -71,25 +93,45 @@ export async function migrateLocalToAccount(
     ? (JSON.parse(vereinsregelnJson) as VereinsRegel[])
     : [];
 
-  // Step 3 — upsert profile under newUserId. Failure → rollback safety.
+  // Step 4 — upsert profile (display_name ONLY post-Phase-2.5-pivot, D-01).
+  // plz/klimazone/archetype moved to gardens (Step 5).
   let profileTransferred = false;
-  if (profile) {
-    const { error } = await supabase.from('profiles').upsert({
-      id: newUserId,
-      plz: profile.plz ?? null,
-      klimazone: profile.klimazone ?? null,
-      archetype: profile.archetype ?? null,
-    });
+  const emailPrefix = input.email.split('@')[0] ?? null;
+  {
+    const { error } = await supabase.from('profiles').upsert(
+      {
+        id: newUserId,
+        display_name: emailPrefix,
+      },
+      { onConflict: 'id' },
+    );
     if (error) {
       throw new Error(`migration_partial_profile: ${error.message}`);
     }
     profileTransferred = true;
   }
 
-  // Step 4 — upsert vereinsregeln with re-stamped user_id.
+  // Step 5 (NEW, Phase 2.5) — copy local PLZ/Klima/Archetyp to the default garden.
+  if (profile) {
+    const { error: gardenError } = await supabase
+      .from('gardens')
+      .update({
+        plz: profile.plz ?? null,
+        klimazone: profile.klimazone ?? null,
+        archetype: profile.archetype ?? null,
+        updated_by_user_id: newUserId,
+      })
+      .eq('id', gardenId);
+    if (gardenError) {
+      throw new Error(
+        `migration_partial_garden_metadata: ${gardenError.message}`,
+      );
+    }
+  }
+
+  // Step 6 — upsert vereinsregeln with re-stamped user_id + gardenId.
   // Run the domain→row mapper (toRow, vereinsregelnRepo.ts) so the Postgres
-  // column contract (`ist_bkleingg` snake_case) is honoured. camelCase
-  // `istBKleingG` would be silently dropped by Supabase otherwise.
+  // column contract (`ist_bkleingg` snake_case + garden_id NOT NULL) is honoured.
   let vrCount = 0;
   if (vereinsregeln.length > 0) {
     const restamped: VereinsRegel[] = vereinsregeln.map((r) => {
@@ -102,9 +144,7 @@ export async function migrateLocalToAccount(
       }
       return { ...r, id: randomId() };
     });
-    // NOTE (Plan 02.5-03 Task 04): gardenId is placeholder here; Task 04 replaces
-    // this entire block with ensureDefaultGardenForUser() + real gardenId stamping.
-    const payload = restamped.map((r) => toRow(r, newUserId, ''));
+    const payload = restamped.map((r) => toRow(r, newUserId, gardenId));
     const { error } = await supabase
       .from('vereinsregeln')
       .upsert(payload, { onConflict: 'id' });
@@ -114,13 +154,17 @@ export async function migrateLocalToAccount(
     vrCount = payload.length;
   }
 
-  // Step 5 — flip auth mode + clean local storage. Atomic tail.
+  // Step 7 — flip auth mode + set active garden BEFORE clearing storage.
   state.setAccountMode(newUserId);
+  state.setActiveGarden(gardenId);
+
+  // Step 8 — clean local storage. Atomic tail (MUST be last).
   await storage.delete(PROFILE_KEY);
   await storage.delete(VEREINSREGELN_KEY);
 
   return {
     userId: newUserId,
+    gardenId,
     transferred: {
       profile: profileTransferred,
       vereinsregeln: vrCount,

@@ -1,9 +1,13 @@
-// migrateLocalToAccount unit tests — Plan 02-04 Task 2-04-03.
+// migrateLocalToAccount unit tests — Plan 02-04 Task 2-04-03 + Phase 2.5-03 Task 04.
 // Covers AUTH-04 (local→account transfer) with rollback safety:
-//   - happy path: signUp → read storage → upsert profile → upsert vereinsregeln
-//     → flip auth mode → delete local storage
+//   - happy path: signUp → ensureDefaultGardenForUser → read storage
+//     → upsert profile (display_name only) → update gardens (metadata)
+//     → upsert vereinsregeln (3-arg toRow w/ gardenId)
+//     → setAccountMode + setActiveGarden → delete local storage
 //   - signUp failure: NO storage touched, NO auth flip
-//   - profile upsert failure: NO storage.delete, NO auth flip (rollback safety)
+//   - RPC failure (ensureDefaultGardenForUser): NO storage touched, NO auth flip
+//   - profile upsert failure: rollback safety
+//   - gardens update failure: rollback safety
 //   - already-in-account guard
 //
 // Rollback invariant (T-2-04-03 in threat model): storage.delete MUST execute
@@ -18,14 +22,18 @@ import type { LocalProfile, VereinsRegel } from '@spatenstich/shared';
 
 // ── Mocks ───────────────────────────────────────────────────────────────
 const mockSignUp = jest.fn();
+const mockRpc = jest.fn();
 const mockProfileUpsert = jest.fn();
 const mockVereinsregelnUpsert = jest.fn();
+const mockGardensUpdate = jest.fn();
+const mockGardensUpdateEq = jest.fn();
 
 jest.mock('../supabase', () => ({
   supabase: {
     auth: {
       signUp: (...args: unknown[]) => mockSignUp(...args),
     },
+    rpc: (...args: unknown[]) => mockRpc(...args),
     from: jest.fn((table: string) => {
       if (table === 'profiles') {
         return { upsert: (...a: unknown[]) => mockProfileUpsert(...a) };
@@ -33,6 +41,16 @@ jest.mock('../supabase', () => ({
       if (table === 'vereinsregeln') {
         return {
           upsert: (...a: unknown[]) => mockVereinsregelnUpsert(...a),
+        };
+      }
+      if (table === 'gardens') {
+        return {
+          update: (...a: unknown[]) => {
+            mockGardensUpdate(...a);
+            return {
+              eq: (...b: unknown[]) => mockGardensUpdateEq(...b),
+            };
+          },
         };
       }
       throw new Error(`unexpected table ${table}`);
@@ -53,6 +71,7 @@ jest.mock('../../storage', () => ({
 
 const mockGetState = jest.fn();
 const mockSetAccountMode = jest.fn();
+const mockSetActiveGarden = jest.fn();
 
 jest.mock('../../stores/authStore', () => ({
   useAuthStore: {
@@ -63,9 +82,6 @@ jest.mock('../../stores/authStore', () => ({
 // Lazy import AFTER mocks.
 import { migrateLocalToAccount } from '../migrateLocalToAccount';
 
-// Local-mode storage holds a Partial<LocalProfile> JSON blob (see profileRepo).
-// Post-Phase-2.5-pivot (D-01): plz/klimazone/archetype live on LocalProfile (lokal-mode)
-// or Garden (account-mode), not on the account-scoped UserProfile.
 const LOCAL_PROFILE: Partial<LocalProfile> = {
   plz: '12043',
   klimazone: 7,
@@ -94,6 +110,23 @@ const LOCAL_RULES: VereinsRegel[] = [
 ];
 
 const NEW_USER_ID = 'new-user-123';
+const NEW_GARDEN_ID = 'g-default-42';
+
+function setupHappyPath(): void {
+  mockSignUp.mockResolvedValue({
+    data: { user: { id: NEW_USER_ID } },
+    error: null,
+  });
+  mockRpc.mockResolvedValue({ data: NEW_GARDEN_ID, error: null });
+  mockStorageGet.mockImplementation(async (key: string) => {
+    if (key === 'profile') return JSON.stringify(LOCAL_PROFILE);
+    if (key === 'vereinsregeln') return JSON.stringify(LOCAL_RULES);
+    return null;
+  });
+  mockProfileUpsert.mockResolvedValue({ error: null });
+  mockVereinsregelnUpsert.mockResolvedValue({ error: null });
+  mockGardensUpdateEq.mockResolvedValue({ error: null });
+}
 
 describe('migrateLocalToAccount', () => {
   beforeEach(() => {
@@ -101,22 +134,15 @@ describe('migrateLocalToAccount', () => {
     mockGetState.mockReturnValue({
       mode: 'local',
       setAccountMode: mockSetAccountMode,
+      setActiveGarden: mockSetActiveGarden,
     });
   });
 
-  // Test 1: happy path — full migration chain.
-  it('signs up, copies profile + vereinsregeln, flips mode, deletes local', async () => {
-    mockSignUp.mockResolvedValue({
-      data: { user: { id: NEW_USER_ID } },
-      error: null,
-    });
-    mockStorageGet.mockImplementation(async (key: string) => {
-      if (key === 'profile') return JSON.stringify(LOCAL_PROFILE);
-      if (key === 'vereinsregeln') return JSON.stringify(LOCAL_RULES);
-      return null;
-    });
-    mockProfileUpsert.mockResolvedValue({ error: null });
-    mockVereinsregelnUpsert.mockResolvedValue({ error: null });
+  // ── Legacy Phase-2 tests (adapted for Phase 2.5 flow) ────────────────
+
+  // Test 1: happy path — full 8-step migration chain.
+  it('runs full 8-step migration: signUp → ensureGarden → upserts → flip → delete', async () => {
+    setupHappyPath();
 
     const result = await migrateLocalToAccount({
       email: 'test@example.com',
@@ -127,36 +153,55 @@ describe('migrateLocalToAccount', () => {
       email: 'test@example.com',
       password: 'Password123!',
     });
+    expect(mockRpc).toHaveBeenCalledWith('ensure_default_garden_for_user');
+    // profile upsert is display_name only (no plz/klimazone/archetype)
     expect(mockProfileUpsert).toHaveBeenCalledWith(
-      expect.objectContaining({ id: NEW_USER_ID, plz: '12043' }),
+      expect.objectContaining({ id: NEW_USER_ID, display_name: 'test' }),
+      expect.objectContaining({ onConflict: 'id' }),
     );
+    const profileCall = mockProfileUpsert.mock.calls[0]![0] as Record<
+      string,
+      unknown
+    >;
+    expect(profileCall).not.toHaveProperty('plz');
+    expect(profileCall).not.toHaveProperty('klimazone');
+    expect(profileCall).not.toHaveProperty('archetype');
+
+    // gardens.update carries metadata from local profile
+    expect(mockGardensUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        plz: '12043',
+        klimazone: 7,
+        archetype: 'familien_naschgarten',
+        updated_by_user_id: NEW_USER_ID,
+      }),
+    );
+    expect(mockGardensUpdateEq).toHaveBeenCalledWith('id', NEW_GARDEN_ID);
+
+    // vereinsregeln payload stamps garden_id + created_by + updated_by
     expect(mockVereinsregelnUpsert).toHaveBeenCalledTimes(1);
-    const [upsertArg] = mockVereinsregelnUpsert.mock.calls[0];
-    expect(Array.isArray(upsertArg)).toBe(true);
-    expect(upsertArg).toHaveLength(2);
-    // Every record must carry the NEW user_id (T-2-04-02 mitigation) AND use
-    // snake_case `ist_bkleingg` — the Postgres column name (see
-    // packages/shared/src/types/database.ts). The camelCase domain key
-    // `istBKleingG` must not leak into the upsert payload.
-    for (const row of upsertArg as Array<Record<string, unknown>>) {
-      expect(row['user_id']).toBe(NEW_USER_ID);
+    const [upsertArg] = mockVereinsregelnUpsert.mock.calls[0]!;
+    const rows = upsertArg as Array<Record<string, unknown>>;
+    expect(Array.isArray(rows)).toBe(true);
+    expect(rows).toHaveLength(2);
+    for (const row of rows) {
+      expect(row['created_by_user_id']).toBe(NEW_USER_ID);
+      expect(row['updated_by_user_id']).toBe(NEW_USER_ID);
+      expect(row['garden_id']).toBe(NEW_GARDEN_ID);
       expect(row).toHaveProperty('ist_bkleingg');
       expect(row).not.toHaveProperty('istBKleingG');
+      expect(row).not.toHaveProperty('user_id');
     }
+
     expect(result.userId).toBe(NEW_USER_ID);
+    expect(result.gardenId).toBe(NEW_GARDEN_ID);
     expect(result.transferred.profile).toBe(true);
     expect(result.transferred.vereinsregeln).toBe(2);
   });
 
-  // Test 2: auth mode flips from 'local' to 'account' with new user id.
-  it('flips authStore.mode to account after successful migration', async () => {
-    mockSignUp.mockResolvedValue({
-      data: { user: { id: NEW_USER_ID } },
-      error: null,
-    });
-    mockStorageGet.mockResolvedValue(null); // no data to migrate still flips
-    mockProfileUpsert.mockResolvedValue({ error: null });
-    mockVereinsregelnUpsert.mockResolvedValue({ error: null });
+  // Test 2: authStore.setAccountMode + setActiveGarden both called.
+  it('flips authStore.mode to account AND sets activeGarden to new gardenId', async () => {
+    setupHappyPath();
 
     await migrateLocalToAccount({
       email: 'e@x.de',
@@ -164,21 +209,12 @@ describe('migrateLocalToAccount', () => {
     });
 
     expect(mockSetAccountMode).toHaveBeenCalledWith(NEW_USER_ID);
+    expect(mockSetActiveGarden).toHaveBeenCalledWith(NEW_GARDEN_ID);
   });
 
-  // Test 3: storage.delete runs LAST (after every Supabase upsert succeeds).
+  // Test 3: storage.delete runs LAST (after every Supabase side-effect succeeds).
   it('deletes local profile + vereinsregeln entries after successful upserts', async () => {
-    mockSignUp.mockResolvedValue({
-      data: { user: { id: NEW_USER_ID } },
-      error: null,
-    });
-    mockStorageGet.mockImplementation(async (key: string) => {
-      if (key === 'profile') return JSON.stringify(LOCAL_PROFILE);
-      if (key === 'vereinsregeln') return JSON.stringify(LOCAL_RULES);
-      return null;
-    });
-    mockProfileUpsert.mockResolvedValue({ error: null });
-    mockVereinsregelnUpsert.mockResolvedValue({ error: null });
+    setupHappyPath();
 
     await migrateLocalToAccount({
       email: 'ok@ok.de',
@@ -190,8 +226,8 @@ describe('migrateLocalToAccount', () => {
     expect(mockStorageDelete).toHaveBeenCalledTimes(2);
   });
 
-  // Test 4: signUp failure → NO storage touched, NO mode flip.
-  it('throws on signUp error without touching storage or auth', async () => {
+  // Test 4: signUp failure → NO storage touched, NO mode flip, NO RPC called.
+  it('throws on signUp error without touching storage, RPC, or auth', async () => {
     const dupErr = new Error('duplicate email');
     mockSignUp.mockResolvedValue({ data: { user: null }, error: dupErr });
 
@@ -202,24 +238,19 @@ describe('migrateLocalToAccount', () => {
       }),
     ).rejects.toThrow('duplicate email');
 
+    expect(mockRpc).not.toHaveBeenCalled();
     expect(mockProfileUpsert).not.toHaveBeenCalled();
     expect(mockVereinsregelnUpsert).not.toHaveBeenCalled();
+    expect(mockGardensUpdate).not.toHaveBeenCalled();
     expect(mockStorageDelete).not.toHaveBeenCalled();
     expect(mockSetAccountMode).not.toHaveBeenCalled();
+    expect(mockSetActiveGarden).not.toHaveBeenCalled();
   });
 
   // Test 5: profile upsert failure → rollback safety.
   it('rolls back (keeps local storage + local mode) on profile upsert failure', async () => {
-    mockSignUp.mockResolvedValue({
-      data: { user: { id: NEW_USER_ID } },
-      error: null,
-    });
-    mockStorageGet.mockImplementation(async (key: string) => {
-      if (key === 'profile') return JSON.stringify(LOCAL_PROFILE);
-      if (key === 'vereinsregeln') return JSON.stringify(LOCAL_RULES);
-      return null;
-    });
-    mockProfileUpsert.mockResolvedValue({
+    setupHappyPath();
+    mockProfileUpsert.mockResolvedValueOnce({
       error: { message: 'network down' },
     });
 
@@ -232,6 +263,7 @@ describe('migrateLocalToAccount', () => {
 
     expect(mockStorageDelete).not.toHaveBeenCalled();
     expect(mockSetAccountMode).not.toHaveBeenCalled();
+    expect(mockSetActiveGarden).not.toHaveBeenCalled();
   });
 
   // Test 6: already in account mode → guard throws without side effects.
@@ -239,6 +271,7 @@ describe('migrateLocalToAccount', () => {
     mockGetState.mockReturnValue({
       mode: 'account',
       setAccountMode: mockSetAccountMode,
+      setActiveGarden: mockSetActiveGarden,
     });
 
     await expect(
@@ -249,20 +282,141 @@ describe('migrateLocalToAccount', () => {
     ).rejects.toThrow(/already in account mode/);
 
     expect(mockSignUp).not.toHaveBeenCalled();
+    expect(mockRpc).not.toHaveBeenCalled();
     expect(mockProfileUpsert).not.toHaveBeenCalled();
     expect(mockVereinsregelnUpsert).not.toHaveBeenCalled();
     expect(mockStorageDelete).not.toHaveBeenCalled();
     expect(mockSetAccountMode).not.toHaveBeenCalled();
+    expect(mockSetActiveGarden).not.toHaveBeenCalled();
   });
 
-  // ── Wave-0 contract for Phase 2.5 extension — Plan 02.5-01-05 (todo) / Plan 02.5-03 (green) ──
+  // ── Phase 2.5 extension — Wave-0 contract now green (was 7× it.todo in Plan 01) ──
   describe('Phase 2.5 extension (shared garden)', () => {
-    it.todo('calls supabase.rpc("ensure_default_garden_for_user") after signUp, before read local');
-    it.todo('upserts garden metadata (PLZ, Klimazone, Archetyp) BEFORE vereinsregeln upsert (FK order)');
-    it.todo('calls vereinsregelnRepo.toRow(r, newUserId, newGardenId) with gardenId param (extended signature)');
-    it.todo('calls authStore.setActiveGarden(newGardenId) in the same set as setAccountMode');
-    it.todo('storage.delete runs STRICTLY AFTER all supabase upserts (atomic-tail invariant preserved)');
-    it.todo('throws migration_partial_garden_seed if ensure_default_garden_for_user RPC fails');
-    it.todo('throws migration_partial_garden_metadata if gardens upsert fails');
+    it('calls ensure_default_garden_for_user after signUp, before profile upsert', async () => {
+      setupHappyPath();
+
+      await migrateLocalToAccount({
+        email: 'a@b.de',
+        password: 'pw12345678',
+      });
+
+      expect(mockRpc).toHaveBeenCalledWith('ensure_default_garden_for_user');
+      // signUp happens before RPC; RPC happens before profile upsert
+      const rpcCallOrder = mockRpc.mock.invocationCallOrder[0]!;
+      const signUpCallOrder = mockSignUp.mock.invocationCallOrder[0]!;
+      const profileCallOrder = mockProfileUpsert.mock.invocationCallOrder[0]!;
+      expect(signUpCallOrder).toBeLessThan(rpcCallOrder);
+      expect(rpcCallOrder).toBeLessThan(profileCallOrder);
+    });
+
+    it('upserts garden metadata (PLZ, Klimazone, Archetyp) BEFORE vereinsregeln upsert (FK order)', async () => {
+      setupHappyPath();
+
+      await migrateLocalToAccount({
+        email: 'a@b.de',
+        password: 'pw12345678',
+      });
+
+      const gardenUpdateOrder = mockGardensUpdate.mock.invocationCallOrder[0]!;
+      const vrUpsertOrder =
+        mockVereinsregelnUpsert.mock.invocationCallOrder[0]!;
+      expect(gardenUpdateOrder).toBeLessThan(vrUpsertOrder);
+    });
+
+    it('calls toRow(r, newUserId, newGardenId) with gardenId param (extended 3-arg signature)', async () => {
+      setupHappyPath();
+
+      await migrateLocalToAccount({
+        email: 'a@b.de',
+        password: 'pw12345678',
+      });
+
+      const [upsertArg] = mockVereinsregelnUpsert.mock.calls[0]!;
+      const rows = upsertArg as Array<Record<string, unknown>>;
+      for (const row of rows) {
+        expect(row['garden_id']).toBe(NEW_GARDEN_ID);
+        expect(row['created_by_user_id']).toBe(NEW_USER_ID);
+        expect(row['updated_by_user_id']).toBe(NEW_USER_ID);
+      }
+    });
+
+    it('calls authStore.setActiveGarden(newGardenId) right after setAccountMode', async () => {
+      setupHappyPath();
+
+      await migrateLocalToAccount({
+        email: 'a@b.de',
+        password: 'pw12345678',
+      });
+
+      const setModeOrder = mockSetAccountMode.mock.invocationCallOrder[0]!;
+      const setGardenOrder = mockSetActiveGarden.mock.invocationCallOrder[0]!;
+      expect(setModeOrder).toBeLessThan(setGardenOrder);
+      expect(mockSetActiveGarden).toHaveBeenCalledWith(NEW_GARDEN_ID);
+    });
+
+    it('storage.delete runs STRICTLY AFTER all supabase upserts (atomic-tail invariant)', async () => {
+      setupHappyPath();
+
+      await migrateLocalToAccount({
+        email: 'a@b.de',
+        password: 'pw12345678',
+      });
+
+      const profileOrder = mockProfileUpsert.mock.invocationCallOrder[0]!;
+      const gardenOrder = mockGardensUpdate.mock.invocationCallOrder[0]!;
+      const vrOrder = mockVereinsregelnUpsert.mock.invocationCallOrder[0]!;
+      const firstDeleteOrder = mockStorageDelete.mock.invocationCallOrder[0]!;
+
+      expect(profileOrder).toBeLessThan(firstDeleteOrder);
+      expect(gardenOrder).toBeLessThan(firstDeleteOrder);
+      expect(vrOrder).toBeLessThan(firstDeleteOrder);
+    });
+
+    it('throws migration_partial_garden_seed when ensure_default_garden_for_user RPC fails (atomic tail preserved)', async () => {
+      mockSignUp.mockResolvedValue({
+        data: { user: { id: NEW_USER_ID } },
+        error: null,
+      });
+      mockRpc.mockResolvedValue({
+        data: null,
+        error: { code: '42501', message: 'rpc_failed' },
+      });
+
+      await expect(
+        migrateLocalToAccount({
+          email: 'a@b.de',
+          password: 'pw12345678',
+        }),
+      ).rejects.toThrow('migration_partial_garden_seed');
+
+      // Atomic-tail verified: no downstream Supabase writes, no auth flip,
+      // no storage cleanup.
+      expect(mockProfileUpsert).not.toHaveBeenCalled();
+      expect(mockGardensUpdate).not.toHaveBeenCalled();
+      expect(mockVereinsregelnUpsert).not.toHaveBeenCalled();
+      expect(mockStorageDelete).not.toHaveBeenCalled();
+      expect(mockSetAccountMode).not.toHaveBeenCalled();
+      expect(mockSetActiveGarden).not.toHaveBeenCalled();
+    });
+
+    it('throws migration_partial_garden_metadata when gardens update fails (atomic tail preserved)', async () => {
+      setupHappyPath();
+      mockGardensUpdateEq.mockResolvedValueOnce({
+        error: { message: 'permission denied' },
+      });
+
+      await expect(
+        migrateLocalToAccount({
+          email: 'a@b.de',
+          password: 'pw12345678',
+        }),
+      ).rejects.toThrow('migration_partial_garden_metadata');
+
+      // Vereinsregeln upsert must NOT run (order respected), storage intact.
+      expect(mockVereinsregelnUpsert).not.toHaveBeenCalled();
+      expect(mockStorageDelete).not.toHaveBeenCalled();
+      expect(mockSetAccountMode).not.toHaveBeenCalled();
+      expect(mockSetActiveGarden).not.toHaveBeenCalled();
+    });
   });
 });
