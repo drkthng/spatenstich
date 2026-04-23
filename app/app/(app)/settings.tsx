@@ -78,11 +78,19 @@ export default function SettingsScreen(): React.JSX.Element | null {
       });
       router.replace('/(app)' as any);
     } catch (e) {
-      // Generic error (T-2-02-02 — never reveal account-exists).
+      // WR-07: spezifische Error-Map statt identischer Branches.
+      // `migration_partial_*` bedeutet: signUp war erfolgreich, aber ein
+      // Folge-Schritt (seed garden / copy metadata / vereinsregeln) ist
+      // fehlgeschlagen. User darf NICHT die Generic-Meldung sehen
+      // (würde suggerieren "Email bereits verwendet"), sondern einen
+      // retry-freundlichen Hinweis.
       const msg = e instanceof Error ? e.message : String(e);
-      if (msg.includes('already in account mode')) {
-        setMigError(t('auth.register.error_generic'));
+      if (msg.startsWith('migration_partial_')) {
+        setMigError(t('settings.migration.error_partial'));
+      } else if (msg.includes('already in account mode')) {
+        setMigError(t('settings.migration.error_already_account'));
       } else {
+        // T-2-02-02 — never reveal account-exists at signUp step.
         setMigError(t('auth.register.error_generic'));
       }
     } finally {

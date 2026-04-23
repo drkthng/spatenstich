@@ -93,7 +93,9 @@
     "logout": "Abmelden",
     "logout_confirm": "Wirklich abmelden?",
     "migration": {
-      "cta": "Account erstellen und Daten übertragen"
+      "cta": "Account erstellen und Daten übertragen",
+      "error_partial": "Account angelegt, aber Datenübertragung fehlgeschlagen. Bitte erneut versuchen.",
+      "error_already_account": "Du bist bereits angemeldet."
     }
   },
   "app": {
