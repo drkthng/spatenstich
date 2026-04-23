@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: ready
+status: Ready to execute
 stopped_at: Phase 2.5 context gathered (19 decisions across 4 areas)
-last_updated: "2026-04-23T07:58:29.196Z"
-last_activity: 2026-04-21 -- Roadmap-Pivot via Quick Task 260421-v43 (Shared-Garden-MVP, Vereinsregeln+Fotorealismus auf v1.1)
+last_updated: "2026-04-23T13:11:33.066Z"
+last_activity: 2026-04-23 -- Phase 02.5 planning complete
 progress:
   total_phases: 8
   completed_phases: 2
-  total_plans: 7
+  total_plans: 11
   completed_plans: 7
-  percent: 100
+  percent: 64
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 Phase: 2.5 (shared-garden-model) — NOT STARTED; nächstes Planungsziel
 Vorheriger Status: Phase 02 (auth-profile-vereinsregeln) — CODE COMPLETE; MVP-Scope-Verify reduziert auf NFR-07/AUTH-05/AUTH-04/Logout-Guard (4 Items statt 10); Vereinsregeln-Verify-Items (Schritte 22–33) auf Phase 9 deferred
 Plans: 7/10 completed (Phase 01: 3/3, Phase 02: 4/4)
-Last activity: 2026-04-21 -- Roadmap-Pivot via Quick Task 260421-v43 (Shared-Garden-MVP, Vereinsregeln+Fotorealismus auf v1.1)
+Last activity: 2026-04-23 -- Phase 02.5 planning complete
 
 Progress: [███████░░░] 70% (7/10 Plans; neue Phasen 2.5, 8, 9 noch nicht geplant)
 
