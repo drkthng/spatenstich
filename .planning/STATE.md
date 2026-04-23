@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
 status: Executing
-stopped_at: Phase 2.5 Plan 03 complete (4/4 tasks, 4 commits, SUMMARY written, 109/109 Jest tests green, typecheck clean) — nächstes Ziel Plan 04 UI + human-verify
-last_updated: "2026-04-23T18:00:00.000Z"
-last_activity: 2026-04-23 -- Phase 02.5 Plan 03 execution complete (2 neue Repos gardenRepo+inviteCodeRepo mit D-16 Owner-Rights, authStore activeGardenId, profileRepo shrink, vereinsregelnRepo+enqueueAiJob column-rename-fix, migrateLocalToAccount 8-step flow)
+stopped_at: Phase 2.5 Plan 04 complete (3/3 autonome Tasks, 3 commits, SUMMARY written, 109/109 Jest tests green, typecheck clean) — human-verify (SC-1..SC-4, D-16 Scenarios 5..7, bootstrap-useEffect + regression) PENDING für `/gsd-verify-work`; danach Phase 3 Offline & Sync
+last_updated: "2026-04-23T19:59:00.000Z"
+last_activity: 2026-04-23 -- Phase 02.5 Plan 04 execution complete (join-by-code + 3rd AuthChoiceCard + Mein-Garten Screen mit D-16 Owner-Rights + Settings-Link + _layout bootstrap useEffect D-12; 3 atomic commits 06b3cca/5e1eb30/60404df; expo-clipboard ~7.0.1 auf SDK 53 gepinnt)
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 11
-  completed_plans: 10
-  percent: 91
+  completed_plans: 11
+  percent: 100
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 
 ## Current Position
 
-Phase: 2.5 (shared-garden-model) — IN PROGRESS; Wave 1 (Plan 01) complete 2026-04-23; Wave 2 (Plan 02) complete 2026-04-23; Wave 3a (Plan 03 Repos + authStore + migrateLocalToAccount extension) complete 2026-04-23; Wave 3b (Plan 04 UI + human-verify) als nächstes
+Phase: 2.5 (shared-garden-model) — CODE COMPLETE 2026-04-23; Wave 1 (Plan 01) complete; Wave 2 (Plan 02) complete; Wave 3a (Plan 03 Repos + authStore + migrateLocalToAccount extension) complete; Wave 3b (Plan 04 UI: join-by-code + 3rd AuthChoiceCard + Mein-Garten mit D-16 + Settings-Link + _layout bootstrap) complete — human-verify-Checkpoint pending für `/gsd-verify-work`. Nächste Phase: 3 Offline & Sync.
 Vorheriger Status: Phase 02 (auth-profile-vereinsregeln) — CODE COMPLETE; MVP-Scope-Verify reduziert auf NFR-07/AUTH-05/AUTH-04/Logout-Guard (4 Items statt 10); Vereinsregeln-Verify-Items (Schritte 22–33) auf Phase 9 deferred
-Plans: 10/11 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 3/4)
-Last activity: 2026-04-23 -- Phase 02.5 Plan 03 execution complete (2 neue Repos + authStore activeGardenId + 8-step migrateLocalToAccount + enqueueAiJob/vereinsregelnRepo column-rename-fix; 109/109 Jest tests green)
+Plans: 11/11 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4)
+Last activity: 2026-04-23 -- Phase 02.5 Plan 04 execution complete (3 autonome Tasks, 3 commits, 109/109 Jest tests green, typecheck clean; human-verify pending)
 
-Progress: [██████████] 91% (10/11 Plans; neue Phasen 8, 9 noch nicht geplant)
+Progress: [██████████] 100% (11/11 Plans; neue Phasen 3–7 + v1.1 Phasen 8, 9 noch nicht geplant)
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Progress: [██████████] 91% (10/11 Plans; neue Phasen 8, 9 no
 | Phase 02.5 P01 | 9 | 5 tasks | 10 files |
 | Phase 02.5 P02 | 45 | 5 tasks | 13 files |
 | Phase 02.5 P03 | 90 | 4 tasks | 11 files |
+| Phase 02.5 P04 | 60 | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -113,6 +114,13 @@ Recent decisions affecting current work:
 - [Phase 02.5 P03]: migrateLocalToAccount 8-Step-Flow — `ensureDefaultGardenForUser` zwischen signUp und profile.upsert platziert (NICHT danach); atomic-tail bleibt bei RPC-Failure erhalten: kein profile-Row, kein gardens-update, keine vereinsregeln, keine storage.delete. Reihenfolge in Tests per `invocationCallOrder` geprüft.
 - [Phase 02.5 P03]: vereinsregelnRepo.deleteVereinsregel scopet by `(id, garden_id)` statt `(id, user_id)` — RLS macht member-check auf garden_id; doppeltes `.eq()` schützt gegen ID-Collision zwischen parallelen Gärten (defense-in-depth).
 - [Phase 02.5 P03]: enqueueAiJob.ts + vereinsregelnRepo.ts Column-Rename-Fix (`user_id` → `created_by_user_id` + `garden_id` NOT NULL) in diesem Plan durchgeführt — Plan 02 Summary dokumentierte explizit "fix those consumers in Plan 03, not here". Typecheck damit sauber grün.
+- [Phase 02.5 P04]: Router-4-Äquivalent für `Stack.Protected` — expo-router 4.0.22 (SDK 53) kennt `Stack.Protected` (SDK 54+) nicht. Security-equivalentes `<Redirect />`-in-GuardedStack-Pattern dokumentiert inline im `_layout.tsx`-Header (identity === null → (auth); identity !== null → (app)).
+- [Phase 02.5 P04]: Inline-Confirmation-Expansion (keine Modals) für alle destruktiven Aktionen — leave-garden, remove-member, transfer-ownership, delete-garden. Folgt UI-SPEC Zeile 234 (Phase 02-04-Pattern); `setState`-Toggles statt React-Native Modal.
+- [Phase 02.5 P04]: D-16 Error-Class-Wiring — `NotOwnerError` / `GardenHasMembersError` / `CannotTransferToSelfError` / `TargetNotMemberError` via `err instanceof` im Mein-Garten-Screen in typspezifische `t('garden.transferOwnership.*')` / `t('garden.delete.*')`-Keys gemappt. Alle 14 D-16 i18n-Keys aus Plan 01 konsumiert; Plan 04 hat keine weiteren D-16-Keys eingeführt.
+- [Phase 02.5 P04]: `canDelete = isOwner && members.length <= 1` — Delete-Button bleibt sichtbar aber `disabled` mit Hint-Text `settings-garden-delete-disabled-hint`, wenn weitere Member existieren. Klar kommuniziert Owner-Rights-Präkondition.
+- [Phase 02.5 P04]: Bootstrap-useEffect in `_layout.tsx` (D-12 Defense-in-Depth) — ruft `ensureDefaultGardenForUser()` RPC, wenn `identity && mode === 'account' && !activeGardenId`. Covered Cases: (a) neue signUps post-deploy ohne migrate-flow, (b) v0 persist-blobs mit activeGardenId:null, (c) DB-Rows ohne Migration-Seed, (d) post-delete-garden (D-16) wo User nur-Garten gelöscht hat. RPC ist server-idempotent.
+- [Phase 02.5 P04]: expo-clipboard@~7.0.1 statt ^55.x (Rule-1-Bug-Fix) — SDK-53-compatible Version gepinnt (Hoisting ins monorepo vermied). Share+Copy-Flow via `expo-clipboard` + RN Share API.
+- [Phase 02.5 P04]: Crockford-Alphabet-Filter im join-by-code-Input — `[^A-Z1-9]` regex schließt `0/O/I/L/U` aus, matcht GARDEN-02-Requirement-Wording und Migration-Tests. Kein 6. Zeichen wird akzeptiert ohne Alphabet-Bestätigung.
 
 ### Pending Todos
 
@@ -136,6 +144,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-23T18:00:00.000Z
-Stopped at: Phase 2.5 Plan 03 complete (4/4 tasks, 4 commits, SUMMARY written, 109/109 Jest tests green, typecheck clean) — nächstes Ziel Plan 04 UI + human-verify
-Resume file: .planning/phases/02.5-shared-garden-model/02.5-04-PLAN.md
+Last session: 2026-04-23T19:59:00.000Z
+Stopped at: Phase 2.5 Plan 04 complete (3/3 autonome Tasks, 3 commits 06b3cca/5e1eb30/60404df, SUMMARY written, 109/109 Jest tests green, typecheck clean) — human-verify-Checkpoint (SC-1..SC-4 + D-16 Scenarios 5..7 + bootstrap + regression) PENDING für nächste `/gsd-verify-work`-Session. Danach Phase 3 Offline & Sync.
+Resume file: .planning/phases/02.5-shared-garden-model/02.5-04-SUMMARY.md
