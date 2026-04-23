@@ -17,6 +17,7 @@
     "choice": {
       "create_account": "Account erstellen",
       "local_start": "Lokal starten",
+      "join_garden": "Einem Garten beitreten",
       "tagline": "Dein digitaler Kleingarten-Assistent",
       "disclaimer_label": "Rechtlicher Hinweis"
     },
@@ -28,6 +29,16 @@
     "login": {
       "submit": "Anmelden",
       "error_generic": "Anmeldung fehlgeschlagen. Bitte E-Mail und Passwort prüfen."
+    },
+    "join": {
+      "title": "Einladungs-Code eingeben",
+      "code_label": "6-stelliger Code",
+      "code_placeholder": "Z. B. ABC7X9",
+      "submit": "Beitreten",
+      "error_invalid": "Code ungültig oder abgelaufen.",
+      "error_full": "Dieser Garten hat bereits 2 Mitglieder.",
+      "error_generic": "Beitritt fehlgeschlagen. Bitte erneut versuchen.",
+      "hint": "Frag die Person, die den Garten angelegt hat, nach dem 6-stelligen Code."
     }
   },
   "profile": {
@@ -85,5 +96,64 @@
       "placeholder": "Dein Gartenplan entsteht hier.",
       "placeholder_sub": "Zuerst: PLZ und Archetyp eintragen, dann Fotos aufnehmen."
     }
+  },
+  "garden": {
+    "settings_link": "Mein Garten",
+    "section_title": "Garten",
+    "name_label": "Name des Gartens",
+    "members_title": "Mitglieder",
+    "owner_badge": "Besitzer",
+    "member_badge": "Mitglied",
+    "empty_state": "Noch kein Garten angelegt.",
+    "invite": {
+      "create": "Person einladen",
+      "code_display_title": "Dein Einladungs-Code",
+      "code_display_hint": "Gib diesen Code an die Person weiter, die deinem Garten beitreten soll. Er ist 24 Stunden gültig.",
+      "copy": "Kopieren",
+      "copied": "Kopiert",
+      "share": "Teilen",
+      "regenerate": "Neuen Code erzeugen",
+      "regenerate_confirm": "Neuer Code wird erzeugt — der alte Code wird ungültig.",
+      "expires_in_hours": "Gültig für 24 Stunden",
+      "error_not_owner": "Nur der Besitzer kann Einladungs-Codes erzeugen.",
+      "error_generic": "Code konnte nicht erzeugt werden."
+    },
+    "member": {
+      "remove": "Entfernen",
+      "remove_confirm": "Mitglied wirklich entfernen?",
+      "remove_cancel": "Abbrechen",
+      "leave": "Garten verlassen",
+      "leave_confirm": "Möchtest du diesen Garten wirklich verlassen?",
+      "leave_confirm_cta": "Ja, verlassen",
+      "leave_cancel": "Abbrechen"
+    },
+    "transferOwnership": {
+      "button": "Besitzer-Status abgeben",
+      "confirm": "An wen übertragen?",
+      "success": "Übertragen an {name}",
+      "error_generic": "Übertragung fehlgeschlagen. Bitte erneut versuchen.",
+      "error_self": "Du bist bereits Besitzer — Ziel muss ein anderes Mitglied sein.",
+      "error_target_not_member": "Das gewählte Mitglied gehört nicht zu diesem Garten."
+    },
+    "delete": {
+      "button": "Garten löschen",
+      "warning": "Alle Daten unwiderruflich löschen?",
+      "confirm_cta": "Endgültig löschen",
+      "cancel": "Abbrechen",
+      "disabledHint": "Erst alle anderen Mitglieder entfernen",
+      "success": "Garten gelöscht",
+      "error_has_members": "Entferne erst alle anderen Mitglieder.",
+      "error_generic": "Löschen fehlgeschlagen. Bitte erneut versuchen."
+    }
+  },
+  "audit": {
+    "last_edited_by": "zuletzt bearbeitet von {name}, {time}",
+    "last_edited_by_unknown": "zuletzt bearbeitet, {time}",
+    "last_edited_self": "von dir bearbeitet, {time}",
+    "time_just_now": "gerade eben",
+    "time_minutes_ago": "vor {n} Min.",
+    "time_hours_ago": "vor {n} h",
+    "time_days_ago": "vor {n} Tagen",
+    "time_on": "am {date}"
   }
 }
