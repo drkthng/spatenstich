@@ -77,11 +77,11 @@
   2. Owner kann einen 6-stelligen Invite-Code generieren; zweiter Account kann per Code beitreten → landet als Member im selben `garden_id`
   3. Alle bestehenden Phase-02-Daten (profiles, vereinsregeln, plans — sobald vorhanden) werden bei Migration pro User einer Default-Garden-Entität zugeordnet; Dirks lokaler Datenbestand bleibt erhalten
   4. Wenn beide Accounts dieselbe Zeile innerhalb von 30 s editieren, gewinnt der spätere Schreibvorgang (LWW über `updated_at`-Timestamp); UI zeigt "zuletzt bearbeitet von <Name>"
-**Plans**: 4 plans (2/4 complete)
+**Plans**: 4 plans (3/4 complete)
   - [x] 02.5-01-PLAN.md — Requirements + Domain-Typen + i18n + Wave-0 Test-Stubs (SQL + Jest) (Wave 1) — completed 2026-04-23
   - [x] 02.5-02-PLAN.md — Migration 003 (gardens + garden_members + invite_codes + RLS-Refactor + 5 RPCs inkl. D-16) + Rule-1-Fix-Migrations 004/005/006 + supabase db push --linked + types regen + 11 grüne SQL-Tests (Wave 2) — completed 2026-04-23
-  - [ ] 02.5-03-PLAN.md — Repos (gardenRepo + inviteCodeRepo new; profileRepo shrink; vereinsregelnRepo extend) + authStore activeGardenId + migrateLocalToAccount extension (Wave 3)
-  - [ ] 02.5-04-PLAN.md — UI (join-by-code + settings/garden + 3rd AuthChoiceCard + settings link + _layout bootstrap useEffect) + human-verify checkpoint (Wave 3)
+  - [x] 02.5-03-PLAN.md — Repos (gardenRepo + inviteCodeRepo new mit D-16 Owner-Rights; profileRepo shrink; vereinsregelnRepo extend 3-arg toRow) + authStore activeGardenId + migrateLocalToAccount 8-step extension + enqueueAiJob column-rename-fix; 109/109 Jest tests green (Wave 3a) — completed 2026-04-23
+  - [ ] 02.5-04-PLAN.md — UI (join-by-code + settings/garden + 3rd AuthChoiceCard + settings link + _layout bootstrap useEffect) + human-verify checkpoint (Wave 3b)
 **UI hint**: yes (Invite-Code-Screen + Member-Liste in Settings)
 
 ### Phase 3: Offline & Sync (2-User Shared State)
@@ -185,7 +185,7 @@
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-04-17 |
 | 2. Auth & Profile (Vereinsregeln flagged off) | 4/4 | Code Complete (MVP-scope verify pending: NFR-07, AUTH-05, AUTH-04, Logout-Guard) | 2026-04-20 |
-| 2.5. Shared Garden Model | 0/4 | Planned (NEU — Pivot) | - |
+| 2.5. Shared Garden Model | 3/4 | In Progress (Wave 3a complete; Wave 3b UI + human-verify pending) | - |
 | 3. Offline & Sync | 0/TBD | Not started | - |
 | 4. Garten-Erfassung (M1) | 0/TBD | Not started | - |
 | 5. Plan-Editor (M2) | 0/TBD | Not started | - |

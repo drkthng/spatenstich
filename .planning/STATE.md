@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
 status: Executing
-stopped_at: Phase 2.5 Plan 02 abgeschlossen (Wave 2 done; 6 Supabase-Migrations live; 11/11 SQL-Tests green; nächstes Ziel Plan 03 Repos)
-last_updated: "2026-04-23T14:40:00.000Z"
-last_activity: 2026-04-23 -- Phase 02.5 Plan 02 (Migration 003 + Rule-1-Fix-Migrations 004/005/006 + type-regen + 11 SQL tests) complete
+stopped_at: Phase 2.5 Plan 03 complete (4/4 tasks, 4 commits, SUMMARY written, 109/109 Jest tests green, typecheck clean) — nächstes Ziel Plan 04 UI + human-verify
+last_updated: "2026-04-23T18:00:00.000Z"
+last_activity: 2026-04-23 -- Phase 02.5 Plan 03 execution complete (2 neue Repos gardenRepo+inviteCodeRepo mit D-16 Owner-Rights, authStore activeGardenId, profileRepo shrink, vereinsregelnRepo+enqueueAiJob column-rename-fix, migrateLocalToAccount 8-step flow)
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 11
-  completed_plans: 9
-  percent: 82
+  completed_plans: 10
+  percent: 91
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 
 ## Current Position
 
-Phase: 2.5 (shared-garden-model) — IN PROGRESS; Wave 1 (Plan 01) complete 2026-04-23; Wave 2 (Plan 02 Migration 003 + Rule-1-Fix-Migrations 004/005/006) complete 2026-04-23; Wave 3 (Plans 03 + 04) als nächstes
+Phase: 2.5 (shared-garden-model) — IN PROGRESS; Wave 1 (Plan 01) complete 2026-04-23; Wave 2 (Plan 02) complete 2026-04-23; Wave 3a (Plan 03 Repos + authStore + migrateLocalToAccount extension) complete 2026-04-23; Wave 3b (Plan 04 UI + human-verify) als nächstes
 Vorheriger Status: Phase 02 (auth-profile-vereinsregeln) — CODE COMPLETE; MVP-Scope-Verify reduziert auf NFR-07/AUTH-05/AUTH-04/Logout-Guard (4 Items statt 10); Vereinsregeln-Verify-Items (Schritte 22–33) auf Phase 9 deferred
-Plans: 9/11 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 2/4)
-Last activity: 2026-04-23 -- Phase 02.5 Plan 02 execution complete (Migration 003 live; 11/11 SQL-Tests green; types regen; 3 Rule-1-Fix-Migrations)
+Plans: 10/11 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 3/4)
+Last activity: 2026-04-23 -- Phase 02.5 Plan 03 execution complete (2 neue Repos + authStore activeGardenId + 8-step migrateLocalToAccount + enqueueAiJob/vereinsregelnRepo column-rename-fix; 109/109 Jest tests green)
 
-Progress: [█████████░] 82% (9/11 Plans; neue Phasen 8, 9 noch nicht geplant)
+Progress: [██████████] 91% (10/11 Plans; neue Phasen 8, 9 noch nicht geplant)
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [█████████░] 82% (9/11 Plans; neue Phasen 8, 9 noc
 | Phase 02 P04 | 13 | 3 tasks | 17 files |
 | Phase 02.5 P01 | 9 | 5 tasks | 10 files |
 | Phase 02.5 P02 | 45 | 5 tasks | 13 files |
+| Phase 02.5 P03 | 90 | 4 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,12 @@ Recent decisions affecting current work:
 - [Phase 02.5 P02]: SQL-Test-Setup-Phasen-Trennung — profiles + direct garden_members-INSERTs laufen als postgres superuser (ohne `set local role authenticated`), weil profiles-RLS `auth.uid() = id` zweiten User blockiert UND garden_members keine INSERT-Policy hat (productive code: consume_invite_code RPC). Nur RPC-Calls + Assertions laufen als authenticated. UUIDs via `set_config`/`current_setting` über role-switches.
 - [Phase 02.5 P02]: profiles.plz/klimazone/archetype bleiben weiterhin INTAKT (Pitfall 4 Two-phase-refactor) — Migration 007 dropt sie, sobald Plan 04 alle Reads auf gardens-Row migriert hat.
 - [Phase 02.5 P02]: Enqueue/repo-Column-Rename-Breaks (enqueueAiJob.ts `user_id` + vereinsregelnRepo.ts `user_id`) werden bewusst NICHT in Plan 02 gefixt — Plan-Text sagt explizit "fix those consumers in Plan 03, not here". Handoff dokumentiert in 02.5-02-SUMMARY.md.
+- [Phase 02.5 P03]: Typed Domain Errors für D-16 — vier Error-Klassen (NotOwnerError/GardenHasMembersError/CannotTransferToSelfError/TargetNotMemberError) mappen Supabase-SQLSTATE (42501/P0003/P0004/P0005) auf unterscheidbare UI-Reaktionen. i18n-Keys aus Plan 01 P01 über error.message konsumierbar.
+- [Phase 02.5 P03]: Account-Only Repo Guard (D-13) — gardenRepo + inviteCodeRepo werfen `'gardens are account-only'` wenn `useAuthStore.getState().mode !== 'account'` (außer `ensureDefaultGardenForUser`, das direkt nach signUp läuft bevor authStore flipped wird)
+- [Phase 02.5 P03]: `ProfilePatch` als explizites type-Alias statt `Partial<UserProfile> & Partial<LocalProfile>` — LocalProfile.mode ist Literal `'local'` und narrowte die Intersection; neue Struktur hat lockeres `mode?: UserProfile['mode']`
+- [Phase 02.5 P03]: migrateLocalToAccount 8-Step-Flow — `ensureDefaultGardenForUser` zwischen signUp und profile.upsert platziert (NICHT danach); atomic-tail bleibt bei RPC-Failure erhalten: kein profile-Row, kein gardens-update, keine vereinsregeln, keine storage.delete. Reihenfolge in Tests per `invocationCallOrder` geprüft.
+- [Phase 02.5 P03]: vereinsregelnRepo.deleteVereinsregel scopet by `(id, garden_id)` statt `(id, user_id)` — RLS macht member-check auf garden_id; doppeltes `.eq()` schützt gegen ID-Collision zwischen parallelen Gärten (defense-in-depth).
+- [Phase 02.5 P03]: enqueueAiJob.ts + vereinsregelnRepo.ts Column-Rename-Fix (`user_id` → `created_by_user_id` + `garden_id` NOT NULL) in diesem Plan durchgeführt — Plan 02 Summary dokumentierte explizit "fix those consumers in Plan 03, not here". Typecheck damit sauber grün.
 
 ### Pending Todos
 
@@ -129,6 +136,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-23T14:40:00.000Z
-Stopped at: Phase 2.5 Plan 02 complete (5/5 tasks, 5 commits, SUMMARY written, 11/11 SQL-Tests green, 6 Supabase-Migrations live) — nächstes Ziel Plan 03 Repos + activeGardenId
-Resume file: .planning/phases/02.5-shared-garden-model/02.5-03-PLAN.md
+Last session: 2026-04-23T18:00:00.000Z
+Stopped at: Phase 2.5 Plan 03 complete (4/4 tasks, 4 commits, SUMMARY written, 109/109 Jest tests green, typecheck clean) — nächstes Ziel Plan 04 UI + human-verify
+Resume file: .planning/phases/02.5-shared-garden-model/02.5-04-PLAN.md
