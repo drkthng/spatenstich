@@ -1,21 +1,21 @@
 // Mode-aware Vereinsregeln persistence — Plan 02-04 Task 2-04-01.
+// Extended in Plan 02.5-03 Task 03:
+//   - Column rename: user_id → created_by_user_id (Migration 003)
+//   - New column: updated_by_user_id (D-14 LWW audit, Pattern 6)
+//   - New column: garden_id (D-02 NOT NULL; pulled from authStore.activeGardenId)
 // Mirrors the pattern in profileRepo.ts (Plan 02-02).
-//   account mode → supabase.from('vereinsregeln').upsert / select / delete
+//   account mode → supabase.from('vereinsregeln').upsert / select / delete (garden-scoped)
 //   local mode   → storage.set('vereinsregeln', JSON.stringify(rules)) (Pitfall 6)
-// RULES-04 enforced as a server-side guard in saveVereinsregeln + deleteVereinsregel
-// (defense in depth above the UI-layer no-render-switch + store no-op).
+// RULES-04 enforced as a server-side guard in saveVereinsregeln + deleteVereinsregel.
 //
 // Domain note:
-//   VereinsRegel (packages/shared) intentionally omits user_id/erstellt_am — those
-//   live on the Supabase row only. The DB default gen_random_uuid() assigns ids
-//   server-side; for locally-created rules (checklist, pdf_extraction draft) we
-//   assign deterministic ids (bk-<userId>-<idx> for BKleingG seeds, random UUIDs
-//   for user-authored rules) so upsert-by-id works on re-save.
+//   VereinsRegel (packages/shared) intentionally omits user_id/garden_id/audit fields —
+//   those live on the Supabase row only. `toRow` stamps them; `fromRow` drops them.
 import { supabase } from './supabase';
 import { storage } from '../storage';
 import { BKLEINGG_REGELN } from '@spatenstich/shared';
 import type { VereinsRegel, Database } from '@spatenstich/shared';
-import type { AuthMode } from '../stores/authStore';
+import { useAuthStore, type AuthMode } from '../stores/authStore';
 
 const STORAGE_KEY = 'vereinsregeln';
 
@@ -29,14 +29,22 @@ type VereinsregelnInsert =
  * domain type uses `istBKleingG` (camelCase). Without this mapping Supabase
  * would silently drop the camelCase key and the BKleingG branch would break
  * on round-trip.
+ *
+ * Phase 2.5 extension:
+ *   - `user_id` → `created_by_user_id` (Migration 003 column rename)
+ *   - Adds `updated_by_user_id` (D-14 LWW audit, Pattern 6)
+ *   - Adds `garden_id` (D-02 NOT NULL — caller must supply the active garden)
  */
 export function toRow(
   rule: VereinsRegel,
   userId: string,
+  gardenId: string,
 ): VereinsregelnInsert {
   return {
     id: rule.id,
-    user_id: userId,
+    created_by_user_id: userId,
+    updated_by_user_id: userId, // Client-first fill (Pattern 6 / D-18)
+    garden_id: gardenId,
     titel: rule.titel,
     beschreibung: rule.beschreibung ?? null,
     wert: rule.wert ?? null,
@@ -49,7 +57,9 @@ export function toRow(
 
 /**
  * Map a DB row back to a domain `VereinsRegel`, dropping server-only fields
- * (`user_id`, `erstellt_am`) that do not belong in the client domain type.
+ * (audit columns, garden_id, erstellt_am) that do not belong in the client
+ * domain type. If the UI needs "last-edited-by" attribution, it should query
+ * `updated_by_user_id` separately (planned in Plan 04 audit-label rendering).
  */
 export function fromRow(row: VereinsregelnRow): VereinsRegel {
   return {
@@ -97,15 +107,23 @@ function assertBKleingGActive(rules: VereinsRegel[]): void {
   }
 }
 
+/** Resolve the active garden id from authStore; throws if absent in account-mode. */
+function requireActiveGardenId(): string {
+  const { activeGardenId } = useAuthStore.getState();
+  if (!activeGardenId) throw new Error('no_active_garden');
+  return activeGardenId;
+}
+
 export async function loadVereinsregeln(
   mode: AuthMode,
   userId: string,
 ): Promise<VereinsRegel[]> {
   if (mode === 'account') {
+    const gardenId = requireActiveGardenId();
     const { data, error } = await supabase
       .from('vereinsregeln')
       .select('*')
-      .eq('user_id', userId);
+      .eq('garden_id', gardenId);
     if (error) throw error;
     const rows = (data ?? []).map(fromRow);
     return rows.length > 0 ? rows : ensureBKleingGRules([], userId);
@@ -130,7 +148,8 @@ export async function saveVereinsregeln(
   assertBKleingGActive(ensured);
 
   if (mode === 'account') {
-    const payload = ensured.map((r) => toRow(r, userId));
+    const gardenId = requireActiveGardenId();
+    const payload = ensured.map((r) => toRow(r, userId, gardenId));
     const { error } = await supabase
       .from('vereinsregeln')
       .upsert(payload, { onConflict: 'id' });
@@ -143,7 +162,7 @@ export async function saveVereinsregeln(
 export async function deleteVereinsregel(
   ruleId: string,
   mode: AuthMode,
-  userId: string,
+  _userId: string,
 ): Promise<void> {
   // RULES-04 server guard — UI never calls this for BKleingG rules, but
   // defense in depth.
@@ -152,11 +171,12 @@ export async function deleteVereinsregel(
   }
 
   if (mode === 'account') {
+    const gardenId = requireActiveGardenId();
     const { error } = await supabase
       .from('vereinsregeln')
       .delete()
       .eq('id', ruleId)
-      .eq('user_id', userId);
+      .eq('garden_id', gardenId);
     if (error) throw error;
     return;
   }

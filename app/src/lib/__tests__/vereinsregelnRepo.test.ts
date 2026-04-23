@@ -1,8 +1,12 @@
-// vereinsregelnRepo unit tests — Plan 02-04 Task 2-04-01.
+// vereinsregelnRepo unit tests — Plan 02-04 Task 2-04-01, updated in Plan 02.5-03 Task 03.
 // Mirrors the mode-aware pattern from profileRepo (D-11):
 //   mode === 'account' → supabase.from('vereinsregeln')
 //   mode === 'local'   → storage key 'vereinsregeln' (single JSON blob, Pitfall 6)
 // RULES-04 server-side guard: saveVereinsregeln REJECTS any input where istBKleingG && !aktiv.
+//
+// Phase 2.5 updates:
+//   - Column rename: user_id → created_by_user_id + new updated_by_user_id + new garden_id
+//   - Account-mode load/save/delete pull activeGardenId from authStore
 
 // Set Supabase env BEFORE any import that transitively pulls in ./supabase.
 process.env['EXPO_PUBLIC_SUPABASE_URL'] = 'https://test.example';
@@ -52,6 +56,14 @@ jest.mock('../../storage', () => ({
     get: (...a: unknown[]) => mockStorageGet(...a),
     set: (...a: unknown[]) => mockStorageSet(...a),
     delete: (...a: unknown[]) => mockStorageDelete(...a),
+  },
+}));
+
+// ── Mock authStore (Phase 2.5: activeGardenId pulled via getState) ─────
+const GARDEN_ID = 'g-test-42';
+jest.mock('../../stores/authStore', () => ({
+  useAuthStore: {
+    getState: () => ({ activeGardenId: 'g-test-42' }),
   },
 }));
 
@@ -115,7 +127,7 @@ describe('vereinsregelnRepo (account mode)', () => {
     expect(mockStorageSet).not.toHaveBeenCalled();
   });
 
-  it('Test 1b: upsert payload uses snake_case `ist_bkleingg` + stamps `user_id` (DB-column contract)', async () => {
+  it('Test 1b: upsert payload uses snake_case `ist_bkleingg` + stamps `created_by_user_id` + `updated_by_user_id` + `garden_id`', async () => {
     mockUpsert.mockResolvedValue({ error: null });
 
     await saveVereinsregeln([USER_RULE], 'account', USER_ID);
@@ -127,12 +139,16 @@ describe('vereinsregelnRepo (account mode)', () => {
       expect(row).toHaveProperty('ist_bkleingg');
       // camelCase domain key must NOT leak to Postgres (Supabase would drop it)
       expect(row).not.toHaveProperty('istBKleingG');
-      // RLS relies on user_id being stamped server-bound
-      expect(row['user_id']).toBe(USER_ID);
+      // Phase 2.5: renamed column + new audit columns + garden scope
+      expect(row['created_by_user_id']).toBe(USER_ID);
+      expect(row['updated_by_user_id']).toBe(USER_ID);
+      expect(row['garden_id']).toBe(GARDEN_ID);
+      // old column name must be gone
+      expect(row).not.toHaveProperty('user_id');
     }
   });
 
-  it('Test 3: loadVereinsregeln selects by user_id and maps snake_case rows to domain type', async () => {
+  it('Test 3: loadVereinsregeln selects by garden_id and maps snake_case rows to domain type', async () => {
     // Supabase returns rows with the actual DB column names (snake_case).
     const serverRows = [
       {
@@ -143,7 +159,9 @@ describe('vereinsregelnRepo (account mode)', () => {
         ist_bkleingg: false,
         aktiv: true,
         source: USER_RULE.source,
-        user_id: USER_ID,
+        created_by_user_id: USER_ID,
+        updated_by_user_id: USER_ID,
+        garden_id: GARDEN_ID,
         erstellt_am: '2026-04-20T00:00:00Z',
       },
       {
@@ -154,7 +172,9 @@ describe('vereinsregelnRepo (account mode)', () => {
         ist_bkleingg: false,
         aktiv: true,
         source: USER_RULE_2.source,
-        user_id: USER_ID,
+        created_by_user_id: USER_ID,
+        updated_by_user_id: USER_ID,
+        garden_id: GARDEN_ID,
         erstellt_am: '2026-04-20T00:00:01Z',
       },
     ];
@@ -163,17 +183,28 @@ describe('vereinsregelnRepo (account mode)', () => {
     const rules = await loadVereinsregeln('account', USER_ID);
 
     expect(mockSelect).toHaveBeenCalledWith('*');
-    expect(mockEq).toHaveBeenCalledWith('user_id', USER_ID);
+    expect(mockEq).toHaveBeenCalledWith('garden_id', GARDEN_ID);
     expect(rules).toHaveLength(2);
     // Must come back in domain shape (camelCase, no server-only fields)
     for (const r of rules) {
       expect(r).toHaveProperty('istBKleingG');
       expect(r).not.toHaveProperty('ist_bkleingg');
-      expect(r).not.toHaveProperty('user_id');
+      expect(r).not.toHaveProperty('created_by_user_id');
+      expect(r).not.toHaveProperty('garden_id');
       expect(r).not.toHaveProperty('erstellt_am');
     }
     expect(rules[0]!.id).toBe('srv-1');
     expect(rules[0]!.istBKleingG).toBe(false);
+  });
+
+  it('Test 3b: deleteVereinsregel scopes by garden_id (RLS defense-in-depth)', async () => {
+    mockDeleteEq2.mockResolvedValue({ error: null });
+
+    await deleteVereinsregel('u-1', 'account', USER_ID);
+
+    expect(mockDelete).toHaveBeenCalledTimes(1);
+    expect(mockDeleteEq1).toHaveBeenCalledWith('id', 'u-1');
+    expect(mockDeleteEq2).toHaveBeenCalledWith('garden_id', GARDEN_ID);
   });
 });
 

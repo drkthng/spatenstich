@@ -102,7 +102,9 @@ export async function migrateLocalToAccount(
       }
       return { ...r, id: randomId() };
     });
-    const payload = restamped.map((r) => toRow(r, newUserId));
+    // NOTE (Plan 02.5-03 Task 04): gardenId is placeholder here; Task 04 replaces
+    // this entire block with ensureDefaultGardenForUser() + real gardenId stamping.
+    const payload = restamped.map((r) => toRow(r, newUserId, ''));
     const { error } = await supabase
       .from('vereinsregeln')
       .upsert(payload, { onConflict: 'id' });
