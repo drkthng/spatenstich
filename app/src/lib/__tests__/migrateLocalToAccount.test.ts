@@ -14,7 +14,7 @@
 process.env['EXPO_PUBLIC_SUPABASE_URL'] = 'https://test.example';
 process.env['EXPO_PUBLIC_SUPABASE_ANON_KEY'] = 'test-anon-key';
 
-import type { UserProfile, VereinsRegel } from '@spatenstich/shared';
+import type { LocalProfile, VereinsRegel } from '@spatenstich/shared';
 
 // ── Mocks ───────────────────────────────────────────────────────────────
 const mockSignUp = jest.fn();
@@ -63,8 +63,10 @@ jest.mock('../../stores/authStore', () => ({
 // Lazy import AFTER mocks.
 import { migrateLocalToAccount } from '../migrateLocalToAccount';
 
-// Local-mode storage holds a Partial<UserProfile> JSON blob (see profileRepo).
-const LOCAL_PROFILE: Partial<UserProfile> = {
+// Local-mode storage holds a Partial<LocalProfile> JSON blob (see profileRepo).
+// Post-Phase-2.5-pivot (D-01): plz/klimazone/archetype live on LocalProfile (lokal-mode)
+// or Garden (account-mode), not on the account-scoped UserProfile.
+const LOCAL_PROFILE: Partial<LocalProfile> = {
   plz: '12043',
   klimazone: 7,
   archetype: 'familien_naschgarten',
@@ -251,5 +253,16 @@ describe('migrateLocalToAccount', () => {
     expect(mockVereinsregelnUpsert).not.toHaveBeenCalled();
     expect(mockStorageDelete).not.toHaveBeenCalled();
     expect(mockSetAccountMode).not.toHaveBeenCalled();
+  });
+
+  // ── Wave-0 contract for Phase 2.5 extension — Plan 02.5-01-05 (todo) / Plan 02.5-03 (green) ──
+  describe('Phase 2.5 extension (shared garden)', () => {
+    it.todo('calls supabase.rpc("ensure_default_garden_for_user") after signUp, before read local');
+    it.todo('upserts garden metadata (PLZ, Klimazone, Archetyp) BEFORE vereinsregeln upsert (FK order)');
+    it.todo('calls vereinsregelnRepo.toRow(r, newUserId, newGardenId) with gardenId param (extended signature)');
+    it.todo('calls authStore.setActiveGarden(newGardenId) in the same set as setAccountMode');
+    it.todo('storage.delete runs STRICTLY AFTER all supabase upserts (atomic-tail invariant preserved)');
+    it.todo('throws migration_partial_garden_seed if ensure_default_garden_for_user RPC fails');
+    it.todo('throws migration_partial_garden_metadata if gardens upsert fails');
   });
 });

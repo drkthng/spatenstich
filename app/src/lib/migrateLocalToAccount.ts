@@ -16,7 +16,7 @@ import { supabase } from './supabase';
 import { storage } from '../storage';
 import { useAuthStore } from '../stores/authStore';
 import { toRow } from './vereinsregelnRepo';
-import type { UserProfile, VereinsRegel } from '@spatenstich/shared';
+import type { LocalProfile, VereinsRegel } from '@spatenstich/shared';
 
 export interface MigrateInput {
   email: string;
@@ -62,8 +62,10 @@ export async function migrateLocalToAccount(
   // Step 2 — read local data (read-only; storage untouched).
   const profileJson = await storage.get(PROFILE_KEY);
   const vereinsregelnJson = await storage.get(VEREINSREGELN_KEY);
-  const profile: Partial<UserProfile> | null = profileJson
-    ? (JSON.parse(profileJson) as Partial<UserProfile>)
+  // Lokal-Modus-Blob hält PLZ/Klimazone/Archetyp am Profil — LocalProfile per D-01.
+  // Plan 03 wird den Block erweitern (ensure_default_garden_for_user RPC + garden_id-Stempel).
+  const profile: Partial<LocalProfile> | null = profileJson
+    ? (JSON.parse(profileJson) as Partial<LocalProfile>)
     : null;
   const vereinsregeln: VereinsRegel[] = vereinsregelnJson
     ? (JSON.parse(vereinsregelnJson) as VereinsRegel[])
