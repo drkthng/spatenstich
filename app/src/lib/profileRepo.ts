@@ -60,6 +60,21 @@ export async function loadProfile(): Promise<ProfilePatch | null> {
   }
 }
 
+/**
+ * WR-03: normalize display_name for the profiles_display_name_len
+ * CHECK-Constraint (Migration 012): max 40 chars, trimmed. Unicode NFC
+ * normalization vermeidet dass visuell identische Namen als verschieden
+ * serialisiert werden. Leerer Rest → null (Constraint erlaubt NULL).
+ */
+function normalizeDisplayName(raw: string | null | undefined): string | null {
+  if (raw == null) return null;
+  // Some JS runtimes (Hermes RN) lack String.prototype.normalize — guard.
+  const normalized =
+    typeof (raw as string).normalize === 'function' ? raw.normalize('NFC') : raw;
+  const trimmed = normalized.trim().slice(0, 40);
+  return trimmed.length > 0 ? trimmed : null;
+}
+
 export async function saveProfile(patch: ProfilePatch): Promise<void> {
   const { mode, userId } = useAuthStore.getState();
   if (!mode || !userId) throw new Error('Not authenticated');
@@ -68,7 +83,9 @@ export async function saveProfile(patch: ProfilePatch): Promise<void> {
     // plz/klimazone/archetype are silently dropped here — they now live on the
     // active garden row and must be saved via gardenRepo.updateGarden.
     const payload: { id: string; display_name?: string | null } = { id: userId };
-    if ('displayName' in patch) payload.display_name = patch.displayName ?? null;
+    if ('displayName' in patch) {
+      payload.display_name = normalizeDisplayName(patch.displayName);
+    }
     const { error } = await supabase
       .from('profiles')
       .upsert(payload, { onConflict: 'id' });

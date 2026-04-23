@@ -95,8 +95,13 @@ export async function migrateLocalToAccount(
 
   // Step 4 — upsert profile (display_name ONLY post-Phase-2.5-pivot, D-01).
   // plz/klimazone/archetype moved to gardens (Step 5).
+  // WR-03: emailPrefix wird auf 40 Zeichen limitiert + getrimmt, um den
+  // profiles_display_name_len CHECK-Constraint (Migration 012) nicht zu
+  // verletzen. Leer-Strings werden zu null (Constraint erlaubt NULL).
   let profileTransferred = false;
-  const emailPrefix = input.email.split('@')[0] ?? null;
+  const rawPrefix = input.email.split('@')[0] ?? '';
+  const trimmed = rawPrefix.trim().slice(0, 40);
+  const emailPrefix = trimmed.length > 0 ? trimmed : null;
   {
     const { error } = await supabase.from('profiles').upsert(
       {
