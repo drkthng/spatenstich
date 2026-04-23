@@ -124,9 +124,14 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
       const newCode = await createInviteForGarden('account', activeGardenId);
       setCode(newCode);
     } catch (e) {
+      // WR-06: 23514-Branch entfernt — create_invite_for_garden kann kein
+      // check_violation werfen (nur INSERT auf invite_codes ohne CHECK).
+      // Der "garden already full"-Fall wird serverseitig über den neuen
+      // P9006 SQLSTATE gemeldet (Migration 007+). UI-Gating via
+      // `members.length < 2` (Zeile 329) ist die primäre Defense.
       const err = e as { code?: string };
       if (err.code === '42501') setError(t('garden.invite.error_not_owner'));
-      else if (err.code === '23514')
+      else if (err.code === 'P9006')
         setError(t('garden.invite.error_already_full'));
       else setError(t('garden.invite.error_generic'));
     } finally {
