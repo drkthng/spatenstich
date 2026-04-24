@@ -94,8 +94,14 @@
   3. Edits made offline appear in Supabase Postgres within 30 seconds of reconnection; the sync-status indicator shows "synced" when complete
   4. The app runs on desktop browser (Chrome/Safari) with IndexedDB as the storage backend — the same plan data is visible on both iPhone and browser after sync
   5. Dirk und Frau editieren denselben Plan offline auf zwei Geräten; bei Reconnect triggert LWW-Merge ohne manuelle Konfliktauflösung; "zuletzt bearbeitet von"-Hinweis zeigt den Gewinner
-**Plans**: TBD
-**UI hint**: no
+**Plans**: 6 plans
+  - [ ] 03-01-PLAN.md — Supabase-Migrationen (LWW-Trigger + deleted_at + photo_queue + Storage-RLS + enqueue_photo_analysis RPC) + db push --linked + Types Regen (Wave 1)
+  - [ ] 03-02-PLAN.md — StorageAdapter Row-Tables + sync_outbox + sync_state (SQLite + IndexedDB + Contract-Tests) (Wave 2)
+  - [ ] 03-03-PLAN.md — Repo-Umbau offline-first (gardenRepo/vereinsregelnRepo/profileRepo/inviteCodeRepo) + migrateLocalToAccount Bootstrap (Wave 3)
+  - [ ] 03-04-PLAN.md — SyncWorker (push/pull/LWW/Retry-Backoff) + SyncTriggers (NetInfo/AppState/debounced) + 2-User-Reconnect-Integration-Test (Wave 3)
+  - [ ] 03-05-PLAN.md — Photo-Queue + EXIF-Strip (native/web) + PhotoUploader (Storage + RPC) + Opt-in-Toggle (Wave 4)
+  - [ ] 03-06-PLAN.md — Sync-Status-UI (Badge + Detail-Screen mit Retry/Verwerfen) + SC-5 30s-Reconnect-Test (Wave 4)
+**UI hint**: partial (Sync-Status-Badge + Detail-Screen + Datenschutz-Toggle)
 
 ### Phase 4: Garten-Erfassung (M1)
 **Goal**: Dirk photographs his allotment from 3 angles, enters the plot dimensions, and sees a confirmed schematic 2D plan populated with the elements Claude Vision detected.
@@ -186,7 +192,7 @@
 | 1. Foundation | 3/3 | Complete | 2026-04-17 |
 | 2. Auth & Profile (Vereinsregeln flagged off) | 4/4 | Code Complete (MVP-scope verify pending: NFR-07, AUTH-05, AUTH-04, Logout-Guard) | 2026-04-20 |
 | 2.5. Shared Garden Model | 4/4 | Code Complete (human-verify pending: SC-1..SC-4 + D-16 Scenarios 5..7 + bootstrap-useEffect + regression) | 2026-04-23 |
-| 3. Offline & Sync | 0/TBD | Not started | - |
+| 3. Offline & Sync | 0/6 | Planned | - |
 | 4. Garten-Erfassung (M1) | 0/TBD | Not started | - |
 | 5. Plan-Editor (M2) | 0/TBD | Not started | - |
 | 6. Saatgut-Inventar (M3) | 0/TBD | Not started | - |
