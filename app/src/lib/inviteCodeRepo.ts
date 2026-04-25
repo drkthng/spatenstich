@@ -1,15 +1,16 @@
-// Invite-Code RPC wrapper — Plan 02.5-03.
-// Pattern: PATTERNS §4. Account-only (D-13); lokal-mode throws.
-// Error codes propagated (UI classifies):
-//   WR-04: Custom P9xxx SQLSTATEs (Migration 010) vermeiden Kollision mit
-//   PL/pgSQL-Built-ins:
-//     P9001 = invalid/expired code (ersetzt P0002 = no_data_found built-in)
-//     P9006 = garden at 2-member limit (neuer Code aus Migration 011)
-//     23514 = generic check_violation (tg_garden_members_limit_2 trigger)
-//     42501 = insufficient_privilege (not owner)
+// Invite-Code RPC wrapper — Plan 02.5-03, extended in Phase 3 Plan 03-03.
+// Pattern: PATTERNS §4. Account-only (D-13); local-mode throws.
+// Phase 3 extension: offline-guard on all RPC methods.
+// RPCs are SECURITY DEFINER with atomic side-effects (garden member INSERT),
+// so offline queuing is not safe — throw 'offline_required' instead.
 //
-//   Ältere Deployments ohne Migration 010/011 liefern noch P0002 / 23514 —
-//   die UI-Mapping-Stellen erkennen beide Varianten für Robustness.
+// Error codes propagated (UI classifies):
+//   WR-04: Custom P9xxx SQLSTATEs (Migration 010):
+//     P9001 = invalid/expired code
+//     P9006 = garden at 2-member limit
+//     23514 = generic check_violation
+//     42501 = insufficient_privilege (not owner)
+import NetInfo from '@react-native-community/netinfo';
 import { supabase } from './supabase';
 import type { AuthMode } from '../stores/authStore';
 
@@ -17,11 +18,19 @@ function assertAccount(mode: AuthMode): void {
   if (mode !== 'account') throw new Error('gardens are account-only');
 }
 
+async function assertOnline(): Promise<void> {
+  const state = await NetInfo.fetch();
+  if (state.isConnected !== true || state.isInternetReachable === false) {
+    throw new Error('offline_required');
+  }
+}
+
 export async function createInviteForGarden(
   mode: AuthMode,
   gardenId: string,
 ): Promise<string> {
   assertAccount(mode);
+  await assertOnline();
   const { data, error } = await supabase.rpc('create_invite_for_garden', {
     p_garden_id: gardenId,
   });
@@ -43,6 +52,7 @@ export async function consumeInviteCode(
   code: string,
 ): Promise<string> {
   assertAccount(mode);
+  await assertOnline();
   const normalized = normalizeCode(code);
   const { data, error } = await supabase.rpc('consume_invite_code', {
     p_code: normalized,
@@ -53,6 +63,7 @@ export async function consumeInviteCode(
 
 export async function ensureDefaultGardenForUser(): Promise<string> {
   // No mode guard: may be called right after signUp but before store flip.
+  // No online guard: this is called during migration which requires network anyway.
   const { data, error } = await supabase.rpc('ensure_default_garden_for_user');
   if (error) throw error;
   return data as string; // garden_id uuid

@@ -30,6 +30,7 @@ const config: Config = {
         '^react-native$': '<rootDir>/src/__mocks__/react-native.ts',
         '^expo-secure-store$': '<rootDir>/src/__mocks__/expo-secure-store.ts',
         '^@react-native-async-storage/async-storage$': '<rootDir>/src/__mocks__/async-storage.ts',
+        '^@react-native-community/netinfo$': '<rootDir>/src/__mocks__/react-native-community-netinfo.ts',
       },
       transform: {
         '^.+\.tsx?$': ['ts-jest', { tsconfig: { strict: true, esModuleInterop: true, resolveJsonModule: true, jsx: 'react' } }],

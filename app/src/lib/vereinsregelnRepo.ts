@@ -1,77 +1,57 @@
 // Mode-aware Vereinsregeln persistence — Plan 02-04 Task 2-04-01.
-// Extended in Plan 02.5-03 Task 03:
-//   - Column rename: user_id → created_by_user_id (Migration 003)
-//   - New column: updated_by_user_id (D-14 LWW audit, Pattern 6)
-//   - New column: garden_id (D-02 NOT NULL; pulled from authStore.activeGardenId)
-// Mirrors the pattern in profileRepo.ts (Plan 02-02).
-//   account mode → supabase.from('vereinsregeln').upsert / select / delete (garden-scoped)
-//   local mode   → storage.set('vereinsregeln', JSON.stringify(rules)) (Pitfall 6)
-// RULES-04 enforced as a server-side guard in saveVereinsregeln + deleteVereinsregel.
+// Phase 3 Plan 03-03 offline-first refactor:
+//   account mode → StorageAdapter Row-Table (writeWithOutbox / getRow) — offline-capable
+//   local mode   → storage.set('vereinsregeln', JSON.stringify(rules)) — unverändert
 //
-// Domain note:
-//   VereinsRegel (packages/shared) intentionally omits user_id/garden_id/audit fields —
-//   those live on the Supabase row only. `toRow` stamps them; `fromRow` drops them.
+// VereinsregelnRow-Design: 1 Row pro Garden (Option A) — rules:{list:[...]} JSON-Payload.
+// DB bleibt N Rows; SyncWorker-Push splittet bei Upload (vereinsregelnToDbRows).
+//
+// RULES-04 enforced: BKleingG rules may never be disabled or deleted.
+// toRow export retained for migrateLocalToAccount.ts compat (will be removed in Phase 4).
 import { supabase } from './supabase';
 import { storage } from '../storage';
 import { BKLEINGG_REGELN } from '@spatenstich/shared';
-import type { VereinsRegel, Database } from '@spatenstich/shared';
+import type { VereinsRegel, VereinsregelnRow } from '@spatenstich/shared';
 import { useAuthStore, type AuthMode } from '../stores/authStore';
+import { OutboxEnqueueError } from './errors';
+import {
+  vereinsregelnToLocalRow,
+  localToVereinsregeln,
+  vereinsregelnFromDbRows,
+  vereinsregelnToDbRows,
+} from './mappers/rowMappers';
 
-const STORAGE_KEY = 'vereinsregeln';
-
-type VereinsregelnRow = Database['public']['Tables']['vereinsregeln']['Row'];
-type VereinsregelnInsert =
-  Database['public']['Tables']['vereinsregeln']['Insert'];
+const STORAGE_KEY_LOCAL = 'vereinsregeln'; // KV-Blob für local-mode
 
 /**
- * Map a domain `VereinsRegel` to a DB row ready for upsert.
- * Required because Postgres column is `ist_bkleingg` (snake_case) while the
- * domain type uses `istBKleingG` (camelCase). Without this mapping Supabase
- * would silently drop the camelCase key and the BKleingG branch would break
- * on round-trip.
- *
- * Phase 2.5 extension:
- *   - `user_id` → `created_by_user_id` (Migration 003 column rename)
- *   - Adds `updated_by_user_id` (D-14 LWW audit, Pattern 6)
- *   - Adds `garden_id` (D-02 NOT NULL — caller must supply the active garden)
+ * Backward compat: toRow was previously exported from this module and imported by
+ * migrateLocalToAccount.ts. Delegate to vereinsregelnToDbRows via a helper.
+ * Plan 03-03 Task 03 will update migrateLocalToAccount to import from rowMappers directly.
  */
 export function toRow(
   rule: VereinsRegel,
   userId: string,
   gardenId: string,
-): VereinsregelnInsert {
-  return {
-    id: rule.id,
-    created_by_user_id: userId,
-    updated_by_user_id: userId, // Client-first fill (Pattern 6 / D-18)
-    garden_id: gardenId,
-    titel: rule.titel,
-    beschreibung: rule.beschreibung ?? null,
-    wert: rule.wert ?? null,
-    einheit: rule.einheit ?? null,
-    ist_bkleingg: rule.istBKleingG,
-    aktiv: rule.aktiv,
-    source: rule.source,
+): import('@spatenstich/shared').Database['public']['Tables']['vereinsregeln']['Insert'] {
+  // Build a minimal VereinsregelnRow to call vereinsregelnToDbRows
+  const now = new Date().toISOString();
+  const singleRow: VereinsregelnRow = {
+    id: gardenId,
+    gardenId,
+    createdAt: now,
+    updatedAt: now,
+    updatedByUserId: userId,
+    deletedAt: null,
+    rules: { list: [rule] },
   };
+  const rows = vereinsregelnToDbRows(singleRow, userId);
+  return rows[0]!;
 }
 
-/**
- * Map a DB row back to a domain `VereinsRegel`, dropping server-only fields
- * (audit columns, garden_id, erstellt_am) that do not belong in the client
- * domain type. If the UI needs "last-edited-by" attribution, it should query
- * `updated_by_user_id` separately (planned in Plan 04 audit-label rendering).
- */
-export function fromRow(row: VereinsregelnRow): VereinsRegel {
-  return {
-    id: row.id,
-    titel: row.titel,
-    ...(row.beschreibung != null ? { beschreibung: row.beschreibung } : {}),
-    ...(row.wert != null ? { wert: row.wert } : {}),
-    ...(row.einheit != null ? { einheit: row.einheit } : {}),
-    istBKleingG: row.ist_bkleingg,
-    aktiv: row.aktiv,
-    source: row.source as VereinsRegel['source'],
-  };
+function requireActiveGardenId(): string {
+  const { activeGardenId } = useAuthStore.getState();
+  if (!activeGardenId) throw new Error('no_active_garden');
+  return activeGardenId;
 }
 
 /**
@@ -93,7 +73,7 @@ function ensureBKleingGRules(
     einheit: seed.einheit,
     istBKleingG: true,
     aktiv: true,
-    source: 'manual',
+    source: 'manual' as const,
   }));
   const missing = seeds.filter((s) => !existingIds.has(s.id));
   return [...missing, ...rules];
@@ -107,34 +87,37 @@ function assertBKleingGActive(rules: VereinsRegel[]): void {
   }
 }
 
-/** Resolve the active garden id from authStore; throws if absent in account-mode. */
-function requireActiveGardenId(): string {
-  const { activeGardenId } = useAuthStore.getState();
-  if (!activeGardenId) throw new Error('no_active_garden');
-  return activeGardenId;
-}
-
 export async function loadVereinsregeln(
   mode: AuthMode,
   userId: string,
 ): Promise<VereinsRegel[]> {
   if (mode === 'account') {
     const gardenId = requireActiveGardenId();
+    // Offline-first: lokale Row lesen (SYNC-01)
+    const localRow = await storage.getRow<VereinsregelnRow>('vereinsregeln', gardenId);
+    if (localRow) {
+      const rules = localToVereinsregeln(localRow);
+      return rules.length > 0 ? rules : ensureBKleingGRules([], userId);
+    }
+    // Fallback: Supabase (SyncWorker hydriert die lokale Row beim nächsten Pull)
     const { data, error } = await supabase
       .from('vereinsregeln')
       .select('*')
       .eq('garden_id', gardenId);
     if (error) throw error;
-    const rows = (data ?? []).map(fromRow);
-    return rows.length > 0 ? rows : ensureBKleingGRules([], userId);
+    const aggregated = vereinsregelnFromDbRows(data ?? [], gardenId);
+    if (aggregated) {
+      await storage.upsertRowFromServer('vereinsregeln', aggregated);
+      return localToVereinsregeln(aggregated);
+    }
+    return ensureBKleingGRules([], userId);
   }
-  // local mode
-  const raw = await storage.get(STORAGE_KEY);
+  // local mode: unverändert (KV-Blob)
+  const raw = await storage.get(STORAGE_KEY_LOCAL);
   if (!raw) return ensureBKleingGRules([], userId);
   try {
     return JSON.parse(raw) as VereinsRegel[];
   } catch {
-    // Corrupt blob — treat as empty and hand back the BKleingG seed.
     return ensureBKleingGRules([], userId);
   }
 }
@@ -149,42 +132,60 @@ export async function saveVereinsregeln(
 
   if (mode === 'account') {
     const gardenId = requireActiveGardenId();
-    const payload = ensured.map((r) => toRow(r, userId, gardenId));
-    const { error } = await supabase
-      .from('vereinsregeln')
-      .upsert(payload, { onConflict: 'id' });
-    if (error) throw error;
+    const existing = await storage.getRow<VereinsregelnRow>('vereinsregeln', gardenId);
+    const updated = vereinsregelnToLocalRow(gardenId, ensured, userId, existing);
+    try {
+      await storage.writeWithOutbox('vereinsregeln', updated, {
+        entity: 'vereinsregeln',
+        rowId: gardenId,
+        operation: existing ? 'update' : 'insert',
+        payload: updated as unknown as Record<string, unknown>,
+      });
+    } catch (cause) {
+      throw new OutboxEnqueueError('vereinsregeln', gardenId, cause);
+    }
     return;
   }
-  await storage.set(STORAGE_KEY, JSON.stringify(ensured));
+  // local mode: unverändert
+  await storage.set(STORAGE_KEY_LOCAL, JSON.stringify(ensured));
 }
 
 export async function deleteVereinsregel(
   ruleId: string,
   mode: AuthMode,
-  _userId: string,
+  userId: string,
 ): Promise<void> {
-  // RULES-04 server guard — UI never calls this for BKleingG rules, but
-  // defense in depth.
+  // RULES-04 defense in depth: BKleingG rules may never be deleted.
   if (ruleId.startsWith('bk-')) {
     throw new Error('cannot delete BKleingG rule');
   }
 
   if (mode === 'account') {
     const gardenId = requireActiveGardenId();
-    const { error } = await supabase
-      .from('vereinsregeln')
-      .delete()
-      .eq('id', ruleId)
-      .eq('garden_id', gardenId);
-    if (error) throw error;
+    const existing = await storage.getRow<VereinsregelnRow>('vereinsregeln', gardenId);
+    const current = localToVereinsregeln(existing);
+    const filtered = current.filter((r) => r.id !== ruleId);
+    const updated = vereinsregelnToLocalRow(gardenId, filtered, userId, existing);
+    try {
+      await storage.writeWithOutbox('vereinsregeln', updated, {
+        entity: 'vereinsregeln',
+        rowId: gardenId,
+        operation: 'update', // Row bleibt bestehen — nur rule aus liste entfernt
+        payload: updated as unknown as Record<string, unknown>,
+      });
+    } catch (cause) {
+      throw new OutboxEnqueueError('vereinsregeln', gardenId, cause);
+    }
     return;
   }
-
-  const raw = await storage.get(STORAGE_KEY);
+  // local mode
+  const raw = await storage.get(STORAGE_KEY_LOCAL);
   const rules: VereinsRegel[] = raw ? (JSON.parse(raw) as VereinsRegel[]) : [];
   await storage.set(
-    STORAGE_KEY,
+    STORAGE_KEY_LOCAL,
     JSON.stringify(rules.filter((r) => r.id !== ruleId)),
   );
 }
+
+// Re-export normalizeDisplayName for any callers that imported from this module.
+export { normalizeDisplayName } from './mappers/rowMappers';

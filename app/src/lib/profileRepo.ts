@@ -1,25 +1,28 @@
 // Mode-aware profile persistence (D-11).
-// account-mode → Supabase `profiles` upsert (POST-PIVOT: only display_name).
-// local-mode → StorageAdapter key 'profile' (JSON blob, Partial<LocalProfile>).
-// Pattern: 02-PATTERNS.md §"app/app/(app)/profile/plz.tsx" + Pitfall 6 (single JSON blob, no flat keys).
+// Phase 3 Plan 03-03 offline-first refactor:
+//   account-mode → StorageAdapter profiles Row-Table (offline-first read + writeWithOutbox)
+//   local-mode   → StorageAdapter key 'profile' (JSON blob, Partial<LocalProfile>) — unverändert
 //
 // Phase 2.5 pivot (D-01): plz/klimazone/archetype moved from profiles → gardens.
-// Account-mode reads/writes ONLY display_name here; the lokal-mode blob still
-// holds the LocalProfile shape (PLZ/Klima/Archetyp) so the lokal-only experience
-// continues to work unchanged (D-13: lokal-mode has no garden).
+// Account-mode reads/writes ONLY display_name here; the local-mode blob still
+// holds the LocalProfile shape (PLZ/Klima/Archetyp) so the local-only experience
+// continues to work unchanged (D-13: local-mode has no garden).
 import { supabase } from './supabase';
 import { storage } from '../storage';
 import { useAuthStore } from '../stores/authStore';
-import type { LocalProfile, UserProfile } from '@spatenstich/shared';
+import type { LocalProfile, UserProfile, ProfileRow } from '@spatenstich/shared';
+import { OutboxEnqueueError } from './errors';
+import {
+  profileToLocalRow,
+  profileFromDb,
+  normalizeDisplayName,
+} from './mappers/rowMappers';
 
 const PROFILE_KEY = 'profile';
 
-// Loosely typed read/write surface so existing lokal-mode callers (useProfile.ts)
+// Loosely typed read/write surface so existing local-mode callers (useProfile.ts)
 // that still touch plz/klimazone/archetype keep compiling. In account-mode the
 // read/write payload is restricted internally to `display_name`.
-// Intersecting Partial<UserProfile> & Partial<LocalProfile> would narrow `mode`
-// to the literal `'local'` (LocalProfile's constraint); we use a looser union
-// on `mode` so account-mode returns are also expressible.
 export type ProfilePatch = {
   userId?: string;
   mode?: UserProfile['mode'];
@@ -35,6 +38,18 @@ export async function loadProfile(): Promise<ProfilePatch | null> {
   const { mode, userId } = useAuthStore.getState();
   if (!mode || !userId) return null;
   if (mode === 'account') {
+    // Offline-first: lokale ProfileRow lesen (SYNC-01)
+    const localRow = await storage.getRow<ProfileRow>('profiles', userId);
+    if (localRow) {
+      return {
+        userId: localRow.userId,
+        mode: 'account',
+        displayName: localRow.displayName,
+        createdAt: localRow.createdAt,
+        updatedAt: localRow.updatedAt,
+      };
+    }
+    // Fallback: Supabase (SyncWorker hydriert beim nächsten Pull)
     const { data, error } = await supabase
       .from('profiles')
       .select('id, display_name, created_at, updated_at')
@@ -42,54 +57,50 @@ export async function loadProfile(): Promise<ProfilePatch | null> {
       .maybeSingle();
     if (error) throw error;
     if (!data) return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const row = profileFromDb(data as any);
+    await storage.upsertRowFromServer('profiles', row);
     return {
-      userId: data.id,
+      userId: row.userId,
       mode: 'account',
-      displayName: data.display_name ?? null,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at,
+      displayName: row.displayName,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     };
   }
+  // local mode: read-only from KV blob (unverändert)
   const raw = await storage.get(PROFILE_KEY);
   if (!raw) return null;
   try {
     return JSON.parse(raw) as ProfilePatch;
   } catch {
-    // Corrupted blob — treat as empty, caller will re-save.
     return null;
   }
-}
-
-/**
- * WR-03: normalize display_name for the profiles_display_name_len
- * CHECK-Constraint (Migration 012): max 40 chars, trimmed. Unicode NFC
- * normalization vermeidet dass visuell identische Namen als verschieden
- * serialisiert werden. Leerer Rest → null (Constraint erlaubt NULL).
- */
-function normalizeDisplayName(raw: string | null | undefined): string | null {
-  if (raw == null) return null;
-  // Some JS runtimes (Hermes RN) lack String.prototype.normalize — guard.
-  const normalized =
-    typeof (raw as string).normalize === 'function' ? raw.normalize('NFC') : raw;
-  const trimmed = normalized.trim().slice(0, 40);
-  return trimmed.length > 0 ? trimmed : null;
 }
 
 export async function saveProfile(patch: ProfilePatch): Promise<void> {
   const { mode, userId } = useAuthStore.getState();
   if (!mode || !userId) throw new Error('Not authenticated');
   if (mode === 'account') {
-    // Account-mode shrink (D-01): only display_name lives on profiles post-pivot.
-    // plz/klimazone/archetype are silently dropped here — they now live on the
-    // active garden row and must be saved via gardenRepo.updateGarden.
-    const payload: { id: string; display_name?: string | null } = { id: userId };
-    if ('displayName' in patch) {
-      payload.display_name = normalizeDisplayName(patch.displayName);
+    // Account-mode: offline-first write via Row-Table + Outbox (L-6)
+    const existing = await storage.getRow<ProfileRow>('profiles', userId);
+    const updated = profileToLocalRow(
+      userId,
+      {
+        ...(patch.displayName !== undefined ? { displayName: patch.displayName } : {}),
+      },
+      existing,
+    );
+    try {
+      await storage.writeWithOutbox('profiles', updated, {
+        entity: 'profiles',
+        rowId: userId,
+        operation: existing ? 'update' : 'insert',
+        payload: updated as unknown as Record<string, unknown>,
+      });
+    } catch (cause) {
+      throw new OutboxEnqueueError('profiles', userId, cause);
     }
-    const { error } = await supabase
-      .from('profiles')
-      .upsert(payload, { onConflict: 'id' });
-    if (error) throw error;
     return;
   }
   // local-mode: read-modify-write against StorageAdapter (Pitfall 6 — one JSON blob key).
@@ -97,3 +108,6 @@ export async function saveProfile(patch: ProfilePatch): Promise<void> {
   const merged = { ...(current ?? {}), ...patch };
   await storage.set(PROFILE_KEY, JSON.stringify(merged));
 }
+
+// Re-export normalizeDisplayName for any callers that imported from this module.
+export { normalizeDisplayName };

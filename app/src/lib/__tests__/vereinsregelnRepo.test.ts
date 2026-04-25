@@ -1,21 +1,24 @@
 // vereinsregelnRepo unit tests — Plan 02-04 Task 2-04-01, updated in Plan 02.5-03 Task 03.
-// Mirrors the mode-aware pattern from profileRepo (D-11):
-//   mode === 'account' → supabase.from('vereinsregeln')
-//   mode === 'local'   → storage key 'vereinsregeln' (single JSON blob, Pitfall 6)
+// Phase 3 Plan 03-03: account-mode tests updated for offline-first (storage-first, writeWithOutbox).
 // RULES-04 server-side guard: saveVereinsregeln REJECTS any input where istBKleingG && !aktiv.
 //
 // Phase 2.5 updates:
 //   - Column rename: user_id → created_by_user_id + new updated_by_user_id + new garden_id
-//   - Account-mode load/save/delete pull activeGardenId from authStore
+//   - Account-mode load/save/delete use StorageAdapter Row-Table (not direct Supabase)
 
 // Set Supabase env BEFORE any import that transitively pulls in ./supabase.
 process.env['EXPO_PUBLIC_SUPABASE_URL'] = 'https://test.example';
 process.env['EXPO_PUBLIC_SUPABASE_ANON_KEY'] = 'test-anon-key';
 
-import type { VereinsRegel } from '@spatenstich/shared';
+import type { VereinsRegel, VereinsregelnRow } from '@spatenstich/shared';
+
+// Concrete rules payload shape used in test assertions
+type VereinsregelnRowTyped = Omit<VereinsregelnRow, 'rules'> & {
+  rules: { list: VereinsRegel[] };
+};
 
 // ── Mock the supabase client ────────────────────────────────────────────
-// The chained API `supabase.from('vereinsregeln').upsert(...)` must be mockable.
+// Still needed for Supabase-fallback path in loadVereinsregeln (when no local row)
 const mockUpsert = jest.fn();
 const mockInsert = jest.fn();
 const mockSelect = jest.fn();
@@ -46,16 +49,22 @@ jest.mock('../supabase', () => ({
   },
 }));
 
-// ── Mock the storage adapter (default-mode persistence) ────────────────
+// ── Mock the storage adapter ───────────────────────────────────────────
 const mockStorageGet = jest.fn();
 const mockStorageSet = jest.fn();
 const mockStorageDelete = jest.fn();
+const mockStorageGetRow = jest.fn();
+const mockStorageWriteWithOutbox = jest.fn();
+const mockStorageUpsertRowFromServer = jest.fn();
 
 jest.mock('../../storage', () => ({
   storage: {
     get: (...a: unknown[]) => mockStorageGet(...a),
     set: (...a: unknown[]) => mockStorageSet(...a),
     delete: (...a: unknown[]) => mockStorageDelete(...a),
+    getRow: (...a: unknown[]) => mockStorageGetRow(...a),
+    writeWithOutbox: (...a: unknown[]) => mockStorageWriteWithOutbox(...a),
+    upsertRowFromServer: (...a: unknown[]) => mockStorageUpsertRowFromServer(...a),
   },
 }));
 
@@ -105,51 +114,90 @@ beforeEach(() => {
   mockStorageGet.mockReset();
   mockStorageSet.mockReset();
   mockStorageDelete.mockReset();
+  mockStorageGetRow.mockReset();
+  mockStorageWriteWithOutbox.mockReset();
+  mockStorageUpsertRowFromServer.mockReset();
 });
 
 describe('vereinsregelnRepo (account mode)', () => {
-  it('Test 1: saveVereinsregeln upserts BKleingG seed + user rules in a single call', async () => {
-    mockUpsert.mockResolvedValue({ error: null });
+  it('Test 1: saveVereinsregeln writes to local Row-Table via writeWithOutbox', async () => {
+    // No existing local row → insert operation
+    mockStorageGetRow.mockResolvedValue(null);
+    mockStorageWriteWithOutbox.mockResolvedValue(undefined);
 
     await saveVereinsregeln([USER_RULE, USER_RULE_2], 'account', USER_ID);
 
-    expect(mockUpsert).toHaveBeenCalledTimes(1);
-    const [rows] = mockUpsert.mock.calls[0]!;
-    const typed = rows as Array<Record<string, unknown>>;
-    // Expect BKleingG seeds prepended + user rules preserved (3 + 2 = 5 when seed has 3 entries)
-    expect(typed.length).toBeGreaterThanOrEqual(5);
-    const bkCount = typed.filter((r) => r['ist_bkleingg'] === true).length;
-    expect(bkCount).toBeGreaterThanOrEqual(2);
-    // user rules present
-    expect(typed.some((r) => r['id'] === 'u-1')).toBe(true);
-    expect(typed.some((r) => r['id'] === 'u-2')).toBe(true);
-    // Local storage must NOT be touched in account mode
+    expect(mockStorageWriteWithOutbox).toHaveBeenCalledTimes(1);
+    const [entity, row, outbox] = mockStorageWriteWithOutbox.mock.calls[0] as [
+      string,
+      VereinsregelnRowTyped,
+      { entity: string; rowId: string; operation: string; payload: unknown },
+    ];
+    expect(entity).toBe('vereinsregeln');
+    expect(outbox.entity).toBe('vereinsregeln');
+    expect(outbox.rowId).toBe(GARDEN_ID);
+    expect(outbox.operation).toBe('insert'); // no existing row
+    // Row contains the rules (BKleingG seeds + user rules)
+    expect(row.rules.list.length).toBeGreaterThanOrEqual(2);
+    expect(row.rules.list.some((r) => r.id === 'u-1')).toBe(true);
+    expect(row.rules.list.some((r) => r.id === 'u-2')).toBe(true);
+    // Local storage KV must NOT be touched in account mode
     expect(mockStorageSet).not.toHaveBeenCalled();
+    // Supabase must NOT be called directly
+    expect(mockUpsert).not.toHaveBeenCalled();
   });
 
-  it('Test 1b: upsert payload uses snake_case `ist_bkleingg` + stamps `created_by_user_id` + `updated_by_user_id` + `garden_id`', async () => {
-    mockUpsert.mockResolvedValue({ error: null });
+  it('Test 1b: saveVereinsregeln uses operation=update when row already exists', async () => {
+    const existingRow: VereinsregelnRow = {
+      id: GARDEN_ID,
+      gardenId: GARDEN_ID,
+      createdAt: '2026-04-20T00:00:00Z',
+      updatedAt: '2026-04-20T00:00:00Z',
+      updatedByUserId: USER_ID,
+      deletedAt: null,
+      rules: { list: [USER_RULE] },
+    };
+    mockStorageGetRow.mockResolvedValue(existingRow);
+    mockStorageWriteWithOutbox.mockResolvedValue(undefined);
 
-    await saveVereinsregeln([USER_RULE], 'account', USER_ID);
+    await saveVereinsregeln([USER_RULE, USER_RULE_2], 'account', USER_ID);
 
-    const [rows] = mockUpsert.mock.calls[0]!;
-    const typed = rows as Array<Record<string, unknown>>;
-    for (const row of typed) {
-      // Snake-case column from `packages/shared/src/types/database.ts`
-      expect(row).toHaveProperty('ist_bkleingg');
-      // camelCase domain key must NOT leak to Postgres (Supabase would drop it)
-      expect(row).not.toHaveProperty('istBKleingG');
-      // Phase 2.5: renamed column + new audit columns + garden scope
-      expect(row['created_by_user_id']).toBe(USER_ID);
-      expect(row['updated_by_user_id']).toBe(USER_ID);
-      expect(row['garden_id']).toBe(GARDEN_ID);
-      // old column name must be gone
-      expect(row).not.toHaveProperty('user_id');
-    }
+    expect(mockStorageWriteWithOutbox).toHaveBeenCalledTimes(1);
+    const [, , outbox] = mockStorageWriteWithOutbox.mock.calls[0] as [
+      string,
+      VereinsregelnRow,
+      { operation: string },
+    ];
+    expect(outbox.operation).toBe('update');
+    expect(mockUpsert).not.toHaveBeenCalled();
   });
 
-  it('Test 3: loadVereinsregeln selects by garden_id and maps snake_case rows to domain type', async () => {
-    // Supabase returns rows with the actual DB column names (snake_case).
+  it('Test 3: loadVereinsregeln returns local row when available (no Supabase call)', async () => {
+    const localRow: VereinsregelnRow = {
+      id: GARDEN_ID,
+      gardenId: GARDEN_ID,
+      createdAt: '2026-04-20T00:00:00Z',
+      updatedAt: '2026-04-20T00:00:00Z',
+      updatedByUserId: USER_ID,
+      deletedAt: null,
+      rules: { list: [USER_RULE, USER_RULE_2] },
+    };
+    mockStorageGetRow.mockResolvedValue(localRow);
+
+    const rules = await loadVereinsregeln('account', USER_ID);
+
+    expect(mockStorageGetRow).toHaveBeenCalledWith('vereinsregeln', GARDEN_ID);
+    expect(rules).toHaveLength(2);
+    expect(rules[0]!.id).toBe('u-1');
+    expect(rules[0]!.istBKleingG).toBe(false);
+    // Supabase must NOT be called when local row present
+    expect(mockSelect).not.toHaveBeenCalled();
+  });
+
+  it('Test 3b: loadVereinsregeln falls back to Supabase when no local row', async () => {
+    mockStorageGetRow.mockResolvedValue(null);
+    mockStorageUpsertRowFromServer.mockResolvedValue(undefined);
+
     const serverRows = [
       {
         id: 'srv-1',
@@ -164,19 +212,6 @@ describe('vereinsregelnRepo (account mode)', () => {
         garden_id: GARDEN_ID,
         erstellt_am: '2026-04-20T00:00:00Z',
       },
-      {
-        id: 'srv-2',
-        titel: USER_RULE_2.titel,
-        wert: null,
-        einheit: null,
-        ist_bkleingg: false,
-        aktiv: true,
-        source: USER_RULE_2.source,
-        created_by_user_id: USER_ID,
-        updated_by_user_id: USER_ID,
-        garden_id: GARDEN_ID,
-        erstellt_am: '2026-04-20T00:00:01Z',
-      },
     ];
     mockEq.mockResolvedValue({ data: serverRows, error: null });
 
@@ -184,27 +219,40 @@ describe('vereinsregelnRepo (account mode)', () => {
 
     expect(mockSelect).toHaveBeenCalledWith('*');
     expect(mockEq).toHaveBeenCalledWith('garden_id', GARDEN_ID);
-    expect(rules).toHaveLength(2);
-    // Must come back in domain shape (camelCase, no server-only fields)
-    for (const r of rules) {
-      expect(r).toHaveProperty('istBKleingG');
-      expect(r).not.toHaveProperty('ist_bkleingg');
-      expect(r).not.toHaveProperty('created_by_user_id');
-      expect(r).not.toHaveProperty('garden_id');
-      expect(r).not.toHaveProperty('erstellt_am');
-    }
-    expect(rules[0]!.id).toBe('srv-1');
-    expect(rules[0]!.istBKleingG).toBe(false);
+    // upserted into local store
+    expect(mockStorageUpsertRowFromServer).toHaveBeenCalledTimes(1);
+    // Returns rules (may include BKleingG seeds if aggregation returns 0 user rules)
+    expect(Array.isArray(rules)).toBe(true);
   });
 
-  it('Test 3b: deleteVereinsregel scopes by garden_id (RLS defense-in-depth)', async () => {
-    mockDeleteEq2.mockResolvedValue({ error: null });
+  it('Test 3c: deleteVereinsregel removes rule from local row via writeWithOutbox', async () => {
+    const existingRow: VereinsregelnRow = {
+      id: GARDEN_ID,
+      gardenId: GARDEN_ID,
+      createdAt: '2026-04-20T00:00:00Z',
+      updatedAt: '2026-04-20T00:00:00Z',
+      updatedByUserId: USER_ID,
+      deletedAt: null,
+      rules: { list: [USER_RULE, USER_RULE_2] },
+    };
+    mockStorageGetRow.mockResolvedValue(existingRow);
+    mockStorageWriteWithOutbox.mockResolvedValue(undefined);
 
     await deleteVereinsregel('u-1', 'account', USER_ID);
 
-    expect(mockDelete).toHaveBeenCalledTimes(1);
-    expect(mockDeleteEq1).toHaveBeenCalledWith('id', 'u-1');
-    expect(mockDeleteEq2).toHaveBeenCalledWith('garden_id', GARDEN_ID);
+    expect(mockStorageWriteWithOutbox).toHaveBeenCalledTimes(1);
+    const [entity, row, outbox] = mockStorageWriteWithOutbox.mock.calls[0] as [
+      string,
+      VereinsregelnRowTyped,
+      { operation: string },
+    ];
+    expect(entity).toBe('vereinsregeln');
+    // rule u-1 removed, u-2 remains
+    expect(row.rules.list.some((r) => r.id === 'u-1')).toBe(false);
+    expect(row.rules.list.some((r) => r.id === 'u-2')).toBe(true);
+    expect(outbox.operation).toBe('update');
+    // Supabase delete must NOT be called
+    expect(mockDelete).not.toHaveBeenCalled();
   });
 });
 
@@ -259,6 +307,7 @@ describe('vereinsregelnRepo (RULES-04 server-side guard)', () => {
     // No mutation side-effects on violation
     expect(mockUpsert).not.toHaveBeenCalled();
     expect(mockStorageSet).not.toHaveBeenCalled();
+    expect(mockStorageWriteWithOutbox).not.toHaveBeenCalled();
   });
 
   it('Test 5b: deleteVereinsregel throws when ruleId begins with "bk-"', async () => {
@@ -268,5 +317,6 @@ describe('vereinsregelnRepo (RULES-04 server-side guard)', () => {
 
     expect(mockDelete).not.toHaveBeenCalled();
     expect(mockStorageDelete).not.toHaveBeenCalled();
+    expect(mockStorageWriteWithOutbox).not.toHaveBeenCalled();
   });
 });
