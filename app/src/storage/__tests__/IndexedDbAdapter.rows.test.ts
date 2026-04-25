@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
 import { IndexedDbAdapter } from '../IndexedDbAdapter';
 import { runMigrations } from '../migrations';
-import { runStorageContractTests } from './RowTables.contract.test';
+import { runStorageContractTests } from './RowTables.contract';
 
 runStorageContractTests(
   'IndexedDbAdapter',

@@ -1,6 +1,6 @@
 import { SqliteAdapter } from '../SqliteAdapter';
 import { runMigrations } from '../migrations';
-import { runStorageContractTests } from './RowTables.contract.test';
+import { runStorageContractTests } from './RowTables.contract';
 
 // expo-sqlite is mocked via jest-expo preset; SqliteAdapter works in Node test env
 // via the jest-expo mock which provides an in-memory SQLite implementation.
