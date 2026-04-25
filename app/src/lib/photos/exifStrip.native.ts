@@ -3,7 +3,8 @@
 // then expo-image-manipulator to re-encode the JPEG (guaranteed EXIF-free).
 //
 // NFR-05: expo-image-manipulator re-encode drops EXIF segment by default.
-import { readAsync } from '@lodev09/react-native-exify';
+// Note: @lodev09/react-native-exify exports `read` (not `readAsync`).
+import { read } from '@lodev09/react-native-exify';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import type { StrippedPhoto, StripExifOptions } from './exifStrip';
 
@@ -15,7 +16,7 @@ export async function stripExifAndExtractGps(
   let gps: { lat: number; lng: number } | null = null;
   if (options.optIn) {
     try {
-      const exif = await readAsync(uri);
+      const exif = await read(uri);
       if (
         exif &&
         typeof exif.GPSLatitude === 'number' &&
