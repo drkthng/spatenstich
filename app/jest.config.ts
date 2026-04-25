@@ -23,6 +23,7 @@ const config: Config = {
       testMatch: [
         '**/src/hooks/__tests__/**/*.test.ts?(x)',
         '**/src/lib/__tests__/**/*.test.ts?(x)',
+        '**/src/lib/sync/__tests__/**/*.test.ts?(x)',
       ],
       moduleNameMapper: {
         '^@spatenstich/shared$': '<rootDir>/../packages/shared/src/index.ts',
@@ -31,6 +32,7 @@ const config: Config = {
         '^expo-secure-store$': '<rootDir>/src/__mocks__/expo-secure-store.ts',
         '^@react-native-async-storage/async-storage$': '<rootDir>/src/__mocks__/async-storage.ts',
         '^@react-native-community/netinfo$': '<rootDir>/src/__mocks__/react-native-community-netinfo.ts',
+        '^@sentry/react-native$': '<rootDir>/src/__mocks__/sentry-react-native.ts',
       },
       transform: {
         '^.+\.tsx?$': ['ts-jest', { tsconfig: { strict: true, esModuleInterop: true, resolveJsonModule: true, jsx: 'react' } }],
