@@ -30,14 +30,12 @@ RETURNS trigger
 LANGUAGE plpgsql AS $$
 BEGIN
   IF NEW.updated_at IS NULL THEN
-    RAISE EXCEPTION 'lww_guard_missing_updated_at'
-      USING ERRCODE = 'P9010',
-            MESSAGE = 'Client must set updated_at explicitly (D-09)';
+    RAISE EXCEPTION 'Client must set updated_at explicitly (D-09): lww_guard_missing_updated_at'
+      USING ERRCODE = 'P9010';
   END IF;
   IF NEW.updated_at < OLD.updated_at THEN
-    RAISE EXCEPTION 'lww_reject_older_write'
-      USING ERRCODE = 'P9011',
-            MESSAGE = format('LWW reject: incoming=%s < existing=%s', NEW.updated_at, OLD.updated_at);
+    RAISE EXCEPTION 'LWW reject: incoming=% < existing=% (lww_reject_older_write)', NEW.updated_at, OLD.updated_at
+      USING ERRCODE = 'P9011';
   END IF;
   RETURN NEW;
 END $$;
@@ -216,7 +214,14 @@ GRANT EXECUTE ON FUNCTION public.server_now() TO authenticated;
 -- Path-Convention: <garden_id>/<photo_id>.<ext>
 -- foldername(name)[1] extrahiert garden_id aus dem ersten Path-Segment.
 -- Re-entrant: DROP IF EXISTS vor CREATE.
+-- Bucket 'photos' wird angelegt falls nicht vorhanden (ON CONFLICT DO NOTHING).
 -- ──────────────────────────────────────────────────────────────
+
+-- Bucket anlegen (idempotent — Supabase Management API nutzt dieselbe Tabelle)
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+  VALUES ('photos', 'photos', false, 52428800, ARRAY['image/jpeg','image/png','image/webp','image/heic'])
+  ON CONFLICT (id) DO NOTHING;
+
 DROP POLICY IF EXISTS "photos_garden_member_read"   ON storage.objects;
 DROP POLICY IF EXISTS "photos_garden_member_insert" ON storage.objects;
 DROP POLICY IF EXISTS "photos_garden_member_update" ON storage.objects;
