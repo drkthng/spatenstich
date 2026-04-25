@@ -10,8 +10,9 @@
 // and useAuth().signOut() we call Sentry.setUser(null) ONLY when the
 // DSN env is present (mirrors Plan 01-03's Sentry.init gating).
 import * as React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 import * as Sentry from '@sentry/react-native';
 import de from '@spatenstich/shared/i18n/de';
 import { Button } from '@/src/components/ui/button';
@@ -133,6 +134,20 @@ export default function SettingsScreen(): React.JSX.Element | null {
             {t('garden.settings_link')}
           </Text>
         </Button>
+
+        <Link href="/(app)/settings/privacy" asChild>
+          <Pressable
+            className="py-3 border-b border-stone-200 dark:border-stone-800 flex-row items-center justify-between"
+            accessibilityRole="button"
+            accessibilityLabel="Datenschutz"
+            testID="settings-privacy-link"
+          >
+            <Text className="text-base text-stone-700 dark:text-stone-200 font-semibold">
+              Datenschutz
+            </Text>
+            <Text className="text-stone-400">›</Text>
+          </Pressable>
+        </Link>
 
         {!showConfirmLogout ? (
           <Button

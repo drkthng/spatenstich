@@ -55,6 +55,26 @@ const config: Config = {
         '^.+\.tsx?$': ['ts-jest', { tsconfig: { strict: true, esModuleInterop: true, resolveJsonModule: true, jsx: 'react' } }],
       },
     },
+    {
+      // Photo-queue tests — jsdom env for Blob/fetch/URL.createObjectURL APIs
+      // lib/photos/__tests__: exifStrip.web + PhotoUploader + photoQueueRepo
+      displayName: 'photos',
+      preset: 'ts-jest',
+      testEnvironment: 'jsdom',
+      testMatch: ['**/src/lib/photos/__tests__/**/*.test.ts?(x)'],
+      setupFilesAfterEnv: ['<rootDir>/src/lib/photos/__tests__/setup.ts'],
+      moduleNameMapper: {
+        '^@spatenstich/shared$': '<rootDir>/../packages/shared/src/index.ts',
+        '^react-native-url-polyfill/auto$': '<rootDir>/src/__mocks__/react-native-url-polyfill.ts',
+        '^react-native$': '<rootDir>/src/__mocks__/react-native.ts',
+        '^expo-secure-store$': '<rootDir>/src/__mocks__/expo-secure-store.ts',
+        '^@react-native-async-storage/async-storage$': '<rootDir>/src/__mocks__/async-storage.ts',
+        '^@sentry/react-native$': '<rootDir>/src/__mocks__/sentry.ts',
+      },
+      transform: {
+        '^.+\\.tsx?$': ['ts-jest', { tsconfig: { strict: true, esModuleInterop: true, resolveJsonModule: true, jsx: 'react' } }],
+      },
+    },
   ],
   collectCoverageFrom: ['src/**/*.{ts,tsx}'],
 };
