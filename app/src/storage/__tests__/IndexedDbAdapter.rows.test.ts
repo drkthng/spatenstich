@@ -20,7 +20,6 @@ describe('IndexedDbAdapter Web-specific', () => {
     const adapter = new IndexedDbAdapter(`upgrade-test-${Date.now()}-${Math.random()}`);
     await runMigrations(adapter);
     // __createRowTablesV3 wirft, falls Stores fehlen:
-    // @ts-expect-error private method exposed for test
     await (adapter as any).__createRowTablesV3();
   });
 
