@@ -17,6 +17,7 @@ import {
   profileFromDb,
   normalizeDisplayName,
 } from './mappers/rowMappers';
+import { scheduleWriteDebounced } from './sync/SyncTriggers';
 
 const PROFILE_KEY = 'profile';
 
@@ -98,6 +99,7 @@ export async function saveProfile(patch: ProfilePatch): Promise<void> {
         operation: existing ? 'update' : 'insert',
         payload: updated as unknown as Record<string, unknown>,
       });
+      scheduleWriteDebounced();
     } catch (cause) {
       throw new OutboxEnqueueError('profiles', userId, cause);
     }

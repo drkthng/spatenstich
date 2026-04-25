@@ -17,6 +17,8 @@ import { Stack, SplashScreen, Redirect, useSegments } from 'expo-router';
 import { AuthProvider, useAuth } from '@/src/lib/auth';
 import { useAuthStore } from '@/src/stores/authStore';
 import { ensureDefaultGardenForUser } from '@/src/lib/inviteCodeRepo';
+import { registerSyncTriggers } from '@/src/lib/sync/SyncTriggers';
+import { getSyncWorker } from '@/src/lib/sync/SyncWorker';
 import '../global.css';
 
 Sentry.init({
@@ -92,6 +94,25 @@ function GuardedStack(): React.JSX.Element {
       cancelled = true;
     };
   }, [identity, mode, activeGardenId, setActiveGarden]);
+
+  // ── Phase 3 Plan 03-04 — SyncWorker-Bootstrap (S-6 Pattern) ────────────────
+  // Registers SyncTriggers (NetInfo + AppState) exactly once after auth + garden ready.
+  // useRef-Guard prevents double-registration in React 18 Concurrent/StrictMode.
+  const syncBooted = React.useRef(false);
+  React.useEffect(() => {
+    if (syncBooted.current) return;
+    if (!identity || mode !== 'account' || !activeGardenId) return;
+    syncBooted.current = true;
+    const unregister = registerSyncTriggers();
+    // Initial-Pull (Reconnect-Equivalent für Fresh-Boot) via Klassen-API
+    getSyncWorker().syncAll().catch((e) => {
+      if (__DEV__) console.warn('[layout] initial syncAll failed', e);
+    });
+    return () => {
+      unregister();
+      syncBooted.current = false;
+    };
+  }, [identity, mode, activeGardenId]);
 
   if (isLoading) {
     // Splash still shown via SplashController; render nothing underneath.
