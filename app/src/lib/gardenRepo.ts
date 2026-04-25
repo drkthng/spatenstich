@@ -24,6 +24,7 @@ import {
   localToGardenView,
   gardenFromDb,
 } from './mappers/rowMappers';
+import { scheduleWriteDebounced } from './sync/SyncTriggers';
 
 // ── Re-export for backward compat (UI callers import from gardenRepo) ─────
 export {
@@ -146,6 +147,7 @@ export async function updateGarden(
       operation: existing ? 'update' : 'insert',
       payload: extendedUpdated as unknown as Record<string, unknown>,
     });
+    scheduleWriteDebounced();
   } catch (cause) {
     throw new OutboxEnqueueError('gardens', gardenId, cause);
   }

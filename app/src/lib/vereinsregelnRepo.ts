@@ -20,6 +20,7 @@ import {
   vereinsregelnFromDbRows,
   vereinsregelnToDbRows,
 } from './mappers/rowMappers';
+import { scheduleWriteDebounced } from './sync/SyncTriggers';
 
 const STORAGE_KEY_LOCAL = 'vereinsregeln'; // KV-Blob für local-mode
 
@@ -141,6 +142,7 @@ export async function saveVereinsregeln(
         operation: existing ? 'update' : 'insert',
         payload: updated as unknown as Record<string, unknown>,
       });
+      scheduleWriteDebounced();
     } catch (cause) {
       throw new OutboxEnqueueError('vereinsregeln', gardenId, cause);
     }
@@ -173,6 +175,7 @@ export async function deleteVereinsregel(
         operation: 'update', // Row bleibt bestehen — nur rule aus liste entfernt
         payload: updated as unknown as Record<string, unknown>,
       });
+      scheduleWriteDebounced();
     } catch (cause) {
       throw new OutboxEnqueueError('vereinsregeln', gardenId, cause);
     }
