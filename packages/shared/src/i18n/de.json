@@ -168,5 +168,30 @@
     "time_hours_ago": "vor {n} h",
     "time_days_ago": "vor {n} Tagen",
     "time_on": "am {date}"
+  },
+  "sync": {
+    "badge": {
+      "synced": "Synchronisiert",
+      "syncing": "Synchronisiere \u2026",
+      "degraded": "Probleme beim Synchronisieren",
+      "offline": "Offline",
+      "pendingCount": "{n} ausstehend",
+      "failedCount": "{n} fehlgeschlagen"
+    },
+    "detail": {
+      "title": "Sync-Status",
+      "pendingHeader": "Ausstehend",
+      "failedHeader": "Fehlgeschlagen",
+      "empty": "Alle \u00c4nderungen sind synchronisiert.",
+      "entryLabel": "{entity} \u00b7 {op}",
+      "retryButton": "Erneut versuchen",
+      "discardButton": "Verwerfen",
+      "discardConfirm": "Änderung wirklich verwerfen? Dein lokaler Wert wird durch den Server-Stand überschrieben.",
+      "discardConfirmYes": "Verwerfen",
+      "discardConfirmNo": "Abbrechen",
+      "lastError": "Letzter Fehler",
+      "attemptsLabel": "Versuche: {n}",
+      "conflictLabel": "Konflikt — älterer Stand, wurde verworfen."
+    }
   }
 }
