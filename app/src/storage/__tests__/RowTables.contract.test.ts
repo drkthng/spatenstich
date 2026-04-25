@@ -47,7 +47,7 @@ export function runStorageContractTests(
           entity: 'gardens',
           rowId: row.id,
           operation: 'insert',
-          payload: row,
+          payload: row as unknown as Record<string, unknown>,
         });
         const loaded = await adapter.getRow<GardenRow>('gardens', row.id);
         expect(loaded).toMatchObject({ id: row.id, name: 'Testgarten' });
@@ -86,7 +86,7 @@ export function runStorageContractTests(
         for (let i = 0; i < 3; i++) {
           const row = sampleGarden({ id: `g-${i}` });
           await adapter.writeWithOutbox('gardens', row, {
-            entity: 'gardens', rowId: row.id, operation: 'insert', payload: row,
+            entity: 'gardens', rowId: row.id, operation: 'insert', payload: row as unknown as Record<string, unknown>,
           });
           // kleine künstliche Zeitverzögerung im Adapter via Date.now() sicherstellen
         }
@@ -99,7 +99,7 @@ export function runStorageContractTests(
       it('deleteOutboxEntry entfernt nur den angegebenen Eintrag', async () => {
         const row = sampleGarden();
         await adapter.writeWithOutbox('gardens', row, {
-          entity: 'gardens', rowId: row.id, operation: 'insert', payload: row,
+          entity: 'gardens', rowId: row.id, operation: 'insert', payload: row as unknown as Record<string, unknown>,
         });
         const [entry] = await adapter.listOutboxEntries();
         await adapter.deleteOutboxEntry(entry!.id);
@@ -109,7 +109,7 @@ export function runStorageContractTests(
       it('updateOutboxEntry erhöht attempts + schreibt lastError', async () => {
         const row = sampleGarden();
         await adapter.writeWithOutbox('gardens', row, {
-          entity: 'gardens', rowId: row.id, operation: 'insert', payload: row,
+          entity: 'gardens', rowId: row.id, operation: 'insert', payload: row as unknown as Record<string, unknown>,
         });
         const [entry] = await adapter.listOutboxEntries();
         await adapter.updateOutboxEntry(entry!.id, { attempts: 2, lastError: 'network' });
