@@ -149,6 +149,20 @@ export default function SettingsScreen(): React.JSX.Element | null {
           </Pressable>
         </Link>
 
+        <Link href="/(app)/settings/sync" asChild>
+          <Pressable
+            className="py-3 border-b border-stone-200 dark:border-stone-800 flex-row items-center justify-between"
+            accessibilityRole="button"
+            accessibilityLabel="Sync-Status"
+            testID="settings-link-sync"
+          >
+            <Text className="text-base text-stone-700 dark:text-stone-200 font-semibold">
+              Sync-Status
+            </Text>
+            <Text className="text-stone-400">›</Text>
+          </Pressable>
+        </Link>
+
         {!showConfirmLogout ? (
           <Button
             variant="ghost"
