@@ -1,6 +1,7 @@
 // gardenRepo unit tests — Plan 02.5-03 Task 02 (converts Wave-0 it.todo stubs).
 // Pattern: vereinsregelnRepo.test.ts — jest.mock('../supabase') with chained-call spies.
 // D-16 Owner-Rights coverage: deleteGarden (4 cases) + transferOwnership (5 cases).
+// Phase 3 Plan 03-03: updated to match offline-first refactor — storage-first reads + writeWithOutbox.
 //
 // NOTE: Project uses Jest (not Vitest) — see app/package.json devDependencies.
 // describe/it are globals provided by jest-expo; no explicit import needed.
@@ -20,6 +21,32 @@ jest.mock('../supabase', () => ({
   },
 }));
 
+const mockStorageGetRow = jest.fn();
+const mockStorageGetRowsByGarden = jest.fn();
+const mockStorageWriteWithOutbox = jest.fn();
+const mockStorageUpsertRowFromServer = jest.fn();
+
+jest.mock('../../storage', () => ({
+  storage: {
+    getRow: (...a: unknown[]) => mockStorageGetRow(...a),
+    getRowsByGarden: (...a: unknown[]) => mockStorageGetRowsByGarden(...a),
+    writeWithOutbox: (...a: unknown[]) => mockStorageWriteWithOutbox(...a),
+    upsertRowFromServer: (...a: unknown[]) => mockStorageUpsertRowFromServer(...a),
+  },
+}));
+
+// Mock NetInfo — online by default (removeMember, deleteGarden, transferOwnership are online-only)
+jest.mock('@react-native-community/netinfo', () => ({
+  __esModule: true,
+  default: {
+    fetch: jest.fn().mockResolvedValue({
+      isConnected: true,
+      isInternetReachable: true,
+      type: 'wifi',
+    }),
+  },
+}));
+
 // Lazy import AFTER mocks.
 import * as repo from '../gardenRepo';
 import {
@@ -28,10 +55,34 @@ import {
   CannotTransferToSelfError,
   TargetNotMemberError,
 } from '../gardenRepo';
+import type { GardenRow } from '@spatenstich/shared';
+
+const GARDEN_ROW: GardenRow = {
+  id: 'g-1',
+  name: 'Dirk Garten',
+  ownerUserId: 'u-1',
+  createdAt: '2026-04-23T10:00:00Z',
+  updatedAt: '2026-04-23T10:00:00Z',
+  updatedByUserId: 'u-1',
+  deletedAt: null,
+};
 
 beforeEach(() => {
   mockFrom.mockReset();
   mockRpc.mockReset();
+  mockStorageGetRow.mockReset();
+  mockStorageGetRowsByGarden.mockReset();
+  mockStorageWriteWithOutbox.mockReset();
+  mockStorageUpsertRowFromServer.mockReset();
+  // Default: online
+  const netinfo = jest.requireMock('@react-native-community/netinfo') as {
+    default: { fetch: jest.Mock };
+  };
+  netinfo.default.fetch.mockResolvedValue({
+    isConnected: true,
+    isInternetReachable: true,
+    type: 'wifi',
+  });
 });
 
 // Helper: install a `from(...).select(...).eq(...).maybeSingle()` chain that
@@ -56,7 +107,24 @@ describe('gardenRepo.loadGarden', () => {
     );
   });
 
-  it('returns Garden on success (fromRow maps snake→camel)', async () => {
+  it('returns Garden on success (local Row read, no Supabase call)', async () => {
+    // Offline-first: local Row present — no Supabase call
+    mockStorageGetRow.mockResolvedValue({
+      ...GARDEN_ROW,
+      plz: '12043',
+      klimazone: 4,
+      archetype: 'selbstversorger',
+    });
+
+    const g = await repo.loadGarden('account', 'g-1');
+    expect(g).not.toBeNull();
+    expect(g?.name).toBe('Dirk Garten');
+    expect(mockFrom).not.toHaveBeenCalled();
+  });
+
+  it('falls back to Supabase when local row is missing (maps snake→camel)', async () => {
+    mockStorageGetRow.mockResolvedValue(null);
+    mockStorageUpsertRowFromServer.mockResolvedValue(undefined);
     mockSingleSelect({
       id: 'g-1',
       name: 'Dirk Garten',
@@ -68,21 +136,24 @@ describe('gardenRepo.loadGarden', () => {
       created_at: '2026-04-23T10:00:00Z',
       updated_at: '2026-04-23T10:00:00Z',
     });
+
     const g = await repo.loadGarden('account', 'g-1');
     expect(g).not.toBeNull();
     expect(g?.name).toBe('Dirk Garten');
-    expect(g?.plz).toBe('12043');
     expect(g?.createdByUserId).toBe('u-1');
-    expect(g?.updatedByUserId).toBe('u-1');
+    expect(mockFrom).toHaveBeenCalledWith('gardens');
+    expect(mockStorageUpsertRowFromServer).toHaveBeenCalledTimes(1);
   });
 
   it('returns null when row not found (RLS rejected / maybeSingle)', async () => {
+    mockStorageGetRow.mockResolvedValue(null);
     mockSingleSelect(null);
     const g = await repo.loadGarden('account', 'g-missing');
     expect(g).toBeNull();
   });
 
   it('throws on unexpected supabase error', async () => {
+    mockStorageGetRow.mockResolvedValue(null);
     mockSingleSelect(null, { code: '500', message: 'boom' });
     await expect(repo.loadGarden('account', 'g-1')).rejects.toMatchObject({
       code: '500',
@@ -97,7 +168,10 @@ describe('gardenRepo.loadMembers', () => {
     );
   });
 
-  it('returns flat member list with display names from profiles embed', async () => {
+  it('returns flat member list with display names from profiles embed (Supabase fallback when local empty)', async () => {
+    // No local members — falls back to Supabase
+    mockStorageGetRowsByGarden.mockResolvedValue([]);
+
     const eq = jest.fn().mockResolvedValue({
       data: [
         {
@@ -129,6 +203,7 @@ describe('gardenRepo.loadMembers', () => {
   });
 
   it('returns empty array when no members', async () => {
+    mockStorageGetRowsByGarden.mockResolvedValue([]);
     const eq = jest.fn().mockResolvedValue({ data: [], error: null });
     const select = jest.fn(() => ({ eq }));
     mockFrom.mockReturnValue({ select });
@@ -145,24 +220,31 @@ describe('gardenRepo.updateGarden', () => {
     ).rejects.toThrow('gardens are account-only');
   });
 
-  it('updates with updated_by_user_id stamped (Pattern 6)', async () => {
-    const eq = jest.fn().mockResolvedValue({ data: null, error: null });
-    const update = jest.fn(() => ({ eq }));
-    mockFrom.mockReturnValue({ update });
+  it('writes via writeWithOutbox with updated fields stamped (Pattern 6)', async () => {
+    // Existing row present → operation='update'
+    mockStorageGetRow.mockResolvedValue(GARDEN_ROW);
+    mockStorageWriteWithOutbox.mockResolvedValue(undefined);
 
     await repo.updateGarden('account', 'g-1', 'u-1', {
       name: 'Dirks neuer Garten',
       plz: '99999',
     });
 
-    expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'Dirks neuer Garten',
-        plz: '99999',
-        updated_by_user_id: 'u-1',
-      }),
-    );
-    expect(eq).toHaveBeenCalledWith('id', 'g-1');
+    expect(mockStorageWriteWithOutbox).toHaveBeenCalledTimes(1);
+    const [entity, row, outbox] = mockStorageWriteWithOutbox.mock.calls[0] as [
+      string,
+      GardenRow & { plz?: string },
+      { entity: string; rowId: string; operation: string; payload: unknown },
+    ];
+    expect(entity).toBe('gardens');
+    expect(row.name).toBe('Dirks neuer Garten');
+    expect(row.plz).toBe('99999');
+    expect(row.updatedByUserId).toBe('u-1');
+    expect(outbox.entity).toBe('gardens');
+    expect(outbox.rowId).toBe('g-1');
+    expect(outbox.operation).toBe('update');
+    // Supabase must NOT be called for updateGarden
+    expect(mockFrom).not.toHaveBeenCalled();
   });
 });
 
