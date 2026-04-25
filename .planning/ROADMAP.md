@@ -100,7 +100,7 @@
   - [x] 03-03-PLAN.md — Repo-Umbau offline-first (gardenRepo/vereinsregelnRepo/profileRepo/inviteCodeRepo) + migrateLocalToAccount Bootstrap (Wave 3)
   - [x] 03-04-PLAN.md — SyncWorker (push/pull/LWW/Retry-Backoff) + SyncTriggers (NetInfo/AppState/debounced) + 2-User-Reconnect-Integration-Test (Wave 3)
   - [x] 03-05-PLAN.md — Photo-Queue + EXIF-Strip (native/web) + PhotoUploader (Storage + RPC) + Opt-in-Toggle (Wave 4)
-  - [ ] 03-06-PLAN.md — Sync-Status-UI (Badge + Detail-Screen mit Retry/Verwerfen) + SC-5 30s-Reconnect-Test (Wave 4)
+  - [x] 03-06-PLAN.md — Sync-Status-UI (Badge + Detail-Screen mit Retry/Verwerfen) + SC-5 30s-Reconnect-Test (Wave 4)
 **UI hint**: partial (Sync-Status-Badge + Detail-Screen + Datenschutz-Toggle)
 
 ### Phase 4: Garten-Erfassung (M1)
