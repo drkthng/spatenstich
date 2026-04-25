@@ -7,4 +7,19 @@ export * from './constants/klimazonen';
 export * from './constants/archetypes';
 export * from './constants/vereinsregeln';
 export * from './utils';
+// Phase 3: Row-Types + Entity-Definitions
+export type {
+  EntityName,
+  RowBase,
+  GardenRow,
+  GardenMemberRow,
+  ProfileRow,
+  VereinsregelnRow,
+  InviteCodeRow,
+  PhotoQueueRow,
+  AnyRow,
+  OutboxEntry,
+  SyncStateEntry,
+} from './types/entities';
+export type { QueryOptions } from './types/storage';
 // i18n JSON wird via Pfad-Import konsumiert: `@spatenstich/shared/i18n/de`
