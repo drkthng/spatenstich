@@ -95,7 +95,7 @@
   4. The app runs on desktop browser (Chrome/Safari) with IndexedDB as the storage backend — the same plan data is visible on both iPhone and browser after sync
   5. Dirk und Frau editieren denselben Plan offline auf zwei Geräten; bei Reconnect triggert LWW-Merge ohne manuelle Konfliktauflösung; "zuletzt bearbeitet von"-Hinweis zeigt den Gewinner
 **Plans**: 6 plans
-  - [ ] 03-01-PLAN.md — Supabase-Migrationen (LWW-Trigger + deleted_at + photo_queue + Storage-RLS + enqueue_photo_analysis RPC) + db push --linked + Types Regen (Wave 1)
+  - [x] 03-01-PLAN.md — Supabase-Migrationen (LWW-Trigger + deleted_at + photo_queue + Storage-RLS + enqueue_photo_analysis RPC) + db push --linked + Types Regen (Wave 1)
   - [ ] 03-02-PLAN.md — StorageAdapter Row-Tables + sync_outbox + sync_state (SQLite + IndexedDB + Contract-Tests) (Wave 2)
   - [ ] 03-03-PLAN.md — Repo-Umbau offline-first (gardenRepo/vereinsregelnRepo/profileRepo/inviteCodeRepo) + migrateLocalToAccount Bootstrap (Wave 3)
   - [ ] 03-04-PLAN.md — SyncWorker (push/pull/LWW/Retry-Backoff) + SyncTriggers (NetInfo/AppState/debounced) + 2-User-Reconnect-Integration-Test (Wave 3)
