@@ -9,6 +9,7 @@ const config: Config = {
       testMatch: ['**/src/storage/__tests__/**/*.test.ts'],
       moduleNameMapper: {
         '^@spatenstich/shared$': '<rootDir>/../packages/shared/src/index.ts',
+        '^expo-sqlite$': '<rootDir>/src/__mocks__/expo-sqlite.ts',
       },
       transform: {
         '^.+\.tsx?$': ['ts-jest', { tsconfig: { strict: true, esModuleInterop: true, resolveJsonModule: true } }],
