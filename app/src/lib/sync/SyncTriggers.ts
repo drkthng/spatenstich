@@ -5,6 +5,7 @@
 import NetInfo from '@react-native-community/netinfo';
 import { AppState, type AppStateStatus } from 'react-native';
 import { getSyncWorker } from './SyncWorker';
+import { uploadPending } from '../photos/PhotoUploader';
 
 // NetInfoSubscription is the return type of addEventListener (unsubscribe function).
 // We use ReturnType to avoid importing from the internal types namespace.
@@ -50,6 +51,9 @@ export function registerSyncTriggers(): () => void {
       getSyncWorker().syncAll().catch((e) => {
         if (typeof __DEV__ !== 'undefined' && __DEV__) console.warn('[SyncTriggers] reconnect syncAll failed', e);
       });
+      uploadPending().catch((e) => {
+        if (typeof __DEV__ !== 'undefined' && __DEV__) console.warn('[SyncTriggers] reconnect uploadPending failed', e);
+      });
     }
   });
 
@@ -58,6 +62,9 @@ export function registerSyncTriggers(): () => void {
     if (lastState !== 'active' && state === 'active') {
       getSyncWorker().syncAll().catch((e) => {
         if (typeof __DEV__ !== 'undefined' && __DEV__) console.warn('[SyncTriggers] foreground syncAll failed', e);
+      });
+      uploadPending().catch((e) => {
+        if (typeof __DEV__ !== 'undefined' && __DEV__) console.warn('[SyncTriggers] foreground uploadPending failed', e);
       });
     }
     lastState = state;
