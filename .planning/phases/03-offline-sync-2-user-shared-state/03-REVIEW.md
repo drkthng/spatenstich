@@ -1,8 +1,8 @@
 ---
 phase: 03-offline-sync-2-user-shared-state
-reviewed: 2026-04-25T00:00:00Z
+reviewed: 2026-04-26T00:00:00Z
 depth: standard
-files_reviewed: 31
+files_reviewed: 32
 files_reviewed_list:
   - app/app/(app)/_layout.tsx
   - app/app/(app)/settings.tsx
@@ -25,6 +25,7 @@ files_reviewed_list:
   - app/src/lib/profileRepo.ts
   - app/src/lib/sync/SyncTriggers.ts
   - app/src/lib/sync/SyncWorker.ts
+  - app/src/lib/sync/__tests__/SyncTriggers.test.ts
   - app/src/lib/sync/backoff.ts
   - app/src/lib/sync/events.ts
   - app/src/lib/vereinsregelnRepo.ts
@@ -39,23 +40,25 @@ files_reviewed_list:
 findings:
   critical: 2
   warning: 7
-  info: 5
-  total: 14
+  info: 6
+  total: 15
 status: issues_found
 ---
 
 # Phase 03: Code Review Report
 
-**Reviewed:** 2026-04-25T00:00:00Z
+**Reviewed:** 2026-04-26T00:00:00Z
 **Depth:** standard
-**Files Reviewed:** 31
+**Files Reviewed:** 32
 **Status:** issues_found
 
 ## Summary
 
 This phase implements offline-first sync for the 2-user shared garden model: Row-Table storage adapters (SQLite + IndexedDB), a SyncWorker with push/pull/backoff, SyncTriggers, photo upload queue with EXIF stripping, and supporting UI (SyncStatusBadge, sync detail screen, privacy settings). The architecture is sound and the GDPR-by-default design (GPS opt-out) is correctly implemented.
 
-Two critical issues were found: a RPC signature mismatch that will cause photo analysis to silently fail at runtime, and a module-level URL object leak on Web that can exhaust memory over a session. Seven warnings cover logic correctness issues including a `syncBooted` ref that is never reset on logout, the backoff timer gap where the worker receives `nextDelayMs` but never actually sleeps before retrying, the `uploadPending` function not emitting a final status event, and several missing-error-handling gaps. Five info items address dead code, a missing `LIKE` injection guard, and stale type assertions.
+Two critical issues were found: a RPC signature mismatch that will cause photo analysis to silently fail at runtime, and a module-level URL object leak on Web that can exhaust memory over a session. Seven warnings cover logic correctness issues including a `syncBooted` ref that is never reset on logout, the backoff timer gap where the worker receives `nextDelayMs` but never actually sleeps before retrying, the `uploadPending` function not emitting a final status event, and several missing-error-handling gaps. Six info items address dead code, a missing `LIKE` injection guard, stale type assertions, and minor test inconsistencies.
+
+**Gap Closure (Plan 03-07):** The `uploadPending()` call has been correctly wired into both SyncTriggers reconnect handlers (NetInfo offline-to-online and AppState background-to-active). The implementation follows the established fire-and-forget `.catch()` pattern used by `syncAll()`, ensuring that a failure in photo uploads does not block sync operations and vice versa. Three new test cases cover the expected call behavior and rejection isolation. No new critical or warning-level issues were introduced by this change.
 
 ---
 
@@ -345,7 +348,7 @@ function normalizeCode(raw: string): string {
 }
 ```
 
-Or map confusables before stripping: `O → 0`, `I → 1`, etc. (standard Crockford decoding convention).
+Or map confusables before stripping: `O -> 0`, `I -> 1`, etc. (standard Crockford decoding convention).
 
 ---
 
@@ -385,6 +388,49 @@ const refreshCounts = React.useCallback(() => {
 
 ---
 
-_Reviewed: 2026-04-25T00:00:00Z_
+### IN-06: Test Functions Declared `async` Without `await` (Gap Closure Tests)
+
+**File:** `app/src/lib/sync/__tests__/SyncTriggers.test.ts:107, 114`
+
+**Issue:** Two of the three new gap closure tests (`ruft uploadPending() bei offline->online` at line 107 and `ruft uploadPending() bei background->active` at line 114) are declared `async` but contain no `await` expressions. Jest handles this correctly (the returned resolved promise is awaited), so there is no functional bug. However, this is inconsistent with the project pattern: the third new test (line 121) correctly uses `await` for a microtask flush, and the older tests in the same file use `async` only when an `await` is present.
+
+**Fix:** Remove the `async` keyword from the two test callbacks that do not use `await`, or add a comment explaining the intent:
+
+```typescript
+it('ruft uploadPending() bei offline->online (SC-2 gap closure)', () => {
+  registerSyncTriggers();
+  netInfoListener({ isConnected: false });
+  netInfoListener({ isConnected: true, isInternetReachable: true });
+  expect(uploadPending).toHaveBeenCalledTimes(1);
+});
+```
+
+---
+
+## Gap Closure: Plan 03-07 Assessment
+
+**Scope:** Wire `uploadPending()` from `PhotoUploader` into `SyncTriggers` reconnect handlers to close the SC-2 / SYNC-02 gap identified in the phase verification report.
+
+**Files changed:**
+- `app/src/lib/sync/SyncTriggers.ts` -- added import + 2 `uploadPending().catch()` call sites
+- `app/src/lib/sync/__tests__/SyncTriggers.test.ts` -- added mock + 3 test cases
+
+**Assessment:** The implementation is clean and correct. Key observations:
+
+1. **Fire-and-forget pattern is consistent.** Both `uploadPending()` and `syncAll()` are called as independent fire-and-forget promises with `.catch()` handlers. A rejection in one does not affect the other. This matches the existing pattern established in the prior phase execution.
+
+2. **Error handling is adequate.** The `.catch()` handlers log warnings only in `__DEV__` mode, consistent with the existing `syncAll()` catch handlers. Unhandled promise rejections are prevented.
+
+3. **Serialization is safe.** `uploadPending()` has its own `uploadInFlight` lock (line 17 of PhotoUploader.ts), so concurrent triggers from both NetInfo and AppState will not cause parallel upload runs.
+
+4. **Test coverage is sufficient.** The three new tests cover: (a) NetInfo reconnect triggers `uploadPending`, (b) AppState foreground triggers `uploadPending`, (c) `uploadPending` rejection does not block `syncAll`. The rejection isolation test at line 121 is particularly valuable.
+
+5. **No regressions.** The existing tests are unaffected. The new `PhotoUploader` mock is properly isolated with `jest.mock()` hoisting, and `jest.clearAllMocks()` in `beforeEach` resets it between tests.
+
+**Verdict:** Gap SC-2 / SYNC-02 is closed. No new critical or warning-level issues introduced.
+
+---
+
+_Reviewed: 2026-04-26T00:00:00Z_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
