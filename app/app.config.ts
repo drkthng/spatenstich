@@ -9,7 +9,7 @@ const config: ExpoConfig = {
   ios: { bundleIdentifier: 'de.spatenstich.app', supportsTablet: true },
   web: {
     bundler: 'metro',
-    output: 'static',
+    output: 'single',
     headers: [
       {
         source: '/(.*)',

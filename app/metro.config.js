@@ -19,6 +19,21 @@ config.resolver.nodeModulesPaths = [
 ];
 config.resolver.assetExts.push('wasm');
 
+// Resolve @spatenstich/shared subpath exports that Metro can't handle
+// (unstable_enablePackageExports breaks expo-router/entry)
+const defaultResolveRequest = config.resolver.resolveRequest;
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (moduleName === '@spatenstich/shared/i18n/de') {
+    return {
+      filePath: path.resolve(monorepoRoot, 'packages/shared/src/i18n/de.json'),
+      type: 'sourceFile',
+    };
+  }
+  return defaultResolveRequest
+    ? defaultResolveRequest(context, moduleName, platform)
+    : context.resolveRequest(context, moduleName, platform);
+};
+
 // expo-sqlite Web: SharedArrayBuffer benötigt COOP+COEP-Header
 config.server = {
   enhanceMiddleware: (middleware) => (req, res, next) => {
