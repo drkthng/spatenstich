@@ -1,12 +1,15 @@
 // Vereinsregeln Checklist Screen — Plan 02-04 Task 2-04-02 Behavior 11.
 // User toggles entries from STANDARD_VEREINSREGELN_CHECKLIST and optionally
 // tweaks the numeric value; on save, selected items become VereinsRegel rows
-// (istBKleingG=false) and are persisted via the repo (account → Supabase,
-// local → StorageAdapter).
+// (istBKleingG=false) and are persisted via the repo (account -> Supabase,
+// local -> StorageAdapter).
+//
+// Bug-fix 2026-04-30: Bridge saved rules into profileStore so profile overview
+// reflects persisted state.
 //
 // Deviation from plan: packages/shared's VereinsregelChecklistItem does NOT
 // carry a 'kategorie' field (defined in Plan 02-01 without it). Grouping into
-// 7 categories is therefore impossible without extending the shared type —
+// 7 categories is therefore impossible without extending the shared type --
 // a change out of scope here. The checklist renders as a flat list with each
 // item's own label; the 7-category grouping is deferred to a future plan that
 // extends the shared shape. See SUMMARY.md Deviations.
@@ -22,6 +25,7 @@ import {
 import de from '@spatenstich/shared/i18n/de';
 import { Button } from '@/src/components/ui/button';
 import { useAuthStore } from '@/src/stores/authStore';
+import { useProfileStore } from '@/src/stores/profileStore';
 import { useVereinsregeln } from '@/src/hooks/useVereinsregeln';
 import { saveVereinsregeln } from '@/src/lib/vereinsregelnRepo';
 
@@ -91,6 +95,8 @@ export default function VereinsregelnChecklistScreen(): React.JSX.Element {
       const keptUser = existingRules.filter((r) => !r.istBKleingG);
       const merged = [...keptBK, ...keptUser, ...newRules];
       await saveVereinsregeln(merged, mode, userId);
+      // Bridge to profileStore so profile overview reflects the saved rules.
+      useProfileStore.getState().setVereinsregeln(merged);
       router.replace('/(app)/profile/vereinsregeln/confirm' as any);
     } finally {
       setSaving(false);

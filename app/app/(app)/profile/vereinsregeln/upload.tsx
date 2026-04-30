@@ -1,10 +1,13 @@
 // Vereinsregeln Upload Screen — Plan 02-04 Task 2-04-02 Behaviors 3-6.
-// Flow: tap "PDF auswählen" → uploadVereinsregelPdf(userId)
-//       → if non-null, call extractVereinsregeln({ ..., signal })
-//       → show ExtractionLoader overlay while running
-//       → on cancel: abort signal → loader closes, stays on upload screen
-//       → on timeout/server error: loader state='error' with retry
-//       → on success: merge candidates with existing rules, navigate to confirm.
+// Flow: tap "PDF auswählen" -> uploadVereinsregelPdf(userId)
+//       -> if non-null, call extractVereinsregeln({ ..., signal })
+//       -> show ExtractionLoader overlay while running
+//       -> on cancel: abort signal -> loader closes, stays on upload screen
+//       -> on timeout/server error: loader state='error' with retry
+//       -> on success: merge candidates with existing rules, navigate to confirm.
+//
+// Bug-fix 2026-04-30: Also bridge rules into profileStore so profile overview
+// reflects the current state.
 import * as React from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -19,6 +22,7 @@ import {
 import { loadVereinsregeln } from '@/src/lib/vereinsregelnRepo';
 import { useAuthStore } from '@/src/stores/authStore';
 import { useVereinsregelnStore } from '@/src/stores/vereinsregelnStore';
+import { useProfileStore } from '@/src/stores/profileStore';
 import type { VereinsRegel } from '@spatenstich/shared';
 
 const t = (key: string): string =>
@@ -67,7 +71,10 @@ export default function VereinsregelnUploadScreen(): React.JSX.Element {
           aktiv: true,
           source: 'pdf_extraction',
         }));
-        setRules([...existing, ...drafts]);
+        const merged = [...existing, ...drafts];
+        setRules(merged);
+        // Bridge to profileStore so profile overview reflects the current state.
+        useProfileStore.getState().setVereinsregeln(merged);
         setState('idle');
         router.replace('/(app)/profile/vereinsregeln/confirm' as any);
       } catch (e) {
