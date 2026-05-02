@@ -408,7 +408,7 @@ export class SyncWorker {
       case 'profiles': {
         let q = this.supabase
           .from('profiles')
-          .select('id, display_name, created_at, updated_at, updated_by_user_id, deleted_at, locale') as any;
+          .select('id, display_name, created_at, updated_at, updated_by_user_id, deleted_at') as any;
         if (lastPullAt) q = q.gt('updated_at', lastPullAt);
         const { data, error } = await q;
         if (error) throw error;

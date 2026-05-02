@@ -25,6 +25,13 @@ export default function GartenPlanScreen(): React.JSX.Element {
       >
         <Text className="text-white font-semibold">Zum Profil</Text>
       </Pressable>
+      <Pressable
+        onPress={() => router.push('/(app)/settings' as any)}
+        className="mt-3 rounded-lg px-6 py-3 min-h-[44px] items-center justify-center active:opacity-80"
+        accessibilityRole="button"
+      >
+        <Text className="text-[#4A7C59] dark:text-[#6BAA7E] font-semibold">Einstellungen</Text>
+      </Pressable>
     </View>
   );
 }

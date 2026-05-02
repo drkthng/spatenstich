@@ -135,6 +135,16 @@ export default function SettingsScreen(): React.JSX.Element | null {
           </Text>
         </Button>
 
+        <Button
+          variant="ghost"
+          onPress={() => router.push('/(app)/join-garden' as any)}
+          testID="settings-join-garden-link"
+        >
+          <Text className="text-stone-700 dark:text-stone-200 font-semibold">
+            Garten beitreten
+          </Text>
+        </Button>
+
         <Link href="/(app)/settings/privacy" asChild>
           <Pressable
             className="py-3 border-b border-stone-200 dark:border-stone-800 flex-row items-center justify-between"
