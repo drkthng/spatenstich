@@ -37,7 +37,7 @@ Declared values (multiples of 4 only) -- inherited from Phase 2, no changes:
 |-------|-------|-----------------|-------------------|
 | xs | 4px | p-1 / gap-1 | Confidence dot-to-label gap, icon-to-text in element rows |
 | sm | 8px | p-2 / gap-2 | Photo thumbnail gap, form field internal padding |
-| md | 16px | p-4 / gap-4 | Default screen padding, capture-step card padding, element list item padding |
+| md | 16px | p-4 / gap-4 | Default screen padding, capture-step card padding, element list item padding, PlanElementRow vertical padding |
 | lg | 24px | p-6 / gap-6 | Section separation (photos section vs. dimensions section), card internal padding |
 | xl | 32px | p-8 / gap-8 | Photo overview grid outer margin, plan render container padding |
 | 2xl | 48px | p-12 / gap-12 | Analysis loading screen vertical centering |
@@ -52,13 +52,13 @@ Exceptions:
 
 ## Typography
 
-Inherited from Phase 2 -- no changes:
+Inherited from Phase 2 -- 4 sizes, 2 weights:
 
 | Role | Size | NativeWind class | Weight | NW Weight class | Line Height | Usage in Phase 4 |
 |------|------|-----------------|--------|-----------------|-------------|-------------------|
 | Body | 16pt | text-base | 400 (Regular) | font-normal | 1.5 | Capture instructions, element names, dimension input labels, plan element labels |
-| Label | 14pt | text-sm | 400 (Regular) | font-normal | 1.4 | Photo step indicator "Foto 1 von 3", confidence labels, dimension unit hints, warning sub-text |
-| Heading | 20pt | text-xl | 600 (Semibold) | font-semibold | 1.2 | Screen titles ("Garten fotografieren", "Elemente bestätigen", "Dein Gartenplan") |
+| Label | 14pt | text-sm | 400 (Regular) | font-normal | 1.4 | Photo step indicator "Foto 1 von 3", confidence labels, dimension unit hints, warning sub-text, plan element labels (SVG), dimension labels along boundary (SVG) |
+| Heading | 20pt | text-xl | 600 (Semibold) | font-semibold | 1.2 | Screen titles ("Garten fotografieren", "Elemente bestaetigen", "Dein Gartenplan") |
 | Display | 28pt | text-3xl | 600 (Semibold) | font-semibold | 1.1 | Not used in Phase 4 (no hero/splash screens) |
 
 Two weights only: 400 (font-normal) and 600 (font-semibold). No other weights.
@@ -107,7 +107,7 @@ Sketch-warm palette per CONTEXT.md D-09 ("skizzenhaft-warm, nicht-klinisch"):
 | Sitzplatz | `#C9B99A` | Fill for seating area, warm stone |
 | Unbekannt / unknown | `#B8AFA7` | Fill for unclassified elements, neutral warm gray |
 | Grid lines | `#D6CFC4` | 1m grid overlay, 0.5px stroke, 40% opacity |
-| Dimension labels | `#8B7355` | Meter labels along garden boundary, 12pt |
+| Dimension labels | `#8B7355` | Meter labels along garden boundary, 14pt (Label size) |
 
 **Rendering rules:**
 - All fills use 60-80% opacity to maintain the sketch-like transparency.
@@ -199,10 +199,10 @@ Sketch-warm palette per CONTEXT.md D-09 ("skizzenhaft-warm, nicht-klinisch"):
 
 - Full-screen overlay (same pattern as ExtractionLoader from Phase 2).
 - Centered content: Loader2 icon (48px, accent green, spinning) + heading "Garten wird analysiert..." (20pt semibold) + sub-text "Das kann 30-60 Sekunden dauern." (14pt, stone-500) + indeterminate progress bar (accent green, full width, animate-pulse).
-- Cancel button at bottom: "Abbrechen" outline button. Cancels the analysis, returns to dimensions screen.
+- Cancel button at bottom: "Analyse abbrechen" outline button. Cancels the analysis, returns to dimensions screen.
 - Budget soft-warning (NFR-03): if user has >= 50 calls today, show BudgetWarningBanner above the analysis trigger (on the dimensions screen, before overlay appears). User can still proceed.
 - Budget hard-stop (NFR-03): if user has >= 200 calls today, CTA "Analyse starten" is disabled. BudgetWarningBanner shows destructive variant: "Tageslimit erreicht. Weitere Analysen sind morgen wieder moeglich."
-- Timeout: 120s client-side. On timeout: overlay transitions to error state -- AlertCircle icon (48px, red-600) + error heading + "Erneut versuchen" primary button + "Abbrechen" outline button.
+- Timeout: 120s client-side. On timeout: overlay transitions to error state -- AlertCircle icon (48px, red-600) + error heading + "Erneut versuchen" primary button + "Analyse abbrechen" outline button.
 - On success: auto-navigate to Element-Bestaetigung screen. No manual "Continue" needed.
 
 ### Element Confirmation (D-06, PHOTO-05)
@@ -214,7 +214,7 @@ Sketch-warm palette per CONTEXT.md D-09 ("skizzenhaft-warm, nicht-klinisch"):
   - Left: element type icon (24px, color-coded per plan palette)
   - Center: element name (16pt body, e.g. "Rasenflaeche", "Gartenlaube", "Kompostplatz") + estimated size label below (14pt label, stone-500, e.g. "ca. 3 x 2 m")
   - Right: ConfidenceBadge ("sicher" / "unsicher") + Switch (accept/reject)
-  - Row height: min 52px, padding 12px vertical / 16px horizontal
+  - Row height: min 52px, padding 16px vertical / 16px horizontal
   - Accepted: full opacity, switch on (accent green track)
   - Rejected: stone-400 text, switch off (stone-300 track)
 - Footer: "Plan erstellen" primary CTA, full width, accent green. Always enabled (0 accepted elements = empty plan, per PHOTO-08).
@@ -225,9 +225,9 @@ Sketch-warm palette per CONTEXT.md D-09 ("skizzenhaft-warm, nicht-klinisch"):
 - Screen title: "Dein Gartenplan" (20pt heading).
 - Plan rendered as SVG inside a ScrollView (pinch-to-zoom deferred to Phase 5; simple ScrollView horizontal/vertical scroll for now).
 - Plan container: full width minus 32px horizontal padding. Aspect ratio derived from garden dimensions. Background: `#F5F0E8` (paper beige).
-- Grid toggle: icon button top-right (Grid3x3 icon from lucide, 24px). Toggles 1m grid overlay on/off. Default: ON.
-- Element labels: small text labels (12pt, `#8B7355`) centered on each element shape. Truncated with ellipsis if > 10 characters.
-- Dimension labels: meter values along garden boundary edges (12pt, `#8B7355`, positioned outside boundary line).
+- Grid toggle: icon button top-right (Grid3x3 icon from lucide, 24px, `accessibilityLabel="Raster ein/aus"`). Toggles 1m grid overlay on/off. Default: ON.
+- Element labels: small text labels (14pt, `#8B7355`) centered on each element shape. Truncated with ellipsis if > 10 characters.
+- Dimension labels: meter values along garden boundary edges (14pt, `#8B7355`, positioned outside boundary line).
 - No tap interaction on plan elements in Phase 4 (interactivity deferred to Phase 5 to control scope per Claude's Discretion area decision).
 - Footer: "Zum Editor" primary CTA navigates to Phase 5 entry (or placeholder if Phase 5 not yet built). Below CTA: "Erneut erfassen" text button (stone-500, 14pt) to restart the capture flow.
 - Plan data is persisted to `plan_elements` + `garden_dimensions` tables via writeWithOutbox before this screen renders.
@@ -278,6 +278,7 @@ All copy keys must exist in `packages/shared/src/i18n/de.json` under a new `capt
 | Loading sub-text | "Das kann 30-60 Sekunden dauern." | capture.analysis.loading_sub |
 | Analysis error | "Analyse fehlgeschlagen. Bitte versuche es erneut." | capture.analysis.error |
 | Retry CTA | "Erneut versuchen" | capture.analysis.retry |
+| Cancel analysis | "Analyse abbrechen" | capture.analysis.cancel |
 | **Element Confirmation** | | |
 | Screen title -- confirm | "Elemente bestaetigen" | capture.confirm.title |
 | Elements count | "{n} Elemente erkannt" | capture.confirm.count |
@@ -305,7 +306,7 @@ All copy keys must exist in `packages/shared/src/i18n/de.json` under a new `capt
 | Action | Pattern |
 |--------|---------|
 | Photo loeschen (review screen) | Long-press thumbnail reveals inline "Foto entfernen?" text + red "Entfernen" button below thumbnail. No modal. Undo not needed -- user can retake. |
-| Erneut erfassen (plan view) | Inline confirmation expands below link: "Bisherige Analyse wird verworfen. Wirklich neu erfassen?" + "Ja, neu erfassen" destructive button + "Abbrechen" text link. Pattern consistent with Phase 2 inline confirmations (no modals). |
+| Erneut erfassen (plan view) | Inline confirmation expands below link: "Bisherige Analyse wird verworfen. Wirklich neu erfassen?" + "Ja, neu erfassen" destructive button + "Nicht neu erfassen" text link. Pattern consistent with Phase 2 inline confirmations (no modals). |
 
 | Element | Copy | i18n key |
 |---------|------|----------|
@@ -313,6 +314,7 @@ All copy keys must exist in `packages/shared/src/i18n/de.json` under a new `capt
 | Photo delete CTA | "Entfernen" | capture.review.delete_cta |
 | Recapture confirm | "Bisherige Analyse wird verworfen. Wirklich neu erfassen?" | capture.plan.recapture_confirm |
 | Recapture confirm CTA | "Ja, neu erfassen" | capture.plan.recapture_confirm_cta |
+| Recapture confirm dismiss | "Nicht neu erfassen" | capture.plan.recapture_confirm_dismiss |
 
 ---
 
@@ -338,8 +340,8 @@ All copy keys must exist in `packages/shared/src/i18n/de.json` under a new `capt
 - Shape not yet selected: dimension fields hidden (only shape cards shown)
 
 ### Analysis Loading
-- Loading: spinner + progress bar (animate-pulse), cancel button visible
-- Error: AlertCircle red icon, error heading, retry + cancel buttons
+- Loading: spinner + progress bar (animate-pulse), "Analyse abbrechen" button visible
+- Error: AlertCircle red icon, error heading, "Erneut versuchen" + "Analyse abbrechen" buttons
 - Budget soft-warning: amber InlineBanner above (on dimensions screen)
 - Budget hard-stop: destructive InlineBanner + CTA disabled (on dimensions screen)
 
@@ -366,6 +368,7 @@ Inherited from Phase 2 baseline, with Phase 4 additions:
 - Camera viewfinder: `accessibilityLabel="Kamerasucher -- Foto aufnehmen mit dem Button unten"`.
 - Analysis loading: `accessibilityLabel="Garten wird analysiert"` + `accessibilityLiveRegion="polite"` for state transitions.
 - Plan SVG: `accessibilityLabel="Schematischer Gartenplan mit {n} Elementen"` on the SVG container. Individual elements are decorative (no individual tap targets in Phase 4).
+- Grid toggle button: `accessibilityLabel="Raster ein/aus"` on the icon button wrapping the Grid3x3 icon.
 - Element rows in confirmation: `accessibilityLabel="{name}, Konfidenz {sicher|unsicher}, {akzeptiert|abgelehnt}"`.
 - Budget warning: `accessibilityLiveRegion="assertive"` for hard-stop banner.
 
