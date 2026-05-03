@@ -117,7 +117,7 @@
 **Plans**: 4 plans
   - [x] 04-01-PLAN.md — Schema (garden_dimensions + plan_elements + RLS + LWW) + Types + gardenPlanRepo + photoResizer + i18n (Wave 1) — completed 2026-05-03
   - [x] 04-02-PLAN.md — Edge Function: Claude Vision integration replacing mock + parseElements + Budget enforcement (Wave 2) — completed 2026-05-03
-  - [ ] 04-03-PLAN.md — Capture Flow UI: expo-image-picker + 3 foto-steps + review + dimensions + ShapeSelector (Wave 2)
+  - [x] 04-03-PLAN.md — Capture Flow UI: expo-image-picker + 3 foto-steps + review + dimensions + ShapeSelector (Wave 2) — completed 2026-05-03
   - [ ] 04-04-PLAN.md — Analysis polling + Element confirmation + GardenPlanView (SVG) + Plan screen + Home screen update (Wave 3)
 **UI hint**: yes
 

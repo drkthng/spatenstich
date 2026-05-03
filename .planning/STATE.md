@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
 status: Executing Phase 04
-stopped_at: Phase 04 Plan 02 complete
-last_updated: "2026-05-03T09:57:00.000Z"
-last_activity: 2026-05-03 -- Phase 04 Plan 02 executed (2 tasks, 4 files)
+stopped_at: Phase 04 Plan 03 complete
+last_updated: "2026-05-03T10:13:25.000Z"
+last_activity: 2026-05-03 -- Phase 04 Plan 03 executed (2 tasks, 14 files)
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 21
-  completed_plans: 13
-  percent: 62
+  completed_plans: 14
+  percent: 67
 ---
 
 # Project State
@@ -26,12 +26,12 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 ## Current Position
 
 Phase: 04 (garten-erfassung-m1) — EXECUTING
-Plan: 3 of 4
-Vorheriger Status: Phase 04 Plan 02 complete (Claude Vision integration)
-Plans: 13/21 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 04: 2/4)
-Last activity: 2026-05-03 -- Phase 04 Plan 02 executed
+Plan: 4 of 4
+Vorheriger Status: Phase 04 Plan 03 complete (Capture Flow UI)
+Plans: 14/21 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 04: 3/4)
+Last activity: 2026-05-03 -- Phase 04 Plan 03 executed
 
-Progress: [██████░░░░] 62% (13/21 Plans)
+Progress: [██████▋░░░] 67% (14/21 Plans)
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Progress: [██████░░░░] 62% (13/21 Plans)
 | Phase 02.5 P04 | 60 | 3 tasks | 8 files |
 | Phase 04 P01 | 15 | 2 tasks | 14 files |
 | Phase 04 P02 | 5 | 2 tasks | 4 files |
+| Phase 04 P03 | 13 | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -127,6 +128,10 @@ Recent decisions affecting current work:
 - [Phase 04 P02]: Budget-Zählung per garden_id (nicht per user_id) — beide Garden-Member teilen sich das gleiche Budget (200/Tag Hard, 50/Tag Soft), da sie an derselben Parzelle arbeiten.
 - [Phase 04 P02]: Files API (nicht base64 inline) für Foto-Upload an Anthropic — reduziert Request-Payload-Größe, Pattern identisch zu extract-vereinsregeln.
 - [Phase 04 P02]: parseElements confidence-Default 'medium' bei ungültigen/fehlenden Werten — sicherer Fallback für Element-Bestätigungs-Screen (pre-accepted).
+- [Phase 04 P03]: expo-image-picker unified für Kamera+Galerie — expo-camera nicht nötig, ein Package deckt beide Use-Cases.
+- [Phase 04 P03]: captureStore als Zustand-Session-Store (nicht route params) — photo URIs zwischen Screens geteilt, kein Persist nötig.
+- [Phase 04 P03]: Freehand-Shape vereinfacht auf Bounding-Box (Länge+Breite) für MVP — vollständiges Polygon-Tool kommt in Phase 5 (interaktiver Canvas).
+- [Phase 04 P03]: Jest 'components' Projekt zu jest.config.ts hinzugefügt — ermöglicht Component-Tests in src/components/__tests__/.
 
 ### Pending Todos
 
@@ -150,6 +155,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-03T09:57:00.000Z
-Stopped at: Completed 04-02-PLAN.md
-Resume file: .planning/phases/04-garten-erfassung-m1/04-03-PLAN.md
+Last session: 2026-05-03T10:13:25.000Z
+Stopped at: Completed 04-03-PLAN.md
+Resume file: .planning/phases/04-garten-erfassung-m1/04-04-PLAN.md
