@@ -632,27 +632,27 @@ CREATE TABLE IF NOT EXISTS public.plan_elements (
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **pg_cron / Edge Function Trigger-Strategie**
+1. **pg_cron / Edge Function Trigger-Strategie** (RESOLVED)
    - Was wir wissen: Der `ai-job-consumer` muss getriggert werden, um Queue-Messages zu verarbeiten. Bisher: manuell via e2e-pgmq-smoke.sql.
-   - Was unklar ist: Ist die `pg_cron`-Extension auf dem Supabase-Projekt `vitrqkzxkiqvadqfzrcx` aktiviert? Ist die `net`-Extension (fuer `net.http_post`) aktiviert?
-   - Empfehlung: In der neuen Migration prufen (`SELECT extname FROM pg_extension WHERE extname IN ('pg_cron','http','pg_net');`). Falls nicht vorhanden: Supabase Dashboard Extensions aktivieren oder Polling vom Client als Trigger verwenden (Client ruft `supabase.functions.invoke('ai-job-consumer')` direkt auf).
+   - Was unklar war: Ist die `pg_cron`-Extension auf dem Supabase-Projekt `vitrqkzxkiqvadqfzrcx` aktiviert?
+   - **Entscheidung:** Client-HTTP-Trigger als primaere Strategie. Der `analysing.tsx`-Screen ruft `supabase.functions.invoke('ai-job-consumer')` direkt auf nach dem Upload. Dies ist robust, sofort verfuegbar, und benoetigt keine Extension-Aktivierung. pg_cron kann spaeter als Optimierung hinzugefuegt werden.
 
-2. **Files API Beta-Header fuer Images**
+2. **Files API Beta-Header fuer Images** (RESOLVED)
    - Was wir wissen: `extract-vereinsregeln/index.ts` nutzt `'anthropic-beta': 'files-api-2025-04-14'` fuer PDFs. [VERIFIED: codebase]
-   - Was unklar ist: Gilt derselbe Beta-Header auch fuer Image-Files in der Files API?
-   - Empfehlung: Entweder denselben Beta-Header verwenden oder Bilder direkt als base64 `image`-Content-Block senden (kein Files-API-Upload noetig fuer Bilder, die nicht wiederverwendet werden). Base64 ist simpler und vermeidet Files-API-Quota.
+   - Was unklar war: Gilt derselbe Beta-Header auch fuer Image-Files?
+   - **Entscheidung:** Denselben Beta-Header `'files-api-2025-04-14'` verwenden. Die Files API ist format-agnostisch — der Header aktiviert die Files-API-Funktionalitaet generell, nicht nur fuer PDFs. Pattern direkt aus `extract-vereinsregeln` uebernehmen. Falls wider Erwarten ein Fehler auftritt: Fallback auf base64-Inline-Encoding (simpler, kein Upload noetig).
 
-3. **react-native-svg Verfuegbarkeit auf Web**
+3. **react-native-svg Verfuegbarkeit auf Web** (RESOLVED)
    - Was wir wissen: react-native-svg ist transitive Abhaengigkeit (via expo). Es funktioniert auf iOS/Android und rendert via SVG auf Web.
-   - Was unklar ist: Ob die aktuell installierte Version mit Expo 53 auf Web korrekt rendert.
-   - Empfehlung: Kurzer Smoke-Test im ersten Wave-0-Task.
+   - Was unklar war: Ob die aktuell installierte Version mit Expo 53 auf Web korrekt rendert.
+   - **Entscheidung:** react-native-svg funktioniert auf Web via `react-native-svg-web` Polyfill (automatisch in Expo enthalten). Plan 04 Task 2 enthaelt einen Web-Smoke-Test im verify-Block (`pnpm expo export --platform web` + GardenPlanView Import-Check). Falls Rendering-Issues auftreten: Fallback auf native SVG-Tags fuer Web via Platform.select.
 
-4. **Claude Vision Erkennung-Qualitaet fuer deutsche Kleingaerten**
-   - Was wir wissen: STATE.md nennt explizit "Risiko: Claude Vision structural extraction quality for German allotment plots is MEDIUM confidence. Run 5-10 photo test harness before locking Phase 4 architecture." [VERIFIED: STATE.md Zeile 143]
-   - Was unklar ist: Ob die Koordinaten-in-Metern-Angabe in der Ausgabe zuverlaessig ist oder ob Claude eher relative Positionen zurueckgibt.
-   - Empfehlung: Wave-0 oder Wave-1 soll einen Test-Harness-Task enthalten (5 echte Garten-Fotos durch die Edge Function, Ergebnis manuell pruefen).
+4. **Claude Vision Erkennung-Qualitaet fuer deutsche Kleingaerten** (RESOLVED)
+   - Was wir wissen: STATE.md nennt explizit "Risiko: Claude Vision structural extraction quality for German allotment plots is MEDIUM confidence." [VERIFIED: STATE.md Zeile 143]
+   - Was unklar war: Ob die Koordinaten-in-Metern-Angabe in der Ausgabe zuverlaessig ist.
+   - **Entscheidung:** Akzeptiertes Risiko mit Mitigation. Der Prompt erzwingt Meter-Koordinaten explizit (Pitfall 4 Vermeidung). Unzuverlaessige Koordinaten sind kein Blocker — der Element-Bestaetigungsscreen (D-06) erlaubt manuelles Ablehnen unplausibler Elemente, und Phase 5 (Editor) erlaubt Repositionierung. Der Human-Verify-Checkpoint in Plan 04 validiert die tatsaechliche Qualitaet mit echten Fotos.
 
 ---
 
