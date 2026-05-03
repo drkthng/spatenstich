@@ -82,13 +82,16 @@ const config: Config = {
       // Component tests — @testing-library/react-native for UI components
       displayName: 'components',
       preset: 'ts-jest',
-      testEnvironment: 'node',
+      testEnvironment: 'jsdom',
       testMatch: ['**/src/components/__tests__/**/*.test.ts?(x)'],
+      setupFiles: ['<rootDir>/src/components/__tests__/setup.ts'],
       moduleNameMapper: {
         '^@spatenstich/shared$': '<rootDir>/../packages/shared/src/index.ts',
         '^@spatenstich/shared/i18n/de$': '<rootDir>/../packages/shared/src/i18n/de.json',
         '^react-native-url-polyfill/auto$': '<rootDir>/src/__mocks__/react-native-url-polyfill.ts',
         '^react-native$': '<rootDir>/src/__mocks__/react-native.ts',
+        '^react-native-css-interop(.*)$': '<rootDir>/src/__mocks__/react-native-css-interop.ts',
+        '^nativewind(.*)$': '<rootDir>/src/__mocks__/react-native-css-interop.ts',
         '^expo-secure-store$': '<rootDir>/src/__mocks__/expo-secure-store.ts',
         '^@react-native-async-storage/async-storage$': '<rootDir>/src/__mocks__/async-storage.ts',
         '^@sentry/react-native$': '<rootDir>/src/__mocks__/sentry-react-native.ts',
@@ -96,8 +99,9 @@ const config: Config = {
         '^@/(.*)$': '<rootDir>/$1',
       },
       transform: {
-        '^.+\\.tsx?$': ['ts-jest', { tsconfig: { strict: true, esModuleInterop: true, resolveJsonModule: true, jsx: 'react' } }],
+        '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.jest-components.json' }],
       },
+      transformIgnorePatterns: ['node_modules/(?!(@testing-library)/)'],
     },
   ],
   collectCoverageFrom: ['src/**/*.{ts,tsx}'],
