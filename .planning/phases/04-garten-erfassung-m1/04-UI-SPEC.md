@@ -1,7 +1,8 @@
 ---
 phase: 4
 slug: garten-erfassung-m1
-status: draft
+status: approved
+reviewed_at: 2026-05-03
 shadcn_initialized: true
 preset: "react-native-reusables (stone baseColor, new-york style, NativeWind 4.1.23)"
 created: 2026-05-03
