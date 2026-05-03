@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: Executing Phase 04
-stopped_at: Phase 04 Plan 03 complete
-last_updated: "2026-05-03T10:13:25.000Z"
-last_activity: 2026-05-03 -- Phase 04 Plan 03 executed (2 tasks, 14 files)
+status: Phase 04 Complete (pending human-verify)
+stopped_at: Phase 04 Plan 04 complete (pending checkpoint)
+last_updated: "2026-05-03T10:38:00.000Z"
+last_activity: 2026-05-03 -- Phase 04 Plan 04 executed (2 tasks, 15 files)
 progress:
   total_phases: 8
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 21
-  completed_plans: 14
-  percent: 67
+  completed_plans: 15
+  percent: 71
 ---
 
 # Project State
@@ -21,17 +21,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-14)
 
 **Core value:** Foto rein → Plan und Kalender raus (2-User Shared Garden seit Pivot 2026-04-21)
-**Current focus:** Phase 04 — garten-erfassung-m1
+**Current focus:** Phase 04 — garten-erfassung-m1 (COMPLETE, pending human-verify)
 
 ## Current Position
 
-Phase: 04 (garten-erfassung-m1) — EXECUTING
+Phase: 04 (garten-erfassung-m1) — COMPLETE (pending human-verify checkpoint)
 Plan: 4 of 4
-Vorheriger Status: Phase 04 Plan 03 complete (Capture Flow UI)
-Plans: 14/21 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 04: 3/4)
-Last activity: 2026-05-03 -- Phase 04 Plan 03 executed
+Vorheriger Status: Phase 04 Plan 04 executed (Analysis Results + Plan View)
+Plans: 15/21 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 04: 4/4)
+Last activity: 2026-05-03 -- Phase 04 Plan 04 executed
 
-Progress: [██████▋░░░] 67% (14/21 Plans)
+Progress: [███████░░░] 71% (15/21 Plans)
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Progress: [██████▋░░░] 67% (14/21 Plans)
 | Phase 04 P01 | 15 | 2 tasks | 14 files |
 | Phase 04 P02 | 5 | 2 tasks | 4 files |
 | Phase 04 P03 | 13 | 2 tasks | 14 files |
+| Phase 04 P04 | 21 | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -132,6 +133,10 @@ Recent decisions affecting current work:
 - [Phase 04 P03]: captureStore als Zustand-Session-Store (nicht route params) — photo URIs zwischen Screens geteilt, kein Persist nötig.
 - [Phase 04 P03]: Freehand-Shape vereinfacht auf Bounding-Box (Länge+Breite) für MVP — vollständiges Polygon-Tool kommt in Phase 5 (interaktiver Canvas).
 - [Phase 04 P03]: Jest 'components' Projekt zu jest.config.ts hinzugefügt — ermöglicht Component-Tests in src/components/__tests__/.
+- [Phase 04 P04]: react-native-svg als direkte Dep hinzugefügt — war transitive Dep via lucide/nativewind, GardenPlanView braucht expliziten Import.
+- [Phase 04 P04]: analysing.tsx jobId via lokale StorageAdapter (photo_queue ist local-only) — nicht über Supabase remote queried.
+- [Phase 04 P04]: Edge Function direkt via supabase.functions.invoke getriggert — deckt ab, wenn pg_cron inaktiv (Open Question 1 RESEARCH.md).
+- [Phase 04 P04]: NativeWind css-interop Jest-Fix: dedizierte tsconfig.jest-components.json mit jsx:'react' + css-interop Mock + jsdom env — behebt getColorScheme crash in Test-Umgebung.
 
 ### Pending Todos
 
@@ -155,6 +160,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-03T10:13:25.000Z
-Stopped at: Completed 04-03-PLAN.md
-Resume file: .planning/phases/04-garten-erfassung-m1/04-04-PLAN.md
+Last session: 2026-05-03T10:38:00.000Z
+Stopped at: Completed 04-04-PLAN.md (pending human-verify checkpoint)
+Resume file: None (Phase 04 complete)

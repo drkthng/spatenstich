@@ -52,10 +52,10 @@
 - [x] **PHOTO-02**: User gibt Garten-Maße ein (L×B in Metern; Formen: Rechteck, L-Form, Trapez, freie Eckpunkte)
 - [ ] **PHOTO-03**: Bilder werden client-seitig auf max. 1.15 MP skaliert vor Upload (Edge Function CPU-Limit-Schutz)
 - [x] **PHOTO-04**: Claude Vision analysiert Fotos + Maße server-seitig und gibt strukturiertes JSON zurück (Elemente mit Typ, Position in Metern, Konfidenz)
-- [ ] **PHOTO-05**: Erkannte Elemente werden dem User einzeln zur Bestätigung oder Ablehnung angezeigt (Konfidenz-UI)
-- [ ] **PHOTO-06**: App rendert schematischen 2D-Plan aus bestätigtem JSON (gezeichneter Stil, nicht fotorealistisch)
+- [x] **PHOTO-05**: Erkannte Elemente werden dem User einzeln zur Bestätigung oder Ablehnung angezeigt (Konfidenz-UI)
+- [x] **PHOTO-06**: App rendert schematischen 2D-Plan aus bestätigtem JSON (gezeichneter Stil, nicht fotorealistisch)
 - [x] **PHOTO-07**: Edge Case: nur 1 Foto → Warnung, Analyse trotzdem versucht
-- [ ] **PHOTO-08**: Edge Case: keine Elemente erkannt → leere Plan-Vorlage mit eingegebenen Maßen, User baut manuell
+- [x] **PHOTO-08**: Edge Case: keine Elemente erkannt → leere Plan-Vorlage mit eingegebenen Maßen, User baut manuell
 
 ### Plan-Editor (M2)
 
@@ -199,12 +199,12 @@
 | PHOTO-02 | Phase 4 | Complete (04-03) |
 | PHOTO-03 | Phase 4 | Pending |
 | PHOTO-04 | Phase 4 | Pending |
-| PHOTO-05 | Phase 4 | Pending |
-| PHOTO-06 | Phase 4 | Pending |
+| PHOTO-05 | Phase 4 | Complete (04-04) |
+| PHOTO-06 | Phase 4 | Complete (04-04) |
 | PHOTO-07 | Phase 4 | Complete (04-03) |
-| PHOTO-08 | Phase 4 | Pending |
-| NFR-02 | Phase 4 | Pending |
-| NFR-03 | Phase 4 | Pending |
+| PHOTO-08 | Phase 4 | Complete (04-04) |
+| NFR-02 | Phase 4 | Complete (04-04) |
+| NFR-03 | Phase 4 | Complete (04-02) |
 | EDIT-01 | Phase 5 | Pending |
 | EDIT-02 | Phase 5 | Pending |
 | EDIT-03 | Phase 5 | Pending |

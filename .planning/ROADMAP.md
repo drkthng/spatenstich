@@ -22,7 +22,7 @@
 - [x] **Phase 2: Auth & Profile** - Account/local mode, PLZ/Klimazone, Archetyp, Onboarding. Vereinsregeln-Code liegt vor, per Feature-Flag ausgeblendet (reaktiviert in Phase 9) (code-complete 2026-04-20, scope reduziert 2026-04-21)
 - [x] **Phase 2.5: Shared Garden Model** - `gardens`-Table + `garden_members`, RLS von `user_id = auth.uid()` auf Member-Check; Invite-Code-Flow für Frau/Partner (code-complete 2026-04-23; human-verify pending) (NEU — Pivot)
 - [ ] **Phase 3: Offline & Sync** - Outbox sync mit 2-User-LWW, network detection, cross-platform storage, photo queue
-- [ ] **Phase 4: Garten-Erfassung (M1)** - Guided photo capture, Claude Vision analysis, element confirmation, 2D plan render
+- [x] **Phase 4: Garten-Erfassung (M1)** - Guided photo capture, Claude Vision analysis, element confirmation, 2D plan render (code-complete 2026-05-03; human-verify pending)
 - [ ] **Phase 5: Plan-Editor (M2)** - Interactive canvas, drag & drop, layers, undo/redo, 60fps (Vereinsregel-Warnings deferred to Phase 9)
 - [ ] **Phase 6: Saatgut-Inventar (M3)** - Seed packet scan, Sorten-DB, inventory CRUD, expiry tracking
 - [ ] **Phase 7: Pflanz- & Aussaatkalender (M4)** - 12-month timeline, climate-adjusted dates, placement suggestions, plan integration
@@ -118,7 +118,7 @@
   - [x] 04-01-PLAN.md — Schema (garden_dimensions + plan_elements + RLS + LWW) + Types + gardenPlanRepo + photoResizer + i18n (Wave 1) — completed 2026-05-03
   - [x] 04-02-PLAN.md — Edge Function: Claude Vision integration replacing mock + parseElements + Budget enforcement (Wave 2) — completed 2026-05-03
   - [x] 04-03-PLAN.md — Capture Flow UI: expo-image-picker + 3 foto-steps + review + dimensions + ShapeSelector (Wave 2) — completed 2026-05-03
-  - [ ] 04-04-PLAN.md — Analysis polling + Element confirmation + GardenPlanView (SVG) + Plan screen + Home screen update (Wave 3)
+  - [x] 04-04-PLAN.md — Analysis polling + Element confirmation + GardenPlanView (SVG) + Plan screen + Home screen update (Wave 3) — completed 2026-05-03
 **UI hint**: yes
 
 ### Phase 5: Plan-Editor (M2)
