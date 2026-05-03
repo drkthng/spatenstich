@@ -115,7 +115,7 @@
   4. Uploading only 1 photo shows a warning but still attempts analysis; receiving zero detected elements opens an empty grid template matching the entered dimensions
   5. The app refuses to exceed 200 Claude calls/day hard limit; a soft warning appears at 50 calls; all AI responses (raw + parsed) are persisted in `ai_results`
 **Plans**: 4 plans
-  - [ ] 04-01-PLAN.md — Schema (garden_dimensions + plan_elements + RLS + LWW) + Types + gardenPlanRepo + photoResizer + i18n (Wave 1)
+  - [x] 04-01-PLAN.md — Schema (garden_dimensions + plan_elements + RLS + LWW) + Types + gardenPlanRepo + photoResizer + i18n (Wave 1) — completed 2026-05-03
   - [ ] 04-02-PLAN.md — Edge Function: Claude Vision integration replacing mock + parseElements + Budget enforcement (Wave 2)
   - [ ] 04-03-PLAN.md — Capture Flow UI: expo-image-picker + 3 foto-steps + review + dimensions + ShapeSelector (Wave 2)
   - [ ] 04-04-PLAN.md — Analysis polling + Element confirmation + GardenPlanView (SVG) + Plan screen + Home screen update (Wave 3)
