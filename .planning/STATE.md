@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
 status: Executing Phase 04
-stopped_at: Phase 04 Plan 01 complete
-last_updated: "2026-05-03T09:49:00.000Z"
-last_activity: 2026-05-03 -- Phase 04 Plan 01 executed (2 tasks, 14 files)
+stopped_at: Phase 04 Plan 02 complete
+last_updated: "2026-05-03T09:57:00.000Z"
+last_activity: 2026-05-03 -- Phase 04 Plan 02 executed (2 tasks, 4 files)
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 21
-  completed_plans: 12
-  percent: 57
+  completed_plans: 13
+  percent: 62
 ---
 
 # Project State
@@ -26,12 +26,12 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 ## Current Position
 
 Phase: 04 (garten-erfassung-m1) — EXECUTING
-Plan: 2 of 4
-Vorheriger Status: Phase 04 Plan 01 complete (data layer + utilities)
-Plans: 12/21 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 04: 1/4)
-Last activity: 2026-05-03 -- Phase 04 Plan 01 executed
+Plan: 3 of 4
+Vorheriger Status: Phase 04 Plan 02 complete (Claude Vision integration)
+Plans: 13/21 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 04: 2/4)
+Last activity: 2026-05-03 -- Phase 04 Plan 02 executed
 
-Progress: [██████░░░░] 57% (12/21 Plans)
+Progress: [██████░░░░] 62% (13/21 Plans)
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Progress: [██████░░░░] 57% (12/21 Plans)
 | Phase 02.5 P03 | 90 | 4 tasks | 11 files |
 | Phase 02.5 P04 | 60 | 3 tasks | 8 files |
 | Phase 04 P01 | 15 | 2 tasks | 14 files |
+| Phase 04 P02 | 5 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -123,6 +124,9 @@ Recent decisions affecting current work:
 - [Phase 02.5 P04]: Bootstrap-useEffect in `_layout.tsx` (D-12 Defense-in-Depth) — ruft `ensureDefaultGardenForUser()` RPC, wenn `identity && mode === 'account' && !activeGardenId`. Covered Cases: (a) neue signUps post-deploy ohne migrate-flow, (b) v0 persist-blobs mit activeGardenId:null, (c) DB-Rows ohne Migration-Seed, (d) post-delete-garden (D-16) wo User nur-Garten gelöscht hat. RPC ist server-idempotent.
 - [Phase 02.5 P04]: expo-clipboard@~7.0.1 statt ^55.x (Rule-1-Bug-Fix) — SDK-53-compatible Version gepinnt (Hoisting ins monorepo vermied). Share+Copy-Flow via `expo-clipboard` + RN Share API.
 - [Phase 02.5 P04]: Crockford-Alphabet-Filter im join-by-code-Input — `[^A-Z1-9]` regex schließt `0/O/I/L/U` aus, matcht GARDEN-02-Requirement-Wording und Migration-Tests. Kein 6. Zeichen wird akzeptiert ohne Alphabet-Bestätigung.
+- [Phase 04 P02]: Budget-Zählung per garden_id (nicht per user_id) — beide Garden-Member teilen sich das gleiche Budget (200/Tag Hard, 50/Tag Soft), da sie an derselben Parzelle arbeiten.
+- [Phase 04 P02]: Files API (nicht base64 inline) für Foto-Upload an Anthropic — reduziert Request-Payload-Größe, Pattern identisch zu extract-vereinsregeln.
+- [Phase 04 P02]: parseElements confidence-Default 'medium' bei ungültigen/fehlenden Werten — sicherer Fallback für Element-Bestätigungs-Screen (pre-accepted).
 
 ### Pending Todos
 
@@ -146,6 +150,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-03T09:49:00.000Z
-Stopped at: Completed 04-01-PLAN.md
-Resume file: .planning/phases/04-garten-erfassung-m1/04-02-PLAN.md
+Last session: 2026-05-03T09:57:00.000Z
+Stopped at: Completed 04-02-PLAN.md
+Resume file: .planning/phases/04-garten-erfassung-m1/04-03-PLAN.md

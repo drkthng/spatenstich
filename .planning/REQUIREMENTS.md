@@ -51,7 +51,7 @@
 - [ ] **PHOTO-01**: User kann mind. 3 Garten-Fotos aufnehmen oder hochladen (geführter Flow mit Winkel-Anleitung: Übersicht, Nord, Süd)
 - [ ] **PHOTO-02**: User gibt Garten-Maße ein (L×B in Metern; Formen: Rechteck, L-Form, Trapez, freie Eckpunkte)
 - [ ] **PHOTO-03**: Bilder werden client-seitig auf max. 1.15 MP skaliert vor Upload (Edge Function CPU-Limit-Schutz)
-- [ ] **PHOTO-04**: Claude Vision analysiert Fotos + Maße server-seitig und gibt strukturiertes JSON zurück (Elemente mit Typ, Position in Metern, Konfidenz)
+- [x] **PHOTO-04**: Claude Vision analysiert Fotos + Maße server-seitig und gibt strukturiertes JSON zurück (Elemente mit Typ, Position in Metern, Konfidenz)
 - [ ] **PHOTO-05**: Erkannte Elemente werden dem User einzeln zur Bestätigung oder Ablehnung angezeigt (Konfidenz-UI)
 - [ ] **PHOTO-06**: App rendert schematischen 2D-Plan aus bestätigtem JSON (gezeichneter Stil, nicht fotorealistisch)
 - [ ] **PHOTO-07**: Edge Case: nur 1 Foto → Warnung, Analyse trotzdem versucht
@@ -101,7 +101,7 @@
 
 - [ ] **NFR-01**: App ist auf iPhone und Desktop-Browser nutzbar, Daten synchron
 - [ ] **NFR-02**: KI-Analyse ist asynchron mit Loading-State (kein blockierendes UI)
-- [ ] **NFR-03**: KI-Budget-Limit: Soft-Warnung bei 50 Claude-Calls/User/Tag, Hard-Stop bei 200/Tag
+- [x] **NFR-03**: KI-Budget-Limit: Soft-Warnung bei 50 Claude-Calls/User/Tag, Hard-Stop bei 200/Tag
 - [ ] **NFR-04**: Alle Fotos verschlüsselt at-rest (Supabase Storage, EU Frankfurt)
 - [ ] **NFR-05**: Geo-Daten (EXIF) nur mit explizitem Opt-in genutzt
 - [x] **NFR-06**: UI-Strings zentralisiert in `de.json` (spätere Lokalisierung vorbereitet, nicht umgesetzt)
