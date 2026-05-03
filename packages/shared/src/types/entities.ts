@@ -8,7 +8,9 @@ export type EntityName =
   | 'profiles'
   | 'vereinsregeln'
   | 'invite_codes'
-  | 'photo_queue';
+  | 'photo_queue'
+  | 'garden_dimensions'
+  | 'plan_elements';
 
 /** Gemeinsame Basis-Felder für alle LWW-managed Rows (Plan 03-01 Migration 013). */
 export interface RowBase {
@@ -59,13 +61,47 @@ export interface PhotoQueueRow extends RowBase {
   jobId: string | null;        // von enqueue_photo_analysis RPC
 }
 
+export interface GardenDimensionsRow extends RowBase {
+  gardenId: string;
+  shape: 'rectangle' | 'l_shape' | 'trapezoid' | 'freehand';
+  widthM: number;
+  heightM: number;
+  extraDims: Record<string, unknown> | null;
+}
+
+export interface PlanElementRow extends RowBase {
+  gardenId: string;
+  aiResultId: string | null;
+  elementType: string;
+  label: string;
+  xM: number;
+  yM: number;
+  widthM: number;
+  heightM: number;
+  confidence: 'high' | 'medium' | 'low' | null;
+  isAccepted: boolean;
+}
+
+/** Pre-confirmation shape from Claude Vision (not yet persisted). */
+export interface PlanElementCandidate {
+  elementType: string;
+  label: string;
+  xM: number;
+  yM: number;
+  widthM: number;
+  heightM: number;
+  confidence: 'high' | 'medium' | 'low';
+}
+
 export type AnyRow =
   | GardenRow
   | GardenMemberRow
   | ProfileRow
   | VereinsregelnRow
   | InviteCodeRow
-  | PhotoQueueRow;
+  | PhotoQueueRow
+  | GardenDimensionsRow
+  | PlanElementRow;
 
 /** Outbox-Eintrag — ein pending Write, der noch nicht gepusht wurde. */
 export interface OutboxEntry {

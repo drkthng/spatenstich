@@ -17,6 +17,8 @@ const ROW_ENTITIES: EntityName[] = [
   'vereinsregeln',
   'invite_codes',
   'photo_queue',
+  'garden_dimensions',
+  'plan_elements',
 ];
 
 // Which entities have a garden_id column?
@@ -28,6 +30,8 @@ const GARDEN_ID_COLUMN: Record<EntityName, string | null> = {
   vereinsregeln: 'garden_id',
   invite_codes: 'garden_id',
   photo_queue: 'garden_id',
+  garden_dimensions: 'garden_id',
+  plan_elements: 'garden_id',
 };
 
 // camelCase field name that maps to the garden_id column in the row object
@@ -38,6 +42,8 @@ const GARDEN_ID_FIELD: Record<EntityName, string | null> = {
   vereinsregeln: 'gardenId',
   invite_codes: 'gardenId',
   photo_queue: 'gardenId',
+  garden_dimensions: 'gardenId',
+  plan_elements: 'gardenId',
 };
 
 // Monotonic counter for Outbox created_at (prevents FIFO collisions at same Date.now())
@@ -146,6 +152,30 @@ export class SqliteAdapter implements StorageAdapter {
         last_push_at TEXT
       );
     `);
+  }
+
+  // ---- Migration hook V4 (Phase 4: garden_dimensions + plan_elements) ----
+  async __createRowTablesV4(): Promise<void> {
+    const db = await this.dbPromise;
+    const v4Entities: EntityName[] = ['garden_dimensions', 'plan_elements'];
+    for (const entity of v4Entities) {
+      const gidCol = GARDEN_ID_COLUMN[entity];
+      const gidSchema = gidCol ? `${gidCol} TEXT,` : '';
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS ${entity} (
+          id TEXT PRIMARY KEY NOT NULL,
+          data TEXT NOT NULL,
+          ${gidSchema}
+          deleted_at TEXT,
+          updated_at TEXT NOT NULL
+        );
+      `);
+      if (gidCol) {
+        await db.execAsync(
+          `CREATE INDEX IF NOT EXISTS idx_${entity}_${gidCol} ON ${entity}(${gidCol}) WHERE deleted_at IS NULL;`,
+        );
+      }
+    }
   }
 
   // ---- Row-Level (Phase 3) ----
