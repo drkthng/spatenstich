@@ -114,7 +114,11 @@
   3. A schematic plan (drawn style, not photorealistic) renders from the confirmed JSON using the entered garden dimensions as the coordinate space
   4. Uploading only 1 photo shows a warning but still attempts analysis; receiving zero detected elements opens an empty grid template matching the entered dimensions
   5. The app refuses to exceed 200 Claude calls/day hard limit; a soft warning appears at 50 calls; all AI responses (raw + parsed) are persisted in `ai_results`
-**Plans**: TBD
+**Plans**: 4 plans
+  - [ ] 04-01-PLAN.md — Schema (garden_dimensions + plan_elements + RLS + LWW) + Types + gardenPlanRepo + photoResizer + i18n (Wave 1)
+  - [ ] 04-02-PLAN.md — Edge Function: Claude Vision integration replacing mock + parseElements + Budget enforcement (Wave 2)
+  - [ ] 04-03-PLAN.md — Capture Flow UI: expo-image-picker + 3 foto-steps + review + dimensions + ShapeSelector (Wave 2)
+  - [ ] 04-04-PLAN.md — Analysis polling + Element confirmation + GardenPlanView (SVG) + Plan screen + Home screen update (Wave 3)
 **UI hint**: yes
 
 ### Phase 5: Plan-Editor (M2)
@@ -194,7 +198,7 @@
 | 2. Auth & Profile (Vereinsregeln flagged off) | 4/4 | Code Complete (MVP-scope verify pending: NFR-07, AUTH-05, AUTH-04, Logout-Guard) | 2026-04-20 |
 | 2.5. Shared Garden Model | 4/4 | Code Complete (human-verify pending: SC-1..SC-4 + D-16 Scenarios 5..7 + bootstrap-useEffect + regression) | 2026-04-23 |
 | 3. Offline & Sync | 6/7 | Gap Closure (SC-2 uploadPending wiring) | - |
-| 4. Garten-Erfassung (M1) | 0/TBD | Not started | - |
+| 4. Garten-Erfassung (M1) | 0/4 | Planned | - |
 | 5. Plan-Editor (M2) | 0/TBD | Not started | - |
 | 6. Saatgut-Inventar (M3) | 0/TBD | Not started | - |
 | 7. Pflanz- & Aussaatkalender (M4) | 0/TBD | Not started | - |
