@@ -23,6 +23,8 @@ import type {
   VereinsregelnRow,
   InviteCodeRow,
   PhotoQueueRow,
+  GardenDimensionsRow,
+  PlanElementRow,
   Garden,
   Klimazone,
   Archetype,
@@ -349,5 +351,116 @@ export function photoQueueFromDb(row: DbPhotoQueueRowLoose): PhotoQueueRow {
     uploadStatus: row.uploaded_at != null ? 'uploaded' : 'pending',
     uploadError: row.last_error ?? null,
     jobId: null, // jobId assigned via RPC response, not stored in DB photo_queue
+  };
+}
+
+// ── Garden Dimensions ─────────────────────────────────────────────────────
+
+// Loose DB type (garden_dimensions not yet in database.ts generated types)
+type DbGardenDimensionsRowLoose = {
+  id: string;
+  garden_id: string;
+  shape: string;
+  width_m: number;
+  height_m: number;
+  extra_dims: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+  updated_by_user_id?: string | null;
+  deleted_at?: string | null;
+};
+
+/** Supabase→Local: snake_case DB-Row → camelCase lokale Row. */
+export function gardenDimensionsToLocal(db: DbGardenDimensionsRowLoose): GardenDimensionsRow {
+  return {
+    id: db.id,
+    gardenId: db.garden_id,
+    shape: db.shape as GardenDimensionsRow['shape'],
+    widthM: db.width_m,
+    heightM: db.height_m,
+    extraDims: db.extra_dims,
+    createdAt: db.created_at,
+    updatedAt: db.updated_at,
+    updatedByUserId: db.updated_by_user_id ?? null,
+    deletedAt: db.deleted_at ?? null,
+  };
+}
+
+/** Local→DB: camelCase → snake_case for Supabase upsert. */
+export function gardenDimensionsToDb(local: GardenDimensionsRow): Record<string, unknown> {
+  return {
+    id: local.id,
+    garden_id: local.gardenId,
+    shape: local.shape,
+    width_m: local.widthM,
+    height_m: local.heightM,
+    extra_dims: local.extraDims,
+    created_at: local.createdAt,
+    updated_at: local.updatedAt,
+    updated_by_user_id: local.updatedByUserId,
+    deleted_at: local.deletedAt,
+  };
+}
+
+// ── Plan Elements ─────────────────────────────────────────────────────────
+
+// Loose DB type (plan_elements not yet in database.ts generated types)
+type DbPlanElementRowLoose = {
+  id: string;
+  garden_id: string;
+  ai_result_id: string | null;
+  element_type: string;
+  label: string;
+  x_m: number;
+  y_m: number;
+  width_m: number;
+  height_m: number;
+  confidence: string | null;
+  is_accepted: boolean;
+  created_at: string;
+  updated_at: string;
+  updated_by_user_id?: string | null;
+  deleted_at?: string | null;
+};
+
+/** Supabase→Local: snake_case DB-Row → camelCase lokale Row. */
+export function planElementToLocal(db: DbPlanElementRowLoose): PlanElementRow {
+  return {
+    id: db.id,
+    gardenId: db.garden_id,
+    aiResultId: db.ai_result_id,
+    elementType: db.element_type,
+    label: db.label,
+    xM: db.x_m,
+    yM: db.y_m,
+    widthM: db.width_m,
+    heightM: db.height_m,
+    confidence: db.confidence as PlanElementRow['confidence'],
+    isAccepted: db.is_accepted,
+    createdAt: db.created_at,
+    updatedAt: db.updated_at,
+    updatedByUserId: db.updated_by_user_id ?? null,
+    deletedAt: db.deleted_at ?? null,
+  };
+}
+
+/** Local→DB: camelCase → snake_case for Supabase upsert. */
+export function planElementToDb(local: PlanElementRow): Record<string, unknown> {
+  return {
+    id: local.id,
+    garden_id: local.gardenId,
+    ai_result_id: local.aiResultId,
+    element_type: local.elementType,
+    label: local.label,
+    x_m: local.xM,
+    y_m: local.yM,
+    width_m: local.widthM,
+    height_m: local.heightM,
+    confidence: local.confidence,
+    is_accepted: local.isAccepted,
+    created_at: local.createdAt,
+    updated_at: local.updatedAt,
+    updated_by_user_id: local.updatedByUserId,
+    deleted_at: local.deletedAt,
   };
 }
