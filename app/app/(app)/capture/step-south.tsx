@@ -23,7 +23,7 @@ export default function StepSouthScreen(): React.JSX.Element {
     async (uri: string) => {
       const resized = await resizeToMaxMp(uri);
       addPhoto(resized);
-      router.push('/(app)/capture/review' as any);
+      router.push('/(app)/capture/review');
     },
     [addPhoto, router],
   );
