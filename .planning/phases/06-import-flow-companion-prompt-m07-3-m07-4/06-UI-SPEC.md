@@ -183,7 +183,7 @@ State transitions:
 │                                     │
 ├─────────────────────────────────────┤
 │ [Button: Ausgewählte übernehmen]    │  ← sticky footer, Button default full-width
-│ [Button outline: Abbrechen]        │  ← ghost/outline
+│ [Button outline: Zurück zur Eingabe]│  ← ghost/outline
 └─────────────────────────────────────┘
 ```
 
@@ -249,7 +249,7 @@ All copy in German. UTF-8 Umlaute — never ASCII substitutions (per project fee
 | Secondary CTA (Entry) | "JSON-Datei öffnen" |
 | Preview screen title | "Vorschau importieren" |
 | Confirm CTA (Preview) | "Ausgewählte übernehmen" |
-| Cancel (Preview) | "Abbrechen" |
+| Cancel (Preview) | "Zurück zur Eingabe" |
 | Section header — Beete | "Beete (N)" |
 | Section header — Pflanzen | "Pflanzen (N)" |
 | Section header — Beobachtungen | "Beobachtungen (N)" |
@@ -273,7 +273,7 @@ Destructive actions in this phase:
 | Action | Trigger | Confirmation |
 |--------|---------|-------------|
 | Dismiss draft (on Preview, single entity) | Toggle OFF a red-confidence entity | No confirmation dialog — toggle is reversible until "Ausgewählte übernehmen" |
-| Discard entire import | "Abbrechen" on Preview | No confirmation dialog — navigates back to Entry screen |
+| Discard entire import | "Zurück zur Eingabe" on Preview | No confirmation dialog — navigates back to Entry screen |
 
 No irreversible destructive actions in this phase (drafts are not deleted until promoted or manually deleted in Phase 7). No confirmation modals needed.
 
