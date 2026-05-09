@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: Phase 6 in progress — Plan 02 complete
-stopped_at: 06-02-PLAN.md complete (2026-05-09)
-last_updated: "2026-05-09T10:15:00Z"
+status: Phase 6 in progress — Plan 03 complete
+stopped_at: Completed 06-03-PLAN.md (Import UI screens + share-intent + Home button)
+last_updated: "2026-05-09T09:57:49Z"
 last_activity: 2026-05-09
 progress:
   total_phases: 10
   completed_phases: 6
   total_plans: 29
-  completed_plans: 27
-  percent: 93
+  completed_plans: 29
+  percent: 100
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 ## Current Position
 
 Phase: 6 (Import-Flow + Companion-Prompt) — IN PROGRESS
-Plan: 2 of TBD (Plans 01-02 complete)
+Plan: 3 of TBD (Plans 01-03 complete)
 Vorheriger Status: Phase 5 complete — AI-Removal + Import-Schema abgeschlossen
 Plans: 14/18 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~)
 Last activity: 2026-05-09
@@ -70,6 +70,7 @@ Progress: [█████░░░░░] 56% (14/18 Plans — Phase 4 plans ex
 | Phase 05 P03 | 168 | 2 tasks | 5 files |
 | Phase 06 P01 | 5 | 2 tasks | 3 files |
 | Phase 06 P02 | 45 | 2 tasks | 11 files |
+| Phase 06 P03 | 35 | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,10 @@ Recent decisions affecting current work:
 - [Phase 06 P02]: ImportItemRow.updatedAt als Alias für createdAt hinzugefügt — StorageAdapter.writeWithOutbox generic constraint T extends AnyRow erfordert updatedAt
 - [Phase 06 P02]: pushImportEntity generisch (importEntityToDb mapper) — keine per-entity push-Methoden für write-once Draft-Rows
 - [Phase 06 P02]: ajv compile auf Modul-Ebene (nicht in Funktion) — Performance-Pattern für Validator
+- [Phase 06 P03]: expo-share-intent@4.1.2 unmet peer expo-constants@>=17.1.5 (found 17.0.8) — accepted as non-blocking; functionality intact
+- [Phase 06 P03]: ShareIntentProvider wraps AppLayout; resetShareIntent() immediately after push prevents re-navigation loop
+- [Phase 06 P03]: Import payload passed via Zustand importStore between screens (NOT navigation params — Pitfall 1)
+- [Phase 06 P03]: confidence <0.6 defaults toggle OFF in preview; red+selected shows manual-review warning in ImportEntityCard
 
 ### Pending Todos
 
@@ -131,6 +136,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-09T10:15:00Z
-Stopped at: Completed 06-02-PLAN.md (importValidator + importRepo + importStore + SyncWorker extension)
+Last session: 2026-05-09T09:57:49Z
+Stopped at: Completed 06-03-PLAN.md (Import UI screens, share-intent config, Home import button)
 Resume file: None

@@ -53,9 +53,9 @@
 ### Import-Flow (Phase 6 — Pivot M07)
 
 - [x] **IMPORT-03**: Claude.ai-Projekt-System-Prompt in `prompts/garden-project-system-prompt.md`
-- [ ] **IMPORT-04**: App registriert Share-Intent-Handler für `application/json` + Custom URL Scheme `spatenstich://import`
-- [ ] **IMPORT-05**: Paste-Fallback (Textarea) für Desktop-Claude.ai-Chat
-- [ ] **IMPORT-06**: Preview-Screen zeigt geparste Entities mit Toggle pro Entity; Confidence < 0.6 mit Warning-Chip
+- [x] **IMPORT-04**: App registriert Share-Intent-Handler für `application/json` + Custom URL Scheme `spatenstich://import`
+- [x] **IMPORT-05**: Paste-Fallback (Textarea) für Desktop-Claude.ai-Chat
+- [x] **IMPORT-06**: Preview-Screen zeigt geparste Entities mit Toggle pro Entity; Confidence < 0.6 mit Warning-Chip
 - [x] **IMPORT-07**: Invalid Payload zeigt actionable Fehler + "Schema kopieren"-Button
 - [x] **IMPORT-08**: Supabase-Tables `imports`, `import_items`, `bed_drafts`, `plant_drafts`, `observation_drafts` mit RLS, alle Imports getaggt mit `source`, `importedAt`, optional `chatReference`
 
@@ -212,9 +212,9 @@
 | IMPORT-01 | Phase 5 | Complete |
 | IMPORT-02 | Phase 5 | Complete |
 | IMPORT-03 | Phase 6 | Pending |
-| IMPORT-04 | Phase 6 | Pending |
-| IMPORT-05 | Phase 6 | Pending |
-| IMPORT-06 | Phase 6 | Pending |
+| IMPORT-04 | Phase 6 | Complete |
+| IMPORT-05 | Phase 6 | Complete |
+| IMPORT-06 | Phase 6 | Complete |
 | IMPORT-07 | Phase 6 | Complete |
 | IMPORT-08 | Phase 6 | Complete |
 | DRAFT-01 | Phase 7 | Pending |

@@ -150,8 +150,8 @@ Plans:
 **Plans**: 4 plans
 Plans:
 - [x] 06-01-PLAN.md — Companion Prompt + Migration 016 + Shared Types (Wave 1) — completed 2026-05-09
-- [ ] 06-02-PLAN.md — Import Validator + Repo + Store + SyncWorker (Wave 2)
-- [ ] 06-03-PLAN.md — UI Screens + Share-Intent + Home Button + i18n (Wave 3)
+- [x] 06-02-PLAN.md — Import Validator + Repo + Store + SyncWorker (Wave 2) — completed 2026-05-09
+- [x] 06-03-PLAN.md — UI Screens + Share-Intent + Home Button + i18n (Wave 3) — completed 2026-05-09
 - [ ] 06-04-PLAN.md — DB Push + Human Verify (Wave 4)
 **UI hint**: yes
 
