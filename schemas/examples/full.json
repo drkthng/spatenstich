@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "spatenstich-import.v1",
+  "capture": {
+    "timestamp": "2026-05-08T14:32:00+02:00",
+    "location": { "lat": 51.34, "lon": 12.37 },
+    "photoRefs": ["IMG_2415.jpg", "IMG_2416.jpg"],
+    "chatReference": "https://claude.ai/chat/abc123"
+  },
+  "beds": [
+    {
+      "localId": "bed-a",
+      "label": "Hochbeet Nordseite",
+      "approxDimensions": { "lengthCm": 200, "widthCm": 80 },
+      "sunExposure": "half",
+      "soilNotes": "lehmig, mulchig",
+      "confidence": 0.85
+    },
+    {
+      "localId": "bed-b",
+      "label": "Erdbeerbeet Südseite",
+      "approxDimensions": { "lengthCm": 300, "widthCm": 120 },
+      "sunExposure": "full",
+      "soilNotes": "sandig-humos",
+      "confidence": 0.92
+    }
+  ],
+  "plants": [
+    {
+      "localId": "plant-1",
+      "bedRef": "bed-a",
+      "scientificName": "Beta vulgaris subsp. cicla",
+      "commonNameDe": "Mangold",
+      "stageEstimate": "vegetative",
+      "healthNotes": "leichter Schneckenfraß",
+      "confidence": 0.72
+    },
+    {
+      "localId": "plant-2",
+      "bedRef": "bed-b",
+      "scientificName": "Fragaria × ananassa",
+      "commonNameDe": "Erdbeere",
+      "stageEstimate": "flowering",
+      "healthNotes": "gesund, kräftig",
+      "confidence": 0.95
+    }
+  ],
+  "observations": [
+    {
+      "localId": "obs-1",
+      "bedRef": "bed-a",
+      "kind": "pest",
+      "summary": "Schnecken aktiv, Nachtschäden",
+      "suggestedActions": ["Schneckenkorn Eisen-III", "Bierfalle"]
+    }
+  ],
+  "complianceFlags": [
+    {
+      "regulation": "BKleingG §1 Abs. 1",
+      "status": "compliant",
+      "note": "Gartennutzung gärtnerisch, kein dominanter Rasen"
+    }
+  ],
+  "freeFormNotes": "Insgesamt guter Zustand. Kompost-Ecke im Nordwesten beachten."
+}

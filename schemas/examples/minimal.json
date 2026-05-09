@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "spatenstich-import.v1",
+  "capture": {
+    "timestamp": "2026-05-09T10:00:00Z"
+  },
+  "beds": [
+    {
+      "localId": "bed-001",
+      "label": "Hochbeet Nord"
+    }
+  ]
+}
