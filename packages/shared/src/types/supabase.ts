@@ -40,113 +40,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      ai_jobs: {
-        Row: {
-          created_at: string
-          created_by_user_id: string
-          deleted_at: string | null
-          garden_id: string
-          id: string
-          job_type: string
-          last_error: string | null
-          payload: Json
-          pgmq_msg_id: number | null
-          status: string
-          updated_at: string
-          updated_by_user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          created_by_user_id: string
-          deleted_at?: string | null
-          garden_id: string
-          id?: string
-          job_type: string
-          last_error?: string | null
-          payload?: Json
-          pgmq_msg_id?: number | null
-          status?: string
-          updated_at?: string
-          updated_by_user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          created_by_user_id?: string
-          deleted_at?: string | null
-          garden_id?: string
-          id?: string
-          job_type?: string
-          last_error?: string | null
-          payload?: Json
-          pgmq_msg_id?: number | null
-          status?: string
-          updated_at?: string
-          updated_by_user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ai_jobs_garden_id_fkey"
-            columns: ["garden_id"]
-            isOneToOne: false
-            referencedRelation: "gardens"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ai_results: {
-        Row: {
-          created_at: string
-          created_by_user_id: string
-          deleted_at: string | null
-          garden_id: string
-          id: string
-          job_id: string
-          latency_ms: number | null
-          model_used: string | null
-          parsed_result: Json | null
-          raw_response: Json
-        }
-        Insert: {
-          created_at?: string
-          created_by_user_id: string
-          deleted_at?: string | null
-          garden_id: string
-          id?: string
-          job_id: string
-          latency_ms?: number | null
-          model_used?: string | null
-          parsed_result?: Json | null
-          raw_response: Json
-        }
-        Update: {
-          created_at?: string
-          created_by_user_id?: string
-          deleted_at?: string | null
-          garden_id?: string
-          id?: string
-          job_id?: string
-          latency_ms?: number | null
-          model_used?: string | null
-          parsed_result?: Json | null
-          raw_response?: Json
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ai_results_garden_id_fkey"
-            columns: ["garden_id"]
-            isOneToOne: false
-            referencedRelation: "gardens"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ai_results_job_id_fkey"
-            columns: ["job_id"]
-            isOneToOne: false
-            referencedRelation: "ai_jobs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       feature_flags: {
         Row: {
           created_at: string
@@ -283,71 +176,6 @@ export type Database = {
           },
         ]
       }
-      photo_queue: {
-        Row: {
-          created_at: string
-          created_by_user_id: string
-          deleted_at: string | null
-          garden_id: string
-          geo_lat: number | null
-          geo_lng: number | null
-          id: string
-          kind: string
-          last_attempted_at: string | null
-          last_error: string | null
-          local_uri: string
-          retry_count: number
-          storage_path: string | null
-          updated_at: string
-          updated_by_user_id: string | null
-          uploaded_at: string | null
-        }
-        Insert: {
-          created_at?: string
-          created_by_user_id: string
-          deleted_at?: string | null
-          garden_id: string
-          geo_lat?: number | null
-          geo_lng?: number | null
-          id?: string
-          kind: string
-          last_attempted_at?: string | null
-          last_error?: string | null
-          local_uri: string
-          retry_count?: number
-          storage_path?: string | null
-          updated_at?: string
-          updated_by_user_id?: string | null
-          uploaded_at?: string | null
-        }
-        Update: {
-          created_at?: string
-          created_by_user_id?: string
-          deleted_at?: string | null
-          garden_id?: string
-          geo_lat?: number | null
-          geo_lng?: number | null
-          id?: string
-          kind?: string
-          last_attempted_at?: string | null
-          last_error?: string | null
-          local_uri?: string
-          retry_count?: number
-          storage_path?: string | null
-          updated_at?: string
-          updated_by_user_id?: string | null
-          uploaded_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "photo_queue_garden_id_fkey"
-            columns: ["garden_id"]
-            isOneToOne: false
-            referencedRelation: "gardens"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           archetype: string | null
@@ -458,10 +286,6 @@ export type Database = {
         Returns: string
       }
       delete_garden: { Args: { p_garden_id: string }; Returns: Json }
-      enqueue_photo_analysis: {
-        Args: { p_garden_id: string; p_kind: string; p_storage_path: string }
-        Returns: string
-      }
       ensure_default_garden_for_user: { Args: never; Returns: string }
       gen_invite_code: { Args: never; Returns: string }
       is_garden_member: { Args: { p_garden_id: string }; Returns: boolean }
