@@ -173,6 +173,40 @@
     "time_days_ago": "vor {n} Tagen",
     "time_on": "am {date}"
   },
+  "import": {
+    "title": "Aus Claude.ai importieren",
+    "pasteHint": "JSON-Ergebnis hier einfügen …",
+    "pasteLabel": "JSON einfügen",
+    "importButton": "Importieren",
+    "filePickerButton": "JSON-Datei öffnen",
+    "confirmButton": "Ausgewählte übernehmen",
+    "cancelButton": "Zurück zur Eingabe",
+    "schemaCopy": "Schema kopieren",
+    "schemaCopied": "Kopiert!",
+    "errorTitle": "Ungültiger Payload",
+    "errorJsonSyntax": "Ungültiges JSON-Format. Prüfe ob der komplette Block kopiert wurde.",
+    "successBanner": "{count} Entwürfe gespeichert — im Editor verfügbar",
+    "saveError": "Speichern fehlgeschlagen. Versuche es erneut.",
+    "saving": "Wird gespeichert …",
+    "noPayload": "Kein Import-Payload vorhanden.",
+    "sections": {
+      "beds": "Beete",
+      "plants": "Pflanzen",
+      "observations": "Beobachtungen",
+      "compliance": "Regelprüfung",
+      "complianceHint": "Wird in zukünftiger Version angezeigt",
+      "notes": "Freitext-Notizen"
+    },
+    "home": {
+      "importButton": "Aus Claude.ai importieren",
+      "emptyHeading": "Noch kein Gartenplan",
+      "emptyBody": "Plane manuell oder importiere eine Analyse aus deinem Claude.ai-Projekt."
+    },
+    "preview": {
+      "title": "Vorschau importieren",
+      "source": "Quelle: Claude.ai Projekt"
+    }
+  },
   "home": {
     "emptyTitle": "Noch kein Gartenplan",
     "emptySubtitle": "Import-Funktion kommt bald."
