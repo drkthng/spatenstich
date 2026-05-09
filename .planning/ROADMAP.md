@@ -1,35 +1,39 @@
 # Roadmap: Kleingarten-App (Spatenstich)
 
-> **Pivot 2026-04-21:** MVP-Scope fokussiert auf Foto→Plan→Editor→Kalender für 2-User Shared Garden (Dirk + Frau). Vereinsregeln-Features (Code aus Phase 02 bleibt, per Feature-Flag aus) und Fotorealismus wurden auf v1.1 verschoben.
+> **Pivot 2026-05-08 (M07):** Kompletter Wegfall von In-App-AI-Calls (Claude Vision, Pl@ntNet). Ersetzt durch manuellen Garten-Plan-Editor + One-Way-Bridge aus externem Claude.ai-Projekt (Dirks Max-Abo). App macht null ausgehende KI-API-Aufrufe. Import ist strukturiertes JSON — kein AI in der App.
+
+> **Pivot 2026-04-21:** MVP-Scope fokussiert auf 2-User Shared Garden (Dirk + Frau). Vereinsregeln-Features per Feature-Flag aus bis Post-MVP.
 
 ## Overview
 
-**v1.0 MVP (Saison 2026):** Acht Phasen bringen Spatenstich von leerem Monorepo zu einem nutzbaren MVP: Dirk und seine Frau fotografieren ihre Parzelle, sehen einen bestätigten 2D-Plan, bearbeiten ihn gemeinsam auf Canvas, tracken Saatgut, und bekommen einen klimaangepassten Pflanzkalender — alles offline-fähig und synchronisiert zwischen beiden Accounts.
+**v1.0 MVP (Saison 2026):** Spatenstich ermöglicht Dirk und seiner Frau, ihre Parzelle manuell als 2D-Plan anzulegen, Beete und Pflanzen zu verwalten, Saatgut zu tracken und einen klimaangepassten Pflanzkalender zu nutzen. Optional: KI-gestützte Analyse über externes Claude.ai-Projekt, dessen strukturierte Ergebnisse per Import-Bridge in die App fließen.
 
-- Phase 1 baut das technische Fundament.
-- Phase 2 liefert Auth + Profil (Vereinsregeln-Code vorhanden, aber per Flag aus bis v1.1).
-- Phase 2.5 erweitert das Datenmodell um Shared Garden (gardens + garden_members).
-- Phase 3 stellt Offline-Sync für 2-User-Edits sicher.
-- Phasen 4–5 liefern das Core-USP (Foto → Plan → Editor).
-- Phasen 6–7 schließen die Kalender-Schleife.
+- Phasen 1–2.5 bauen das technische Fundament + Auth + Shared Garden.
+- Phase 3 stellt Offline-Sync sicher.
+- Phase 4 (alte Garten-Erfassung per Claude Vision) ist **SUPERSEDED** durch M07-Pivot.
+- Phase 5 entfernt allen AI-Code und etabliert das Import-Schema.
+- Phase 6 baut den Import-Flow + Claude.ai-Companion-Prompt.
+- Phase 7 liefert den interaktiven Plan-Editor mit Drafts-Integration.
+- Phasen 8–9 schließen mit Saatgut-Inventar und Kalender.
 
-**v1.1 Post-MVP:** Phase 8 (Fotorealistisches Beet-Preview) + Phase 9 (Vereinsregeln-Aktivierung) folgen nach Saison-Einsatz 2026.
+**v1.1 Post-MVP:** Phase 10 (Vereinsregeln-Aktivierung) folgt nach Saison-Einsatz 2026.
 
 ## Phases
 
 ### v1.0 (MVP — Saison 2026)
 - [x] **Phase 1: Foundation** - Monorepo, StorageAdapter, Supabase schema + RLS, pgmq, feature flags, EAS CI (completed 2026-04-17)
-- [x] **Phase 2: Auth & Profile** - Account/local mode, PLZ/Klimazone, Archetyp, Onboarding. Vereinsregeln-Code liegt vor, per Feature-Flag ausgeblendet (reaktiviert in Phase 9) (code-complete 2026-04-20, scope reduziert 2026-04-21)
-- [x] **Phase 2.5: Shared Garden Model** - `gardens`-Table + `garden_members`, RLS von `user_id = auth.uid()` auf Member-Check; Invite-Code-Flow für Frau/Partner (code-complete 2026-04-23; human-verify pending) (NEU — Pivot)
+- [x] **Phase 2: Auth & Profile** - Account/local mode, PLZ/Klimazone, Archetyp, Onboarding. Vereinsregeln-Code liegt vor, per Feature-Flag ausgeblendet (code-complete 2026-04-20, scope reduziert 2026-04-21)
+- [x] **Phase 2.5: Shared Garden Model** - `gardens`-Table + `garden_members`, RLS von `user_id = auth.uid()` auf Member-Check; Invite-Code-Flow (code-complete 2026-04-23; human-verify pending) (NEU — Pivot 2026-04-21)
 - [ ] **Phase 3: Offline & Sync** - Outbox sync mit 2-User-LWW, network detection, cross-platform storage, photo queue
-- [x] **Phase 4: Garten-Erfassung (M1)** - Guided photo capture, Claude Vision analysis, element confirmation, 2D plan render (code-complete 2026-05-03; human-verify pending)
-- [ ] **Phase 5: Plan-Editor (M2)** - Interactive canvas, drag & drop, layers, undo/redo, 60fps (Vereinsregel-Warnings deferred to Phase 9)
-- [ ] **Phase 6: Saatgut-Inventar (M3)** - Seed packet scan, Sorten-DB, inventory CRUD, expiry tracking
-- [ ] **Phase 7: Pflanz- & Aussaatkalender (M4)** - 12-month timeline, climate-adjusted dates, placement suggestions, plan integration
+- [x] ~~**Phase 4: Garten-Erfassung (M1)**~~ - **SUPERSEDED (Pivot M07 2026-05-08)** — Claude Vision capture flow wurde durch manuellen Plan-Editor + Import-Bridge ersetzt. Code wird in Phase 5 entfernt. (code-complete 2026-05-03, nie human-verified)
+- [ ] **Phase 5: AI-Removal + Import-Schema (M07.1 + M07.2)** - Entfernung aller AI-Clients (Claude Vision, Pl@ntNet), Env-Vars, Screens, Tests. JSON-Schema `spatenstich-import.v1` + Referenz-Payloads erstellen.
+- [ ] **Phase 6: Import-Flow + Companion-Prompt (M07.3 + M07.4)** - Claude.ai-Projekt-System-Prompt schreiben. `ImportFromClaudeAiScreen` mit Share-Intent + Paste-Fallback + Preview-Screen + Supabase-Draft-Tables.
+- [ ] **Phase 7: Plan-Editor + Drafts-Integration (M2 + M07.5)** - Interaktiver Canvas, Drag & Drop, Layers, Undo/Redo, 60fps. Import-Drafts als "Recent Imports"-Tray im Editor. Manueller Einstieg bleibt Default.
+- [ ] **Phase 8: Saatgut-Inventar (M3)** - Sorten-DB, manuelle Texteingabe mit Autocomplete, Inventar CRUD, Haltbarkeits-Tracking. Kein KI-Foto-Scan (manuell only).
+- [ ] **Phase 9: Pflanz- & Aussaatkalender (M4)** - 12-month timeline, climate-adjusted dates, placement suggestions, plan integration
 
 ### v1.1 (Post-MVP)
-- [ ] **Phase 8: Fotorealistisches Beet-Preview** - Gemini 2.5 Flash Image / Nano Banana: Foto vom Beet + Pflanzplan → fotorealistisches Vorschau-Bild (NEU — Pivot)
-- [ ] **Phase 9: Vereinsregeln-Aktivierung** - Feature-Flag on, PDF-Edge-Function live (API-Key-Strategie geklärt), Editor-Warnings, BKleingG 1/3-Warnung (NEU — Pivot, reaktiviert Phase-02-Code)
+- [ ] **Phase 10: Vereinsregeln-Aktivierung** - Feature-Flag on, manuelle Regeleingabe live, Editor-Warnings, BKleingG 1/3-Warnung. (Claude PDF-Extraktion entfernt; Regeln werden manuell oder per Claude.ai-Import eingegeben)
 
 ## Phase Details
 
@@ -50,143 +54,177 @@
 **UI hint**: no
 
 ### Phase 2: Auth & Profile (Vereinsregeln-Code flagged off)
-**Status:** Code Complete 2026-04-20; scope-reduziert per Pivot 2026-04-21. Vereinsregeln-Schicht (Plan 02-03 Edge Function + Plan 02-04 UI) liegt im Code, aber per Feature-Flag ausgeblendet bis Phase 9.
+**Status:** Code Complete 2026-04-20; scope-reduziert per Pivot 2026-04-21. Vereinsregeln-Schicht (Plan 02-03 Edge Function + Plan 02-04 UI) liegt im Code, aber per Feature-Flag ausgeblendet bis Phase 10.
 **Goal**: Dirk und seine Frau können sich registrieren / einloggen oder lokal starten, PLZ + Archetyp setzen, und ihr Profil überlebt Neustart. Onboarding < 5 Min.
 **Depends on**: Phase 1
 **Requirements (aktiv im MVP)**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, PROF-01, PROF-02, PROF-03, PROF-04, NFR-07
-**Requirements (deferred to Phase 9)**: RULES-01, RULES-02, RULES-03, RULES-04, RULES-05
+**Requirements (deferred to Phase 10)**: RULES-01, RULES-02, RULES-03, RULES-04, RULES-05
 **Success Criteria (MVP-aktiv)** (what must be TRUE):
   1. User can create an account with email/password, log in, and remain logged in after app restart
   2. User can tap "lokal nutzen", complete onboarding, and use the app without ever entering an email — data survives app restart via expo-secure-store UUID
   3. User enters PLZ 12345 and the app displays the correct Klimazone label without network call; changing PLZ updates Klimazone immediately
   4. User selects an Archetyp (e.g. "Selbstversorger") and the selection is reflected in profile data that downstream features can read
-  5. ~~User uploads a Vereinssatzung PDF...~~ — **DEFERRED zu Phase 9 (v1.1)**
+  5. ~~User uploads a Vereinssatzung PDF...~~ — **DEFERRED zu Phase 10 (v1.1)**
 **Plans**: 4 plans — alle code-complete; Vereinsregeln-Scope aus Plan 02-03 + 02-04 per Feature-Flag inaktiv
-- [x] 02-01-PLAN.md — Schema (profiles + vereinsregeln + storage bucket) + Auth core (LargeSecureStore + getOrCreateLocalUUID + authStore + NativeWind 4.1.23) + Domain types/i18n/seed (Wave 1)
-- [x] 02-02-PLAN.md — Onboarding & Profile UI (Stack.Protected route guards, Auth-Wahl with NFR-07 Haftungsausschluss, signUp/signIn/verify-email, Garten-Plan-Placeholder, Profile-Übersicht with InlineBanner + TrafficLightBadge, PLZ + Archetype screens) (Wave 2)
-- [x] 02-03-PLAN.md — Vereinsregeln Edge Function — **flagged off, live-deploy deferred zu Phase 9** (Wave 2)
-- [x] 02-04-PLAN.md — Vereinsregeln UI — **flagged off, human-verify 22–26 deferred zu Phase 9** (Wave 3)
+- [x] 02-01-PLAN.md — Schema (profiles + vereinsregeln + storage bucket) + Auth core (Wave 1)
+- [x] 02-02-PLAN.md — Onboarding & Profile UI (Wave 2)
+- [x] 02-03-PLAN.md — Vereinsregeln Edge Function — **flagged off, live-deploy deferred zu Phase 10** (Wave 2)
+- [x] 02-04-PLAN.md — Vereinsregeln UI — **flagged off, human-verify deferred zu Phase 10** (Wave 3)
 **UI hint**: yes
 
 ### Phase 2.5: Shared Garden Model (NEU — Pivot 2026-04-21)
 **Goal**: Dirk und seine Frau können denselben Kleingarten über zwei Accounts gemeinsam bearbeiten — beide Geräte (iPhone + Desktop) zeigen nach Sync den identischen Plan, Saatgut-Inventar, Kalender.
 **Depends on**: Phase 2
-**Requirements (neu)**: GARDEN-01, GARDEN-02, GARDEN-03, GARDEN-04 (Shared-Garden-Suite, in Phase 2.5 aus Pivot abgeleitet)
+**Requirements (neu)**: GARDEN-01, GARDEN-02, GARDEN-03, GARDEN-04
 **Success Criteria** (what must be TRUE):
-  1. `gardens`-Table und `garden_members`-Table existieren mit RLS-Policies `auth.uid() IN (SELECT user_id FROM garden_members WHERE garden_id = ...)` statt direktem `user_id`-Check
-  2. Owner kann einen 6-stelligen Invite-Code generieren; zweiter Account kann per Code beitreten → landet als Member im selben `garden_id`
-  3. Alle bestehenden Phase-02-Daten (profiles, vereinsregeln, plans — sobald vorhanden) werden bei Migration pro User einer Default-Garden-Entität zugeordnet; Dirks lokaler Datenbestand bleibt erhalten
-  4. Wenn beide Accounts dieselbe Zeile innerhalb von 30 s editieren, gewinnt der spätere Schreibvorgang (LWW über `updated_at`-Timestamp); UI zeigt "zuletzt bearbeitet von <Name>"
+  1. `gardens`-Table und `garden_members`-Table existieren mit RLS-Policies
+  2. Owner kann einen 6-stelligen Invite-Code generieren; zweiter Account kann per Code beitreten
+  3. Alle bestehenden Phase-02-Daten werden bei Migration pro User einer Default-Garden-Entität zugeordnet
+  4. Wenn beide Accounts dieselbe Zeile editieren, gewinnt der spätere Schreibvorgang (LWW)
 **Plans**: 4 plans (4/4 complete; human-verify pending)
-  - [x] 02.5-01-PLAN.md — Requirements + Domain-Typen + i18n + Wave-0 Test-Stubs (SQL + Jest) (Wave 1) — completed 2026-04-23
-  - [x] 02.5-02-PLAN.md — Migration 003 (gardens + garden_members + invite_codes + RLS-Refactor + 5 RPCs inkl. D-16) + Rule-1-Fix-Migrations 004/005/006 + supabase db push --linked + types regen + 11 grüne SQL-Tests (Wave 2) — completed 2026-04-23
-  - [x] 02.5-03-PLAN.md — Repos (gardenRepo + inviteCodeRepo new mit D-16 Owner-Rights; profileRepo shrink; vereinsregelnRepo extend 3-arg toRow) + authStore activeGardenId + migrateLocalToAccount 8-step extension + enqueueAiJob column-rename-fix; 109/109 Jest tests green (Wave 3a) — completed 2026-04-23
-  - [x] 02.5-04-PLAN.md — UI (join-by-code + 3rd AuthChoiceCard + Mein-Garten mit D-16 Owner-Rights + settings link + _layout bootstrap useEffect D-12); 3 atomic commits 06b3cca/5e1eb30/60404df; human-verify checkpoint PENDING (Wave 3b) — code-complete 2026-04-23
-**UI hint**: yes (Invite-Code-Screen + Member-Liste in Settings)
+  - [x] 02.5-01-PLAN.md — Requirements + Domain-Typen + i18n (Wave 1) — completed 2026-04-23
+  - [x] 02.5-02-PLAN.md — Migration 003 + RLS-Refactor (Wave 2) — completed 2026-04-23
+  - [x] 02.5-03-PLAN.md — Repos + authStore + migrateLocalToAccount (Wave 3a) — completed 2026-04-23
+  - [x] 02.5-04-PLAN.md — UI: join-by-code + Mein-Garten (Wave 3b) — completed 2026-04-23
+**UI hint**: yes
 
 ### Phase 3: Offline & Sync (2-User Shared State)
-**Goal**: Dirk und seine Frau können die App ohne Internet öffnen, den gemeinsamen Plan sehen und bearbeiten, und alle Änderungen (inkl. Foto-Queue) werden bei Reconnect automatisch synchronisiert — LWW bei gleichzeitigen Edits, Sync-Status sichtbar.
+**Goal**: Dirk und seine Frau können die App ohne Internet öffnen, den gemeinsamen Plan sehen und bearbeiten, und alle Änderungen (inkl. Foto-Queue) werden bei Reconnect automatisch synchronisiert.
 **Depends on**: Phase 2.5
 **Requirements**: SYNC-01, SYNC-02, SYNC-03, SYNC-04, NFR-01, NFR-04, NFR-05
 **Success Criteria** (what must be TRUE):
   1. App opens and renders the last-seen plan with no network — no spinner, no error, no blank screen
-  2. A photo captured offline is stored locally; when the network returns the photo is uploaded and the AI analysis job is enqueued automatically without user action
-  3. Edits made offline appear in Supabase Postgres within 30 seconds of reconnection; the sync-status indicator shows "synced" when complete
-  4. The app runs on desktop browser (Chrome/Safari) with IndexedDB as the storage backend — the same plan data is visible on both iPhone and browser after sync
-  5. Dirk und Frau editieren denselben Plan offline auf zwei Geräten; bei Reconnect triggert LWW-Merge ohne manuelle Konfliktauflösung; "zuletzt bearbeitet von"-Hinweis zeigt den Gewinner
+  2. A photo captured offline is stored locally; when the network returns the photo is uploaded automatically
+  3. Edits made offline appear in Supabase within 30 seconds of reconnection
+  4. The app runs on desktop browser with IndexedDB as the storage backend
+  5. Dirk und Frau editieren denselben Plan offline → LWW-Merge bei Reconnect
 **Plans**: 7 plans
-  - [x] 03-01-PLAN.md — Supabase-Migrationen (LWW-Trigger + deleted_at + photo_queue + Storage-RLS + enqueue_photo_analysis RPC) + db push --linked + Types Regen (Wave 1)
-  - [x] 03-02-PLAN.md — StorageAdapter Row-Tables + sync_outbox + sync_state (SQLite + IndexedDB + Contract-Tests) (Wave 2)
-  - [x] 03-03-PLAN.md — Repo-Umbau offline-first (gardenRepo/vereinsregelnRepo/profileRepo/inviteCodeRepo) + migrateLocalToAccount Bootstrap (Wave 3)
-  - [x] 03-04-PLAN.md — SyncWorker (push/pull/LWW/Retry-Backoff) + SyncTriggers (NetInfo/AppState/debounced) + 2-User-Reconnect-Integration-Test (Wave 3)
-  - [x] 03-05-PLAN.md — Photo-Queue + EXIF-Strip (native/web) + PhotoUploader (Storage + RPC) + Opt-in-Toggle (Wave 4)
-  - [x] 03-06-PLAN.md — Sync-Status-UI (Badge + Detail-Screen mit Retry/Verwerfen) + SC-5 30s-Reconnect-Test (Wave 4)
-  - [ ] 03-07-PLAN.md — Gap Closure: uploadPending() in SyncTriggers reconnect-Handler verdrahten (SC-2 / SYNC-02) (Wave 5)
-**UI hint**: partial (Sync-Status-Badge + Detail-Screen + Datenschutz-Toggle)
+  - [x] 03-01-PLAN.md — Supabase-Migrationen (Wave 1)
+  - [x] 03-02-PLAN.md — StorageAdapter Row-Tables (Wave 2)
+  - [x] 03-03-PLAN.md — Repo-Umbau offline-first (Wave 3)
+  - [x] 03-04-PLAN.md — SyncWorker + SyncTriggers (Wave 3)
+  - [x] 03-05-PLAN.md — Photo-Queue + PhotoUploader (Wave 4)
+  - [x] 03-06-PLAN.md — Sync-Status-UI (Wave 4)
+  - [ ] 03-07-PLAN.md — Gap Closure: uploadPending() wiring (Wave 5)
+**UI hint**: partial
 
-### Phase 4: Garten-Erfassung (M1)
-**Goal**: Dirk photographs his allotment from 3 angles, enters the plot dimensions, and sees a confirmed schematic 2D plan populated with the elements Claude Vision detected.
+### Phase 4: Garten-Erfassung (M1) — SUPERSEDED
+**Status:** ⚠️ **SUPERSEDED by Pivot M07 (2026-05-08).** Code-complete 2026-05-03, but never human-verified. All Claude Vision code, Edge Functions, and capture screens from this phase will be removed in Phase 5. Phase 4 artifacts remain for historical reference only.
+**Original Goal**: Dirk photographs his allotment, Claude Vision analyzes photos, user confirms detected elements, app renders 2D plan.
+**Why superseded**: Claude Vision API costs out of scope for v1 economics. Replaced by manual garden planning + Claude.ai bridge import.
+**Plans**: 4 plans (all superseded)
+  - [x] ~~04-01-PLAN.md — Schema + gardenPlanRepo + photoResizer~~
+  - [x] ~~04-02-PLAN.md — Edge Function: Claude Vision integration~~
+  - [x] ~~04-03-PLAN.md — Capture Flow UI~~
+  - [x] ~~04-04-PLAN.md — Analysis polling + Element confirmation + GardenPlanView~~
+**UI hint**: superseded
+
+### Phase 5: AI-Removal + Import-Schema (M07.1 + M07.2)
+**Goal**: Zero AI-API-Aufrufe aus der App. Alle Claude Vision / Pl@ntNet Clients, Edge Functions, Env-Vars, Screens und Tests entfernt. Import-Schema `spatenstich-import.v1` als JSON Schema (draft 2020-12) definiert und mit Referenz-Payloads validiert.
 **Depends on**: Phase 3
-**Requirements**: PHOTO-01, PHOTO-02, PHOTO-03, PHOTO-04, PHOTO-05, PHOTO-06, PHOTO-07, PHOTO-08, NFR-02, NFR-03
+**Requirements**: REMOVE-01, REMOVE-02, REMOVE-03, IMPORT-01, IMPORT-02
 **Success Criteria** (what must be TRUE):
-  1. The guided capture flow prompts for Overview, Nord, and Süd shots; each photo is resized to max 1.15 MP before upload; a progress indicator is visible while Claude Vision processes (never a blocking UI freeze)
-  2. Detected elements appear one by one for confirmation with confidence labels ("sicher" / "unsicher"); user can accept or reject each individually; only accepted elements become plan objects
-  3. A schematic plan (drawn style, not photorealistic) renders from the confirmed JSON using the entered garden dimensions as the coordinate space
-  4. Uploading only 1 photo shows a warning but still attempts analysis; receiving zero detected elements opens an empty grid template matching the entered dimensions
-  5. The app refuses to exceed 200 Claude calls/day hard limit; a soft warning appears at 50 calls; all AI responses (raw + parsed) are persisted in `ai_results`
-**Plans**: 4 plans
-  - [x] 04-01-PLAN.md — Schema (garden_dimensions + plan_elements + RLS + LWW) + Types + gardenPlanRepo + photoResizer + i18n (Wave 1) — completed 2026-05-03
-  - [x] 04-02-PLAN.md — Edge Function: Claude Vision integration replacing mock + parseElements + Budget enforcement (Wave 2) — completed 2026-05-03
-  - [x] 04-03-PLAN.md — Capture Flow UI: expo-image-picker + 3 foto-steps + review + dimensions + ShapeSelector (Wave 2) — completed 2026-05-03
-  - [x] 04-04-PLAN.md — Analysis polling + Element confirmation + GardenPlanView (SVG) + Plan screen + Home screen update (Wave 3) — completed 2026-05-03
+  1. `grep -ri "anthropic\|plantnet\|vision" src/` returns no functional code, only comments referencing the historical pivot
+  2. App builds and ships green on iOS + Android; zero outbound network calls beyond Supabase + Expo update channel
+  3. `schemas/spatenstich-import.v1.json` exists as valid JSON Schema (draft 2020-12)
+  4. Three reference payloads (`full.json`, `minimal.json`, `edge-cases.json`) all validate against the schema
+  5. Onboarding, README, and privacy policy scrubbed of AI-call language
+**Plans**: 3 plans
+Plans:
+- [ ] 05-01-PLAN.md — Backend-Bereinigung: Migration 015 (DROP ai_tables), Edge Functions loeschen, Shared Types bereinigen (Wave 1)
+- [ ] 05-02-PLAN.md — App-Level AI-Code-Bereinigung: Client-Libs, Screens, Sync, i18n, README (Wave 2)
+- [ ] 05-03-PLAN.md — Import-Schema v1 + Referenz-Payloads + Validierungsscript + DB Push (Wave 2)
+**UI hint**: no
+
+### Phase 6: Import-Flow + Companion-Prompt (M07.3 + M07.4)
+**Goal**: Claude.ai-Projekt-System-Prompt fertig. Import-Screen in der App: Share-Intent für JSON-Dateien + Paste-Fallback → Preview mit Confidence-Badges → selektive Übernahme als Drafts in Supabase.
+**Depends on**: Phase 5
+**Requirements**: IMPORT-03, IMPORT-04, IMPORT-05, IMPORT-06, IMPORT-07, IMPORT-08
+**Success Criteria** (what must be TRUE):
+  1. `prompts/garden-project-system-prompt.md` exists; drei Test-Gartenfotos → drei valide v1-Payloads im Claude.ai-Projekt (first try, kein manuelles Reformatieren)
+  2. App registriert sich als Handler für `application/json` + Custom URL Scheme `spatenstich://import`
+  3. `ImportFromClaudeAiScreen` zeigt Preview mit Entity-Toggles; Confidence < 0.6 mit Warning-Chip
+  4. Invalid Payload zeigt actionable Fehler + "Schema kopieren"-Button
+  5. Supabase-Tables `imports`, `import_items`, `bed_drafts`, `plant_drafts`, `observation_drafts` mit RLS
+  6. Round-trip: handcrafted Payload → Share Intent → Preview → Confirm → Drafts sichtbar im Editor
+**Plans**: 3 plans
+Plans:
+- [ ] 05-01-PLAN.md — Backend-Bereinigung: Migration 015 (DROP ai_tables), Edge Functions loeschen, Shared Types bereinigen (Wave 1)
+- [ ] 05-02-PLAN.md — App-Level AI-Code-Bereinigung: Client-Libs, Screens, Sync, i18n, README (Wave 2)
+- [ ] 05-03-PLAN.md — Import-Schema v1 + Referenz-Payloads + Validierungsscript + DB Push (Wave 2)
 **UI hint**: yes
 
-### Phase 5: Plan-Editor (M2)
-**Goal**: Dirk can interactively place, move, rotate, and delete garden elements on a metered canvas, with undo/redo, auto-save, and live compliance warnings — running at 60fps on his iPhone.
-**Depends on**: Phase 4
-**Requirements**: EDIT-01, EDIT-02, EDIT-03, EDIT-04, EDIT-05, EDIT-06, EDIT-07, EDIT-08, EDIT-09, EDIT-10, EDIT-11, EDIT-12
+### Phase 7: Plan-Editor + Drafts-Integration (M2 + M07.5)
+**Goal**: Dirk kann Gartenelemente interaktiv auf einem Canvas platzieren, bewegen, rotieren und löschen — manuell oder aus importierten Drafts. 60fps auf iPhone, Undo/Redo, Auto-Save. Import-Drafts erscheinen als "Letzte Importe"-Tray.
+**Depends on**: Phase 6
+**Requirements**: EDIT-01, EDIT-02, EDIT-03, EDIT-04, EDIT-05, EDIT-06, EDIT-07, EDIT-08, EDIT-09, EDIT-11, EDIT-12, DRAFT-01, DRAFT-02, DRAFT-03
 **Success Criteria** (what must be TRUE):
-  1. Canvas renders the plan at 60fps with 200 elements on a real iPhone (measured via Xcode frame meter); the 1×1 m grid can be toggled on/off without frame drop
-  2. User drags an element from the palette onto the canvas; releasing it places the element at the correct garden-meter coordinate (not pixel); a spacing hint appears for plant elements
-  3. User draws a bed polygon by tapping corner points; the polygon is saved in garden-meters and renders correctly after zoom or device rotation
-  4. Undo reverts the last 20 actions (including drag, rotate, scale, delete); Redo restores them; auto-save fires 5 seconds after the last change without user action
-  5. ~~Placing an element that violates a Vereinsregel...~~ — **DEFERRED zu Phase 9 (v1.1)** (Editor-Hook vorbereiten, Regel-Check inaktiv im MVP)
-**Plans**: TBD
+  1. Canvas renders at 60fps with 200 elements on real iPhone; 1×1 m grid toggleable
+  2. User drags element from palette onto canvas; coordinates in garden-meters
+  3. User draws bed polygon by tapping corner points
+  4. Undo reverts last 20 actions; auto-save fires 5s after last change
+  5. Imported drafts appear in "Recent imports" tray; drag bed draft → canvas places it
+  6. Accepting a plant draft into a bed lifts it to a real planted entity with `importedFrom` provenance
+  7. Drafts not promoted within 30 days flagged as "Stale imports", never auto-deleted
+**Plans**: 3 plans
+Plans:
+- [ ] 05-01-PLAN.md — Backend-Bereinigung: Migration 015 (DROP ai_tables), Edge Functions loeschen, Shared Types bereinigen (Wave 1)
+- [ ] 05-02-PLAN.md — App-Level AI-Code-Bereinigung: Client-Libs, Screens, Sync, i18n, README (Wave 2)
+- [ ] 05-03-PLAN.md — Import-Schema v1 + Referenz-Payloads + Validierungsscript + DB Push (Wave 2)
 **UI hint**: yes
 
-### Phase 6: Saatgut-Inventar (M3)
-**Goal**: Dirk can photograph a seed packet and immediately see the extracted variety name, sowing window, and expiry date added to his inventory — or add a variety manually with autocomplete.
+### Phase 8: Saatgut-Inventar (M3)
+**Goal**: Dirk kann Saatgut-Sorten manuell per Autocomplete gegen die Sorten-DB hinzufügen, Inventar verwalten und Haltbarkeit tracken. Kein KI-Foto-Scan — manuelle Eingabe ist der einzige Weg.
 **Depends on**: Phase 3
-**Requirements**: SEED-01, SEED-02, SEED-03, SEED-04, SEED-05, SEED-06
+**Requirements**: SEED-02, SEED-03, SEED-04, SEED-05, SEED-06
 **Success Criteria** (what must be TRUE):
-  1. User photographs a seed packet; Claude Vision extracts the variety name, sowing window, and expiry date; the extracted data appears pre-filled in an editable form before saving
-  2. User types "Tom" in the text-add field and sees autocomplete suggestions from the Sorten-DB (100–150 entries); selecting one pre-fills all metadata fields
-  3. A variety not found in the DB can be saved as a free-text entry; it appears in inventory with the user's entered data and is not discarded
-  4. Inventory list shows a visual expiry badge: green (ok), amber (expires within 6 months), red (expired); user can edit or delete any entry
-**Plans**: TBD
+  1. User types "Tom" → Autocomplete-Vorschläge aus Sorten-DB (100–150 Einträge); Auswahl füllt Metadaten
+  2. Sorte nicht in DB → Freitext-Eintrag möglich, wird nicht verworfen
+  3. Inventar zeigt Haltbarkeits-Badge: grün/gelb/rot
+  4. User kann Einträge bearbeiten und löschen
+**Plans**: 3 plans
+Plans:
+- [ ] 05-01-PLAN.md — Backend-Bereinigung: Migration 015 (DROP ai_tables), Edge Functions loeschen, Shared Types bereinigen (Wave 1)
+- [ ] 05-02-PLAN.md — App-Level AI-Code-Bereinigung: Client-Libs, Screens, Sync, i18n, README (Wave 2)
+- [ ] 05-03-PLAN.md — Import-Schema v1 + Referenz-Payloads + Validierungsscript + DB Push (Wave 2)
 **UI hint**: yes
 
-### Phase 7: Pflanz- & Aussaatkalender (M4)
+### Phase 9: Pflanz- & Aussaatkalender (M4)
 **Goal**: Dirk sees a 12-month scrollable calendar of when to sow, plant, and harvest each variety in his inventory, adjusted for his Klimazone, with placement suggestions that land directly in the plan.
-**Depends on**: Phase 5, Phase 6
+**Depends on**: Phase 7, Phase 8
 **Requirements**: CAL-01, CAL-02, CAL-03, CAL-04, CAL-05, CAL-06
 **Success Criteria** (what must be TRUE):
-  1. The 12-month timeline shows a task card for each inventory variety; task dates differ between Klimazone 1 and Klimazone 7 by the documented offset (verifiable by switching PLZ in profile)
-  2. Each variety shows distinct bars or labels for Vorkultur (indoor), Direktsaat, Auspflanzen, and Ernte — four task types are visually distinguishable
-  3. For a variety with a "sonnig" standort requirement, the placement suggestion points to an unoccupied bed area marked as sunny in the plan; user can accept, relocate, or skip the suggestion
-  4. Accepting a placement suggestion adds the plant element to the plan canvas and activates the calendar task — both are visible without any additional manual step
-  5. Replanting a variety from the same plant family (e.g. Solanaceae) in the same bed that contained it last season shows a fruchtfolge warning before the placement is confirmed
-**Plans**: TBD
+  1. 12-month timeline shows task cards per inventory variety; dates differ by Klimazone
+  2. Four task types visually distinguishable: Vorkultur, Direktsaat, Auspflanzen, Ernte
+  3. Placement suggestion points to unoccupied sunny bed area for sunny-requirement variety
+  4. Accepting placement adds plant to plan canvas and activates calendar task
+  5. Fruchtfolge warning when replanting same family in same bed as last season
+**Plans**: 3 plans
+Plans:
+- [ ] 05-01-PLAN.md — Backend-Bereinigung: Migration 015 (DROP ai_tables), Edge Functions loeschen, Shared Types bereinigen (Wave 1)
+- [ ] 05-02-PLAN.md — App-Level AI-Code-Bereinigung: Client-Libs, Screens, Sync, i18n, README (Wave 2)
+- [ ] 05-03-PLAN.md — Import-Schema v1 + Referenz-Payloads + Validierungsscript + DB Push (Wave 2)
 **UI hint**: yes
 
 ---
 
 ## v1.1 Post-MVP
 
-### Phase 8: Fotorealistisches Beet-Preview (NEU — Pivot 2026-04-21)
-**Goal**: Dirk fotografiert ein leeres oder teilbepflanztes Beet, wählt einen Pflanzplan aus dem Editor (Phase 5) oder Kalender (Phase 7), und die App erzeugt ein fotorealistisches Vorschau-Bild, wie das Beet nach der geplanten Bepflanzung in 4–8 Wochen aussehen wird.
-**Depends on**: Phase 5, Phase 7
-**Requirements (neu)**: PREVIEW-01 bis PREVIEW-04 (in Phase 8 Spec abzuleiten)
+### Phase 10: Vereinsregeln-Aktivierung (NEU — Pivot 2026-04-21, aktualisiert M07 2026-05-08)
+**Goal**: Die in Phase 02 implementierte Vereinsregeln-Schicht wird per Feature-Flag aktiviert. Regeleingabe erfolgt manuell (Checkliste) oder per Claude.ai-Import. Claude PDF-Extraktion Edge Function wird entfernt (keine In-App AI). Editor-Warnings aktiv, BKleingG 1/3-Warnung erscheint.
+**Depends on**: Phase 2 (Code), Phase 7 (Editor-Hook)
+**Requirements**: RULES-02, RULES-03, RULES-04, RULES-05
 **Success Criteria** (what must be TRUE):
-  1. Edge Function nimmt Foto + Plan-JSON + Sorten-Metadaten entgegen, ruft Gemini 2.5 Flash Image (oder Nano Banana / SeeDream) auf, gibt fotorealistisches PNG zurück
-  2. Generierung dauert < 30 s auf gängigem Input; Preview wird persistiert in Storage und kann später erneut aufgerufen werden
-  3. User kann zwischen "in 4 Wochen", "in 8 Wochen" und "Hochsaison" wechseln; Modell bekommt entsprechenden Zeit-Hint im Prompt
-  4. API-Key-Strategie geklärt (Spike davor: entweder Gemini-Free-Tier, eigener Proxy auf 24/7-Rechner, oder bezahlter API-Key)
-**Plans**: TBD
+  1. Feature-Flag `vereinsregeln_enabled` auf `true` → UI sichtbar
+  2. Manuelle Checklisten-Eingabe funktioniert (keine PDF-Upload-Edge-Function)
+  3. Im Plan-Editor: Platzierung eines regelwidrigen Elements zeigt Inline-Warnung
+  4. BKleingG-Badge wird rot/gelb/grün je nach Nutz/Zier-Verhältnis
+**Plans**: 3 plans
+Plans:
+- [ ] 05-01-PLAN.md — Backend-Bereinigung: Migration 015 (DROP ai_tables), Edge Functions loeschen, Shared Types bereinigen (Wave 1)
+- [ ] 05-02-PLAN.md — App-Level AI-Code-Bereinigung: Client-Libs, Screens, Sync, i18n, README (Wave 2)
+- [ ] 05-03-PLAN.md — Import-Schema v1 + Referenz-Payloads + Validierungsscript + DB Push (Wave 2)
 **UI hint**: yes
-
-### Phase 9: Vereinsregeln-Aktivierung (NEU — Pivot 2026-04-21)
-**Goal**: Die in Phase 02 bereits implementierte Vereinsregeln-Schicht wird per Feature-Flag aktiviert; Edge Function `extract-vereinsregeln` geht live (API-Key-Strategie wie Phase 8), Editor-Warnings (Phase 5 Hook) werden aktiv, BKleingG 1/3-Warnung erscheint bei Nutz/Zier-Verstoß.
-**Depends on**: Phase 2 (Code), Phase 5 (Editor-Hook), Phase 8 (API-Key-Strategie geklärt)
-**Requirements**: RULES-01, RULES-02, RULES-03, RULES-04, RULES-05 (aus Phase 2 übernommen) + BKLEINGG-01 (1/3-Warnung)
-**Success Criteria** (what must be TRUE):
-  1. Feature-Flag `vereinsregeln_enabled` auf `true` → Profil-Banner + Settings-PDF-Upload-Karte wieder sichtbar
-  2. Edge Function deployed, ACTIVE; PDF-Upload → extrahierte Regeln in < 55 s
-  3. Im Plan-Editor (Phase 5): Platzierung eines Elements, das gegen eine Regel verstößt, zeigt Inline-Warnung ohne Blockade
-  4. BKleingG-Badge im Profil wird rot/gelb/grün je nach Nutz/Zier-Verhältnis im aktuellen Plan
-  5. Human-verify-Checkpoint aus Phase 02 (Schritte 22–33) wird vollständig abgearbeitet
-**Plans**: TBD
-**UI hint**: yes (reaktiviert bestehende Screens aus Phase 02-04)
 
 ---
 
@@ -195,13 +233,17 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-04-17 |
-| 2. Auth & Profile (Vereinsregeln flagged off) | 4/4 | Code Complete (MVP-scope verify pending: NFR-07, AUTH-05, AUTH-04, Logout-Guard) | 2026-04-20 |
-| 2.5. Shared Garden Model | 4/4 | Code Complete (human-verify pending: SC-1..SC-4 + D-16 Scenarios 5..7 + bootstrap-useEffect + regression) | 2026-04-23 |
-| 3. Offline & Sync | 6/7 | Gap Closure (SC-2 uploadPending wiring) | - |
-| 4. Garten-Erfassung (M1) | 0/4 | Planned | - |
-| 5. Plan-Editor (M2) | 0/TBD | Not started | - |
-| 6. Saatgut-Inventar (M3) | 0/TBD | Not started | - |
-| 7. Pflanz- & Aussaatkalender (M4) | 0/TBD | Not started | - |
+| 2. Auth & Profile | 4/4 | Code Complete (verify pending) | 2026-04-20 |
+| 2.5. Shared Garden Model | 4/4 | Code Complete (human-verify pending) | 2026-04-23 |
+| 3. Offline & Sync | 6/7 | Gap Closure pending | - |
+| ~~4. Garten-Erfassung (M1)~~ | 4/4 | **SUPERSEDED** (Pivot M07) | - |
+| 5. AI-Removal + Import-Schema (M07.1+2) | 0/TBD | Not started | - |
+| 6. Import-Flow + Companion-Prompt (M07.3+4) | 0/TBD | Not started | - |
+| 7. Plan-Editor + Drafts (M2 + M07.5) | 0/TBD | Not started | - |
+| 8. Saatgut-Inventar (M3) | 0/TBD | Not started | - |
+| 9. Pflanz-/Aussaatkalender (M4) | 0/TBD | Not started | - |
 | **— v1.1 Post-MVP —** | | | |
-| 8. Fotorealistisches Beet-Preview | 0/TBD | Not started (NEU — Pivot) | - |
-| 9. Vereinsregeln-Aktivierung | 0/TBD | Not started (NEU — Pivot, reaktiviert Phase-02-Code) | - |
+| 10. Vereinsregeln-Aktivierung | 0/TBD | Not started | - |
+
+---
+*Last updated: 2026-05-08 — M07 Pivot (Manual Planning + Claude.ai Bridge)*
