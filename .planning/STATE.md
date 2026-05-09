@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: Ready to execute
-stopped_at: M07 Pivot roadmap overhaul complete
-last_updated: "2026-05-09T05:46:57.023Z"
+status: Phase complete — ready for verification
+stopped_at: Plan 05-03 complete — Import-Schema v1 + Migration 015 gepusht
+last_updated: "2026-05-09T06:09:52.249Z"
 last_activity: 2026-05-09
 progress:
   total_phases: 10
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 25
-  completed_plans: 23
-  percent: 92
+  completed_plans: 25
+  percent: 100
 ---
 
 # Project State
@@ -67,6 +67,7 @@ Progress: [█████░░░░░] 56% (14/18 Plans — Phase 4 plans ex
 | Phase 04 P03 | 13 | 2 tasks | 14 files | *(superseded)*
 | Phase 04 P04 | 21 | 2 tasks | 15 files | *(superseded)*
 | Phase 05 P02 | 35 | 2 tasks | 40 files |
+| Phase 05 P03 | 168 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,7 @@ Recent decisions affecting current work:
 - [Phase 02.5 P02]: Migration-History ist append-only
 - [Phase 04 P02]: Budget-Zählung per garden_id *(superseded — AI budget no longer relevant)*
 - [Phase 04 P02]: Files API für Foto-Upload an Anthropic *(superseded — Anthropic client being removed)*
+- [Phase ?]: spatenstich-import.v1 JSON Schema draft 2020-12 als Datenkontrakt Claude.ai Projekt → App definiert; sunExposure enum 'half' (nicht 'halfShade')
 
 ### Pending Todos
 
@@ -121,6 +123,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-09T08:30:00.000Z
-Stopped at: Plan 05-02 complete — App-Level AI-Code-Bereinigung, TypeScript-Build gruen
+Last session: 2026-05-09T06:09:47.380Z
+Stopped at: Plan 05-03 complete — Import-Schema v1 + Migration 015 gepusht
 Resume file: None

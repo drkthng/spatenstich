@@ -47,8 +47,8 @@
 
 ### Import-Schema (Phase 5 — Pivot M07)
 
-- [ ] **IMPORT-01**: JSON-Schema `spatenstich-import.v1.json` (draft 2020-12) definiert und committed
-- [ ] **IMPORT-02**: Drei Referenz-Payloads (`full.json`, `minimal.json`, `edge-cases.json`) validieren gegen Schema
+- [x] **IMPORT-01**: JSON-Schema `spatenstich-import.v1.json` (draft 2020-12) definiert und committed
+- [x] **IMPORT-02**: Drei Referenz-Payloads (`full.json`, `minimal.json`, `edge-cases.json`) validieren gegen Schema
 
 ### Import-Flow (Phase 6 — Pivot M07)
 
@@ -209,8 +209,8 @@
 | REMOVE-01 | Phase 5 | Pending |
 | REMOVE-02 | Phase 5 | Pending |
 | REMOVE-03 | Phase 5 | Pending |
-| IMPORT-01 | Phase 5 | Pending |
-| IMPORT-02 | Phase 5 | Pending |
+| IMPORT-01 | Phase 5 | Complete |
+| IMPORT-02 | Phase 5 | Complete |
 | IMPORT-03 | Phase 6 | Pending |
 | IMPORT-04 | Phase 6 | Pending |
 | IMPORT-05 | Phase 6 | Pending |

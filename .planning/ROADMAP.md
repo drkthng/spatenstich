@@ -26,7 +26,7 @@
 - [x] **Phase 2.5: Shared Garden Model** - `gardens`-Table + `garden_members`, RLS von `user_id = auth.uid()` auf Member-Check; Invite-Code-Flow (code-complete 2026-04-23; human-verify pending) (NEU — Pivot 2026-04-21)
 - [ ] **Phase 3: Offline & Sync** - Outbox sync mit 2-User-LWW, network detection, cross-platform storage, photo queue
 - [x] ~~**Phase 4: Garten-Erfassung (M1)**~~ - **SUPERSEDED (Pivot M07 2026-05-08)** — Claude Vision capture flow wurde durch manuellen Plan-Editor + Import-Bridge ersetzt. Code wird in Phase 5 entfernt. (code-complete 2026-05-03, nie human-verified)
-- [ ] **Phase 5: AI-Removal + Import-Schema (M07.1 + M07.2)** - Entfernung aller AI-Clients (Claude Vision, Pl@ntNet), Env-Vars, Screens, Tests. JSON-Schema `spatenstich-import.v1` + Referenz-Payloads erstellen.
+- [x] **Phase 5: AI-Removal + Import-Schema (M07.1 + M07.2)** - Entfernung aller AI-Clients (Claude Vision, Pl@ntNet), Env-Vars, Screens, Tests. JSON-Schema `spatenstich-import.v1` + Referenz-Payloads erstellen. (completed 2026-05-09)
 - [ ] **Phase 6: Import-Flow + Companion-Prompt (M07.3 + M07.4)** - Claude.ai-Projekt-System-Prompt schreiben. `ImportFromClaudeAiScreen` mit Share-Intent + Paste-Fallback + Preview-Screen + Supabase-Draft-Tables.
 - [ ] **Phase 7: Plan-Editor + Drafts-Integration (M2 + M07.5)** - Interaktiver Canvas, Drag & Drop, Layers, Undo/Redo, 60fps. Import-Drafts als "Recent Imports"-Tray im Editor. Manueller Einstieg bleibt Default.
 - [ ] **Phase 8: Saatgut-Inventar (M3)** - Sorten-DB, manuelle Texteingabe mit Autocomplete, Inventar CRUD, Haltbarkeits-Tracking. Kein KI-Foto-Scan (manuell only).
@@ -133,7 +133,7 @@
 Plans:
 - [x] 05-01-PLAN.md — Backend-Bereinigung: Migration 015 (DROP ai_tables), Edge Functions loeschen, Shared Types bereinigen (Wave 1)
 - [x] 05-02-PLAN.md — App-Level AI-Code-Bereinigung: Client-Libs, Screens, Sync, i18n, README (Wave 2) — completed 2026-05-09
-- [ ] 05-03-PLAN.md — Import-Schema v1 + Referenz-Payloads + Validierungsscript + DB Push (Wave 2)
+- [x] 05-03-PLAN.md — Import-Schema v1 + Referenz-Payloads + Validierungsscript + DB Push (Wave 2)
 **UI hint**: no
 
 ### Phase 6: Import-Flow + Companion-Prompt (M07.3 + M07.4)
@@ -149,8 +149,8 @@ Plans:
   6. Round-trip: handcrafted Payload → Share Intent → Preview → Confirm → Drafts sichtbar im Editor
 **Plans**: 3 plans
 Plans:
-- [ ] 05-01-PLAN.md — Backend-Bereinigung: Migration 015 (DROP ai_tables), Edge Functions loeschen, Shared Types bereinigen (Wave 1)
-- [ ] 05-02-PLAN.md — App-Level AI-Code-Bereinigung: Client-Libs, Screens, Sync, i18n, README (Wave 2)
+- [x] 05-01-PLAN.md — Backend-Bereinigung: Migration 015 (DROP ai_tables), Edge Functions loeschen, Shared Types bereinigen (Wave 1)
+- [x] 05-02-PLAN.md — App-Level AI-Code-Bereinigung: Client-Libs, Screens, Sync, i18n, README (Wave 2)
 - [ ] 05-03-PLAN.md — Import-Schema v1 + Referenz-Payloads + Validierungsscript + DB Push (Wave 2)
 **UI hint**: yes
 
@@ -237,7 +237,7 @@ Plans:
 | 2.5. Shared Garden Model | 4/4 | Code Complete (human-verify pending) | 2026-04-23 |
 | 3. Offline & Sync | 6/7 | Gap Closure pending | - |
 | ~~4. Garten-Erfassung (M1)~~ | 4/4 | **SUPERSEDED** (Pivot M07) | - |
-| 5. AI-Removal + Import-Schema (M07.1+2) | 1/3 | In Progress|  |
+| 5. AI-Removal + Import-Schema (M07.1+2) | 3/3 | Complete   | 2026-05-09 |
 | 6. Import-Flow + Companion-Prompt (M07.3+4) | 0/TBD | Not started | - |
 | 7. Plan-Editor + Drafts (M2 + M07.5) | 0/TBD | Not started | - |
 | 8. Saatgut-Inventar (M3) | 0/TBD | Not started | - |
