@@ -375,6 +375,13 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# ── Edge Function overrides ──────────────────────────────────────────────
+# verify_jwt = false lets the Supabase gateway forward OPTIONS preflight
+# requests (which carry no Authorization header) to the function code,
+# so the function's own CORS handler can respond with correct headers.
+# Each function still validates auth inside its handler (defense-in-depth).
+
+
 [analytics]
 enabled = true
 port = 54327
