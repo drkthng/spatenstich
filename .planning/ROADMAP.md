@@ -131,7 +131,7 @@
   5. Onboarding, README, and privacy policy scrubbed of AI-call language
 **Plans**: 3 plans
 Plans:
-- [ ] 05-01-PLAN.md — Backend-Bereinigung: Migration 015 (DROP ai_tables), Edge Functions loeschen, Shared Types bereinigen (Wave 1)
+- [x] 05-01-PLAN.md — Backend-Bereinigung: Migration 015 (DROP ai_tables), Edge Functions loeschen, Shared Types bereinigen (Wave 1)
 - [ ] 05-02-PLAN.md — App-Level AI-Code-Bereinigung: Client-Libs, Screens, Sync, i18n, README (Wave 2)
 - [ ] 05-03-PLAN.md — Import-Schema v1 + Referenz-Payloads + Validierungsscript + DB Push (Wave 2)
 **UI hint**: no
@@ -237,7 +237,7 @@ Plans:
 | 2.5. Shared Garden Model | 4/4 | Code Complete (human-verify pending) | 2026-04-23 |
 | 3. Offline & Sync | 6/7 | Gap Closure pending | - |
 | ~~4. Garten-Erfassung (M1)~~ | 4/4 | **SUPERSEDED** (Pivot M07) | - |
-| 5. AI-Removal + Import-Schema (M07.1+2) | 0/TBD | Not started | - |
+| 5. AI-Removal + Import-Schema (M07.1+2) | 1/3 | In Progress|  |
 | 6. Import-Flow + Companion-Prompt (M07.3+4) | 0/TBD | Not started | - |
 | 7. Plan-Editor + Drafts (M2 + M07.5) | 0/TBD | Not started | - |
 | 8. Saatgut-Inventar (M3) | 0/TBD | Not started | - |
