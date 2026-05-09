@@ -1,128 +1,127 @@
 # Requirements: Kleingarten-App (Spatenstich)
 
 **Defined:** 2026-04-15
-**Core Value:** Foto rein → Plan und Kalender raus: KI-gestützte Überführung einer realen Parzelle in einen digital planbaren, regelkonformen Kleingarten-Assistenten.
+**Updated:** 2026-05-08 (Pivot M07 — Manual Planning + Claude.ai Bridge)
+**Core Value:** Manueller Plan-Editor + strukturierter Import aus Claude.ai: Dirk plant seine Parzelle digital — per Hand oder beschleunigt durch KI-Analyse im externen Claude.ai-Projekt.
 
 ## v1 Requirements
 
 ### Foundation (Technische Basis)
 
 - [x] **FOUND-01**: Monorepo mit pnpm workspaces läuft lokal (app/, supabase/, packages/shared)
-- [x] **FOUND-02**: StorageAdapter-Interface abstrahiert expo-sqlite (native) und IndexedDB (web) — kein direkter SQLite-Aufruf in Feature-Code
+- [x] **FOUND-02**: StorageAdapter-Interface abstrahiert expo-sqlite (native) und IndexedDB (web)
 - [x] **FOUND-03**: Supabase-Schema mit Row Level Security auf allen Tabellen aktiviert ab Migration 001
 - [x] **FOUND-04**: Feature-Flag-System über Supabase-Tabelle (`feature_flags`) operabel
 - [x] **FOUND-05**: EAS Build funktioniert in CI für iOS und Web-Export
-- [x] **FOUND-06**: Alle KI-API-Keys (Claude, Pl@ntNet) nur server-seitig in Edge Functions, nie im Client
-- [x] **FOUND-07**: pgmq-Queue für asynchrone KI-Jobs eingerichtet (retry-Semantik via visibility timeout)
-- [x] **FOUND-08**: KI-Antworten werden vollständig persistiert (roh + geparst) in `ai_results`-Tabelle
+- [x] **FOUND-06**: ~~Alle KI-API-Keys nur server-seitig~~ — **SUPERSEDED: Keine KI-API-Keys mehr nötig (Pivot M07)**
+- [x] **FOUND-07**: ~~pgmq-Queue für asynchrone KI-Jobs~~ — **SUPERSEDED: pgmq bleibt als Infrastruktur, aber keine AI-Jobs mehr**
+- [x] **FOUND-08**: ~~KI-Antworten persistiert in `ai_results`~~ — **SUPERSEDED: Tabelle bleibt, aber keine neuen AI-Ergebnisse**
 
 ### Authentifizierung & Onboarding
 
 - [ ] **AUTH-01**: User kann Account mit E-Mail/Passwort anlegen (Supabase Auth)
 - [ ] **AUTH-02**: User kann sich einloggen und bleibt eingeloggt (persistente Session)
-- [ ] **AUTH-03**: User kann App ohne Account nutzen ("lokal nutzen"-Modus, Daten nur auf Gerät)
-- [x] **AUTH-04**: User kann später aus lokalem Modus in Account-Modus wechseln (Sync bestehender Daten)
-- [ ] **AUTH-05**: Onboarding-Flow führt in < 5 Minuten zu erstem nutzbaren Plan: Account/lokal → PLZ → Archetyp → Vereinsregeln (optional) → Garten-Erfassung
+- [ ] **AUTH-03**: User kann App ohne Account nutzen ("lokal nutzen"-Modus)
+- [x] **AUTH-04**: User kann später aus lokalem Modus in Account-Modus wechseln
+- [ ] **AUTH-05**: Onboarding-Flow führt in < 5 Minuten zu erstem nutzbaren Plan: Account/lokal → PLZ → Archetyp → Garten erstellen/beitreten → Plan-Editor
 
 ### Shared Garden (Phase 2.5 — Pivot 2026-04-21)
 
-- [x] **GARDEN-01**: `gardens`-Tabelle + `garden_members`-Tabelle + RLS-Policies auf Member-Check (`(select auth.uid()) IN (SELECT user_id FROM public.garden_members WHERE garden_id = <row>.garden_id)`) auf allen Phase-2-Tabellen (vereinsregeln, ai_jobs, ai_results) statt direktem `user_id = auth.uid()`-Check. Max 2 Member pro Garten enforced via `BEFORE INSERT TRIGGER` auf `garden_members` (CHECK mit Subquery ist in Postgres nicht erlaubt).
-- [x] **GARDEN-02**: 6-stelliger Invite-Code-Flow über Postgres-RPCs (SECURITY DEFINER): `create_invite_for_garden(p_garden_id uuid) → text` (Owner-only, invalidiert alten Code vor Erzeugung — D-11) und `consume_invite_code(p_code text) → uuid` (atomic UPDATE … RETURNING, 24 h TTL, single-use via `consumed_at`-Spalte). Alphabet `123456789ABCDEFGHJKMNPQRSTVWXYZ` (Crockford ohne 0/O/I/L/U). Ergänzend (D-16 Owner-Rights): `delete_garden(p_garden_id uuid)` (nur Owner; blockt wenn weitere Member existieren) + `transfer_ownership(p_garden_id uuid, p_to_user_id uuid)` (atomic Role-Swap zwischen Owner und Ziel-Member).
-- [ ] **GARDEN-03**: Migration 003 seeded Default-Garten pro Bestands-`profiles`-Row (`INSERT INTO gardens … FROM profiles`) + Backfill aller vereinsregeln/ai_jobs/ai_results-Rows mit `garden_id` → `SET NOT NULL`. `migrateLocalToAccount.ts` wird erweitert: nach signUp `ensure_default_garden_for_user()` RPC → gardenId im anschließenden profile/vereinsregeln-Upsert mit-einstempeln. Lokal-Modus bleibt single-user (kein Garten-Konzept in StorageAdapter, D-13).
-- [x] **GARDEN-04**: LWW-Tracking via `updated_at timestamptz` (BEFORE UPDATE Trigger `public.tg_set_updated_at` aus Migration 001 wiederverwendet) + `updated_by_user_id uuid REFERENCES auth.users(id)` (Client-first fill in `toRow`, BEFORE UPDATE Trigger `tg_set_updated_by_user_id` als Fallback). UI zeigt inline unter garden-scoped Rows "zuletzt bearbeitet von {display_name}, {relative-time}" — Source für Name ist `profiles.display_name` des User mit `id = updated_by_user_id`.
+- [x] **GARDEN-01**: `gardens`-Tabelle + `garden_members`-Tabelle + RLS-Policies auf Member-Check
+- [x] **GARDEN-02**: 6-stelliger Invite-Code-Flow über Postgres-RPCs (SECURITY DEFINER)
+- [ ] **GARDEN-03**: Migration 003 seeded Default-Garten pro Bestands-`profiles`-Row
+- [x] **GARDEN-04**: LWW-Tracking via `updated_at` + `updated_by_user_id`
 
 ### Profil & Standort
 
-- [ ] **PROF-01**: User kann PLZ eingeben, App ordnet automatisch eine der 7 Klimazonen zu (statische Lookup-Tabelle)
-- [ ] **PROF-02**: User kann Garten-Archetyp wählen (6 Optionen: Selbstversorger, Familien-Naschgarten, Mix ausgewogen, Zier- & Erholungsgarten, Biodiversitäts-/Naturgarten, Kräuter-/Apothekergarten)
-- [ ] **PROF-03**: Profil-Daten (PLZ, Klimazone, Archetyp) beeinflussen Aussaatdaten und Sortenvorschläge
-- [ ] **PROF-04**: User kann Profil jederzeit ändern (Archetyp-Wechsel, PLZ-Korrektur)
+- [ ] **PROF-01**: User kann PLZ eingeben, App ordnet automatisch Klimazone zu
+- [ ] **PROF-02**: User kann Garten-Archetyp wählen (6 Optionen)
+- [ ] **PROF-03**: Profil-Daten beeinflussen Aussaatdaten und Sortenvorschläge
+- [ ] **PROF-04**: User kann Profil jederzeit ändern
 
-### Vereinsregeln
+### AI-Removal (Phase 5 — Pivot M07)
 
-- [ ] **RULES-01**: User kann PDF/Bild der Vereinssatzung hochladen; Claude extrahiert Regeln in strukturiertes JSON (VereinsRegel-Datenmodell)
-- [x] **RULES-02**: User kann extrahierte Regeln bestätigen, korrigieren oder löschen
-- [x] **RULES-03**: User kann alternativ Vereinsregeln über Checkliste gängiger Regeln eingeben (Heckenmaß, Laubenmaß, Baumverbote etc.)
-- [x] **RULES-04**: BKleingG-Grundregeln sind immer aktiv (1/3-Nutzgartenpflicht, Hochstamm-Verbote)
-- [x] **RULES-05**: App zeigt Warnung wenn Nutz/Zier-Verhältnis im Plan die 1/3-Nutzgarten-Schwelle unterschreitet
+- [ ] **REMOVE-01**: Alle Claude Vision / Anthropic SDK Clients, Edge Functions (`ai-job-consumer`), und zugehörige Screens entfernt
+- [ ] **REMOVE-02**: Alle KI-bezogenen Env-Vars (`ANTHROPIC_API_KEY`, `PLANTNET_API_KEY`) entfernt
+- [ ] **REMOVE-03**: Onboarding, README, Privacy Policy von AI-Call-Sprache bereinigt
 
-### Garten-Erfassung (M1)
+### Import-Schema (Phase 5 — Pivot M07)
 
-- [x] **PHOTO-01**: User kann mind. 3 Garten-Fotos aufnehmen oder hochladen (geführter Flow mit Winkel-Anleitung: Übersicht, Nord, Süd)
-- [x] **PHOTO-02**: User gibt Garten-Maße ein (L×B in Metern; Formen: Rechteck, L-Form, Trapez, freie Eckpunkte)
-- [ ] **PHOTO-03**: Bilder werden client-seitig auf max. 1.15 MP skaliert vor Upload (Edge Function CPU-Limit-Schutz)
-- [x] **PHOTO-04**: Claude Vision analysiert Fotos + Maße server-seitig und gibt strukturiertes JSON zurück (Elemente mit Typ, Position in Metern, Konfidenz)
-- [x] **PHOTO-05**: Erkannte Elemente werden dem User einzeln zur Bestätigung oder Ablehnung angezeigt (Konfidenz-UI)
-- [x] **PHOTO-06**: App rendert schematischen 2D-Plan aus bestätigtem JSON (gezeichneter Stil, nicht fotorealistisch)
-- [x] **PHOTO-07**: Edge Case: nur 1 Foto → Warnung, Analyse trotzdem versucht
-- [x] **PHOTO-08**: Edge Case: keine Elemente erkannt → leere Plan-Vorlage mit eingegebenen Maßen, User baut manuell
+- [ ] **IMPORT-01**: JSON-Schema `spatenstich-import.v1.json` (draft 2020-12) definiert und committed
+- [ ] **IMPORT-02**: Drei Referenz-Payloads (`full.json`, `minimal.json`, `edge-cases.json`) validieren gegen Schema
+
+### Import-Flow (Phase 6 — Pivot M07)
+
+- [ ] **IMPORT-03**: Claude.ai-Projekt-System-Prompt in `prompts/garden-project-system-prompt.md`
+- [ ] **IMPORT-04**: App registriert Share-Intent-Handler für `application/json` + Custom URL Scheme `spatenstich://import`
+- [ ] **IMPORT-05**: Paste-Fallback (Textarea) für Desktop-Claude.ai-Chat
+- [ ] **IMPORT-06**: Preview-Screen zeigt geparste Entities mit Toggle pro Entity; Confidence < 0.6 mit Warning-Chip
+- [ ] **IMPORT-07**: Invalid Payload zeigt actionable Fehler + "Schema kopieren"-Button
+- [ ] **IMPORT-08**: Supabase-Tables `imports`, `import_items`, `bed_drafts`, `plant_drafts`, `observation_drafts` mit RLS, alle Imports getaggt mit `source`, `importedAt`, optional `chatReference`
+
+### Drafts-Integration (Phase 7 — Pivot M07)
+
+- [ ] **DRAFT-01**: Import-Drafts erscheinen als "Letzte Importe"-Tray im Plan-Editor
+- [ ] **DRAFT-02**: Bed-Draft auf Canvas ziehen → platziert als echtes Beet-Element mit `importedFrom`-Provenance
+- [ ] **DRAFT-03**: Drafts nicht promoted innerhalb 30 Tagen → "Stale Imports"-Ansicht, nie auto-gelöscht
 
 ### Plan-Editor (M2)
 
-- [ ] **EDIT-01**: Canvas mit Maß-Gitter (1×1 m, ein-/ausblendbar) — implementiert mit @shopify/react-native-skia (GPU-threaded, 60fps)
-- [ ] **EDIT-02**: Element-Palette (Seitenleiste/Drawer): Beete, Pflanzen (Gemüse, Kräuter, Blumen, Obstgehölze, Stauden), Infrastruktur (Weg, Zaun, Laube, Kompost, Wasserstelle, Sitzplatz)
-- [ ] **EDIT-03**: User kann Elemente per Drag & Drop auf Canvas platzieren (react-native-gesture-handler, nicht PanResponder)
-- [ ] **EDIT-04**: User kann Elemente rotieren und skalieren
-- [ ] **EDIT-05**: User kann Beete als Polygon zeichnen (Eckpunkte setzen)
-- [ ] **EDIT-06**: Koordinaten werden in Gartenmetern gespeichert (nicht Pixel) — Screen-Koordinaten nur für Rendering berechnet
-- [ ] **EDIT-07**: Pflanzen-Abstandshinweis erscheint beim Platzieren (aus Sorten-Metadaten, z.B. "Tomate: 60 cm Abstand")
-- [ ] **EDIT-08**: Zwei Layer: Infrastruktur (dauerhaft) und Jahresplan (saison-spezifisch, wechselbar)
+- [ ] **EDIT-01**: Canvas mit Maß-Gitter (1×1 m, ein-/ausblendbar) — @shopify/react-native-skia (GPU-threaded, 60fps)
+- [ ] **EDIT-02**: Element-Palette: Beete, Pflanzen, Infrastruktur
+- [ ] **EDIT-03**: Drag & Drop auf Canvas (react-native-gesture-handler)
+- [ ] **EDIT-04**: Rotation und Skalierung
+- [ ] **EDIT-05**: Beet-Polygon zeichnen
+- [ ] **EDIT-06**: Koordinaten in Gartenmetern (nicht Pixel)
+- [ ] **EDIT-07**: Pflanzenabstand-Hinweis beim Platzieren
+- [ ] **EDIT-08**: Zwei Layer: Infrastruktur (dauerhaft) und Jahresplan (saison-spezifisch)
 - [ ] **EDIT-09**: Auto-Save alle 5 Sekunden + manuelles Speichern
-- [ ] **EDIT-10**: Vereinsregel-Warnung erscheint inline wenn User regelwidriges Element platziert (z.B. verbotener Baum)
-- [ ] **EDIT-11**: Undo/Redo (mind. 20 Schritte, via zundo-Middleware auf Zustand-Store)
-- [ ] **EDIT-12**: Plan-Editor läuft mit 60fps bei bis zu 200 Elementen auf echtem iOS-Gerät
+- [ ] ~~**EDIT-10**: Vereinsregel-Warnung inline~~ — **DEFERRED zu Phase 10 (v1.1)**
+- [ ] **EDIT-11**: Undo/Redo (mind. 20 Schritte)
+- [ ] **EDIT-12**: 60fps bei bis zu 200 Elementen auf echtem iOS-Gerät
 
-### Saatgut-Inventar (M3)
+### Saatgut-Inventar (M3) — manuell only
 
-- [ ] **SEED-01**: User kann Samentüten fotografieren; Claude Vision extrahiert Sortenname, Aussaatzeitraum, Haltbarkeitsdatum
-- [ ] **SEED-02**: User kann Sorten per Texteingabe hinzufügen (Autocomplete gegen Sorten-DB)
-- [ ] **SEED-03**: User kann Inventar-Einträge bearbeiten und löschen
-- [ ] **SEED-04**: Sorten-DB enthält 100–150 häufige Kleingartenpflanzen (Gemüse, Kräuter, Blumen, Obstgehölze) mit vollständigen Metadaten
-- [ ] **SEED-05**: Sorte nicht in DB → Freitext-Eintrag möglich (wird nicht verworfen)
-- [ ] **SEED-06**: Inventar zeigt Haltbarkeits-Status (abgelaufen / läuft bald ab / ok)
+- [ ] ~~**SEED-01**: Claude Vision extrahiert Sorteninfo aus Samentüten-Fotos~~ — **DROPPED (Pivot M07, keine In-App AI)**
+- [ ] **SEED-02**: Texteingabe mit Autocomplete gegen Sorten-DB
+- [ ] **SEED-03**: Inventar-Einträge bearbeiten und löschen
+- [ ] **SEED-04**: Sorten-DB mit 100–150 häufigen Kleingartenpflanzen
+- [ ] **SEED-05**: Freitext-Eintrag für unbekannte Sorten
+- [ ] **SEED-06**: Haltbarkeits-Status-Anzeige (abgelaufen / bald / ok)
 
 ### Pflanz- & Aussaatkalender (M4)
 
-- [ ] **CAL-01**: Zeitachse (12 Monate, scrollbar) zeigt Aufgaben-Karten pro Sorte aus Inventar
-- [ ] **CAL-02**: Aufgaben-Daten werden klimazonenspezifisch berechnet (Offset ± Wochen vs. Referenz)
-- [ ] **CAL-03**: Kalender unterscheidet: Vorkultur (innen/Gewächshaus), Direktsaat, Auspflanzen, Ernte
-- [ ] **CAL-04**: Pro Sorte wird ein Platzierungs-Vorschlag auf dem Plan gemacht (freie Beetfläche + Standort-Anforderung)
-- [ ] **CAL-05**: User bestätigt oder ändert Platzierungs-Vorschlag → Pflanze landet im Plan, Kalender-Aufgabe wird aktiv
-- [ ] **CAL-06**: Einfache Fruchtfolge-Warnung: offensichtliche Fehler (gleiche Pflanzenfamilie wie Vorjahr) werden angezeigt
+- [ ] **CAL-01**: Zeitachse (12 Monate, scrollbar) mit Aufgaben-Karten pro Sorte
+- [ ] **CAL-02**: Klimazonenspezifische Aufgaben-Daten
+- [ ] **CAL-03**: Unterscheidung: Vorkultur, Direktsaat, Auspflanzen, Ernte
+- [ ] **CAL-04**: Platzierungsvorschlag auf Plan (freie Fläche + Standort)
+- [ ] **CAL-05**: Bestätigung → Pflanze im Plan + Kalender-Aufgabe aktiv
+- [ ] **CAL-06**: Einfache Fruchtfolge-Warnung
 
 ### Offline & Sync
 
 - [ ] **SYNC-01**: App startet und zeigt letzten Plan ohne Netzverbindung
-- [ ] **SYNC-02**: Foto-Queue funktioniert offline (Fotos werden lokal gespeichert, KI-Analyse wird gequeued)
-- [ ] **SYNC-03**: Sync-Queue verarbeitet ausstehende Operationen automatisch beim Wiederherstellen der Verbindung (Last-Write-Wins, Single-User)
-- [ ] **SYNC-04**: User sieht Sync-Status (ausstehende Operationen, Fehler)
+- [ ] **SYNC-02**: Foto-Queue funktioniert offline (lokal gespeichert, Upload bei Reconnect)
+- [ ] **SYNC-03**: Sync-Queue verarbeitet ausstehende Operationen bei Reconnect (LWW)
+- [ ] **SYNC-04**: User sieht Sync-Status
 
 ### Nicht-funktionale Anforderungen
 
 - [ ] **NFR-01**: App ist auf iPhone und Desktop-Browser nutzbar, Daten synchron
-- [ ] **NFR-02**: KI-Analyse ist asynchron mit Loading-State (kein blockierendes UI)
-- [x] **NFR-03**: KI-Budget-Limit: Soft-Warnung bei 50 Claude-Calls/User/Tag, Hard-Stop bei 200/Tag
+- [ ] **NFR-02**: ~~KI-Analyse asynchron mit Loading-State~~ — **SUPERSEDED: Import ist synchron (lokale JSON-Verarbeitung)**
+- [x] ~~**NFR-03**: KI-Budget-Limit~~ — **SUPERSEDED: Keine In-App AI-Calls mehr**
 - [ ] **NFR-04**: Alle Fotos verschlüsselt at-rest (Supabase Storage, EU Frankfurt)
-- [ ] **NFR-05**: Geo-Daten (EXIF) nur mit explizitem Opt-in genutzt
-- [x] **NFR-06**: UI-Strings zentralisiert in `de.json` (spätere Lokalisierung vorbereitet, nicht umgesetzt)
-- [x] **NFR-07**: Haftungsausschluss im UI: "Die App gibt Empfehlungen ohne Gewähr. BKleingG-Compliance liegt in der Verantwortung des Nutzers."
-- [x] **NFR-08**: Sentry (EU) für Crash-Reporting eingerichtet
+- [ ] **NFR-05**: Geo-Daten (EXIF) nur mit explizitem Opt-in
+- [x] **NFR-06**: UI-Strings zentralisiert in `de.json`
+- [x] **NFR-07**: Haftungsausschluss im UI
+- [x] **NFR-08**: Sentry (EU) für Crash-Reporting
 
 ## v2 Requirements
 
 ### Pflegeerinnerungen (S1)
 
-- **CARE-01**: Aufgaben-Engine generiert Erinnerungen auf Basis Plan (Zurückschneiden, Ernten, Jäten, Düngen)
+- **CARE-01**: Aufgaben-Engine generiert Erinnerungen auf Basis Plan
 - **CARE-02**: Push-Notifications für fällige Aufgaben
-
-### Unkraut-Check per Foto (S2)
-
-- **WEED-01**: User fotografiert Beet, App vergleicht mit Soll-Plan und markiert Fremdgewächse
-- **WEED-02**: Kombination Claude Vision (Kontext) + Pl@ntNet (Identifikation)
-
-### AI-Bildvorschau (S3)
-
-- **PREV-01**: Geplanter Garten wird als fotorealistisches Rendering visualisiert
 
 ### Fruchtfolge-Assistent (S4)
 
@@ -131,29 +130,46 @@
 
 ### Mischkultur-Check (S5)
 
-- **COMP-01**: Beim Platzieren: gute/schlechte Nachbarn werden angezeigt
+- **COMP-01**: Beim Platzieren: gute/schlechte Nachbarn angezeigt
 - **COMP-02**: Mischkultur-Score pro Beet-Kombination
 
 ### Barcode/EAN-Scan (S6)
 
 - **SCAN-01**: Samentüten per EAN-Barcode scannen und automatisch zuordnen
 
+## Dropped Requirements (Pivot M07 2026-05-08)
+
+| Requirement | Original Phase | Reason |
+|-------------|---------------|--------|
+| PHOTO-01 | Phase 4 | Guided photo capture superseded — Fotos laufen über Claude.ai |
+| PHOTO-02 | Phase 4 | Garden dimensions → wird Teil des manuellen Plan-Editors (Phase 7) |
+| PHOTO-03 | Phase 4 | Client-side resize for Vision API → keine Vision API mehr |
+| PHOTO-04 | Phase 4 | Claude Vision server-side analysis → komplett entfernt |
+| PHOTO-05 | Phase 4 | Element confirmation UI → ersetzt durch Import-Preview (IMPORT-06) |
+| PHOTO-06 | Phase 4 | SVG plan render from Vision JSON → SVG render bleibt, aber aus manuellem Editor |
+| PHOTO-07 | Phase 4 | 1-photo edge case → nicht mehr relevant |
+| PHOTO-08 | Phase 4 | Empty elements fallback → manueller Editor startet leer |
+| SEED-01 | Phase 6→8 | Claude Vision seed packet scan → manuell only |
+| WEED-01/02 | v2 | Unkraut-Check per Foto → keine In-App AI |
+| PREV-01 | v1.1 | Fotorealistisches Preview → Gemini dropped |
+| RULES-01 | Phase 2→10 | PDF-Upload + Claude-Extraktion → manuelle Eingabe stattdessen |
+
 ## Out of Scope
 
 | Feature | Grund |
 |---------|-------|
-| Social features, Community, Chat | Kein Multi-User-Fokus im MVP; lenkt von Kern-USP ab |
-| Marktplatz für Samentausch | Außerhalb Kern-Use-Case; eigene Komplexität |
-| Eigenes trainiertes ML-Modell | Externe APIs (Claude, Pl@ntNet) reichen für MVP |
+| In-App KI-API-Aufrufe jeglicher Art | Pivot M07: zero outbound AI calls. Claude Vision, Pl@ntNet, Gemini — alles gestrichen |
+| Social features, Community, Chat | Kein Multi-User-Fokus im MVP |
+| Marktplatz für Samentausch | Außerhalb Kern-Use-Case |
 | AT/CH-Lokalisierung | Anderes Regelwerk; nach MVP |
-| Wetter-Integration (Frost-/Hitzewarnung) | v2+; erhöht API-Abhängigkeiten |
-| PDF-Export Jahresplan | v2+; nice-to-have |
-| Mehrpersonen-Gärten (Shared Access) | Multi-Tenant-Komplexität; RLS vorbereitet, Feature nicht umgesetzt |
-| 3D-Visualisierung / AR | Kein Mehrwert für Kleingarten-Planung; Over-Engineering |
-| Krankheits-/Schädlingsdiagnose per Foto | v2+; eigene UX-Komplexität |
+| Wetter-Integration | v2+; erhöht API-Abhängigkeiten |
+| PDF-Export Jahresplan | v2+ |
+| 3D-Visualisierung / AR | Over-Engineering |
+| Krankheits-/Schädlingsdiagnose per Foto | Keine In-App AI |
 | Ernte-Tagebuch / Jahresrückblick | v2+ |
 | Sprach-Notizen beim Rundgang | v2+ |
-| Vereins-Satzungsdatenbank (Community) | v2+; eigene Moderation nötig |
+| Vereins-Satzungsdatenbank (Community) | v2+ |
+| Two-way Sync Spatenstich ↔ Claude.ai | Evtl. M09 |
 
 ## Traceability
 
@@ -164,30 +180,25 @@
 | FOUND-03 | Phase 1 | Complete |
 | FOUND-04 | Phase 1 | Complete |
 | FOUND-05 | Phase 1 | Complete |
-| FOUND-06 | Phase 1 | Complete |
-| FOUND-07 | Phase 1 | Complete |
-| FOUND-08 | Phase 1 | Complete |
+| FOUND-06 | Phase 1 | Superseded (M07) |
+| FOUND-07 | Phase 1 | Superseded (M07) |
+| FOUND-08 | Phase 1 | Superseded (M07) |
 | NFR-06 | Phase 1 | Complete |
 | NFR-08 | Phase 1 | Complete |
 | AUTH-01 | Phase 2 | Pending |
 | AUTH-02 | Phase 2 | Pending |
 | AUTH-03 | Phase 2 | Pending |
-| AUTH-04 | Phase 2 | Complete (Plan 02-04, commit 2a621bd) |
+| AUTH-04 | Phase 2 | Complete |
 | AUTH-05 | Phase 2 | Pending |
 | PROF-01 | Phase 2 | Pending |
 | PROF-02 | Phase 2 | Pending |
 | PROF-03 | Phase 2 | Pending |
 | PROF-04 | Phase 2 | Pending |
-| RULES-01 | Phase 2 | Pending |
-| RULES-02 | Phase 2 | Complete (Plan 02-04, commit fc2a665) |
-| RULES-03 | Phase 2 | Complete (Plan 02-04, commit fc2a665) |
-| RULES-04 | Phase 2 | Complete (Plan 02-04, commits 0dc915a + fc2a665 — three-layer defense: UI + store + repo + DB CHECK) |
-| RULES-05 | Phase 2 | Complete (Plan 02-04, neutral TrafficLightBadge render verified in profile) |
-| NFR-07 | Phase 2 | Complete (Plan 02-02, inherited; 02-04 preserves Haftungsausschluss on Auth-Wahl) |
-| GARDEN-01 | Phase 2.5 | Complete (Plan 02.5-02 + 02.5-03 + 02.5-04, commits d172541 + 5e1eb30 — gardenRepo D-16 Owner-Rights + Mein-Garten-Screen mit Members-List, Leave, Remove-Member, Transfer-Ownership, Delete-Garden; human-verify pending) |
-| GARDEN-02 | Phase 2.5 | Complete (Plan 02.5-02 + 02.5-03 + 02.5-04, commits d172541 + 06b3cca — inviteCodeRepo createInviteForGarden/consumeInviteCode/ensureDefaultGardenForUser + join-by-code-Screen mit Crockford-Filter + 3rd AuthChoiceCard + Invite-mint Copy/Share in Mein-Garten; human-verify pending) |
-| GARDEN-03 | Phase 2.5 | Schema + Client Complete (Plan 02.5-02 + Plan 02.5-03, commit 85cae92 — migrateLocalToAccount 8-step flow mit ensureDefaultGardenForUser + gardens.update; atomic-tail preserved; 13/13 Jest tests green inkl. 5 Phase-2.5-Extension-Tests.) |
-| GARDEN-04 | Phase 2.5 | Complete (Plan 02.5-02 + 02.5-03 + 02.5-04, commits d172541 + 2867c37 + 5e1eb30 — updated_by_user_id DB-Trigger + Client-first fill; UI "zuletzt bearbeitet von {display_name}" Label in Mein-Garten-Screen mit testID settings-garden-lww-label; human-verify pending) |
+| NFR-07 | Phase 2 | Complete |
+| GARDEN-01 | Phase 2.5 | Complete |
+| GARDEN-02 | Phase 2.5 | Complete |
+| GARDEN-03 | Phase 2.5 | Pending |
+| GARDEN-04 | Phase 2.5 | Complete |
 | SYNC-01 | Phase 3 | Pending |
 | SYNC-02 | Phase 3 | Pending |
 | SYNC-03 | Phase 3 | Pending |
@@ -195,48 +206,57 @@
 | NFR-01 | Phase 3 | Pending |
 | NFR-04 | Phase 3 | Pending |
 | NFR-05 | Phase 3 | Pending |
-| PHOTO-01 | Phase 4 | Complete (04-03) |
-| PHOTO-02 | Phase 4 | Complete (04-03) |
-| PHOTO-03 | Phase 4 | Pending |
-| PHOTO-04 | Phase 4 | Pending |
-| PHOTO-05 | Phase 4 | Complete (04-04) |
-| PHOTO-06 | Phase 4 | Complete (04-04) |
-| PHOTO-07 | Phase 4 | Complete (04-03) |
-| PHOTO-08 | Phase 4 | Complete (04-04) |
-| NFR-02 | Phase 4 | Complete (04-04) |
-| NFR-03 | Phase 4 | Complete (04-02) |
-| EDIT-01 | Phase 5 | Pending |
-| EDIT-02 | Phase 5 | Pending |
-| EDIT-03 | Phase 5 | Pending |
-| EDIT-04 | Phase 5 | Pending |
-| EDIT-05 | Phase 5 | Pending |
-| EDIT-06 | Phase 5 | Pending |
-| EDIT-07 | Phase 5 | Pending |
-| EDIT-08 | Phase 5 | Pending |
-| EDIT-09 | Phase 5 | Pending |
-| EDIT-10 | Phase 5 | Pending |
-| EDIT-11 | Phase 5 | Pending |
-| EDIT-12 | Phase 5 | Pending |
-| SEED-01 | Phase 6 | Pending |
-| SEED-02 | Phase 6 | Pending |
-| SEED-03 | Phase 6 | Pending |
-| SEED-04 | Phase 6 | Pending |
-| SEED-05 | Phase 6 | Pending |
-| SEED-06 | Phase 6 | Pending |
-| CAL-01 | Phase 7 | Pending |
-| CAL-02 | Phase 7 | Pending |
-| CAL-03 | Phase 7 | Pending |
-| CAL-04 | Phase 7 | Pending |
-| CAL-05 | Phase 7 | Pending |
-| CAL-06 | Phase 7 | Pending |
+| REMOVE-01 | Phase 5 | Pending |
+| REMOVE-02 | Phase 5 | Pending |
+| REMOVE-03 | Phase 5 | Pending |
+| IMPORT-01 | Phase 5 | Pending |
+| IMPORT-02 | Phase 5 | Pending |
+| IMPORT-03 | Phase 6 | Pending |
+| IMPORT-04 | Phase 6 | Pending |
+| IMPORT-05 | Phase 6 | Pending |
+| IMPORT-06 | Phase 6 | Pending |
+| IMPORT-07 | Phase 6 | Pending |
+| IMPORT-08 | Phase 6 | Pending |
+| DRAFT-01 | Phase 7 | Pending |
+| DRAFT-02 | Phase 7 | Pending |
+| DRAFT-03 | Phase 7 | Pending |
+| EDIT-01 | Phase 7 | Pending |
+| EDIT-02 | Phase 7 | Pending |
+| EDIT-03 | Phase 7 | Pending |
+| EDIT-04 | Phase 7 | Pending |
+| EDIT-05 | Phase 7 | Pending |
+| EDIT-06 | Phase 7 | Pending |
+| EDIT-07 | Phase 7 | Pending |
+| EDIT-08 | Phase 7 | Pending |
+| EDIT-09 | Phase 7 | Pending |
+| EDIT-11 | Phase 7 | Pending |
+| EDIT-12 | Phase 7 | Pending |
+| SEED-02 | Phase 8 | Pending |
+| SEED-03 | Phase 8 | Pending |
+| SEED-04 | Phase 8 | Pending |
+| SEED-05 | Phase 8 | Pending |
+| SEED-06 | Phase 8 | Pending |
+| CAL-01 | Phase 9 | Pending |
+| CAL-02 | Phase 9 | Pending |
+| CAL-03 | Phase 9 | Pending |
+| CAL-04 | Phase 9 | Pending |
+| CAL-05 | Phase 9 | Pending |
+| CAL-06 | Phase 9 | Pending |
+| NFR-02 | - | Superseded (M07) |
+| NFR-03 | - | Superseded (M07) |
+| RULES-02 | Phase 10 | Deferred (v1.1) |
+| RULES-03 | Phase 10 | Deferred (v1.1) |
+| RULES-04 | Phase 10 | Deferred (v1.1) |
+| RULES-05 | Phase 10 | Deferred (v1.1) |
+| EDIT-10 | Phase 10 | Deferred (v1.1) |
 
 **Coverage:**
-- v1 requirements: 70 total (FOUND×8, AUTH×5, PROF×4, RULES×5, GARDEN×4, PHOTO×8, EDIT×12, SEED×6, CAL×6, SYNC×4, NFR×8)
-- Mapped to phases: 70
+- v1 active requirements: 62 total (FOUND×5 active, AUTH×5, GARDEN×4, PROF×4, REMOVE×3, IMPORT×8, DRAFT×3, EDIT×11, SEED×5, CAL×6, SYNC×4, NFR×4 active)
+- Superseded/dropped by M07: 15 (PHOTO×8, SEED-01, FOUND-06/07/08, NFR-02/03, RULES-01)
+- Deferred to v1.1: 5 (RULES-02/03/04/05, EDIT-10)
+- Mapped to phases: all ✓
 - Unmapped: 0 ✓
-
-**Note:** Earlier traceability listed 58 requirements. The correct count is 66 — the 8 NFR requirements were previously undercounted in phase assignments. All 66 are now individually mapped. Phase 2.5 pivot (2026-04-21) added 4 GARDEN requirements, bringing the total to 70.
 
 ---
 *Requirements defined: 2026-04-15*
-*Last updated: 2026-04-14 — traceability updated after roadmap creation (7 phases)*
+*Last updated: 2026-05-08 — M07 Pivot (Manual Planning + Claude.ai Bridge)*
