@@ -16,7 +16,6 @@ const ROW_ENTITIES: EntityName[] = [
   'profiles',
   'vereinsregeln',
   'invite_codes',
-  'photo_queue',
   'garden_dimensions',
   'plan_elements',
 ];
@@ -29,7 +28,6 @@ const GARDEN_ID_COLUMN: Record<EntityName, string | null> = {
   profiles: null,            // profiles is cross-garden
   vereinsregeln: 'garden_id',
   invite_codes: 'garden_id',
-  photo_queue: 'garden_id',
   garden_dimensions: 'garden_id',
   plan_elements: 'garden_id',
 };
@@ -41,7 +39,6 @@ const GARDEN_ID_FIELD: Record<EntityName, string | null> = {
   profiles: null,
   vereinsregeln: 'gardenId',
   invite_codes: 'gardenId',
-  photo_queue: 'gardenId',
   garden_dimensions: 'gardenId',
   plan_elements: 'gardenId',
 };

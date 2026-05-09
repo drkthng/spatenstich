@@ -1,13 +1,12 @@
 // Phase 4 Plan 04-01: CRUD for garden_dimensions + plan_elements.
 // Pattern: gardenRepo.ts — assertAccount, writeWithOutbox, scheduleWriteDebounced.
-// Account-only (Claude Vision = server-side API call requires account mode).
+// Account-only.
 
 import { storage } from '../storage';
 import { useAuthStore, type AuthMode } from '../stores/authStore';
 import type {
   GardenDimensionsRow,
   PlanElementRow,
-  PlanElementCandidate,
 } from '@spatenstich/shared';
 import { OutboxEnqueueError } from './errors';
 import { scheduleWriteDebounced } from './sync/SyncTriggers';
@@ -86,62 +85,6 @@ export async function loadDimensions(
 }
 
 // ── plan_elements ─────────────────────────────────────────────────────────
-
-/**
- * Saves plan elements from Claude Vision analysis result.
- * Auto-acceptance based on confidence (D-06):
- *   high/medium → isAccepted=true (pre-toggled ON)
- *   low → isAccepted=false (pre-toggled OFF)
- */
-export async function saveElements(
-  mode: AuthMode,
-  gardenId: string,
-  elements: PlanElementCandidate[],
-  aiResultId: string | null,
-): Promise<PlanElementRow[]> {
-  assertAccount(mode);
-  const userId = useAuthStore.getState().userId;
-  if (!userId) throw new Error('not_authenticated');
-
-  const now = new Date().toISOString();
-  const rows: PlanElementRow[] = [];
-
-  for (const el of elements) {
-    const row: PlanElementRow = {
-      id: randomId(),
-      gardenId,
-      aiResultId,
-      elementType: el.elementType,
-      label: el.label,
-      xM: el.xM,
-      yM: el.yM,
-      widthM: el.widthM,
-      heightM: el.heightM,
-      confidence: el.confidence,
-      isAccepted: el.confidence === 'high' || el.confidence === 'medium',
-      createdAt: now,
-      updatedAt: now,
-      updatedByUserId: userId,
-      deletedAt: null,
-    };
-
-    try {
-      await storage.writeWithOutbox('plan_elements', row, {
-        entity: 'plan_elements',
-        rowId: row.id,
-        operation: 'insert',
-        payload: row as unknown as Record<string, unknown>,
-      });
-    } catch (cause) {
-      throw new OutboxEnqueueError('plan_elements', row.id, cause);
-    }
-
-    rows.push(row);
-  }
-
-  scheduleWriteDebounced();
-  return rows;
-}
 
 /**
  * Returns only accepted, non-deleted plan elements for a garden.

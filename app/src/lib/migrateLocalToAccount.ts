@@ -288,6 +288,4 @@ export async function bootstrapRowTables(
     await storage.setSyncState({ entity: 'invite_codes', lastPullAt: serverNow, lastPushAt: null });
   }
 
-  // photo_queue — nach Migration: 0 Einträge (keine Rows zu pullen)
-  await storage.setSyncState({ entity: 'photo_queue', lastPullAt: serverNow, lastPushAt: null });
 }

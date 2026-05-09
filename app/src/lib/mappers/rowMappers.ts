@@ -22,7 +22,6 @@ import type {
   ProfileRow,
   VereinsregelnRow,
   InviteCodeRow,
-  PhotoQueueRow,
   GardenDimensionsRow,
   PlanElementRow,
   Garden,
@@ -38,21 +37,6 @@ type DbProfileRow = Database['public']['Tables']['profiles']['Row'];
 type DbVereinsregelnRow = Database['public']['Tables']['vereinsregeln']['Row'];
 type DbInviteCodeRow = Database['public']['Tables']['invite_codes']['Row'];
 
-// photo_queue ist noch nicht in database.ts (wird nach gen:types verfügbar).
-// Interim: loose type für photoQueueFromDb.
-type DbPhotoQueueRowLoose = {
-  id: string;
-  created_at: string;
-  updated_at: string;
-  created_by_user_id: string;
-  deleted_at?: string | null;
-  garden_id: string;
-  geo_lat: number | null;
-  geo_lng: number | null;
-  storage_path?: string | null;
-  last_error?: string | null;
-  uploaded_at?: string | null;
-};
 
 // ── Gardens ────────────────────────────────────────────────────────────────
 
@@ -330,27 +314,6 @@ export function inviteCodeFromDb(row: DbInviteCodeRow): InviteCodeRow {
     expiresAt: row.expires_at ?? null,
     usedAt: row.consumed_at ?? null,
     usedByUserId: row.consumed_by_user_id ?? null,
-  };
-}
-
-// ── Photo Queue ────────────────────────────────────────────────────────────
-// photo_queue is not yet in database.ts types (added by Plan 03-01 migration).
-// Uses loose type DbPhotoQueueRowLoose until gen:types is run.
-
-export function photoQueueFromDb(row: DbPhotoQueueRowLoose): PhotoQueueRow {
-  return {
-    id: row.id,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    updatedByUserId: row.created_by_user_id ?? null,
-    deletedAt: row.deleted_at ?? null,
-    gardenId: row.garden_id,
-    storagePath: row.storage_path ?? '',
-    geoLat: row.geo_lat,
-    geoLng: row.geo_lng,
-    uploadStatus: row.uploaded_at != null ? 'uploaded' : 'pending',
-    uploadError: row.last_error ?? null,
-    jobId: null, // jobId assigned via RPC response, not stored in DB photo_queue
   };
 }
 

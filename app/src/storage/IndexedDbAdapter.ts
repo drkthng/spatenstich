@@ -19,7 +19,6 @@ const ROW_ENTITIES: EntityName[] = [
   'profiles',
   'vereinsregeln',
   'invite_codes',
-  'photo_queue',
   'garden_dimensions',
   'plan_elements',
 ];
@@ -32,7 +31,6 @@ const GARDEN_ID_COLUMN: Record<EntityName, string | null> = {
   profiles: null,
   vereinsregeln: 'garden_id',
   invite_codes: 'garden_id',
-  photo_queue: 'garden_id',
   garden_dimensions: 'garden_id',
   plan_elements: 'garden_id',
 };
@@ -55,7 +53,7 @@ export class IndexedDbAdapter implements StorageAdapter {
         if (oldVersion < 2) {
           // Row-Stores for V3 entities
           const v3Entities: EntityName[] = [
-            'gardens', 'garden_members', 'profiles', 'vereinsregeln', 'invite_codes', 'photo_queue',
+            'gardens', 'garden_members', 'profiles', 'vereinsregeln', 'invite_codes',
           ];
           for (const entity of v3Entities) {
             if (!db.objectStoreNames.contains(entity)) {
@@ -63,7 +61,7 @@ export class IndexedDbAdapter implements StorageAdapter {
               const gidCol = GARDEN_ID_COLUMN[entity];
               if (gidCol && gidCol !== 'id') {
                 // IndexedDB indexes use keyPath in camelCase (JS object fields):
-                // garden_members.gardenId, photo_queue.gardenId, etc.
+                // e.g. garden_members.gardenId
                 store.createIndex('by_gardenId', 'gardenId', { unique: false });
               }
             }
@@ -134,7 +132,7 @@ export class IndexedDbAdapter implements StorageAdapter {
     // Here we verify all stores exist (defensive check).
     const db = await this.dbPromise;
     const v3Entities: EntityName[] = [
-      'gardens', 'garden_members', 'profiles', 'vereinsregeln', 'invite_codes', 'photo_queue',
+      'gardens', 'garden_members', 'profiles', 'vereinsregeln', 'invite_codes',
     ];
     const missing = [...v3Entities, OUTBOX_STORE, STATE_STORE].filter(
       (s) => !db.objectStoreNames.contains(s),
