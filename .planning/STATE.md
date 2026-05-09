@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: Phase 6 in progress — Plan 01 complete
-stopped_at: 06-01-PLAN.md complete (2026-05-09)
-last_updated: "2026-05-09T09:26:06Z"
+status: Phase 6 in progress — Plan 02 complete
+stopped_at: 06-02-PLAN.md complete (2026-05-09)
+last_updated: "2026-05-09T10:15:00Z"
 last_activity: 2026-05-09
 progress:
   total_phases: 10
@@ -27,7 +27,7 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 ## Current Position
 
 Phase: 6 (Import-Flow + Companion-Prompt) — IN PROGRESS
-Plan: 1 of TBD (Plan 01 complete)
+Plan: 2 of TBD (Plans 01-02 complete)
 Vorheriger Status: Phase 5 complete — AI-Removal + Import-Schema abgeschlossen
 Plans: 14/18 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~)
 Last activity: 2026-05-09
@@ -69,6 +69,7 @@ Progress: [█████░░░░░] 56% (14/18 Plans — Phase 4 plans ex
 | Phase 05 P02 | 35 | 2 tasks | 40 files |
 | Phase 05 P03 | 168 | 2 tasks | 5 files |
 | Phase 06 P01 | 5 | 2 tasks | 3 files |
+| Phase 06 P02 | 45 | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -101,6 +102,9 @@ Recent decisions affecting current work:
 - [Phase 06 P01]: import_items ist write-once — keine LWW-Trigger (aa_/mm_), nur zz_set_updated_at auf mutable Draft-Tabellen
 - [Phase 06 P01]: ImportItemRow extends nicht RowBase — write-once Semantik (kein updatedAt/updatedByUserId)
 - [Phase 06 P01]: Companion Prompt in prompts/ als plain Markdown; Ziel-Modell Opus 4.7; Re-emit-Instruktion auf Deutsch
+- [Phase 06 P02]: ImportItemRow.updatedAt als Alias für createdAt hinzugefügt — StorageAdapter.writeWithOutbox generic constraint T extends AnyRow erfordert updatedAt
+- [Phase 06 P02]: pushImportEntity generisch (importEntityToDb mapper) — keine per-entity push-Methoden für write-once Draft-Rows
+- [Phase 06 P02]: ajv compile auf Modul-Ebene (nicht in Funktion) — Performance-Pattern für Validator
 
 ### Pending Todos
 
@@ -127,6 +131,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-09T09:26:06Z
-Stopped at: Completed 06-01-PLAN.md (companion prompt + migration 016 + types)
+Last session: 2026-05-09T10:15:00Z
+Stopped at: Completed 06-02-PLAN.md (importValidator + importRepo + importStore + SyncWorker extension)
 Resume file: None
