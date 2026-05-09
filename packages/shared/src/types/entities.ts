@@ -9,7 +9,12 @@ export type EntityName =
   | 'vereinsregeln'
   | 'invite_codes'
   | 'garden_dimensions'
-  | 'plan_elements';
+  | 'plan_elements'
+  | 'imports'
+  | 'import_items'
+  | 'bed_drafts'
+  | 'plant_drafts'
+  | 'observation_drafts';
 
 /** Gemeinsame Basis-Felder für alle LWW-managed Rows (Plan 03-01 Migration 013). */
 export interface RowBase {
@@ -77,7 +82,139 @@ export type AnyRow =
   | VereinsregelnRow
   | InviteCodeRow
   | GardenDimensionsRow
-  | PlanElementRow;
+  | PlanElementRow
+  | ImportRow
+  | BedDraftRow
+  | PlantDraftRow
+  | ObservationDraftRow;
+
+/** Phase 6: Import header row (per D-17, D-18) */
+export interface ImportRow extends RowBase {
+  gardenId: string;
+  source: 'claude-ai-project';
+  importedAt: string;
+  chatReference: string | null;
+  payloadSchemaVersion: string;
+}
+
+/** Phase 6: Import item detail row (per D-18) — no RowBase, write-once */
+export interface ImportItemRow {
+  id: string;
+  importId: string;
+  gardenId: string;
+  itemType: 'bed' | 'plant' | 'observation';
+  localId: string;
+  payload: Record<string, unknown>;
+  confidence: number | null;
+  createdAt: string;
+  deletedAt: string | null;
+}
+
+/** Phase 6: Bed draft row (per D-19) */
+export interface BedDraftRow {
+  id: string;
+  importItemId: string;
+  gardenId: string;
+  label: string;
+  lengthCm: number | null;
+  widthCm: number | null;
+  sunExposure: string | null;
+  soilNotes: string | null;
+  confidence: number | null;
+  status: 'pending' | 'promoted' | 'dismissed';
+  promotedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  updatedByUserId: string | null;
+  deletedAt: string | null;
+}
+
+/** Phase 6: Plant draft row (per D-19) */
+export interface PlantDraftRow {
+  id: string;
+  importItemId: string;
+  gardenId: string;
+  bedDraftId: string | null;
+  scientificName: string | null;
+  commonNameDe: string;
+  stageEstimate: string | null;
+  healthNotes: string | null;
+  confidence: number | null;
+  status: 'pending' | 'promoted' | 'dismissed';
+  promotedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  updatedByUserId: string | null;
+  deletedAt: string | null;
+}
+
+/** Phase 6: Observation draft row (per D-19) */
+export interface ObservationDraftRow {
+  id: string;
+  importItemId: string;
+  gardenId: string;
+  bedRefLocalId: string | null;
+  kind: 'pest' | 'disease' | 'weather' | 'soil' | 'structural' | 'other';
+  summary: string;
+  suggestedActions: string[] | null;
+  confidence: number | null;
+  status: 'pending' | 'promoted' | 'dismissed';
+  promotedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  updatedByUserId: string | null;
+  deletedAt: string | null;
+}
+
+/** Phase 6: Parsed import payload matching spatenstich-import.v1 schema */
+export interface ImportPayload {
+  schemaVersion: string;
+  capture: {
+    timestamp: string;
+    location?: { lat: number; lon: number };
+    photoRefs?: string[];
+    chatReference?: string;
+  };
+  beds?: ImportPayloadBed[];
+  plants?: ImportPayloadPlant[];
+  observations?: ImportPayloadObservation[];
+  complianceFlags?: ImportPayloadComplianceFlag[];
+  freeFormNotes?: string;
+}
+
+export interface ImportPayloadBed {
+  localId: string;
+  label: string;
+  approxDimensions?: { lengthCm: number; widthCm: number };
+  sunExposure?: 'full' | 'half' | 'shade' | 'mixed';
+  soilNotes?: string;
+  confidence?: number;
+}
+
+export interface ImportPayloadPlant {
+  localId: string;
+  bedRef?: string;
+  scientificName?: string;
+  commonNameDe: string;
+  stageEstimate?: 'seedling' | 'vegetative' | 'flowering' | 'fruiting' | 'senescent';
+  healthNotes?: string;
+  confidence?: number;
+}
+
+export interface ImportPayloadObservation {
+  localId: string;
+  bedRef?: string;
+  kind: 'pest' | 'disease' | 'weather' | 'soil' | 'structural' | 'other';
+  summary: string;
+  suggestedActions?: string[];
+  confidence?: number;
+}
+
+export interface ImportPayloadComplianceFlag {
+  regulation: string;
+  status: 'compliant' | 'warn' | 'violation';
+  note?: string;
+}
 
 /** Outbox-Eintrag — ein pending Write, der noch nicht gepusht wurde. */
 export interface OutboxEntry {
