@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: Phase 6 in progress — Plan 03 complete
-stopped_at: Completed 06-03-PLAN.md (Import UI screens + share-intent + Home button)
-last_updated: "2026-05-09T09:57:49Z"
+status: Phase 6 complete — all 4 plans executed
+stopped_at: Phase 6 execution complete — migration pushed, all code committed
+last_updated: "2026-05-09T11:30:00Z"
 last_activity: 2026-05-09
 progress:
   total_phases: 10
@@ -26,8 +26,8 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 
 ## Current Position
 
-Phase: 6 (Import-Flow + Companion-Prompt) — IN PROGRESS
-Plan: 3 of TBD (Plans 01-03 complete)
+Phase: 6 (Import-Flow + Companion-Prompt) — COMPLETE
+Plan: 4 of 4 (all complete)
 Vorheriger Status: Phase 5 complete — AI-Removal + Import-Schema abgeschlossen
 Plans: 14/18 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~)
 Last activity: 2026-05-09
@@ -71,6 +71,7 @@ Progress: [█████░░░░░] 56% (14/18 Plans — Phase 4 plans ex
 | Phase 06 P01 | 5 | 2 tasks | 3 files |
 | Phase 06 P02 | 45 | 2 tasks | 11 files |
 | Phase 06 P03 | 35 | 2 tasks | 9 files |
+| Phase 06 P04 | 5 | 2 tasks | 0 files |
 
 ## Accumulated Context
 
@@ -136,6 +137,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-09T09:57:49Z
-Stopped at: Completed 06-03-PLAN.md (Import UI screens, share-intent config, Home import button)
+Last session: 2026-05-09T11:30:00Z
+Stopped at: Phase 6 complete — all 4 plans executed, migration pushed to Supabase
 Resume file: None
