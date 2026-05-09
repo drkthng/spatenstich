@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: Phase complete — ready for verification
-stopped_at: Plan 05-03 complete — Import-Schema v1 + Migration 015 gepusht
-last_updated: "2026-05-09T06:09:52.249Z"
+status: Phase 6 context gathered — ready for planning
+stopped_at: Phase 6 context gathered
+last_updated: "2026-05-09T12:00:00.000Z"
 last_activity: 2026-05-09
 progress:
   total_phases: 10
@@ -22,13 +22,13 @@ See: .planning/PROJECT.md (updated 2026-05-08)
 See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 
 **Core value:** Manueller Plan-Editor + strukturierter Import aus Claude.ai (zero In-App AI seit Pivot M07 2026-05-08)
-**Current focus:** Phase 5 — AI-Removal + Import-Schema
+**Current focus:** Phase 6 — Import-Flow + Companion-Prompt
 
 ## Current Position
 
-Phase: 5 (AI-Removal + Import-Schema) — EXECUTING
-Plan: 3 of 3
-Vorheriger Status: Plan 05-02 complete — App-Level AI-Code-Bereinigung abgeschlossen
+Phase: 6 (Import-Flow + Companion-Prompt) — CONTEXT GATHERED
+Plan: 0 of TBD
+Vorheriger Status: Phase 5 complete — AI-Removal + Import-Schema abgeschlossen
 Plans: 14/18 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~)
 Last activity: 2026-05-09
 
