@@ -149,7 +149,7 @@ Plans:
   6. Round-trip: handcrafted Payload → Share Intent → Preview → Confirm → Drafts sichtbar im Editor
 **Plans**: 4 plans
 Plans:
-- [ ] 06-01-PLAN.md — Companion Prompt + Migration 016 + Shared Types (Wave 1)
+- [x] 06-01-PLAN.md — Companion Prompt + Migration 016 + Shared Types (Wave 1) — completed 2026-05-09
 - [ ] 06-02-PLAN.md — Import Validator + Repo + Store + SyncWorker (Wave 2)
 - [ ] 06-03-PLAN.md — UI Screens + Share-Intent + Home Button + i18n (Wave 3)
 - [ ] 06-04-PLAN.md — DB Push + Human Verify (Wave 4)
@@ -223,7 +223,7 @@ Plans:
 | 3. Offline & Sync | 6/7 | Gap Closure pending | - |
 | ~~4. Garten-Erfassung (M1)~~ | 4/4 | **SUPERSEDED** (Pivot M07) | - |
 | 5. AI-Removal + Import-Schema (M07.1+2) | 3/3 | Complete   | 2026-05-09 |
-| 6. Import-Flow + Companion-Prompt (M07.3+4) | 0/4 | Planned | - |
+| 6. Import-Flow + Companion-Prompt (M07.3+4) | 1/4 | In Progress | - |
 | 7. Plan-Editor + Drafts (M2 + M07.5) | 0/TBD | Not started | - |
 | 8. Saatgut-Inventar (M3) | 0/TBD | Not started | - |
 | 9. Pflanz-/Aussaatkalender (M4) | 0/TBD | Not started | - |
@@ -231,4 +231,4 @@ Plans:
 | 10. Vereinsregeln-Aktivierung | 0/TBD | Not started | - |
 
 ---
-*Last updated: 2026-05-09 — Phase 6 planned (4 plans, 4 waves)*
+*Last updated: 2026-05-09 — Phase 6 Plan 01 complete (companion prompt + migration 016 + types)*

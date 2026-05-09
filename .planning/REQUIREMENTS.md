@@ -52,12 +52,12 @@
 
 ### Import-Flow (Phase 6 — Pivot M07)
 
-- [ ] **IMPORT-03**: Claude.ai-Projekt-System-Prompt in `prompts/garden-project-system-prompt.md`
+- [x] **IMPORT-03**: Claude.ai-Projekt-System-Prompt in `prompts/garden-project-system-prompt.md`
 - [ ] **IMPORT-04**: App registriert Share-Intent-Handler für `application/json` + Custom URL Scheme `spatenstich://import`
 - [ ] **IMPORT-05**: Paste-Fallback (Textarea) für Desktop-Claude.ai-Chat
 - [ ] **IMPORT-06**: Preview-Screen zeigt geparste Entities mit Toggle pro Entity; Confidence < 0.6 mit Warning-Chip
 - [ ] **IMPORT-07**: Invalid Payload zeigt actionable Fehler + "Schema kopieren"-Button
-- [ ] **IMPORT-08**: Supabase-Tables `imports`, `import_items`, `bed_drafts`, `plant_drafts`, `observation_drafts` mit RLS, alle Imports getaggt mit `source`, `importedAt`, optional `chatReference`
+- [x] **IMPORT-08**: Supabase-Tables `imports`, `import_items`, `bed_drafts`, `plant_drafts`, `observation_drafts` mit RLS, alle Imports getaggt mit `source`, `importedAt`, optional `chatReference`
 
 ### Drafts-Integration (Phase 7 — Pivot M07)
 

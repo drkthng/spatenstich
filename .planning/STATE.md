@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: Phase 6 planned — ready to execute
-stopped_at: Phase 6 planning complete — 4 plans in 4 waves
-last_updated: "2026-05-09T09:18:02.763Z"
+status: Phase 6 in progress — Plan 01 complete
+stopped_at: 06-01-PLAN.md complete (2026-05-09)
+last_updated: "2026-05-09T09:26:06Z"
 last_activity: 2026-05-09
 progress:
   total_phases: 10
   completed_phases: 6
   total_plans: 29
-  completed_plans: 25
-  percent: 86
+  completed_plans: 27
+  percent: 93
 ---
 
 # Project State
@@ -26,8 +26,8 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 
 ## Current Position
 
-Phase: 6 (Import-Flow + Companion-Prompt) — CONTEXT GATHERED
-Plan: 0 of TBD
+Phase: 6 (Import-Flow + Companion-Prompt) — IN PROGRESS
+Plan: 1 of TBD (Plan 01 complete)
 Vorheriger Status: Phase 5 complete — AI-Removal + Import-Schema abgeschlossen
 Plans: 14/18 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~)
 Last activity: 2026-05-09
@@ -68,6 +68,7 @@ Progress: [█████░░░░░] 56% (14/18 Plans — Phase 4 plans ex
 | Phase 04 P04 | 21 | 2 tasks | 15 files | *(superseded)*
 | Phase 05 P02 | 35 | 2 tasks | 40 files |
 | Phase 05 P03 | 168 | 2 tasks | 5 files |
+| Phase 06 P01 | 5 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,9 @@ Recent decisions affecting current work:
 - [Phase 04 P02]: Budget-Zählung per garden_id *(superseded — AI budget no longer relevant)*
 - [Phase 04 P02]: Files API für Foto-Upload an Anthropic *(superseded — Anthropic client being removed)*
 - [Phase ?]: spatenstich-import.v1 JSON Schema draft 2020-12 als Datenkontrakt Claude.ai Projekt → App definiert; sunExposure enum 'half' (nicht 'halfShade')
+- [Phase 06 P01]: import_items ist write-once — keine LWW-Trigger (aa_/mm_), nur zz_set_updated_at auf mutable Draft-Tabellen
+- [Phase 06 P01]: ImportItemRow extends nicht RowBase — write-once Semantik (kein updatedAt/updatedByUserId)
+- [Phase 06 P01]: Companion Prompt in prompts/ als plain Markdown; Ziel-Modell Opus 4.7; Re-emit-Instruktion auf Deutsch
 
 ### Pending Todos
 
@@ -123,6 +127,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-09T09:18:02.750Z
-Stopped at: context exhaustion at 92% (2026-05-09)
+Last session: 2026-05-09T09:26:06Z
+Stopped at: Completed 06-01-PLAN.md (companion prompt + migration 016 + types)
 Resume file: None
