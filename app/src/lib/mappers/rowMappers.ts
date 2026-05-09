@@ -424,3 +424,96 @@ export function planElementToDb(local: PlanElementRow): Record<string, unknown> 
     deleted_at: local.deletedAt,
   };
 }
+
+// ── Import Entities (Phase 6) ─────────────────────────────────────────────
+
+/**
+ * Generic camelCase→snake_case mapper for all Phase 6 import entities.
+ * Handles: imports, import_items, bed_drafts, plant_drafts, observation_drafts.
+ * Called by SyncWorker.pushImportEntity to convert outbox payload before upsert.
+ */
+export function importEntityToDb(
+  row: Record<string, unknown>,
+  _entity: string,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  const camelToSnakeMap: Record<string, string> = {
+    gardenId: 'garden_id',
+    importId: 'import_id',
+    importItemId: 'import_item_id',
+    bedDraftId: 'bed_draft_id',
+    itemType: 'item_type',
+    localId: 'local_id',
+    importedAt: 'imported_at',
+    chatReference: 'chat_reference',
+    payloadSchemaVersion: 'payload_schema_version',
+    sunExposure: 'sun_exposure',
+    soilNotes: 'soil_notes',
+    scientificName: 'scientific_name',
+    commonNameDe: 'common_name_de',
+    stageEstimate: 'stage_estimate',
+    healthNotes: 'health_notes',
+    bedRefLocalId: 'bed_ref_local_id',
+    suggestedActions: 'suggested_actions',
+    lengthCm: 'length_cm',
+    widthCm: 'width_cm',
+    promotedAt: 'promoted_at',
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    updatedByUserId: 'updated_by_user_id',
+    deletedAt: 'deleted_at',
+  };
+
+  for (const [key, value] of Object.entries(row)) {
+    const snakeKey = camelToSnakeMap[key] ?? key;
+    result[snakeKey] = value;
+  }
+
+  return result;
+}
+
+/**
+ * Generic snake_case→camelCase mapper for import entities (reverse of importEntityToDb).
+ * Used for future pull-sync if needed.
+ */
+export function importEntityFromDb(
+  row: Record<string, unknown>,
+  _entity: string,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  const snakeToCamelMap: Record<string, string> = {
+    garden_id: 'gardenId',
+    import_id: 'importId',
+    import_item_id: 'importItemId',
+    bed_draft_id: 'bedDraftId',
+    item_type: 'itemType',
+    local_id: 'localId',
+    imported_at: 'importedAt',
+    chat_reference: 'chatReference',
+    payload_schema_version: 'payloadSchemaVersion',
+    sun_exposure: 'sunExposure',
+    soil_notes: 'soilNotes',
+    scientific_name: 'scientificName',
+    common_name_de: 'commonNameDe',
+    stage_estimate: 'stageEstimate',
+    health_notes: 'healthNotes',
+    bed_ref_local_id: 'bedRefLocalId',
+    suggested_actions: 'suggestedActions',
+    length_cm: 'lengthCm',
+    width_cm: 'widthCm',
+    promoted_at: 'promotedAt',
+    created_at: 'createdAt',
+    updated_at: 'updatedAt',
+    updated_by_user_id: 'updatedByUserId',
+    deleted_at: 'deletedAt',
+  };
+
+  for (const [key, value] of Object.entries(row)) {
+    const camelKey = snakeToCamelMap[key] ?? key;
+    result[camelKey] = value;
+  }
+
+  return result;
+}

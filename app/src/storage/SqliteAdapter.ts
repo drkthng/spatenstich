@@ -18,6 +18,11 @@ const ROW_ENTITIES: EntityName[] = [
   'invite_codes',
   'garden_dimensions',
   'plan_elements',
+  'imports',
+  'import_items',
+  'bed_drafts',
+  'plant_drafts',
+  'observation_drafts',
 ];
 
 // Which entities have a garden_id column?
@@ -30,6 +35,11 @@ const GARDEN_ID_COLUMN: Record<EntityName, string | null> = {
   invite_codes: 'garden_id',
   garden_dimensions: 'garden_id',
   plan_elements: 'garden_id',
+  imports: 'garden_id',
+  import_items: 'garden_id',
+  bed_drafts: 'garden_id',
+  plant_drafts: 'garden_id',
+  observation_drafts: 'garden_id',
 };
 
 // camelCase field name that maps to the garden_id column in the row object
@@ -41,6 +51,11 @@ const GARDEN_ID_FIELD: Record<EntityName, string | null> = {
   invite_codes: 'gardenId',
   garden_dimensions: 'gardenId',
   plan_elements: 'gardenId',
+  imports: 'gardenId',
+  import_items: 'gardenId',
+  bed_drafts: 'gardenId',
+  plant_drafts: 'gardenId',
+  observation_drafts: 'gardenId',
 };
 
 // Monotonic counter for Outbox created_at (prevents FIFO collisions at same Date.now())

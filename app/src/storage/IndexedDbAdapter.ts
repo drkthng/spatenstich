@@ -21,6 +21,11 @@ const ROW_ENTITIES: EntityName[] = [
   'invite_codes',
   'garden_dimensions',
   'plan_elements',
+  'imports',
+  'import_items',
+  'bed_drafts',
+  'plant_drafts',
+  'observation_drafts',
 ];
 
 // Which entities have a garden_id field (in camelCase JS objects)?
@@ -33,6 +38,11 @@ const GARDEN_ID_COLUMN: Record<EntityName, string | null> = {
   invite_codes: 'garden_id',
   garden_dimensions: 'garden_id',
   plan_elements: 'garden_id',
+  imports: 'gardenId',
+  import_items: 'gardenId',
+  bed_drafts: 'gardenId',
+  plant_drafts: 'gardenId',
+  observation_drafts: 'gardenId',
 };
 
 // Monotonic counter for Outbox created_at (prevents FIFO collisions at same ms)

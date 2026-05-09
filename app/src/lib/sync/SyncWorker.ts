@@ -15,6 +15,11 @@ import type {
   ProfileRow,
   VereinsregelnRow,
   InviteCodeRow,
+  ImportRow,
+  ImportItemRow,
+  BedDraftRow,
+  PlantDraftRow,
+  ObservationDraftRow,
 } from '@spatenstich/shared';
 import {
   gardenFromDb,
@@ -23,6 +28,7 @@ import {
   gardenMemberFromDb,
   inviteCodeFromDb,
   vereinsregelnToDbRows,
+  importEntityToDb,
 } from '../mappers/rowMappers';
 
 // Entities, die gepullt werden
@@ -222,9 +228,24 @@ export class SyncWorker {
       case 'vereinsregeln': return this.pushVereinsregeln(entry);
       case 'garden_members': return this.pushGardenMember(entry);
       case 'invite_codes':  return this.pushInviteCode(entry);
+      case 'imports':
+      case 'import_items':
+      case 'bed_drafts':
+      case 'plant_drafts':
+      case 'observation_drafts':
+        return this.pushImportEntity(entry);
       default:
         throw new Error(`Unknown entity for push: ${(entry as { entity: string }).entity}`);
     }
+  }
+
+  private async pushImportEntity(entry: OutboxEntry): Promise<void> {
+    const row = entry.payload;
+    const snakeRow = importEntityToDb(row, entry.entity);
+    const { error } = await this.supabase
+      .from(entry.entity)
+      .upsert(snakeRow as any, { onConflict: 'id' });
+    if (error) throw error;
   }
 
   private async pushGarden(entry: OutboxEntry): Promise<void> {

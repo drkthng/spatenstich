@@ -84,6 +84,7 @@ export type AnyRow =
   | GardenDimensionsRow
   | PlanElementRow
   | ImportRow
+  | ImportItemRow
   | BedDraftRow
   | PlantDraftRow
   | ObservationDraftRow;
@@ -107,6 +108,8 @@ export interface ImportItemRow {
   payload: Record<string, unknown>;
   confidence: number | null;
   createdAt: string;
+  /** Alias for createdAt — write-once row, updatedAt always equals createdAt. Required by StorageAdapter. */
+  updatedAt: string;
   deletedAt: string | null;
 }
 
