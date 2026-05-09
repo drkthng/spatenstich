@@ -1,13 +1,16 @@
 // Home Screen — zeigt Gartenplan wenn Elemente vorhanden, sonst Placeholder.
 // Phase 5 Plan 05-02: Capture-Buttons entfernt (M07 Pivot — kein In-App AI).
+// Phase 6 Plan 06-03: "Aus Claude.ai importieren" Button in Empty State + Plan View.
 import * as React from 'react';
 import { View, Text, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
 import de from '@spatenstich/shared/i18n/de';
 import type { GardenDimensionsRow, PlanElementRow } from '@spatenstich/shared';
 import { useAuthStore } from '@/src/stores/authStore';
 import { supabase } from '@/src/lib/supabase';
 import { loadAcceptedElements, loadDimensions } from '@/src/lib/gardenPlanRepo';
 import { GardenPlanView } from '@/src/components/GardenPlanView';
+import { Button } from '@/src/components/ui/button';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
@@ -15,6 +18,7 @@ const t = (key: string): string =>
 export default function HomeScreen(): React.JSX.Element {
   const mode = useAuthStore((s) => s.mode);
   const activeGardenId = useAuthStore((s) => s.activeGardenId);
+  const router = useRouter();
 
   const [userEmail, setUserEmail] = React.useState<string | null>(null);
   const [elements, setElements] = React.useState<PlanElementRow[]>([]);
@@ -85,6 +89,16 @@ export default function HomeScreen(): React.JSX.Element {
             showGrid={true}
             testID="home-garden-plan"
           />
+          <Button
+            variant="outline"
+            onPress={() => router.push('/(app)/import' as any)}
+            className="mt-4 w-full"
+            testID="home-import-button-plan"
+          >
+            <Text className="font-semibold text-stone-700 dark:text-stone-200">
+              {t('import.home.importButton')}
+            </Text>
+          </Button>
         </ScrollView>
       </View>
     );
@@ -100,11 +114,21 @@ export default function HomeScreen(): React.JSX.Element {
       ) : null}
       <View className="flex-1 items-center justify-center p-6">
         <Text className="text-lg font-semibold text-stone-700 dark:text-stone-200 mb-2">
-          {t('home.emptyTitle') !== 'home.emptyTitle' ? t('home.emptyTitle') : 'Noch kein Gartenplan'}
+          {t('import.home.emptyHeading')}
         </Text>
-        <Text className="text-sm text-stone-500 dark:text-stone-400 text-center">
-          {t('home.emptySubtitle') !== 'home.emptySubtitle' ? t('home.emptySubtitle') : 'Import-Funktion kommt bald.'}
+        <Text className="text-sm text-stone-500 dark:text-stone-400 text-center mb-2">
+          {t('import.home.emptyBody')}
         </Text>
+        <Button
+          variant="default"
+          onPress={() => router.push('/(app)/import' as any)}
+          className="mt-4 w-full"
+          testID="home-import-button-empty"
+        >
+          <Text className="text-white font-semibold">
+            {t('import.home.importButton')}
+          </Text>
+        </Button>
       </View>
     </View>
   );
