@@ -1,5 +1,6 @@
 // gardenPlanRepo unit tests — Phase 4 Plan 04-01 Task 02.
 // Pattern: gardenRepo.test.ts — jest.mock storage + authStore.
+// Phase 5 Plan 05-02: saveElements + PlanElementCandidate entfernt (M07 Pivot).
 
 process.env['EXPO_PUBLIC_SUPABASE_URL'] = 'https://test.example';
 process.env['EXPO_PUBLIC_SUPABASE_ANON_KEY'] = 'test-anon-key';
@@ -33,10 +34,9 @@ jest.mock('../sync/SyncTriggers', () => ({
 import {
   saveDimensions,
   loadDimensions,
-  saveElements,
   loadAcceptedElements,
 } from '../gardenPlanRepo';
-import type { GardenDimensionsRow, PlanElementRow, PlanElementCandidate } from '@spatenstich/shared';
+import type { GardenDimensionsRow, PlanElementRow } from '@spatenstich/shared';
 
 describe('gardenPlanRepo', () => {
   const gardenId = 'garden-001';
@@ -109,51 +109,25 @@ describe('gardenPlanRepo', () => {
     });
   });
 
-  describe('saveElements', () => {
-    it('writes multiple plan_elements rows via writeWithOutbox loop', async () => {
-      const candidates: PlanElementCandidate[] = [
-        { elementType: 'Beet', label: 'Hochbeet', xM: 2, yM: 3, widthM: 2, heightM: 1, confidence: 'high' },
-        { elementType: 'Laube', label: 'Gartenlaube', xM: 8, yM: 6, widthM: 3, heightM: 4, confidence: 'low' },
-      ];
-
-      await saveElements('account', gardenId, candidates, 'ai-result-001');
-
-      expect(mockStorageWriteWithOutbox).toHaveBeenCalledTimes(2);
-
-      // First element: high confidence => isAccepted=true
-      const [entity1, row1, outbox1] = mockStorageWriteWithOutbox.mock.calls[0];
-      expect(entity1).toBe('plan_elements');
-      expect(row1.elementType).toBe('Beet');
-      expect(row1.isAccepted).toBe(true);
-      expect(row1.aiResultId).toBe('ai-result-001');
-      expect(outbox1.entity).toBe('plan_elements');
-
-      // Second element: low confidence => isAccepted=false
-      const [, row2] = mockStorageWriteWithOutbox.mock.calls[1];
-      expect(row2.elementType).toBe('Laube');
-      expect(row2.isAccepted).toBe(false);
-    });
-  });
-
   describe('loadAcceptedElements', () => {
     it('returns only rows with isAccepted=true and deletedAt=null', async () => {
       const elements: PlanElementRow[] = [
         {
-          id: 'el-001', gardenId, aiResultId: null, elementType: 'Beet',
+          id: 'el-001', gardenId, elementType: 'Beet',
           label: 'Hochbeet', xM: 2, yM: 3, widthM: 2, heightM: 1,
           confidence: 'high', isAccepted: true,
           createdAt: '2026-05-03T00:00:00Z', updatedAt: '2026-05-03T00:00:00Z',
           updatedByUserId: 'user-001', deletedAt: null,
         },
         {
-          id: 'el-002', gardenId, aiResultId: null, elementType: 'Laube',
+          id: 'el-002', gardenId, elementType: 'Laube',
           label: 'Gartenlaube', xM: 8, yM: 6, widthM: 3, heightM: 4,
           confidence: 'low', isAccepted: false,
           createdAt: '2026-05-03T00:00:00Z', updatedAt: '2026-05-03T00:00:00Z',
           updatedByUserId: 'user-001', deletedAt: null,
         },
         {
-          id: 'el-003', gardenId, aiResultId: null, elementType: 'Kompost',
+          id: 'el-003', gardenId, elementType: 'Kompost',
           label: 'Kompostplatz', xM: 10, yM: 2, widthM: 1.5, heightM: 1.5,
           confidence: 'medium', isAccepted: true,
           createdAt: '2026-05-03T00:00:00Z', updatedAt: '2026-05-03T00:00:00Z',

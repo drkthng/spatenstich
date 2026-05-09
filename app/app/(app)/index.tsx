@@ -1,12 +1,11 @@
-// Home Screen — shows garden plan if elements exist, otherwise empty-state CTA to capture.
-// Phase 4 Plan 04 — replaces placeholder from Phase 2.
+// Home Screen — zeigt Gartenplan wenn Elemente vorhanden, sonst Placeholder.
+// Phase 5 Plan 05-02: Capture-Buttons entfernt (M07 Pivot — kein In-App AI).
 import * as React from 'react';
-import { View, Text, Pressable, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Camera } from 'lucide-react-native';
+import { View, Text, ScrollView } from 'react-native';
 import de from '@spatenstich/shared/i18n/de';
 import type { GardenDimensionsRow, PlanElementRow } from '@spatenstich/shared';
 import { useAuthStore } from '@/src/stores/authStore';
+import { supabase } from '@/src/lib/supabase';
 import { loadAcceptedElements, loadDimensions } from '@/src/lib/gardenPlanRepo';
 import { GardenPlanView } from '@/src/components/GardenPlanView';
 
@@ -14,12 +13,23 @@ const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
 
 export default function HomeScreen(): React.JSX.Element {
-  const router = useRouter();
+  const mode = useAuthStore((s) => s.mode);
   const activeGardenId = useAuthStore((s) => s.activeGardenId);
 
+  const [userEmail, setUserEmail] = React.useState<string | null>(null);
   const [elements, setElements] = React.useState<PlanElementRow[]>([]);
   const [dimensions, setDimensions] = React.useState<GardenDimensionsRow | null>(null);
   const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    if (mode !== 'account') return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!cancelled) setUserEmail(data.session?.user?.email ?? null);
+    })();
+    return () => { cancelled = true; };
+  }, [mode]);
 
   React.useEffect(() => {
     if (!activeGardenId) {
@@ -50,6 +60,12 @@ export default function HomeScreen(): React.JSX.Element {
     );
   }
 
+  const statusLabel = mode === 'account'
+    ? (userEmail ?? 'Eingeloggt')
+    : mode === 'local'
+      ? 'Lokaler Modus'
+      : null;
+
   // Has plan: show inline plan view
   if (elements.length > 0 && dimensions) {
     return (
@@ -58,6 +74,11 @@ export default function HomeScreen(): React.JSX.Element {
           className="flex-1"
           contentContainerStyle={{ padding: 16, alignItems: 'center' }}
         >
+          {statusLabel ? (
+            <View className="self-end mb-2">
+              <Text className="text-xs text-stone-400" testID="home-auth-status">{statusLabel}</Text>
+            </View>
+          ) : null}
           <GardenPlanView
             dimensions={dimensions}
             elements={elements}
@@ -65,26 +86,6 @@ export default function HomeScreen(): React.JSX.Element {
             testID="home-garden-plan"
           />
         </ScrollView>
-
-        {/* Footer CTAs */}
-        <View className="p-4 border-t border-stone-200 dark:border-stone-700">
-          <Pressable
-            onPress={() => router.push('/(app)/capture/plan' as any)}
-            accessibilityRole="button"
-            className="w-full rounded-lg py-3 min-h-[44px] items-center justify-center bg-[#4A7C59] dark:bg-[#6BAA7E] active:opacity-80"
-          >
-            <Text className="text-white font-semibold">Garten bearbeiten</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => router.push('/(app)/capture/step-overview' as any)}
-            accessibilityRole="button"
-            className="mt-3 w-full rounded-lg py-3 min-h-[44px] items-center justify-center active:opacity-80"
-          >
-            <Text className="text-[#4A7C59] dark:text-[#6BAA7E] font-semibold text-sm">
-              Erneut erfassen
-            </Text>
-          </Pressable>
-        </View>
       </View>
     );
   }
@@ -92,22 +93,19 @@ export default function HomeScreen(): React.JSX.Element {
   // Empty state: no plan yet
   return (
     <View className="flex-1 items-center justify-center bg-[#F9F7F4] dark:bg-[#1C1917] px-6">
-      <View className="w-20 h-20 rounded-full bg-stone-200 dark:bg-stone-700 items-center justify-center mb-4">
-        <Camera size={36} color="#78716C" />
+      {statusLabel ? (
+        <View className="absolute top-4 right-4">
+          <Text className="text-xs text-stone-400" testID="home-auth-status">{statusLabel}</Text>
+        </View>
+      ) : null}
+      <View className="flex-1 items-center justify-center p-6">
+        <Text className="text-lg font-semibold text-stone-700 dark:text-stone-200 mb-2">
+          {t('home.emptyTitle') !== 'home.emptyTitle' ? t('home.emptyTitle') : 'Noch kein Gartenplan'}
+        </Text>
+        <Text className="text-sm text-stone-500 dark:text-stone-400 text-center">
+          {t('home.emptySubtitle') !== 'home.emptySubtitle' ? t('home.emptySubtitle') : 'Import-Funktion kommt bald.'}
+        </Text>
       </View>
-      <Text className="text-xl font-semibold text-stone-800 dark:text-stone-100 text-center">
-        Noch kein Gartenplan
-      </Text>
-      <Text className="text-sm text-stone-500 mt-2 text-center max-w-xs">
-        Fotografiere deinen Garten und lass dir einen Plan erstellen.
-      </Text>
-      <Pressable
-        onPress={() => router.push('/(app)/capture/step-overview' as any)}
-        accessibilityRole="button"
-        className="mt-6 bg-[#4A7C59] dark:bg-[#6BAA7E] rounded-lg px-6 py-3 min-h-[44px] items-center justify-center active:opacity-80"
-      >
-        <Text className="text-white font-semibold">Garten erfassen</Text>
-      </Pressable>
     </View>
   );
 }

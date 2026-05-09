@@ -12,7 +12,6 @@ import {
   WRITE_DEBOUNCE_MS,
 } from '../SyncTriggers';
 import * as SyncWorkerModule from '../SyncWorker';
-import { uploadPending } from '../../photos/PhotoUploader';
 
 jest.mock('@react-native-community/netinfo');
 jest.mock('../SyncWorker', () => {
@@ -31,10 +30,6 @@ jest.mock('../SyncWorker', () => {
     __workerMock: workerMock,
   };
 });
-
-jest.mock('../../photos/PhotoUploader', () => ({
-  uploadPending: jest.fn().mockResolvedValue(undefined),
-}));
 
 jest.mock('../../../stores/authStore', () => ({
   useAuthStore: {
@@ -102,28 +97,5 @@ describe('SyncTriggers', () => {
 
   it('WRITE_DEBOUNCE_MS ist 500 (D-16/D-26)', () => {
     expect(WRITE_DEBOUNCE_MS).toBe(500);
-  });
-
-  it('ruft uploadPending() bei offline→online (SC-2 gap closure)', async () => {
-    registerSyncTriggers();
-    netInfoListener({ isConnected: false });
-    netInfoListener({ isConnected: true, isInternetReachable: true });
-    expect(uploadPending).toHaveBeenCalledTimes(1);
-  });
-
-  it('ruft uploadPending() bei background→active (SC-2 gap closure)', async () => {
-    registerSyncTriggers();
-    appStateListener('background');
-    appStateListener('active');
-    expect(uploadPending).toHaveBeenCalledTimes(1);
-  });
-
-  it('uploadPending() rejection blockiert syncAll() nicht', async () => {
-    (uploadPending as jest.Mock).mockRejectedValueOnce(new Error('upload fail'));
-    registerSyncTriggers();
-    netInfoListener({ isConnected: false });
-    netInfoListener({ isConnected: true, isInternetReachable: true });
-    await new Promise((r) => setTimeout(r, 10));
-    expect(workerMock.syncAll).toHaveBeenCalledTimes(1);
   });
 });

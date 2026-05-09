@@ -371,7 +371,6 @@ export function gardenDimensionsToDb(local: GardenDimensionsRow): Record<string,
 type DbPlanElementRowLoose = {
   id: string;
   garden_id: string;
-  ai_result_id: string | null;
   element_type: string;
   label: string;
   x_m: number;
@@ -391,7 +390,6 @@ export function planElementToLocal(db: DbPlanElementRowLoose): PlanElementRow {
   return {
     id: db.id,
     gardenId: db.garden_id,
-    aiResultId: db.ai_result_id,
     elementType: db.element_type,
     label: db.label,
     xM: db.x_m,
@@ -412,7 +410,6 @@ export function planElementToDb(local: PlanElementRow): Record<string, unknown> 
   return {
     id: local.id,
     garden_id: local.gardenId,
-    ai_result_id: local.aiResultId,
     element_type: local.elementType,
     label: local.label,
     x_m: local.xM,

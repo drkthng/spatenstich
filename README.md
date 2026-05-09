@@ -8,9 +8,9 @@
 
 ## Was ist das?
 
-Spatenstich übersetzt deine reale Parzelle per Foto in einen interaktiven 2D-Plan und kombiniert jahreszyklische Aussaat- und Pflanzplanung mit dem Kontext des Bundeskleingartengesetzes und deiner Vereinssatzung.
+Spatenstich kombiniert manuellen Gartenplan-Editor mit strukturiertem Import aus Claude.ai und jahreszyklischer Aussaat- und Pflanzplanung mit dem Kontext des Bundeskleingartengesetzes und deiner Vereinssatzung.
 
-**Foto rein → Plan, Kalender und Empfehlungen raus.**
+**Plan erstellen → Kalender und Empfehlungen raus.**
 
 Kein generisches Garten-App-Feature-Bingo. Sondern ein Assistent, der weiß:
 - dass Walnussbäume im Kleingarten oft verboten sind
@@ -23,11 +23,11 @@ Kein generisches Garten-App-Feature-Bingo. Sondern ein Assistent, der weiß:
 
 | Feature | Beschreibung | Status |
 |---------|--------------|--------|
-| **Garten-Erfassung per Foto** | Fotos fotografieren → Claude Vision analysiert → schematischer 2D-Plan | 🔜 Geplant |
-| **Interaktiver Plan-Editor** | Drag & Drop von Beeten, Pflanzen, Infrastruktur auf dem Plan | 🔜 Geplant |
-| **Saatgut-Inventar** | Samentüten fotografieren → automatische Erkennung der Sorte | 🔜 Geplant |
+| **Manueller Plan-Editor** | Interaktiver 2D-Plan mit Drag & Drop von Beeten, Pflanzen, Infrastruktur | 🔜 Geplant |
+| **Claude.ai Import** | Strukturierter Import aus externem Claude.ai-Projekt (zero In-App AI) | 🔜 Geplant |
+| **Saatgut-Inventar** | Manuelle Erfassung von Sorten und Inventar | 🔜 Geplant |
 | **Pflanz-/Aussaatkalender** | Wann was wo pflanzen – auf Basis Inventar, Plan und Klimazone | 🔜 Geplant |
-| **Profil & Vereinsregeln** | PLZ → Klimazone, Archetyp, PDF-Upload Vereinssatzung | 🔜 Geplant |
+| **Profil & Vereinsregeln** | PLZ → Klimazone, Archetyp, manuelle Vereinsregeln | 🔜 Geplant |
 
 ---
 
@@ -40,14 +40,11 @@ Client (Expo: iOS / Android / Web)
               └── Supabase (Frankfurt, EU)
                     ├── Postgres + Auth + Storage
                     ├── Edge Functions
-                    │     ├── Claude API (Vision + Text)
-                    │     └── Pl@ntNet API
                     └── (future) Weather API
 ```
 
 - **Frontend:** [Expo](https://expo.dev) (React Native) mit Web-Export · TypeScript
 - **Backend:** [Supabase](https://supabase.com) (Frankfurt) · Postgres · Edge Functions
-- **KI:** [Claude API](https://anthropic.com) (Vision, Text) · [Pl@ntNet API](https://plantnet.org)
 - **Monorepo:** pnpm workspaces (`app/`, `supabase/`, `packages/shared`)
 - **Lizenz:** AGPL-3.0
 
@@ -82,7 +79,6 @@ Umgebungsvariablen: siehe `.env.example` (folgt im Setup-Schritt)
 spatenstich/
 ├── app/              # Expo React Native App
 ├── supabase/         # Migrations, Edge Functions, Seed
-│   ├── functions/    # Claude/Pl@ntNet Integrations
 │   └── migrations/
 ├── packages/
 │   └── shared/       # Typen, Sorten-DB, Klimazonen-Lookup
@@ -99,10 +95,10 @@ Die detaillierte Planung liegt in [`.planning/ROADMAP.md`](.planning/ROADMAP.md)
 
 - **Woche 1:** Setup, Auth, Onboarding (PLZ, Archetyp)
 - **Woche 2:** Sorten-DB (100 Pflanzen), Klimazonen-Lookup
-- **Woche 3:** Saatgut-Inventar (Foto + Liste, Claude-Integration)
-- **Woche 4:** Garten-Erfassung (Fotos, Maße, Claude-Analyse)
-- **Woche 5:** 2D-Plan-Editor (Canvas, Drag & Drop)
-- **Woche 6:** Erfassung → Plan-Rendering + Vereinsregeln
+- **Woche 3:** Saatgut-Inventar (manuelle Erfassung)
+- **Woche 4:** 2D-Plan-Editor (Canvas, Drag & Drop)
+- **Woche 5:** Claude.ai Import-Bridge
+- **Woche 6:** Plan-Rendering + Vereinsregeln
 - **Woche 7:** Pflanzkalender aus Inventar + Plan
 - **Woche 8:** Polish, Offline-Sync, Dogfooding
 - **Ziel:** MVP-stabil Ende Juni 2026
@@ -113,7 +109,6 @@ Die detaillierte Planung liegt in [`.planning/ROADMAP.md`](.planning/ROADMAP.md)
 
 - **Lizenz:** [AGPL-3.0](LICENSE)
 - **Haftungsausschluss:** Die App gibt Empfehlungen ohne Gewähr. BKleingG-Compliance und Vereinsregelkonformität liegen in der Verantwortung des Nutzers.
-- **Pl@ntNet API:** Nichtkommerzielle Nutzung frei. Bei kommerzieller Nutzung separate Vereinbarung erforderlich.
 - **Datenschutz:** EU-Hosting (Supabase Frankfurt). Fotos verschlüsselt at-rest. DSGVO-konform.
 
 ---

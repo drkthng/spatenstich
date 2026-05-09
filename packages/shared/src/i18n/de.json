@@ -19,6 +19,8 @@
     "choice": {
       "create_account": "Account erstellen",
       "local_start": "Lokal starten",
+      "login": "Anmelden",
+      "login_desc": "Mit bestehendem Account einloggen",
       "join_garden": "Einem Garten beitreten",
       "join_garden_desc": "Mit Einladungs-Code einem geteilten Garten beitreten",
       "tagline": "Dein digitaler Kleingarten-Assistent",
@@ -92,6 +94,8 @@
   "settings": {
     "logout": "Abmelden",
     "logout_confirm": "Wirklich abmelden?",
+    "login_existing": "Mit bestehendem Account anmelden",
+    "login_existing_desc": "Du hast bereits einen Account? Melde dich an und deine lokalen Daten bleiben erhalten.",
     "migration": {
       "cta": "Account erstellen und Daten übertragen",
       "error_partial": "Account angelegt, aber Datenübertragung fehlgeschlagen. Bitte erneut versuchen.",
@@ -169,80 +173,9 @@
     "time_days_ago": "vor {n} Tagen",
     "time_on": "am {date}"
   },
-  "capture": {
-    "title": "Garten fotografieren",
-    "step": {
-      "overview": "Fotografiere deinen Garten von oben oder aus der Ferne (Uebersicht)",
-      "north": "Fotografiere die Nordseite deines Gartens",
-      "south": "Fotografiere die Suedseite deines Gartens",
-      "indicator": "Foto {current} von {total}"
-    },
-    "shutter": "Foto aufnehmen",
-    "gallery": "Aus Galerie waehlen",
-    "review": {
-      "title": "Deine Fotos",
-      "add_more": "Weiteres Foto",
-      "proceed": "Weiter zu Gartenform",
-      "single_photo_warning": "Nur 1 Foto vorhanden. Mehr Perspektiven verbessern die Erkennung. Analyse wird trotzdem versucht.",
-      "delete_confirm": "Foto entfernen?",
-      "delete_cta": "Entfernen"
-    },
-    "dimensions": {
-      "title": "Gartenform und Masse",
-      "shape_heading": "Grundform waehlen",
-      "shape": {
-        "rectangle": "Rechteck",
-        "l_shape": "L-Form",
-        "trapezoid": "Trapez",
-        "freehand": "Freihand"
-      },
-      "length": "Laenge",
-      "width": "Breite",
-      "depth": "Tiefe",
-      "l_length_full": "Laenge gesamt",
-      "l_width_full": "Breite gesamt",
-      "l_cutout_length": "Einschnitt Laenge",
-      "l_cutout_width": "Einschnitt Breite",
-      "trapez_top": "Seite oben",
-      "trapez_bottom": "Seite unten",
-      "freehand_hint": "Tippe auf die Karte, um Eckpunkte zu setzen",
-      "unit": "m",
-      "error_range": "Bitte einen Wert zwischen 1 und 200 eingeben.",
-      "submit": "Analyse starten"
-    },
-    "analysis": {
-      "loading_title": "Garten wird analysiert...",
-      "loading_sub": "Das kann 30-60 Sekunden dauern.",
-      "error": "Analyse fehlgeschlagen. Bitte versuche es erneut.",
-      "retry": "Erneut versuchen",
-      "cancel": "Analyse abbrechen"
-    },
-    "confirm": {
-      "title": "Elemente bestaetigen",
-      "count": "{n} Elemente erkannt",
-      "select_all": "Alle bestaetigen",
-      "deselect_all": "Alle abwaehlen",
-      "confidence_high": "sicher",
-      "confidence_low": "unsicher",
-      "estimated_size": "ca. {w} x {h} m",
-      "submit": "Plan erstellen",
-      "empty_heading": "Keine Elemente erkannt",
-      "empty_body": "Kein Problem -- du kannst im Editor alles manuell einzeichnen.",
-      "empty_cta": "Leeren Plan erstellen"
-    },
-    "plan": {
-      "title": "Dein Gartenplan",
-      "grid_toggle": "Raster",
-      "to_editor": "Zum Editor",
-      "recapture": "Erneut erfassen",
-      "recapture_confirm": "Bisherige Analyse wird verworfen. Wirklich neu erfassen?",
-      "recapture_confirm_cta": "Ja, neu erfassen",
-      "recapture_confirm_dismiss": "Nicht neu erfassen"
-    },
-    "budget": {
-      "soft_warning": "Du hast heute bereits {n} Analysen gestartet.",
-      "hard_stop": "Tageslimit erreicht. Weitere Analysen sind morgen wieder moeglich."
-    }
+  "home": {
+    "emptyTitle": "Noch kein Gartenplan",
+    "emptySubtitle": "Import-Funktion kommt bald."
   },
   "sync": {
     "badge": {
