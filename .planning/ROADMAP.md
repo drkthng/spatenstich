@@ -147,11 +147,12 @@ Plans:
   4. Invalid Payload zeigt actionable Fehler + "Schema kopieren"-Button
   5. Supabase-Tables `imports`, `import_items`, `bed_drafts`, `plant_drafts`, `observation_drafts` mit RLS
   6. Round-trip: handcrafted Payload → Share Intent → Preview → Confirm → Drafts sichtbar im Editor
-**Plans**: 3 plans
+**Plans**: 4 plans
 Plans:
-- [x] 05-01-PLAN.md — Backend-Bereinigung: Migration 015 (DROP ai_tables), Edge Functions loeschen, Shared Types bereinigen (Wave 1)
-- [x] 05-02-PLAN.md — App-Level AI-Code-Bereinigung: Client-Libs, Screens, Sync, i18n, README (Wave 2)
-- [ ] 05-03-PLAN.md — Import-Schema v1 + Referenz-Payloads + Validierungsscript + DB Push (Wave 2)
+- [ ] 06-01-PLAN.md — Companion Prompt + Migration 016 + Shared Types (Wave 1)
+- [ ] 06-02-PLAN.md — Import Validator + Repo + Store + SyncWorker (Wave 2)
+- [ ] 06-03-PLAN.md — UI Screens + Share-Intent + Home Button + i18n (Wave 3)
+- [ ] 06-04-PLAN.md — DB Push + Human Verify (Wave 4)
 **UI hint**: yes
 
 ### Phase 7: Plan-Editor + Drafts-Integration (M2 + M07.5)
@@ -166,11 +167,7 @@ Plans:
   5. Imported drafts appear in "Recent imports" tray; drag bed draft → canvas places it
   6. Accepting a plant draft into a bed lifts it to a real planted entity with `importedFrom` provenance
   7. Drafts not promoted within 30 days flagged as "Stale imports", never auto-deleted
-**Plans**: 3 plans
-Plans:
-- [ ] 05-01-PLAN.md — Backend-Bereinigung: Migration 015 (DROP ai_tables), Edge Functions loeschen, Shared Types bereinigen (Wave 1)
-- [ ] 05-02-PLAN.md — App-Level AI-Code-Bereinigung: Client-Libs, Screens, Sync, i18n, README (Wave 2)
-- [ ] 05-03-PLAN.md — Import-Schema v1 + Referenz-Payloads + Validierungsscript + DB Push (Wave 2)
+**Plans**: TBD
 **UI hint**: yes
 
 ### Phase 8: Saatgut-Inventar (M3)
@@ -182,11 +179,7 @@ Plans:
   2. Sorte nicht in DB → Freitext-Eintrag möglich, wird nicht verworfen
   3. Inventar zeigt Haltbarkeits-Badge: grün/gelb/rot
   4. User kann Einträge bearbeiten und löschen
-**Plans**: 3 plans
-Plans:
-- [ ] 05-01-PLAN.md — Backend-Bereinigung: Migration 015 (DROP ai_tables), Edge Functions loeschen, Shared Types bereinigen (Wave 1)
-- [ ] 05-02-PLAN.md — App-Level AI-Code-Bereinigung: Client-Libs, Screens, Sync, i18n, README (Wave 2)
-- [ ] 05-03-PLAN.md — Import-Schema v1 + Referenz-Payloads + Validierungsscript + DB Push (Wave 2)
+**Plans**: TBD
 **UI hint**: yes
 
 ### Phase 9: Pflanz- & Aussaatkalender (M4)
@@ -199,11 +192,7 @@ Plans:
   3. Placement suggestion points to unoccupied sunny bed area for sunny-requirement variety
   4. Accepting placement adds plant to plan canvas and activates calendar task
   5. Fruchtfolge warning when replanting same family in same bed as last season
-**Plans**: 3 plans
-Plans:
-- [ ] 05-01-PLAN.md — Backend-Bereinigung: Migration 015 (DROP ai_tables), Edge Functions loeschen, Shared Types bereinigen (Wave 1)
-- [ ] 05-02-PLAN.md — App-Level AI-Code-Bereinigung: Client-Libs, Screens, Sync, i18n, README (Wave 2)
-- [ ] 05-03-PLAN.md — Import-Schema v1 + Referenz-Payloads + Validierungsscript + DB Push (Wave 2)
+**Plans**: TBD
 **UI hint**: yes
 
 ---
@@ -219,11 +208,7 @@ Plans:
   2. Manuelle Checklisten-Eingabe funktioniert (keine PDF-Upload-Edge-Function)
   3. Im Plan-Editor: Platzierung eines regelwidrigen Elements zeigt Inline-Warnung
   4. BKleingG-Badge wird rot/gelb/grün je nach Nutz/Zier-Verhältnis
-**Plans**: 3 plans
-Plans:
-- [ ] 05-01-PLAN.md — Backend-Bereinigung: Migration 015 (DROP ai_tables), Edge Functions loeschen, Shared Types bereinigen (Wave 1)
-- [ ] 05-02-PLAN.md — App-Level AI-Code-Bereinigung: Client-Libs, Screens, Sync, i18n, README (Wave 2)
-- [ ] 05-03-PLAN.md — Import-Schema v1 + Referenz-Payloads + Validierungsscript + DB Push (Wave 2)
+**Plans**: TBD
 **UI hint**: yes
 
 ---
@@ -238,12 +223,12 @@ Plans:
 | 3. Offline & Sync | 6/7 | Gap Closure pending | - |
 | ~~4. Garten-Erfassung (M1)~~ | 4/4 | **SUPERSEDED** (Pivot M07) | - |
 | 5. AI-Removal + Import-Schema (M07.1+2) | 3/3 | Complete   | 2026-05-09 |
-| 6. Import-Flow + Companion-Prompt (M07.3+4) | 0/TBD | Not started | - |
+| 6. Import-Flow + Companion-Prompt (M07.3+4) | 0/4 | Planned | - |
 | 7. Plan-Editor + Drafts (M2 + M07.5) | 0/TBD | Not started | - |
 | 8. Saatgut-Inventar (M3) | 0/TBD | Not started | - |
 | 9. Pflanz-/Aussaatkalender (M4) | 0/TBD | Not started | - |
-| **— v1.1 Post-MVP —** | | | |
+| **--- v1.1 Post-MVP ---** | | | |
 | 10. Vereinsregeln-Aktivierung | 0/TBD | Not started | - |
 
 ---
-*Last updated: 2026-05-08 — M07 Pivot (Manual Planning + Claude.ai Bridge)*
+*Last updated: 2026-05-09 — Phase 6 planned (4 plans, 4 waves)*
