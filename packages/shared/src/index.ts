@@ -1,7 +1,6 @@
 export * from './types/storage';
 export * from './types/domain';
 export * from './types/database';
-export * from './constants/queues';
 export * from './constants/flags';
 export * from './constants/klimazonen';
 export * from './constants/archetypes';
