@@ -20,6 +20,17 @@ export type {
   AnyRow,
   OutboxEntry,
   SyncStateEntry,
+  // Phase 6: Import types
+  ImportRow,
+  ImportItemRow,
+  BedDraftRow,
+  PlantDraftRow,
+  ObservationDraftRow,
+  ImportPayload,
+  ImportPayloadBed,
+  ImportPayloadPlant,
+  ImportPayloadObservation,
+  ImportPayloadComplianceFlag,
 } from './types/entities';
 export type { QueryOptions } from './types/storage';
 // i18n JSON wird via Pfad-Import konsumiert: `@spatenstich/shared/i18n/de`
