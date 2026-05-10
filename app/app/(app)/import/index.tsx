@@ -93,7 +93,6 @@ export default function ImportEntryScreen(): React.JSX.Element {
           numberOfLines={8}
           placeholder={t('import.pasteHint')}
           placeholderTextColor="#A8A29E"
-          onBlur={() => { if (pasteValue.trim()) handleValidate(pasteValue); }}
           value={pasteValue}
           onChangeText={(v) => { setPasteValue(v); setErrors(null); }}
           className="font-mono text-xs min-h-[120px] p-3 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100"

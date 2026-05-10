@@ -52,7 +52,7 @@ export class IndexedDbAdapter implements StorageAdapter {
   private dbPromise: Promise<IDBPDatabase>;
 
   constructor(dbName: string) {
-    this.dbPromise = openDB(dbName, 3, {
+    this.dbPromise = openDB(dbName, 4, {
       upgrade(db, oldVersion) {
         // Fallthrough pattern for future versions.
         if (oldVersion < 1) {
@@ -90,6 +90,21 @@ export class IndexedDbAdapter implements StorageAdapter {
           // Phase 4 (Plan 04-01): garden_dimensions + plan_elements Row-Stores
           const v4Entities: EntityName[] = ['garden_dimensions', 'plan_elements'];
           for (const entity of v4Entities) {
+            if (!db.objectStoreNames.contains(entity)) {
+              const store = db.createObjectStore(entity, { keyPath: 'id' });
+              const gidCol = GARDEN_ID_COLUMN[entity];
+              if (gidCol && gidCol !== 'id') {
+                store.createIndex('by_gardenId', 'gardenId', { unique: false });
+              }
+            }
+          }
+        }
+        if (oldVersion < 4) {
+          // Phase 6: import draft stores
+          const v5Entities: EntityName[] = [
+            'imports', 'import_items', 'bed_drafts', 'plant_drafts', 'observation_drafts',
+          ];
+          for (const entity of v5Entities) {
             if (!db.objectStoreNames.contains(entity)) {
               const store = db.createObjectStore(entity, { keyPath: 'id' });
               const gidCol = GARDEN_ID_COLUMN[entity];
@@ -167,6 +182,23 @@ export class IndexedDbAdapter implements StorageAdapter {
     if (missing.length > 0) {
       throw new Error(
         `IndexedDbAdapter: v4 stores missing after upgrade: ${missing.join(', ')}. ` +
+        'Delete dev database and retry.',
+      );
+    }
+  }
+
+  // ---- Migration hook V5 (Phase 6: import draft stores) ----
+  async __createRowTablesV5(): Promise<void> {
+    const db = await this.dbPromise;
+    const v5Entities: EntityName[] = [
+      'imports', 'import_items', 'bed_drafts', 'plant_drafts', 'observation_drafts',
+    ];
+    const missing = v5Entities.filter(
+      (s) => !db.objectStoreNames.contains(s),
+    );
+    if (missing.length > 0) {
+      throw new Error(
+        `IndexedDbAdapter: v5 stores missing after upgrade: ${missing.join(', ')}. ` +
         'Delete dev database and retry.',
       );
     }

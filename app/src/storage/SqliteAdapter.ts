@@ -190,6 +190,32 @@ export class SqliteAdapter implements StorageAdapter {
     }
   }
 
+  // ---- Migration hook V5 (Phase 6: import draft tables) ----
+  async __createRowTablesV5(): Promise<void> {
+    const db = await this.dbPromise;
+    const v5Entities: EntityName[] = [
+      'imports', 'import_items', 'bed_drafts', 'plant_drafts', 'observation_drafts',
+    ];
+    for (const entity of v5Entities) {
+      const gidCol = GARDEN_ID_COLUMN[entity];
+      const gidSchema = gidCol ? `${gidCol} TEXT,` : '';
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS ${entity} (
+          id TEXT PRIMARY KEY NOT NULL,
+          data TEXT NOT NULL,
+          ${gidSchema}
+          deleted_at TEXT,
+          updated_at TEXT NOT NULL
+        );
+      `);
+      if (gidCol) {
+        await db.execAsync(
+          `CREATE INDEX IF NOT EXISTS idx_${entity}_${gidCol} ON ${entity}(${gidCol}) WHERE deleted_at IS NULL;`,
+        );
+      }
+    }
+  }
+
   // ---- Row-Level (Phase 3) ----
   async getRow<T extends AnyRow>(
     entity: EntityName,
