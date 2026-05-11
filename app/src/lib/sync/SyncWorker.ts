@@ -15,6 +15,8 @@ import type {
   ProfileRow,
   VereinsregelnRow,
   InviteCodeRow,
+  GardenDimensionsRow,
+  PlanElementRow,
   ImportRow,
   ImportItemRow,
   BedDraftRow,
@@ -28,6 +30,8 @@ import {
   gardenMemberFromDb,
   inviteCodeFromDb,
   vereinsregelnToDbRows,
+  gardenDimensionsToDb,
+  planElementToDb,
   importEntityToDb,
 } from '../mappers/rowMappers';
 
@@ -223,11 +227,13 @@ export class SyncWorker {
 
   private async dispatchPush(entry: OutboxEntry): Promise<void> {
     switch (entry.entity) {
-      case 'gardens':       return this.pushGarden(entry);
-      case 'profiles':      return this.pushProfile(entry);
-      case 'vereinsregeln': return this.pushVereinsregeln(entry);
-      case 'garden_members': return this.pushGardenMember(entry);
-      case 'invite_codes':  return this.pushInviteCode(entry);
+      case 'gardens':           return this.pushGarden(entry);
+      case 'profiles':          return this.pushProfile(entry);
+      case 'vereinsregeln':     return this.pushVereinsregeln(entry);
+      case 'garden_members':    return this.pushGardenMember(entry);
+      case 'invite_codes':      return this.pushInviteCode(entry);
+      case 'garden_dimensions': return this.pushGardenDimensions(entry);
+      case 'plan_elements':     return this.pushPlanElement(entry);
       case 'imports':
       case 'import_items':
       case 'bed_drafts':
@@ -329,6 +335,55 @@ export class SyncWorker {
 
   private async pushInviteCode(_entry: OutboxEntry): Promise<void> {
     throw new Error('invite_codes push not supported — use RPCs');
+  }
+
+  private async pushGardenDimensions(entry: OutboxEntry): Promise<void> {
+    const row = entry.payload as unknown as GardenDimensionsRow;
+    const userId = useAuthStore.getState().userId;
+    if (!userId) throw new Error('no_user');
+    if (entry.operation === 'delete') {
+      const { error } = await this.supabase
+        .from('garden_dimensions')
+        .update({
+          deleted_at: new Date().toISOString(),
+          updated_at: row.updatedAt,
+          updated_by_user_id: userId,
+        } as any)
+        .eq('id', entry.rowId);
+      if (error) throw error;
+      return;
+    }
+    const dbRow = gardenDimensionsToDb(row);
+    // Stamp updated_by_user_id from session (mapper carries the local value, which may be null on first write).
+    (dbRow as Record<string, unknown>).updated_by_user_id = userId;
+    const { error } = await this.supabase
+      .from('garden_dimensions')
+      .upsert(dbRow as any, { onConflict: 'id' });
+    if (error) throw error;
+  }
+
+  private async pushPlanElement(entry: OutboxEntry): Promise<void> {
+    const row = entry.payload as unknown as PlanElementRow;
+    const userId = useAuthStore.getState().userId;
+    if (!userId) throw new Error('no_user');
+    if (entry.operation === 'delete') {
+      const { error } = await this.supabase
+        .from('plan_elements')
+        .update({
+          deleted_at: new Date().toISOString(),
+          updated_at: row.updatedAt,
+          updated_by_user_id: userId,
+        } as any)
+        .eq('id', entry.rowId);
+      if (error) throw error;
+      return;
+    }
+    const dbRow = planElementToDb(row);
+    (dbRow as Record<string, unknown>).updated_by_user_id = userId;
+    const { error } = await this.supabase
+      .from('plan_elements')
+      .upsert(dbRow as any, { onConflict: 'id' });
+    if (error) throw error;
   }
 
   // ── Private: Error Handling ─────────────────────────────────────────────────
