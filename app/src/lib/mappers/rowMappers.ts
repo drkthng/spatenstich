@@ -431,10 +431,16 @@ export function planElementToDb(local: PlanElementRow): Record<string, unknown> 
  * Generic camelCase→snake_case mapper for all Phase 6 import entities.
  * Handles: imports, import_items, bed_drafts, plant_drafts, observation_drafts.
  * Called by SyncWorker.pushImportEntity to convert outbox payload before upsert.
+ *
+ * For `import_items` (write-once per D-19), `updated_at` and `updated_by_user_id`
+ * are stripped before upsert — those columns do not exist on the table
+ * (migration 20260509000016 §2). The `ImportItemRow.updatedAt` alias is required
+ * by the StorageAdapter generic constraint (see STATE.md [Phase 06 P02]); the
+ * mapper boundary is the correct place to filter it out for the push path.
  */
 export function importEntityToDb(
   row: Record<string, unknown>,
-  _entity: string,
+  entity: string,
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {};
 
@@ -468,6 +474,16 @@ export function importEntityToDb(
   for (const [key, value] of Object.entries(row)) {
     const snakeKey = camelToSnakeMap[key] ?? key;
     result[snakeKey] = value;
+  }
+
+  // import_items is write-once (migration 20260509000016 §2 — no updated_at,
+  // no updated_by_user_id, no LWW trigger). Drop these columns at the mapper
+  // boundary so the type's `updatedAt` alias (required by StorageAdapter
+  // generic constraint, see STATE.md [Phase 06 P02]) does not bleed into the
+  // PostgREST upsert.
+  if (entity === 'import_items') {
+    delete result.updated_at;
+    delete result.updated_by_user_id;
   }
 
   return result;
