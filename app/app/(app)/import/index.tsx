@@ -6,7 +6,7 @@
 // Security (T-06-08, T-06-09): JSON.parse + validatePayload before any navigation or state update.
 // Payload passed via importStore (Zustand), NOT navigation params (Pitfall 1 from RESEARCH).
 import * as React from 'react';
-import { View, Text, TextInput, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, ScrollView, ActivityIndicator, Platform } from 'react-native';
 import { useRouter, useLocalSearchParams, Stack } from 'expo-router';
 import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
@@ -32,7 +32,10 @@ export default function ImportEntryScreen(): React.JSX.Element {
     (async () => {
       setLoading(true);
       try {
-        const content = await FileSystem.readAsStringAsync(fileUri);
+        const content =
+          Platform.OS === 'web'
+            ? await (await fetch(fileUri)).text()
+            : await FileSystem.readAsStringAsync(fileUri);
         handleValidate(content);
       } catch {
         setErrors([t('import.errorJsonSyntax')]);
@@ -69,7 +72,11 @@ export default function ImportEntryScreen(): React.JSX.Element {
     if (result.canceled || !result.assets?.length) return;
     setLoading(true);
     try {
-      const content = await FileSystem.readAsStringAsync(result.assets[0].uri);
+      const asset = result.assets[0];
+      const content =
+        Platform.OS === 'web' && asset.file
+          ? await asset.file.text()
+          : await FileSystem.readAsStringAsync(asset.uri);
       handleValidate(content);
     } catch {
       setErrors([t('import.errorJsonSyntax')]);
