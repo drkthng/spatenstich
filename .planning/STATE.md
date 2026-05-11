@@ -4,8 +4,8 @@ milestone: v1.1
 milestone_name: Post-MVP
 status: Phase 6 complete — all 4 plans executed
 stopped_at: Phase 6 execution complete — migration pushed, all code committed
-last_updated: "2026-05-09T11:30:00Z"
-last_activity: 2026-05-09
+last_updated: "2026-05-11T00:00:00Z"
+last_activity: 2026-05-11
 progress:
   total_phases: 10
   completed_phases: 6
@@ -30,7 +30,7 @@ Phase: 6 (Import-Flow + Companion-Prompt) — COMPLETE
 Plan: 4 of 4 (all complete)
 Vorheriger Status: Phase 5 complete — AI-Removal + Import-Schema abgeschlossen
 Plans: 14/18 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~)
-Last activity: 2026-05-09
+Last activity: 2026-05-11 - Completed quick task 260510-r5p: Phase-06 Import-Bug Triple Fix
 
 Progress: [█████░░░░░] 56% (14/18 Plans — Phase 4 plans excluded from count as superseded)
 
@@ -123,6 +123,7 @@ None yet.
 | 260418-q01 | Fix CI: add react-native-web to app deps | 2026-04-18 | 12c988d | [260418-q01-fix-react-native-web-ci](.planning/quick/260418-q01-fix-react-native-web-ci/) |
 | 260421-v43 | Roadmap-Pivot: shared-garden MVP, defer vereinsregeln+photorealism to post-MVP | 2026-04-21 | (pending) | [260421-v43-roadmap-pivot](.planning/quick/260421-v43-roadmap-pivot/) |
 | 260508-m07 | M07 Pivot: Manual Planning + Claude.ai Bridge — roadmap overhaul | 2026-05-08 | (pending) | - |
+| 260510-r5p | Phase-06 Import-Bug Triple Fix: file-picker + sync-cases + import-items updated_at | 2026-05-11 | a3321e1 | [260510-r5p-phase-06-import-bug-triple-fix-file-pick](.planning/quick/260510-r5p-phase-06-import-bug-triple-fix-file-pick/) |
 
 ### Blockers/Concerns
 
