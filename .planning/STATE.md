@@ -112,6 +112,10 @@ Recent decisions affecting current work:
 - [Phase 06 P03]: Import payload passed via Zustand importStore between screens (NOT navigation params — Pitfall 1)
 - [Phase 06 P03]: confidence <0.6 defaults toggle OFF in preview; red+selected shows manual-review warning in ImportEntityCard
 
+### Roadmap Evolution
+
+- Phase 6.5 inserted after Phase 6 (2026-05-12): Draft-Sichtung + Promotion-Flow Draft → `plan_elements` (URGENT). Trigger: Debug-Session `import-uebernehmen-noop` — Phase 6 endete mit Drafts gespeichert, aber kein Pfad zur Anzeige im Plan; Home-Screen zeigt "Noch kein Gartenplan" obwohl Import erfolgreich. Phase 7's `depends_on` sollte überprüft werden (jetzt logisch Phase 6.5 statt Phase 6).
+
 ### Pending Todos
 
 None yet.

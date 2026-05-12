@@ -28,6 +28,7 @@
 - [x] ~~**Phase 4: Garten-Erfassung (M1)**~~ - **SUPERSEDED (Pivot M07 2026-05-08)** — Claude Vision capture flow wurde durch manuellen Plan-Editor + Import-Bridge ersetzt. Code wird in Phase 5 entfernt. (code-complete 2026-05-03, nie human-verified)
 - [x] **Phase 5: AI-Removal + Import-Schema (M07.1 + M07.2)** - Entfernung aller AI-Clients (Claude Vision, Pl@ntNet), Env-Vars, Screens, Tests. JSON-Schema `spatenstich-import.v1` + Referenz-Payloads erstellen. (completed 2026-05-09)
 - [ ] **Phase 6: Import-Flow + Companion-Prompt (M07.3 + M07.4)** - Claude.ai-Projekt-System-Prompt schreiben. `ImportFromClaudeAiScreen` mit Share-Intent + Paste-Fallback + Preview-Screen + Supabase-Draft-Tables.
+- [ ] **Phase 6.5: Draft-Sichtung + Promotion (INSERTED 2026-05-12)** - Sichtungs-Screen für gespeicherte Drafts (Beete/Pflanzen/Beobachtungen) + Promotion-Logik Draft → `plan_elements`. Schließt die Lücke zwischen Phase 6 (Drafts speichern) und Phase 7 (Plan rendern).
 - [ ] **Phase 7: Plan-Editor + Drafts-Integration (M2 + M07.5)** - Interaktiver Canvas, Drag & Drop, Layers, Undo/Redo, 60fps. Import-Drafts als "Recent Imports"-Tray im Editor. Manueller Einstieg bleibt Default.
 - [ ] **Phase 8: Saatgut-Inventar (M3)** - Sorten-DB, manuelle Texteingabe mit Autocomplete, Inventar CRUD, Haltbarkeits-Tracking. Kein KI-Foto-Scan (manuell only).
 - [ ] **Phase 9: Pflanz- & Aussaatkalender (M4)** - 12-month timeline, climate-adjusted dates, placement suggestions, plan integration
@@ -155,6 +156,22 @@ Plans:
 - [ ] 06-04-PLAN.md — DB Push + Human Verify (Wave 4)
 **UI hint**: yes
 
+### Phase 6.5: Draft-Sichtung + Promotion (INSERTED 2026-05-12)
+**Status:** ⚠️ **INSERTED (urgent)** — Roadmap-Lücke entdeckt 2026-05-12 via Debug-Session `import-uebernehmen-noop`. Phase 6 endet mit Drafts in `bed_drafts`/`plant_drafts`/`observation_drafts`, aber kein Pfad zu `plan_elements`. Home-Screen zeigt "Noch kein Gartenplan" obwohl Import erfolgreich war.
+**Goal**: Dirk klickt nach Import auf "Ausgewählte übernehmen" und sieht direkt einen Sichtungs-Screen mit allen Drafts. Pro Eintrag: annehmen → wird zu `plan_element` promoted, verwerfen → Draft gelöscht, editieren → vor Promotion anpassen. Auto-Promote bei `confidence ≥ 0.8` (konfigurierbar). Danach sichtbarer Gartenplan auf Home.
+**Depends on**: Phase 6
+**Requirements**: DRAFT-01, DRAFT-02 (vorgezogen aus Phase 7)
+**Success Criteria** (what must be TRUE):
+  1. Klick auf "Ausgewählte übernehmen" navigiert zu `/(app)/import/review` (Sichtungs-Screen), nicht zu Home
+  2. Sichtungs-Screen listet alle pending Drafts gruppiert: Beete, Pflanzen, Beobachtungen
+  3. Pro Eintrag: "Annehmen"-Button promoted Draft → `plan_elements` mit `provenance.importedFrom = importItemId`; Draft-Status auf `'promoted'` + `promotedAt`
+  4. Pro Eintrag: "Verwerfen"-Button setzt `deletedAt` auf Draft
+  5. Auto-Promote-Toggle: confidence ≥ 0.8 wird automatisch promoted ohne User-Interaktion
+  6. Nach "Fertig" auf Home: Gartenplan zeigt importierte Elemente (kein Empty-State mehr bei `plan_elements.length > 0`)
+  7. i18n-Keys auf Deutsch — `import.review.*`
+**Plans**: TBD (geplant via `/gsd-plan-phase 6.5`)
+**UI hint**: yes
+
 ### Phase 7: Plan-Editor + Drafts-Integration (M2 + M07.5)
 **Goal**: Dirk kann Gartenelemente interaktiv auf einem Canvas platzieren, bewegen, rotieren und löschen — manuell oder aus importierten Drafts. 60fps auf iPhone, Undo/Redo, Auto-Save. Import-Drafts erscheinen als "Letzte Importe"-Tray.
 **Depends on**: Phase 6
@@ -224,6 +241,7 @@ Plans:
 | ~~4. Garten-Erfassung (M1)~~ | 4/4 | **SUPERSEDED** (Pivot M07) | - |
 | 5. AI-Removal + Import-Schema (M07.1+2) | 3/3 | Complete   | 2026-05-09 |
 | 6. Import-Flow + Companion-Prompt (M07.3+4) | 1/4 | In Progress | - |
+| 6.5. Draft-Sichtung + Promotion (INSERTED) | 0/TBD | Not planned | - |
 | 7. Plan-Editor + Drafts (M2 + M07.5) | 0/TBD | Not started | - |
 | 8. Saatgut-Inventar (M3) | 0/TBD | Not started | - |
 | 9. Pflanz-/Aussaatkalender (M4) | 0/TBD | Not started | - |
