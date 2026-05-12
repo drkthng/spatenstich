@@ -1,12 +1,36 @@
 ---
 slug: import-uebernehmen-noop
-status: root_cause_found
+status: resolved
 trigger: "Ausgewählte übernehmen" Button im Import-Screen führt zurück zur Import-Hauptseite (mit "Aus claude.ai importieren"-Button), statt die ausgewählten Items zu übernehmen. Vorausgehender Schritt: "JSON-Datei öffnen" funktioniert, Daten werden korrekt geladen und angezeigt. Erst beim Klick auf "Ausgewählte übernehmen" passiert das Fehlverhalten.
 created: 2026-05-12T11:02:44Z
-updated: 2026-05-12T11:35:00Z
+updated: 2026-05-12T16:31:24Z
+resolved_at: 2026-05-12T16:31:24Z
+resolved_by: Phase 6.5 (Draft-Sichtung + Promotion) — Plans 01–05
 ---
 
 # Debug Session: import-uebernehmen-noop
+
+## Resolution (2026-05-12)
+
+**Status:** RESOLVED via Phase 6.5 (Draft-Sichtung + Promotion).
+
+**Root cause (two-part):**
+1. **Visible half:** `app/app/(app)/import/preview.tsx:62` redirected to `/(app)` (Home empty-state) after successful import. Users saw their drafts vanish into "Noch kein Gartenplan" with no path forward.
+2. **Hidden half:** No promotion mechanic existed from `bed_drafts`/`plant_drafts`/`observation_drafts` to `plan_elements` — even if the user had reached a Sichtungs-Screen, the resulting accepted drafts would never have rendered on Home because Home reads from `plan_elements`, not from `*_drafts`.
+
+**Fix:**
+- Phase 6.5 Plan 01 (Wave-0): test scaffold for the 7 new files (39 todo behaviours).
+- Phase 6.5 Plan 02: Migration `20260512000017_plan_elements_provenance.sql` — adds `imported_from` (uuid FK → `import_items`) + `provenance` (jsonb), drops legacy `ai_result_id`. PlanElementRow type + rowMappers updated.
+- Phase 6.5 Plan 03: `draftPromotionRepo` — `promoteBedDraft` / `promotePlantDraft` / `promoteObservationDraft` / `dismissDraft` with idempotency on `importedFrom`.
+- Phase 6.5 Plan 04: `app/app/(app)/import/review.tsx` Sichtungs-Screen with three sections, action buttons (Annehmen/Editieren/Verwerfen), Auto-Promote-Toggle (≥0.8), `DraftReviewCard`, `DraftEditForm`, 13 i18n keys, 17 component tests.
+- **Phase 6.5 Plan 05 (this resolution):** preview.tsx one-line change `'/(app)' as any` → `'/(app)/import/review' as any` (commit `ad170c9`); Migration 017 pushed to Supabase project `vitrqkzxkiqvadqfzrcx`.
+
+**Verification commits:**
+- `97a6b15` test(06.5-05): add failing preview-navigation test (RED)
+- `ad170c9` feat(06.5-05): wire preview confirm redirect to /(app)/import/review (GREEN)
+- Migration 017 confirmed via `supabase migration list --linked`: `20260512000017 | 20260512000017 | 2026-05-12 00:00:17`
+
+**Remaining verification:** End-to-end browser smoke is deferred to user (auto-mode auto-approved Plan 05 Task 3 checkpoint). See `.planning/phases/06.5-draft-sichtung-promotion/06.5-05-wire-and-push-SUMMARY.md` § "Deferred Manual Verification" for the 10-step click-through.
 
 ## Symptoms
 

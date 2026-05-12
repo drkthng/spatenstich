@@ -28,7 +28,7 @@
 - [x] ~~**Phase 4: Garten-Erfassung (M1)**~~ - **SUPERSEDED (Pivot M07 2026-05-08)** — Claude Vision capture flow wurde durch manuellen Plan-Editor + Import-Bridge ersetzt. Code wird in Phase 5 entfernt. (code-complete 2026-05-03, nie human-verified)
 - [x] **Phase 5: AI-Removal + Import-Schema (M07.1 + M07.2)** - Entfernung aller AI-Clients (Claude Vision, Pl@ntNet), Env-Vars, Screens, Tests. JSON-Schema `spatenstich-import.v1` + Referenz-Payloads erstellen. (completed 2026-05-09)
 - [ ] **Phase 6: Import-Flow + Companion-Prompt (M07.3 + M07.4)** - Claude.ai-Projekt-System-Prompt schreiben. `ImportFromClaudeAiScreen` mit Share-Intent + Paste-Fallback + Preview-Screen + Supabase-Draft-Tables.
-- [ ] **Phase 6.5: Draft-Sichtung + Promotion (INSERTED 2026-05-12)** - Sichtungs-Screen für gespeicherte Drafts (Beete/Pflanzen/Beobachtungen) + Promotion-Logik Draft → `plan_elements`. Schließt die Lücke zwischen Phase 6 (Drafts speichern) und Phase 7 (Plan rendern).
+- [x] **Phase 6.5: Draft-Sichtung + Promotion (INSERTED 2026-05-12)** - Sichtungs-Screen für gespeicherte Drafts (Beete/Pflanzen/Beobachtungen) + Promotion-Logik Draft → `plan_elements`. Schließt die Lücke zwischen Phase 6 (Drafts speichern) und Phase 7 (Plan rendern). (code-complete 2026-05-12, Migration 017 live; manual smoke test deferred to user)
 - [ ] **Phase 7: Plan-Editor + Drafts-Integration (M2 + M07.5)** - Interaktiver Canvas, Drag & Drop, Layers, Undo/Redo, 60fps. Import-Drafts als "Recent Imports"-Tray im Editor. Manueller Einstieg bleibt Default.
 - [ ] **Phase 8: Saatgut-Inventar (M3)** - Sorten-DB, manuelle Texteingabe mit Autocomplete, Inventar CRUD, Haltbarkeits-Tracking. Kein KI-Foto-Scan (manuell only).
 - [ ] **Phase 9: Pflanz- & Aussaatkalender (M4)** - 12-month timeline, climate-adjusted dates, placement suggestions, plan integration
@@ -156,8 +156,8 @@ Plans:
 - [ ] 06-04-PLAN.md — DB Push + Human Verify (Wave 4)
 **UI hint**: yes
 
-### Phase 6.5: Draft-Sichtung + Promotion (INSERTED 2026-05-12)
-**Status:** ⚠️ **INSERTED (urgent)** — Roadmap-Lücke entdeckt 2026-05-12 via Debug-Session `import-uebernehmen-noop`. Phase 6 endet mit Drafts in `bed_drafts`/`plant_drafts`/`observation_drafts`, aber kein Pfad zu `plan_elements`. Home-Screen zeigt "Noch kein Gartenplan" obwohl Import erfolgreich war.
+### Phase 6.5: Draft-Sichtung + Promotion (INSERTED 2026-05-12, COMPLETE 2026-05-12)
+**Status:** ✅ **CODE-COMPLETE 2026-05-12** — Roadmap-Lücke entdeckt 2026-05-12 via Debug-Session `import-uebernehmen-noop`, in einem Tag in 5 Wellen (Test-Scaffold → Schema → Repo → Screen → Wire + Push) durchgezogen. Migration 017 ist live auf Supabase Frankfurt, preview.tsx leitet auf den Sichtungs-Screen, Debug-Session als `resolved` markiert. End-to-End-Browser-Smoke ist als deferred-to-user verification protokolliert (Auto-Mode auto-approved den Checkpoint).
 **Goal**: Dirk klickt nach Import auf "Ausgewählte übernehmen" und sieht direkt einen Sichtungs-Screen mit allen Drafts. Pro Eintrag: annehmen → wird zu `plan_element` promoted, verwerfen → Draft gelöscht, editieren → vor Promotion anpassen. Auto-Promote bei `confidence ≥ 0.8` (konfigurierbar). Danach sichtbarer Gartenplan auf Home.
 **Depends on**: Phase 6
 **Requirements**: DRAFT-01, DRAFT-02 (vorgezogen aus Phase 7)
@@ -174,7 +174,7 @@ Plans:
 - [x] 06.5-02-schema-foundation-PLAN.md — Migration 017 + types + mappers (Wave 1) — completed 2026-05-12
 - [x] 06.5-03-promotion-repo-PLAN.md — draftPromotionRepo + idempotency + layout (Wave 2)
 - [x] 06.5-04-review-screen-PLAN.md — review.tsx + DraftReviewCard + DraftEditForm + i18n (Wave 3) — completed 2026-05-12
-- [ ] 06.5-05-wire-and-push-PLAN.md — preview.tsx redirect + DB push + human-verify (Wave 4)
+- [x] 06.5-05-wire-and-push-PLAN.md — preview.tsx redirect + DB push (Migration 017 live on Supabase) + human-verify (Wave 4) — completed 2026-05-12 (manual smoke test deferred to user)
 **UI hint**: yes
 
 ### Phase 7: Plan-Editor + Drafts-Integration (M2 + M07.5)

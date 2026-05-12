@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
 status: Ready to execute
-stopped_at: Phase 06.5 Plan 04 (review screen) COMPLETE — Plan 05 (wire-and-push) next
-last_updated: "2026-05-12T15:30:00.000Z"
+stopped_at: Phase 06.5 COMPLETE (all 5 plans) — Plan 05 wire-and-push done; Migration 017 live on Supabase. Next: Phase 7 (plan-editor + drafts integration).
+last_updated: "2026-05-12T16:31:24.000Z"
 last_activity: 2026-05-12
 progress:
   total_phases: 11
   completed_phases: 7
   total_plans: 34
-  completed_plans: 33
-  percent: 97
+  completed_plans: 34
+  percent: 100
 ---
 
 # Project State
@@ -26,13 +26,13 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 
 ## Current Position
 
-Phase: 6.5 (Draft-Sichtung + Promotion) — EXECUTING
-Plan: 4 of 5 (review screen) COMPLETE — next: Plan 05 (wire-and-push)
-Vorheriger Status: Phase 06.5 Plan 03 complete — promotion repo
-Plans: 17/18 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 4/5)
+Phase: 6.5 (Draft-Sichtung + Promotion) — COMPLETE
+Plan: 5 of 5 (wire-and-push) COMPLETE — Migration 017 live on Supabase, preview redirect wired, all 5 plans done
+Vorheriger Status: Phase 06.5 Plan 04 complete — review screen
+Plans: 18/18 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 5/5)
 Last activity: 2026-05-12
 
-Progress: [█████████░] 94% (17/18 Plans — Phase 4 plans excluded as superseded; Phase 06.5 5 plans added)
+Progress: [██████████] 100% (18/18 Plans — Phase 4 plans excluded as superseded; Phase 06.5 5/5 complete)
 
 ## Performance Metrics
 
@@ -76,6 +76,7 @@ Progress: [█████████░] 94% (17/18 Plans — Phase 4 plans ex
 | Phase 06.5 P02 | 10 | 2 tasks | 6 files |
 | Phase 06.5 P03 | 6 | 2 tasks | 4 files |
 | Phase 06.5 P04 | 14 | 2 tasks | 8 files |
+| Phase 06.5 P05 | 66 | 3 tasks (1 wire + 1 push + 1 manual-deferred) | 3 files |
 
 ## Accumulated Context
 
@@ -127,6 +128,11 @@ Recent decisions affecting current work:
 - [Phase 06.5]: [Phase 06.5 P04] Sichtungs-Screen at /(app)/import/review composes 3 sections + Auto-Promote toggle (threshold 0.8 pinned in reviewSettingsStore). Edit flow simplified to edit-then-promote (no separate persist-draft step per RESEARCH §Open Question 1).
 - [Phase 06.5]: [Phase 06.5 P04] InlineBanner usage replaced with View+Text inside review.tsx (Deviation Rule 3) because lucide-react-native is ESM and the components jest project does not transform it. Same testIDs preserved (promoting-banner, promote-error-banner). Logged for future jest-config infrastructure plan.
 - [Phase 06.5]: [Phase 06.5 P04] Plant promotion tolerates null parent: handleAcceptPlant resolves parent bed via elements.find(e => e.importedFrom === draft.bedDraftId && e.deletedAt === null), passing null when not found — prevents Auto-Promote ordering bugs.
+- [Phase 06.5]: [Phase 06.5 P05] preview.tsx confirm now redirects to /(app)/import/review (one-line change at line 62) — closes visible half of import-uebernehmen-noop bug. TDD RED (`97a6b15`) before GREEN (`ad170c9`) preserved as separate commits even for one-liner.
+- [Phase 06.5]: [Phase 06.5 P05] Migration 017 pushed to live Supabase (project ref vitrqkzxkiqvadqfzrcx, Frankfurt) via non-interactive `supabase db push --linked --yes` — DO-block notice `migration_017 ok` fired; `migration list --linked` confirms 20260512000017 in both Local and Remote columns. plan_elements now has imported_from + provenance; ai_result_id dropped.
+- [Phase 06.5]: [Phase 06.5 P05] Auto-mode autonomous DB-push gate established: (1) `migration list --linked` exit 0 + full local/remote diff, (2) `db push --dry-run --yes` exit 0, THEN (3) real push with `--yes`. Otherwise checkpoint:human-action. Both pre-flight gates passed in this plan; push completed without escalation.
+- [Phase 06.5]: [Phase 06.5 P05] lucide-react-native global jest mock added in `components/__tests__/setup.ts` (Rule 3 blocking fix) — unblocks every future component test that transitively imports lucide via InlineBanner. Preferable to per-test mocks; resolves the Plan 04 deferred infrastructure item.
+- [Phase 06.5]: [Phase 06.5 P05] Debug session `import-uebernehmen-noop` marked RESOLVED in `.planning/debug/import-uebernehmen-noop.md` with full resolution trail across Phase 6.5 Plans 01–05.
 
 ### Roadmap Evolution
 
@@ -158,6 +164,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-12T15:30:00.000Z
-Stopped at: Phase 06.5 Plan 04 (review screen) COMPLETE — Plan 05 (wire-and-push) next
+Last session: 2026-05-12T16:31:24.000Z
+Stopped at: Phase 06.5 COMPLETE (all 5 plans, Migration 017 live on Supabase). Remaining manual smoke test (Plan 05 Task 3) auto-approved per auto-mode policy and listed as deferred-to-user verification in 06.5-05-wire-and-push-SUMMARY.md. Next: Phase 7 (plan-editor + drafts integration).
 Resume file: None
