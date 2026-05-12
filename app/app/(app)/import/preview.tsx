@@ -59,7 +59,7 @@ export default function ImportPreviewScreen(): React.JSX.Element {
     try {
       await saveImport(mode, activeGardenId, payload, selected);
       resetImport();
-      router.replace('/(app)' as any);
+      router.replace('/(app)/import/review' as any);
     } catch {
       setSaveError(t('import.saveError'));
     } finally {
