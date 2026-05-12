@@ -42,6 +42,13 @@ export default function SettingsScreen(): React.JSX.Element | null {
   const [migrating, setMigrating] = React.useState(false);
   const [migError, setMigError] = React.useState<string | null>(null);
 
+  // Local mode — inline login form
+  const [showLogin, setShowLogin] = React.useState(false);
+  const [loginEmail, setLoginEmail] = React.useState('');
+  const [loginPassword, setLoginPassword] = React.useState('');
+  const [loggingIn, setLoggingIn] = React.useState(false);
+  const [loginError, setLoginError] = React.useState<string | null>(null);
+
   React.useEffect(() => {
     if (mode !== 'account') return;
     let cancelled = false;
@@ -68,6 +75,26 @@ export default function SettingsScreen(): React.JSX.Element | null {
       setShowConfirmLogout(false);
     }
   }, [signOut, router]);
+
+  const handleLogin = React.useCallback(async () => {
+    setLoginError(null);
+    setLoggingIn(true);
+    try {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: loginEmail.trim(),
+        password: loginPassword,
+      });
+      if (signInError || !data.session) {
+        setLoginError(t('auth.login.error_generic'));
+        return;
+      }
+      useAuthStore.getState().setAccountMode(data.session.user.id);
+    } catch {
+      setLoginError(t('auth.login.error_generic'));
+    } finally {
+      setLoggingIn(false);
+    }
+  }, [loginEmail, loginPassword]);
 
   const handleMigrate = React.useCallback(async () => {
     setMigError(null);
@@ -132,6 +159,16 @@ export default function SettingsScreen(): React.JSX.Element | null {
         >
           <Text className="text-stone-700 dark:text-stone-200 font-semibold">
             {t('garden.settings_link')}
+          </Text>
+        </Button>
+
+        <Button
+          variant="ghost"
+          onPress={() => router.push('/(app)/join-garden' as any)}
+          testID="settings-join-garden-link"
+        >
+          <Text className="text-stone-700 dark:text-stone-200 font-semibold">
+            Garten beitreten
           </Text>
         </Button>
 
@@ -268,6 +305,86 @@ export default function SettingsScreen(): React.JSX.Element | null {
           {migrating ? t('common.loading') : t('settings.migration.cta')}
         </Text>
       </Button>
+
+      <View className="mt-6 pt-6 border-t border-stone-200 dark:border-stone-700 gap-2">
+        <Text className="text-sm text-stone-600 dark:text-stone-300">
+          {t('settings.login_existing_desc')}
+        </Text>
+        {!showLogin ? (
+          <Button
+            variant="outline"
+            onPress={() => setShowLogin(true)}
+            testID="settings-login-existing"
+          >
+            <Text className="text-stone-700 dark:text-stone-200 font-semibold">
+              {t('settings.login_existing')}
+            </Text>
+          </Button>
+        ) : (
+          <View className="gap-2 p-4 rounded-lg border border-stone-200 dark:border-stone-700">
+            <View className="gap-2">
+              <Label nativeID="login-email-label">E-Mail</Label>
+              <Input
+                value={loginEmail}
+                onChangeText={setLoginEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                textContentType="emailAddress"
+                testID="settings-login-email"
+                accessibilityLabelledBy="login-email-label"
+              />
+            </View>
+
+            <View className="gap-2">
+              <Label nativeID="login-password-label">Passwort</Label>
+              <Input
+                value={loginPassword}
+                onChangeText={setLoginPassword}
+                secureTextEntry
+                autoCapitalize="none"
+                autoComplete="current-password"
+                textContentType="password"
+                testID="settings-login-password"
+                accessibilityLabelledBy="login-password-label"
+              />
+            </View>
+
+            {loginError ? (
+              <Text
+                accessibilityLiveRegion="polite"
+                className="text-sm text-red-600 dark:text-red-400"
+              >
+                {loginError}
+              </Text>
+            ) : null}
+
+            <View className="flex-row gap-2">
+              <Button
+                onPress={handleLogin}
+                disabled={loggingIn || !loginEmail || !loginPassword}
+                testID="settings-login-submit"
+                className="flex-1"
+              >
+                <Text className="text-white font-semibold">
+                  {loggingIn ? t('common.loading') : t('auth.login.submit')}
+                </Text>
+              </Button>
+              <Button
+                variant="outline"
+                onPress={() => setShowLogin(false)}
+                disabled={loggingIn}
+                testID="settings-login-cancel"
+                className="flex-1"
+              >
+                <Text className="text-stone-900 dark:text-stone-100 font-semibold">
+                  {t('common.cancel')}
+                </Text>
+              </Button>
+            </View>
+          </View>
+        )}
+      </View>
     </ScrollView>
   );
 }

@@ -10,6 +10,8 @@ export interface LocalMigration {
 // access so that the StorageAdapter interface stays clean.
 interface RowTableCreator {
   __createRowTablesV3?: () => Promise<void>;
+  __createRowTablesV4?: () => Promise<void>;
+  __createRowTablesV5?: () => Promise<void>;
 }
 
 // Phase 1: initial bootstrap migration (no local schema needed yet,
@@ -39,6 +41,36 @@ export const MIGRATIONS: LocalMigration[] = [
       } else {
         throw new Error(
           'Migration v3 requires adapter to implement __createRowTablesV3(). ' +
+          'Update SqliteAdapter/IndexedDbAdapter.',
+        );
+      }
+    },
+  },
+  {
+    version: 4,
+    up: async (adapter) => {
+      // Phase 4 (Plan 04-01): garden_dimensions + plan_elements Row-Tables.
+      const creator = adapter as StorageAdapter & RowTableCreator;
+      if (typeof creator.__createRowTablesV4 === 'function') {
+        await creator.__createRowTablesV4();
+      } else {
+        throw new Error(
+          'Migration v4 requires adapter to implement __createRowTablesV4(). ' +
+          'Update SqliteAdapter/IndexedDbAdapter.',
+        );
+      }
+    },
+  },
+  {
+    version: 5,
+    up: async (adapter) => {
+      // Phase 6: import draft Row-Tables (imports, import_items, bed_drafts, plant_drafts, observation_drafts).
+      const creator = adapter as StorageAdapter & RowTableCreator;
+      if (typeof creator.__createRowTablesV5 === 'function') {
+        await creator.__createRowTablesV5();
+      } else {
+        throw new Error(
+          'Migration v5 requires adapter to implement __createRowTablesV5(). ' +
           'Update SqliteAdapter/IndexedDbAdapter.',
         );
       }

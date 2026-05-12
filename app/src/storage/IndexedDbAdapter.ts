@@ -19,7 +19,13 @@ const ROW_ENTITIES: EntityName[] = [
   'profiles',
   'vereinsregeln',
   'invite_codes',
-  'photo_queue',
+  'garden_dimensions',
+  'plan_elements',
+  'imports',
+  'import_items',
+  'bed_drafts',
+  'plant_drafts',
+  'observation_drafts',
 ];
 
 // Which entities have a garden_id field (in camelCase JS objects)?
@@ -30,7 +36,13 @@ const GARDEN_ID_COLUMN: Record<EntityName, string | null> = {
   profiles: null,
   vereinsregeln: 'garden_id',
   invite_codes: 'garden_id',
-  photo_queue: 'garden_id',
+  garden_dimensions: 'garden_id',
+  plan_elements: 'garden_id',
+  imports: 'gardenId',
+  import_items: 'gardenId',
+  bed_drafts: 'gardenId',
+  plant_drafts: 'gardenId',
+  observation_drafts: 'gardenId',
 };
 
 // Monotonic counter for Outbox created_at (prevents FIFO collisions at same ms)
@@ -40,7 +52,7 @@ export class IndexedDbAdapter implements StorageAdapter {
   private dbPromise: Promise<IDBPDatabase>;
 
   constructor(dbName: string) {
-    this.dbPromise = openDB(dbName, 2, {
+    this.dbPromise = openDB(dbName, 4, {
       upgrade(db, oldVersion) {
         // Fallthrough pattern for future versions.
         if (oldVersion < 1) {
@@ -49,14 +61,17 @@ export class IndexedDbAdapter implements StorageAdapter {
           }
         }
         if (oldVersion < 2) {
-          // Row-Stores for all entities
-          for (const entity of ROW_ENTITIES) {
+          // Row-Stores for V3 entities
+          const v3Entities: EntityName[] = [
+            'gardens', 'garden_members', 'profiles', 'vereinsregeln', 'invite_codes',
+          ];
+          for (const entity of v3Entities) {
             if (!db.objectStoreNames.contains(entity)) {
               const store = db.createObjectStore(entity, { keyPath: 'id' });
               const gidCol = GARDEN_ID_COLUMN[entity];
               if (gidCol && gidCol !== 'id') {
                 // IndexedDB indexes use keyPath in camelCase (JS object fields):
-                // garden_members.gardenId, photo_queue.gardenId, etc.
+                // e.g. garden_members.gardenId
                 store.createIndex('by_gardenId', 'gardenId', { unique: false });
               }
             }
@@ -69,6 +84,34 @@ export class IndexedDbAdapter implements StorageAdapter {
           // sync_state keyed by entity
           if (!db.objectStoreNames.contains(STATE_STORE)) {
             db.createObjectStore(STATE_STORE, { keyPath: 'entity' });
+          }
+        }
+        if (oldVersion < 3) {
+          // Phase 4 (Plan 04-01): garden_dimensions + plan_elements Row-Stores
+          const v4Entities: EntityName[] = ['garden_dimensions', 'plan_elements'];
+          for (const entity of v4Entities) {
+            if (!db.objectStoreNames.contains(entity)) {
+              const store = db.createObjectStore(entity, { keyPath: 'id' });
+              const gidCol = GARDEN_ID_COLUMN[entity];
+              if (gidCol && gidCol !== 'id') {
+                store.createIndex('by_gardenId', 'gardenId', { unique: false });
+              }
+            }
+          }
+        }
+        if (oldVersion < 4) {
+          // Phase 6: import draft stores
+          const v5Entities: EntityName[] = [
+            'imports', 'import_items', 'bed_drafts', 'plant_drafts', 'observation_drafts',
+          ];
+          for (const entity of v5Entities) {
+            if (!db.objectStoreNames.contains(entity)) {
+              const store = db.createObjectStore(entity, { keyPath: 'id' });
+              const gidCol = GARDEN_ID_COLUMN[entity];
+              if (gidCol && gidCol !== 'id') {
+                store.createIndex('by_gardenId', 'gardenId', { unique: false });
+              }
+            }
           }
         }
       },
@@ -113,12 +156,49 @@ export class IndexedDbAdapter implements StorageAdapter {
     // The migration runner stores schema_version = 3 in KV afterwards.
     // Here we verify all stores exist (defensive check).
     const db = await this.dbPromise;
-    const missing = [...ROW_ENTITIES, OUTBOX_STORE, STATE_STORE].filter(
+    const v3Entities: EntityName[] = [
+      'gardens', 'garden_members', 'profiles', 'vereinsregeln', 'invite_codes',
+    ];
+    const missing = [...v3Entities, OUTBOX_STORE, STATE_STORE].filter(
       (s) => !db.objectStoreNames.contains(s),
     );
     if (missing.length > 0) {
       throw new Error(
         `IndexedDbAdapter: expected stores missing after upgrade: ${missing.join(', ')}. ` +
+        'Delete dev database and retry.',
+      );
+    }
+  }
+
+  // ---- Migration hook V4 (Phase 4: garden_dimensions + plan_elements) ----
+  async __createRowTablesV4(): Promise<void> {
+    // IndexedDB stores for v4 entities are created in the upgrade() callback
+    // when the DB version is bumped. Here we verify they exist (defensive check).
+    const db = await this.dbPromise;
+    const v4Entities: EntityName[] = ['garden_dimensions', 'plan_elements'];
+    const missing = v4Entities.filter(
+      (s) => !db.objectStoreNames.contains(s),
+    );
+    if (missing.length > 0) {
+      throw new Error(
+        `IndexedDbAdapter: v4 stores missing after upgrade: ${missing.join(', ')}. ` +
+        'Delete dev database and retry.',
+      );
+    }
+  }
+
+  // ---- Migration hook V5 (Phase 6: import draft stores) ----
+  async __createRowTablesV5(): Promise<void> {
+    const db = await this.dbPromise;
+    const v5Entities: EntityName[] = [
+      'imports', 'import_items', 'bed_drafts', 'plant_drafts', 'observation_drafts',
+    ];
+    const missing = v5Entities.filter(
+      (s) => !db.objectStoreNames.contains(s),
+    );
+    if (missing.length > 0) {
+      throw new Error(
+        `IndexedDbAdapter: v5 stores missing after upgrade: ${missing.join(', ')}. ` +
         'Delete dev database and retry.',
       );
     }

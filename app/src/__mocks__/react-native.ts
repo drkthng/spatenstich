@@ -29,6 +29,8 @@ export const Pressable = ({ children, onPress, testID, accessibilityRole, access
   React.createElement('Pressable', { testID, accessibilityRole, accessibilityLabel, onPress, ...props }, children);
 export const ScrollView = ({ children, testID, ...props }: any) =>
   React.createElement('ScrollView', { testID, ...props }, children);
+export const Image = ({ testID, accessibilityLabel, source, ...props }: any) =>
+  React.createElement('Image', { testID, accessibilityLabel, source, ...props });
 export const ActivityIndicator = (props: any) =>
   React.createElement('ActivityIndicator', props);
 export const Switch = ({ testID, value, onValueChange, accessibilityLabel, ...props }: any) =>

@@ -15,7 +15,13 @@ import type {
   ProfileRow,
   VereinsregelnRow,
   InviteCodeRow,
-  PhotoQueueRow,
+  GardenDimensionsRow,
+  PlanElementRow,
+  ImportRow,
+  ImportItemRow,
+  BedDraftRow,
+  PlantDraftRow,
+  ObservationDraftRow,
 } from '@spatenstich/shared';
 import {
   gardenFromDb,
@@ -24,9 +30,12 @@ import {
   gardenMemberFromDb,
   inviteCodeFromDb,
   vereinsregelnToDbRows,
+  gardenDimensionsToDb,
+  planElementToDb,
+  importEntityToDb,
 } from '../mappers/rowMappers';
 
-// Entities, die gepullt werden (photo_queue ist upload-driven, nicht pull-driven)
+// Entities, die gepullt werden
 export const PULL_ENTITIES: EntityName[] = [
   'gardens',
   'garden_members',
@@ -42,13 +51,13 @@ export interface SyncWorkerDeps {
 }
 
 /**
- * SyncWorker: Offline-First Sync-Engine für Phase 3.
+ * SyncWorker: Offline-First Sync-Engine fuer Phase 3.
  *
  * KLASSE (nicht Module-Funktionen), weil:
  *   - pushInFlight-Serialisation braucht Instance-State
  *   - retryOp/discardOp sind instance-scoped und koppeln an Outbox + SyncTriggers
  *   - Constructor-Injection { storage, supabase } erlaubt saubere Jest-Mocks
- *     (insbesondere für reconnect-2user.integration.test.ts in Task 03)
+ *     (insbesondere fuer reconnect-2user.integration.test.ts in Task 03)
  *
  * Singleton-Pattern: getSyncWorker() im App-Code, setSyncWorker() in Tests + _layout.tsx.
  */
@@ -67,8 +76,8 @@ export class SyncWorker {
   // ── Public API ──────────────────────────────────────────────────────────────
 
   /**
-   * Push alle pending Outbox-Einträge sequentiell.
-   * Idempotent bei parallelem Aufruf (zweiter Aufruf ist No-Op wenn erster noch läuft — S-6 Pattern).
+   * Push alle pending Outbox-Eintraege sequentiell.
+   * Idempotent bei parallelem Aufruf (zweiter Aufruf ist No-Op wenn erster noch laeuft — S-6 Pattern).
    */
   async push(): Promise<void> {
     if (this.pushInFlight) return;
@@ -90,7 +99,7 @@ export class SyncWorker {
   }
 
   /**
-   * Delta-Pull für eine einzelne Entity.
+   * Delta-Pull fuer eine einzelne Entity.
    * Nutzt sync_state.lastPullAt als `updated_at > X`-Filter.
    * Aktualisiert sync_state auf server_now() nach Erfolg.
    */
@@ -121,7 +130,7 @@ export class SyncWorker {
   }
 
   /**
-   * Delta-Pull für ALLE PULL_ENTITIES.
+   * Delta-Pull fuer ALLE PULL_ENTITIES.
    * Fehler einzelner Entities stoppen die Iteration NICHT — partial-sync ist erlaubt.
    * Wird von syncAll() + Plan 03-06 Task 05 (worker.pullAll()) genutzt.
    */
@@ -131,7 +140,7 @@ export class SyncWorker {
         await this.pull(entity);
       } catch (e) {
         if (typeof __DEV__ !== 'undefined' && __DEV__) console.warn(`[pullAll] pull ${entity} failed`, e);
-        // Continue mit nächster Entity
+        // Continue mit naechster Entity
       }
     }
   }
@@ -166,8 +175,8 @@ export class SyncWorker {
 
   /**
    * Verwerfen eines Outbox-Eintrags (Plan 03-06 Detail-Screen Verwerfen-Button).
-   * Löscht die Op, triggert pull(entity) für Delta-Korrektur — Server-Stand überschreibt lokalen Wert (D-22).
-   * Idempotent: fehlende IDs führen NICHT zu Exception.
+   * Loescht die Op, triggert pull(entity) fuer Delta-Korrektur — Server-Stand ueberschreibt lokalen Wert (D-22).
+   * Idempotent: fehlende IDs fuehren NICHT zu Exception.
    */
   async discardOp(opId: string): Promise<void> {
     const entries = await this.storage.listOutboxEntries();
@@ -177,7 +186,7 @@ export class SyncWorker {
       try {
         await this.pull(entry.entity);
       } catch {
-        // Pull-Fehler still — nächster Trigger wird versuchen
+        // Pull-Fehler still — naechster Trigger wird versuchen
       }
     }
   }
@@ -218,15 +227,31 @@ export class SyncWorker {
 
   private async dispatchPush(entry: OutboxEntry): Promise<void> {
     switch (entry.entity) {
-      case 'gardens':       return this.pushGarden(entry);
-      case 'profiles':      return this.pushProfile(entry);
-      case 'vereinsregeln': return this.pushVereinsregeln(entry);
-      case 'garden_members': return this.pushGardenMember(entry);
-      case 'invite_codes':  return this.pushInviteCode(entry);
-      case 'photo_queue':   return this.pushPhotoQueue(entry);
+      case 'gardens':           return this.pushGarden(entry);
+      case 'profiles':          return this.pushProfile(entry);
+      case 'vereinsregeln':     return this.pushVereinsregeln(entry);
+      case 'garden_members':    return this.pushGardenMember(entry);
+      case 'invite_codes':      return this.pushInviteCode(entry);
+      case 'garden_dimensions': return this.pushGardenDimensions(entry);
+      case 'plan_elements':     return this.pushPlanElement(entry);
+      case 'imports':
+      case 'import_items':
+      case 'bed_drafts':
+      case 'plant_drafts':
+      case 'observation_drafts':
+        return this.pushImportEntity(entry);
       default:
         throw new Error(`Unknown entity for push: ${(entry as { entity: string }).entity}`);
     }
+  }
+
+  private async pushImportEntity(entry: OutboxEntry): Promise<void> {
+    const row = entry.payload;
+    const snakeRow = importEntityToDb(row, entry.entity);
+    const { error } = await this.supabase
+      .from(entry.entity)
+      .upsert(snakeRow as any, { onConflict: 'id' });
+    if (error) throw error;
   }
 
   private async pushGarden(entry: OutboxEntry): Promise<void> {
@@ -312,26 +337,52 @@ export class SyncWorker {
     throw new Error('invite_codes push not supported — use RPCs');
   }
 
-  private async pushPhotoQueue(entry: OutboxEntry): Promise<void> {
-    const row = entry.payload as unknown as PhotoQueueRow;
+  private async pushGardenDimensions(entry: OutboxEntry): Promise<void> {
+    const row = entry.payload as unknown as GardenDimensionsRow;
     const userId = useAuthStore.getState().userId;
     if (!userId) throw new Error('no_user');
-    const { error } = await this.supabase.from('photo_queue').upsert(
-      {
-        id: row.id,
-        garden_id: row.gardenId,
-        storage_path: row.storagePath,
-        geo_lat: row.geoLat,
-        geo_lng: row.geoLng,
-        upload_status: row.uploadStatus,
-        upload_error: row.uploadError,
-        job_id: row.jobId,
-        updated_at: row.updatedAt,
-        updated_by_user_id: userId,
-        deleted_at: row.deletedAt,
-      } as any,
-      { onConflict: 'id' },
-    );
+    if (entry.operation === 'delete') {
+      const { error } = await this.supabase
+        .from('garden_dimensions')
+        .update({
+          deleted_at: new Date().toISOString(),
+          updated_at: row.updatedAt,
+          updated_by_user_id: userId,
+        } as any)
+        .eq('id', entry.rowId);
+      if (error) throw error;
+      return;
+    }
+    const dbRow = gardenDimensionsToDb(row);
+    // Stamp updated_by_user_id from session (mapper carries the local value, which may be null on first write).
+    (dbRow as Record<string, unknown>).updated_by_user_id = userId;
+    const { error } = await this.supabase
+      .from('garden_dimensions')
+      .upsert(dbRow as any, { onConflict: 'id' });
+    if (error) throw error;
+  }
+
+  private async pushPlanElement(entry: OutboxEntry): Promise<void> {
+    const row = entry.payload as unknown as PlanElementRow;
+    const userId = useAuthStore.getState().userId;
+    if (!userId) throw new Error('no_user');
+    if (entry.operation === 'delete') {
+      const { error } = await this.supabase
+        .from('plan_elements')
+        .update({
+          deleted_at: new Date().toISOString(),
+          updated_at: row.updatedAt,
+          updated_by_user_id: userId,
+        } as any)
+        .eq('id', entry.rowId);
+      if (error) throw error;
+      return;
+    }
+    const dbRow = planElementToDb(row);
+    (dbRow as Record<string, unknown>).updated_by_user_id = userId;
+    const { error } = await this.supabase
+      .from('plan_elements')
+      .upsert(dbRow as any, { onConflict: 'id' });
     if (error) throw error;
   }
 
@@ -408,7 +459,7 @@ export class SyncWorker {
       case 'profiles': {
         let q = this.supabase
           .from('profiles')
-          .select('id, display_name, created_at, updated_at, updated_by_user_id, deleted_at, locale') as any;
+          .select('id, display_name, created_at, updated_at, updated_by_user_id, deleted_at') as any;
         if (lastPullAt) q = q.gt('updated_at', lastPullAt);
         const { data, error } = await q;
         if (error) throw error;
@@ -467,7 +518,7 @@ let _instance: SyncWorker | null = null;
 /**
  * Lazy-initialized Singleton-Accessor.
  * Default-Injection: storage aus '../../storage', supabase aus '../supabase'.
- * Für Tests: setSyncWorker(null) vor Test + setSyncWorker(customWorker) zur Injection.
+ * Fuer Tests: setSyncWorker(null) vor Test + setSyncWorker(customWorker) zur Injection.
  */
 export function getSyncWorker(): SyncWorker {
   if (!_instance) {

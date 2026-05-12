@@ -22,7 +22,8 @@ import type {
   ProfileRow,
   VereinsregelnRow,
   InviteCodeRow,
-  PhotoQueueRow,
+  GardenDimensionsRow,
+  PlanElementRow,
   Garden,
   Klimazone,
   Archetype,
@@ -36,21 +37,6 @@ type DbProfileRow = Database['public']['Tables']['profiles']['Row'];
 type DbVereinsregelnRow = Database['public']['Tables']['vereinsregeln']['Row'];
 type DbInviteCodeRow = Database['public']['Tables']['invite_codes']['Row'];
 
-// photo_queue ist noch nicht in database.ts (wird nach gen:types verfügbar).
-// Interim: loose type für photoQueueFromDb.
-type DbPhotoQueueRowLoose = {
-  id: string;
-  created_at: string;
-  updated_at: string;
-  created_by_user_id: string;
-  deleted_at?: string | null;
-  garden_id: string;
-  geo_lat: number | null;
-  geo_lng: number | null;
-  storage_path?: string | null;
-  last_error?: string | null;
-  uploaded_at?: string | null;
-};
 
 // ── Gardens ────────────────────────────────────────────────────────────────
 
@@ -331,23 +317,219 @@ export function inviteCodeFromDb(row: DbInviteCodeRow): InviteCodeRow {
   };
 }
 
-// ── Photo Queue ────────────────────────────────────────────────────────────
-// photo_queue is not yet in database.ts types (added by Plan 03-01 migration).
-// Uses loose type DbPhotoQueueRowLoose until gen:types is run.
+// ── Garden Dimensions ─────────────────────────────────────────────────────
 
-export function photoQueueFromDb(row: DbPhotoQueueRowLoose): PhotoQueueRow {
+// Loose DB type (garden_dimensions not yet in database.ts generated types)
+type DbGardenDimensionsRowLoose = {
+  id: string;
+  garden_id: string;
+  shape: string;
+  width_m: number;
+  height_m: number;
+  extra_dims: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+  updated_by_user_id?: string | null;
+  deleted_at?: string | null;
+};
+
+/** Supabase→Local: snake_case DB-Row → camelCase lokale Row. */
+export function gardenDimensionsToLocal(db: DbGardenDimensionsRowLoose): GardenDimensionsRow {
   return {
-    id: row.id,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    updatedByUserId: row.created_by_user_id ?? null,
-    deletedAt: row.deleted_at ?? null,
-    gardenId: row.garden_id,
-    storagePath: row.storage_path ?? '',
-    geoLat: row.geo_lat,
-    geoLng: row.geo_lng,
-    uploadStatus: row.uploaded_at != null ? 'uploaded' : 'pending',
-    uploadError: row.last_error ?? null,
-    jobId: null, // jobId assigned via RPC response, not stored in DB photo_queue
+    id: db.id,
+    gardenId: db.garden_id,
+    shape: db.shape as GardenDimensionsRow['shape'],
+    widthM: db.width_m,
+    heightM: db.height_m,
+    extraDims: db.extra_dims,
+    createdAt: db.created_at,
+    updatedAt: db.updated_at,
+    updatedByUserId: db.updated_by_user_id ?? null,
+    deletedAt: db.deleted_at ?? null,
   };
+}
+
+/** Local→DB: camelCase → snake_case for Supabase upsert. */
+export function gardenDimensionsToDb(local: GardenDimensionsRow): Record<string, unknown> {
+  return {
+    id: local.id,
+    garden_id: local.gardenId,
+    shape: local.shape,
+    width_m: local.widthM,
+    height_m: local.heightM,
+    extra_dims: local.extraDims,
+    created_at: local.createdAt,
+    updated_at: local.updatedAt,
+    updated_by_user_id: local.updatedByUserId,
+    deleted_at: local.deletedAt,
+  };
+}
+
+// ── Plan Elements ─────────────────────────────────────────────────────────
+
+// Loose DB type (plan_elements not yet in database.ts generated types)
+type DbPlanElementRowLoose = {
+  id: string;
+  garden_id: string;
+  element_type: string;
+  label: string;
+  x_m: number;
+  y_m: number;
+  width_m: number;
+  height_m: number;
+  confidence: string | null;
+  is_accepted: boolean;
+  created_at: string;
+  updated_at: string;
+  updated_by_user_id?: string | null;
+  deleted_at?: string | null;
+};
+
+/** Supabase→Local: snake_case DB-Row → camelCase lokale Row. */
+export function planElementToLocal(db: DbPlanElementRowLoose): PlanElementRow {
+  return {
+    id: db.id,
+    gardenId: db.garden_id,
+    elementType: db.element_type,
+    label: db.label,
+    xM: db.x_m,
+    yM: db.y_m,
+    widthM: db.width_m,
+    heightM: db.height_m,
+    confidence: db.confidence as PlanElementRow['confidence'],
+    isAccepted: db.is_accepted,
+    createdAt: db.created_at,
+    updatedAt: db.updated_at,
+    updatedByUserId: db.updated_by_user_id ?? null,
+    deletedAt: db.deleted_at ?? null,
+  };
+}
+
+/** Local→DB: camelCase → snake_case for Supabase upsert. */
+export function planElementToDb(local: PlanElementRow): Record<string, unknown> {
+  return {
+    id: local.id,
+    garden_id: local.gardenId,
+    element_type: local.elementType,
+    label: local.label,
+    x_m: local.xM,
+    y_m: local.yM,
+    width_m: local.widthM,
+    height_m: local.heightM,
+    confidence: local.confidence,
+    is_accepted: local.isAccepted,
+    created_at: local.createdAt,
+    updated_at: local.updatedAt,
+    updated_by_user_id: local.updatedByUserId,
+    deleted_at: local.deletedAt,
+  };
+}
+
+// ── Import Entities (Phase 6) ─────────────────────────────────────────────
+
+/**
+ * Generic camelCase→snake_case mapper for all Phase 6 import entities.
+ * Handles: imports, import_items, bed_drafts, plant_drafts, observation_drafts.
+ * Called by SyncWorker.pushImportEntity to convert outbox payload before upsert.
+ *
+ * For `import_items` (write-once per D-19), `updated_at` and `updated_by_user_id`
+ * are stripped before upsert — those columns do not exist on the table
+ * (migration 20260509000016 §2). The `ImportItemRow.updatedAt` alias is required
+ * by the StorageAdapter generic constraint (see STATE.md [Phase 06 P02]); the
+ * mapper boundary is the correct place to filter it out for the push path.
+ */
+export function importEntityToDb(
+  row: Record<string, unknown>,
+  entity: string,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  const camelToSnakeMap: Record<string, string> = {
+    gardenId: 'garden_id',
+    importId: 'import_id',
+    importItemId: 'import_item_id',
+    bedDraftId: 'bed_draft_id',
+    itemType: 'item_type',
+    localId: 'local_id',
+    importedAt: 'imported_at',
+    chatReference: 'chat_reference',
+    payloadSchemaVersion: 'payload_schema_version',
+    sunExposure: 'sun_exposure',
+    soilNotes: 'soil_notes',
+    scientificName: 'scientific_name',
+    commonNameDe: 'common_name_de',
+    stageEstimate: 'stage_estimate',
+    healthNotes: 'health_notes',
+    bedRefLocalId: 'bed_ref_local_id',
+    suggestedActions: 'suggested_actions',
+    lengthCm: 'length_cm',
+    widthCm: 'width_cm',
+    promotedAt: 'promoted_at',
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    updatedByUserId: 'updated_by_user_id',
+    deletedAt: 'deleted_at',
+  };
+
+  for (const [key, value] of Object.entries(row)) {
+    const snakeKey = camelToSnakeMap[key] ?? key;
+    result[snakeKey] = value;
+  }
+
+  // import_items is write-once (migration 20260509000016 §2 — no updated_at,
+  // no updated_by_user_id, no LWW trigger). Drop these columns at the mapper
+  // boundary so the type's `updatedAt` alias (required by StorageAdapter
+  // generic constraint, see STATE.md [Phase 06 P02]) does not bleed into the
+  // PostgREST upsert.
+  if (entity === 'import_items') {
+    delete result.updated_at;
+    delete result.updated_by_user_id;
+  }
+
+  return result;
+}
+
+/**
+ * Generic snake_case→camelCase mapper for import entities (reverse of importEntityToDb).
+ * Used for future pull-sync if needed.
+ */
+export function importEntityFromDb(
+  row: Record<string, unknown>,
+  _entity: string,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  const snakeToCamelMap: Record<string, string> = {
+    garden_id: 'gardenId',
+    import_id: 'importId',
+    import_item_id: 'importItemId',
+    bed_draft_id: 'bedDraftId',
+    item_type: 'itemType',
+    local_id: 'localId',
+    imported_at: 'importedAt',
+    chat_reference: 'chatReference',
+    payload_schema_version: 'payloadSchemaVersion',
+    sun_exposure: 'sunExposure',
+    soil_notes: 'soilNotes',
+    scientific_name: 'scientificName',
+    common_name_de: 'commonNameDe',
+    stage_estimate: 'stageEstimate',
+    health_notes: 'healthNotes',
+    bed_ref_local_id: 'bedRefLocalId',
+    suggested_actions: 'suggestedActions',
+    length_cm: 'lengthCm',
+    width_cm: 'widthCm',
+    promoted_at: 'promotedAt',
+    created_at: 'createdAt',
+    updated_at: 'updatedAt',
+    updated_by_user_id: 'updatedByUserId',
+    deleted_at: 'deletedAt',
+  };
+
+  for (const [key, value] of Object.entries(row)) {
+    const camelKey = snakeToCamelMap[key] ?? key;
+    result[camelKey] = value;
+  }
+
+  return result;
 }

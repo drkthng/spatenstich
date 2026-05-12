@@ -30,6 +30,16 @@ const config: ExpoConfig = {
         url: 'https://sentry.io/',
       },
     ],
+    [
+      'expo-share-intent',
+      {
+        iosActivationRules: {
+          NSExtensionActivationSupportsFileWithMaxCount: 1,
+        },
+        iosShareExtensionName: 'SpatenstichShareExtension',
+        androidIntentFilters: ['application/json'],
+      },
+    ],
   ],
   experiments: { typedRoutes: true },
   extra: {

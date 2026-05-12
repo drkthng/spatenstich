@@ -1,30 +1,135 @@
-// Garten-Plan-Placeholder — empty state for users without a plan (Phase 4 will render real plan).
-// Pattern: 02-UI-SPEC.md §"Empty state".
+// Home Screen — zeigt Gartenplan wenn Elemente vorhanden, sonst Placeholder.
+// Phase 5 Plan 05-02: Capture-Buttons entfernt (M07 Pivot — kein In-App AI).
+// Phase 6 Plan 06-03: "Aus Claude.ai importieren" Button in Empty State + Plan View.
 import * as React from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import de from '@spatenstich/shared/i18n/de';
+import type { GardenDimensionsRow, PlanElementRow } from '@spatenstich/shared';
+import { useAuthStore } from '@/src/stores/authStore';
+import { supabase } from '@/src/lib/supabase';
+import { loadAcceptedElements, loadDimensions } from '@/src/lib/gardenPlanRepo';
+import { GardenPlanView } from '@/src/components/GardenPlanView';
+import { Button } from '@/src/components/ui/button';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
 
-export default function GartenPlanScreen(): React.JSX.Element {
+export default function HomeScreen(): React.JSX.Element {
+  const mode = useAuthStore((s) => s.mode);
+  const activeGardenId = useAuthStore((s) => s.activeGardenId);
   const router = useRouter();
+
+  const [userEmail, setUserEmail] = React.useState<string | null>(null);
+  const [elements, setElements] = React.useState<PlanElementRow[]>([]);
+  const [dimensions, setDimensions] = React.useState<GardenDimensionsRow | null>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    if (mode !== 'account') return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!cancelled) setUserEmail(data.session?.user?.email ?? null);
+    })();
+    return () => { cancelled = true; };
+  }, [mode]);
+
+  React.useEffect(() => {
+    if (!activeGardenId) {
+      setLoading(false);
+      return;
+    }
+    (async () => {
+      try {
+        const [dims, elems] = await Promise.all([
+          loadDimensions(activeGardenId),
+          loadAcceptedElements(activeGardenId),
+        ]);
+        setDimensions(dims);
+        setElements(elems);
+      } catch (err) {
+        console.error('home: load plan failed', err);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [activeGardenId]);
+
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#F9F7F4] dark:bg-[#1C1917]">
+        <Text className="text-stone-500">...</Text>
+      </View>
+    );
+  }
+
+  const statusLabel = mode === 'account'
+    ? (userEmail ?? 'Eingeloggt')
+    : mode === 'local'
+      ? 'Lokaler Modus'
+      : null;
+
+  // Has plan: show inline plan view
+  if (elements.length > 0 && dimensions) {
+    return (
+      <View className="flex-1 bg-[#F9F7F4] dark:bg-[#1C1917]">
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ padding: 16, alignItems: 'center' }}
+        >
+          {statusLabel ? (
+            <View className="self-end mb-2">
+              <Text className="text-xs text-stone-400" testID="home-auth-status">{statusLabel}</Text>
+            </View>
+          ) : null}
+          <GardenPlanView
+            dimensions={dimensions}
+            elements={elements}
+            showGrid={true}
+            testID="home-garden-plan"
+          />
+          <Button
+            variant="outline"
+            onPress={() => router.push('/(app)/import' as any)}
+            className="mt-4 w-full"
+            testID="home-import-button-plan"
+          >
+            <Text className="font-semibold text-stone-700 dark:text-stone-200">
+              {t('import.home.importButton')}
+            </Text>
+          </Button>
+        </ScrollView>
+      </View>
+    );
+  }
+
+  // Empty state: no plan yet
   return (
-    <View className="flex-1 items-center justify-center bg-stone-50 dark:bg-stone-900 p-6">
-      <Text className="text-xl font-semibold text-stone-800 dark:text-stone-100 text-center">
-        {t('app.index.placeholder')}
-      </Text>
-      <Text className="text-sm text-stone-500 mt-2 text-center max-w-md">
-        {t('app.index.placeholder_sub')}
-      </Text>
-      <Pressable
-        onPress={() => router.push('/(app)/profile')}
-        className="mt-6 bg-[#4A7C59] dark:bg-[#6BAA7E] rounded-lg px-6 py-3 min-h-[44px] items-center justify-center active:opacity-80"
-        accessibilityRole="button"
-      >
-        <Text className="text-white font-semibold">Zum Profil</Text>
-      </Pressable>
+    <View className="flex-1 items-center justify-center bg-[#F9F7F4] dark:bg-[#1C1917] px-6">
+      {statusLabel ? (
+        <View className="absolute top-4 right-4">
+          <Text className="text-xs text-stone-400" testID="home-auth-status">{statusLabel}</Text>
+        </View>
+      ) : null}
+      <View className="flex-1 items-center justify-center p-6">
+        <Text className="text-lg font-semibold text-stone-700 dark:text-stone-200 mb-2">
+          {t('import.home.emptyHeading')}
+        </Text>
+        <Text className="text-sm text-stone-500 dark:text-stone-400 text-center mb-2">
+          {t('import.home.emptyBody')}
+        </Text>
+        <Button
+          variant="default"
+          onPress={() => router.push('/(app)/import' as any)}
+          className="mt-4 w-full"
+          testID="home-import-button-empty"
+        >
+          <Text className="text-white font-semibold">
+            {t('import.home.importButton')}
+          </Text>
+        </Button>
+      </View>
     </View>
   );
 }

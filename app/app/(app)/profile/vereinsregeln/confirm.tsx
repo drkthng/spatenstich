@@ -2,6 +2,9 @@
 // D-08 ordering: BKleingG group FIRST (sticky/non-removable), user rules below.
 // Scroll gate: Save button is DISABLED until the user has scrolled past the
 // BKleingG section (measured via onLayout on the last BKleingG row).
+//
+// Bug-fix 2026-04-30: Bridge saved rules into profileStore so profile overview
+// reflects persisted state. Surface save errors via inline banner.
 import * as React from 'react';
 import {
   View,
@@ -18,6 +21,7 @@ import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { useAuthStore } from '@/src/stores/authStore';
 import { useVereinsregelnStore } from '@/src/stores/vereinsregelnStore';
+import { useProfileStore } from '@/src/stores/profileStore';
 import { useVereinsregeln } from '@/src/hooks/useVereinsregeln';
 import {
   saveVereinsregeln,
@@ -47,6 +51,7 @@ export default function VereinsregelnConfirmScreen(): React.JSX.Element {
   const [bkleingGBottomY, setBkleingGBottomY] = React.useState<number>(0);
   const [scrolledPastBKleingG, setScrolledPastBKleingG] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
+  const [saveError, setSaveError] = React.useState<string | null>(null);
 
   // Inline edit state — only one row is editable at a time. `draft` mirrors
   // the rule fields as text so numeric input can be partially typed.
@@ -135,12 +140,20 @@ export default function VereinsregelnConfirmScreen(): React.JSX.Element {
   const handleSave = React.useCallback(async () => {
     if (!mode || !userId) return;
     setSaving(true);
+    setSaveError(null);
     try {
       await saveVereinsregeln(rules, mode, userId);
+      // Bridge to profileStore so profile overview reflects the saved rules.
+      useProfileStore.getState().setVereinsregeln(rules);
       router.back();
-    } catch {
-      // Keep user on screen; UI does not currently show a generic save error
-      // banner. Future enhancement per deferred items.
+    } catch (e) {
+      // Surface save error to the user instead of silently swallowing it.
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg === 'no_active_garden') {
+        setSaveError('Kein aktiver Garten gefunden. Bitte starte die App neu.');
+      } else {
+        setSaveError('Speichern fehlgeschlagen. Bitte versuche es erneut.');
+      }
     } finally {
       setSaving(false);
     }
@@ -272,6 +285,15 @@ export default function VereinsregelnConfirmScreen(): React.JSX.Element {
       </ScrollView>
 
       <View className="p-4 border-t border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900">
+        {saveError ? (
+          <Text
+            accessibilityLiveRegion="polite"
+            className="text-sm text-red-600 dark:text-red-400 mb-2"
+            testID="vereinsregeln-confirm-error"
+          >
+            {saveError}
+          </Text>
+        ) : null}
         <Button
           onPress={handleSave}
           disabled={!scrolledPastBKleingG || saving}

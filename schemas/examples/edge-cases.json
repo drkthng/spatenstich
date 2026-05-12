@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "spatenstich-import.v1",
+  "capture": {
+    "timestamp": "2026-05-09T16:45:00+02:00",
+    "photoRefs": ["foto_unscharfes_beet.jpg"]
+  },
+  "beds": [
+    {
+      "localId": "bed-x",
+      "label": "Unklares Beet (Schatten)",
+      "sunExposure": "shade",
+      "confidence": 0.35
+    }
+  ],
+  "plants": [
+    {
+      "localId": "plant-x1",
+      "bedRef": "bed-x",
+      "commonNameDe": "Vermutlich Petersilie",
+      "confidence": 0.28
+    },
+    {
+      "localId": "plant-x2",
+      "scientificName": "Solanum lycopersicum",
+      "commonNameDe": "Tomate",
+      "stageEstimate": "senescent",
+      "healthNotes": "Braunfäule-Verdacht, Blätter verfärbt",
+      "confidence": 0.55
+    }
+  ],
+  "observations": [
+    {
+      "localId": "obs-x1",
+      "kind": "disease",
+      "summary": "Mögliche Braunfäule an Tomaten im Schattenbeet",
+      "suggestedActions": ["Befallene Blätter entfernen", "Kupferspritzmittel erwägen"]
+    },
+    {
+      "localId": "obs-x2",
+      "kind": "structural",
+      "summary": "Zaunpfosten schief, Sturmschaden"
+    }
+  ],
+  "complianceFlags": [
+    {
+      "regulation": "Leipziger Gartenordnung §4",
+      "status": "warn",
+      "note": "Heckhöhe unklar, möglicherweise über 1.20m"
+    }
+  ],
+  "freeFormNotes": "Fotos bei schlechtem Licht gemacht. Confidence-Werte entsprechend niedrig.\n\n## Offene Fragen\n- Beet im Schatten: was wächst da genau?\n- Zaunreparatur priorisieren?"
+}

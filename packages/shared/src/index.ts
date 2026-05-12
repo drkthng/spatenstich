@@ -1,7 +1,6 @@
 export * from './types/storage';
 export * from './types/domain';
 export * from './types/database';
-export * from './constants/queues';
 export * from './constants/flags';
 export * from './constants/klimazonen';
 export * from './constants/archetypes';
@@ -16,10 +15,22 @@ export type {
   ProfileRow,
   VereinsregelnRow,
   InviteCodeRow,
-  PhotoQueueRow,
+  GardenDimensionsRow,
+  PlanElementRow,
   AnyRow,
   OutboxEntry,
   SyncStateEntry,
+  // Phase 6: Import types
+  ImportRow,
+  ImportItemRow,
+  BedDraftRow,
+  PlantDraftRow,
+  ObservationDraftRow,
+  ImportPayload,
+  ImportPayloadBed,
+  ImportPayloadPlant,
+  ImportPayloadObservation,
+  ImportPayloadComplianceFlag,
 } from './types/entities';
 export type { QueryOptions } from './types/storage';
 // i18n JSON wird via Pfad-Import konsumiert: `@spatenstich/shared/i18n/de`
