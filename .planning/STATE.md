@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
 status: Executing
-stopped_at: Phase 06.5 Plan 01 (wave-0 test scaffold) COMPLETE — Plan 02 next
-last_updated: "2026-05-12T14:32:12Z"
-last_activity: 2026-05-12 -- Phase 06.5 Plan 01 executed (7 test stubs, 39 todos)
+stopped_at: Phase 06.5 Plan 02 (schema foundation) COMPLETE — Plan 03 next
+last_updated: "2026-05-12T14:49:14Z"
+last_activity: 2026-05-12 -- Phase 06.5 Plan 02 executed (migration 017 + PlanElementRow type + mappers + 3 round-trip tests)
 progress:
   total_phases: 11
   completed_phases: 7
   total_plans: 34
-  completed_plans: 30
-  percent: 88
+  completed_plans: 31
+  percent: 91
 ---
 
 # Project State
@@ -27,12 +27,12 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 ## Current Position
 
 Phase: 6.5 (Draft-Sichtung + Promotion) — EXECUTING
-Plan: 1 of 5 (Wave-0 test scaffold) COMPLETE — next: Plan 02 (schema foundation)
-Vorheriger Status: Phase 6 complete — Import-Flow + Companion-Prompt
-Plans: 15/18 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 1/5)
-Last activity: 2026-05-12 -- Phase 06.5 Plan 01 (wave-0 test scaffold) executed: 7 stub files, 39 it.todo shells
+Plan: 2 of 5 (schema foundation) COMPLETE — next: Plan 03 (promotion repo)
+Vorheriger Status: Phase 06.5 Plan 01 complete — Wave-0 test scaffold
+Plans: 16/18 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 2/5)
+Last activity: 2026-05-12 -- Phase 06.5 Plan 02 (schema foundation) executed: migration 017 + PlanElementRow type + mappers + 3 round-trip tests
 
-Progress: [██████░░░░] 60% (15/18 Plans — Phase 4 plans excluded as superseded; Phase 06.5 5 plans added)
+Progress: [████████░░] 89% (16/18 Plans — Phase 4 plans excluded as superseded; Phase 06.5 5 plans added)
 
 ## Performance Metrics
 
@@ -73,6 +73,7 @@ Progress: [██████░░░░] 60% (15/18 Plans — Phase 4 plans ex
 | Phase 06 P03 | 35 | 2 tasks | 9 files |
 | Phase 06 P04 | 5 | 2 tasks | 0 files |
 | Phase 06.5 P01 | 12 | 2 tasks | 7 files |
+| Phase 06.5 P02 | 10 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -114,6 +115,9 @@ Recent decisions affecting current work:
 - [Phase 06 P03]: confidence <0.6 defaults toggle OFF in preview; red+selected shows manual-review warning in ImportEntityCard
 - [Phase 06.5 P01]: Wave-0 test-scaffold strategy — 7 stub files (4 hooks-project + 3 components-project) mit it.todo() shells; keine Imports von Production-Targets; Plans 02-04 müssen 39 named behaviours erfüllen (Crit-1..7 + Pitfall-1..3).
 - [Phase 06.5 P01]: pnpm run-script "--" Forward-Bug für jest CLI Flags — use `pnpm --filter app exec jest --testPathPattern=...` instead of `pnpm --filter app test -- --testPathPattern=...` (pnpm v9 swallows second `--`).
+- [Phase 06.5 P02]: PlanElementRow gains non-optional nullable fields importedFrom + provenance (matches confidence-style). DbPlanElementRowLoose stays optional on DB side for pre-migration-017 row tolerance via ?? null default in mapper.
+- [Phase 06.5 P02]: Migration 017 file committed but NOT pushed — Plan 05 (Wave 4) owns supabase db push. Local schema state still pre-017 until Plan 05 runs.
+- [Phase 06.5 P02]: Pre-existing supabase.ts first-line bug ('Initialising login role...') logged as DEFERRED-1 — blocks `pnpm --filter shared typecheck` but unrelated to Plan 02 scope. App-level typecheck green.
 
 ### Roadmap Evolution
 
@@ -145,6 +149,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-12T14:32:12Z
-Stopped at: Phase 06.5 Plan 01 (wave-0 test scaffold) COMPLETE — Plan 02 (schema foundation) next
+Last session: 2026-05-12T14:49:14Z
+Stopped at: Phase 06.5 Plan 02 (schema foundation) COMPLETE — Plan 03 (promotion repo) next
 Resume file: None
