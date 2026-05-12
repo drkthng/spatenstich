@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
 status: Ready to execute
-stopped_at: Phase 06.5 Plan 03 (promotion repo) COMPLETE — Plan 04 (review screen) next
-last_updated: "2026-05-12T15:07:24.399Z"
+stopped_at: Phase 06.5 Plan 04 (review screen) COMPLETE — Plan 05 (wire-and-push) next
+last_updated: "2026-05-12T15:30:00.000Z"
 last_activity: 2026-05-12
 progress:
   total_phases: 11
   completed_phases: 7
   total_plans: 34
-  completed_plans: 32
-  percent: 94
+  completed_plans: 33
+  percent: 97
 ---
 
 # Project State
@@ -27,12 +27,12 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 ## Current Position
 
 Phase: 6.5 (Draft-Sichtung + Promotion) — EXECUTING
-Plan: 3 of 5 (schema foundation) COMPLETE — next: Plan 03 (promotion repo)
-Vorheriger Status: Phase 06.5 Plan 01 complete — Wave-0 test scaffold
-Plans: 16/18 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 2/5)
+Plan: 4 of 5 (review screen) COMPLETE — next: Plan 05 (wire-and-push)
+Vorheriger Status: Phase 06.5 Plan 03 complete — promotion repo
+Plans: 17/18 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 4/5)
 Last activity: 2026-05-12
 
-Progress: [████████░░] 89% (16/18 Plans — Phase 4 plans excluded as superseded; Phase 06.5 5 plans added)
+Progress: [█████████░] 94% (17/18 Plans — Phase 4 plans excluded as superseded; Phase 06.5 5 plans added)
 
 ## Performance Metrics
 
@@ -75,6 +75,7 @@ Progress: [████████░░] 89% (16/18 Plans — Phase 4 plans ex
 | Phase 06.5 P01 | 12 | 2 tasks | 7 files |
 | Phase 06.5 P02 | 10 | 2 tasks | 6 files |
 | Phase 06.5 P03 | 6 | 2 tasks | 4 files |
+| Phase 06.5 P04 | 14 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -123,6 +124,9 @@ Recent decisions affecting current work:
 - [Phase 06.5]: [Phase 06.5 P03] nextFreeBedSlot exported as pure helper alongside async writers — enables layout tests without mocks, Plan 04 UI placement preview, and future Phase 7 snap-to-grid reuse.
 - [Phase 06.5]: [Phase 06.5 P03] dismissDraft uses a single EntityName-narrowed writeWithOutbox<AnyRow> call with literal entity cast — keeps the generic across three draft tables without per-table duplication.
 - [Phase 06.5]: [Phase 06.5 P03] promoteObservationDraft does NOT write plan_elements (Pitfall-3) — observations are annotations, single observation_drafts status update only. Third parameter _importItemId reserved for future caller-symmetry.
+- [Phase 06.5]: [Phase 06.5 P04] Sichtungs-Screen at /(app)/import/review composes 3 sections + Auto-Promote toggle (threshold 0.8 pinned in reviewSettingsStore). Edit flow simplified to edit-then-promote (no separate persist-draft step per RESEARCH §Open Question 1).
+- [Phase 06.5]: [Phase 06.5 P04] InlineBanner usage replaced with View+Text inside review.tsx (Deviation Rule 3) because lucide-react-native is ESM and the components jest project does not transform it. Same testIDs preserved (promoting-banner, promote-error-banner). Logged for future jest-config infrastructure plan.
+- [Phase 06.5]: [Phase 06.5 P04] Plant promotion tolerates null parent: handleAcceptPlant resolves parent bed via elements.find(e => e.importedFrom === draft.bedDraftId && e.deletedAt === null), passing null when not found — prevents Auto-Promote ordering bugs.
 
 ### Roadmap Evolution
 
@@ -154,6 +158,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-12T15:07:24.382Z
-Stopped at: Phase 06.5 Plan 03 (promotion repo) COMPLETE — Plan 04 (review screen) next
+Last session: 2026-05-12T15:30:00.000Z
+Stopped at: Phase 06.5 Plan 04 (review screen) COMPLETE — Plan 05 (wire-and-push) next
 Resume file: None

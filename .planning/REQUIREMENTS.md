@@ -61,7 +61,7 @@
 
 ### Drafts-Integration (Phase 7 — Pivot M07)
 
-- [ ] **DRAFT-01**: Import-Drafts erscheinen als "Letzte Importe"-Tray im Plan-Editor
+- [x] **DRAFT-01**: Import-Drafts erscheinen als "Letzte Importe"-Tray im Plan-Editor
 - [x] **DRAFT-02**: Bed-Draft auf Canvas ziehen → platziert als echtes Beet-Element mit `importedFrom`-Provenance
 - [ ] **DRAFT-03**: Drafts nicht promoted innerhalb 30 Tagen → "Stale Imports"-Ansicht, nie auto-gelöscht
 
@@ -217,8 +217,8 @@
 | IMPORT-06 | Phase 6 | Complete |
 | IMPORT-07 | Phase 6 | Complete |
 | IMPORT-08 | Phase 6 | Complete |
-| DRAFT-01 | Phase 7 | Pending |
-| DRAFT-02 | Phase 7 | Complete |
+| DRAFT-01 | Phase 6.5 | Complete |
+| DRAFT-02 | Phase 6.5 | Complete |
 | DRAFT-03 | Phase 7 | Pending |
 | EDIT-01 | Phase 7 | Pending |
 | EDIT-02 | Phase 7 | Pending |
