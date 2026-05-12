@@ -205,6 +205,24 @@
     "preview": {
       "title": "Vorschau importieren",
       "source": "Quelle: Claude.ai Projekt"
+    },
+    "review": {
+      "title": "Importierte Drafts sichten",
+      "accept": "Annehmen",
+      "dismiss": "Verwerfen",
+      "edit": "Editieren",
+      "done": "Fertig",
+      "autoPromoteToggle": "Sichere Drafts automatisch annehmen (≥ 80%)",
+      "emptyState": "Keine Drafts zur Sichtung",
+      "promoting": "Wird übernommen …",
+      "promoteError": "Übernahme fehlgeschlagen. Versuche es erneut.",
+      "editForm": {
+        "labelPlaceholder": "Bezeichnung",
+        "lengthPlaceholder": "Länge (cm)",
+        "widthPlaceholder": "Breite (cm)",
+        "save": "Speichern",
+        "cancel": "Abbrechen"
+      }
     }
   },
   "home": {
