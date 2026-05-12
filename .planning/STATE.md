@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: Executing
-stopped_at: Phase 06.5 Plan 02 (schema foundation) COMPLETE — Plan 03 next
-last_updated: "2026-05-12T14:49:14Z"
-last_activity: 2026-05-12 -- Phase 06.5 Plan 02 executed (migration 017 + PlanElementRow type + mappers + 3 round-trip tests)
+status: Ready to execute
+stopped_at: Phase 06.5 Plan 03 (promotion repo) COMPLETE — Plan 04 (review screen) next
+last_updated: "2026-05-12T15:07:24.399Z"
+last_activity: 2026-05-12
 progress:
   total_phases: 11
   completed_phases: 7
   total_plans: 34
-  completed_plans: 31
-  percent: 91
+  completed_plans: 32
+  percent: 94
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 ## Current Position
 
 Phase: 6.5 (Draft-Sichtung + Promotion) — EXECUTING
-Plan: 2 of 5 (schema foundation) COMPLETE — next: Plan 03 (promotion repo)
+Plan: 3 of 5 (schema foundation) COMPLETE — next: Plan 03 (promotion repo)
 Vorheriger Status: Phase 06.5 Plan 01 complete — Wave-0 test scaffold
 Plans: 16/18 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 2/5)
-Last activity: 2026-05-12 -- Phase 06.5 Plan 02 (schema foundation) executed: migration 017 + PlanElementRow type + mappers + 3 round-trip tests
+Last activity: 2026-05-12
 
 Progress: [████████░░] 89% (16/18 Plans — Phase 4 plans excluded as superseded; Phase 06.5 5 plans added)
 
@@ -74,6 +74,7 @@ Progress: [████████░░] 89% (16/18 Plans — Phase 4 plans ex
 | Phase 06 P04 | 5 | 2 tasks | 0 files |
 | Phase 06.5 P01 | 12 | 2 tasks | 7 files |
 | Phase 06.5 P02 | 10 | 2 tasks | 6 files |
+| Phase 06.5 P03 | 6 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -118,6 +119,10 @@ Recent decisions affecting current work:
 - [Phase 06.5 P02]: PlanElementRow gains non-optional nullable fields importedFrom + provenance (matches confidence-style). DbPlanElementRowLoose stays optional on DB side for pre-migration-017 row tolerance via ?? null default in mapper.
 - [Phase 06.5 P02]: Migration 017 file committed but NOT pushed — Plan 05 (Wave 4) owns supabase db push. Local schema state still pre-017 until Plan 05 runs.
 - [Phase 06.5 P02]: Pre-existing supabase.ts first-line bug ('Initialising login role...') logged as DEFERRED-1 — blocks `pnpm --filter shared typecheck` but unrelated to Plan 02 scope. App-level typecheck green.
+- [Phase 06.5]: [Phase 06.5 P03] Detection-first idempotency on promoteBedDraft — caller passes existingElements snapshot; repo checks importedFrom equality on a non-deleted plan_element and returns it without writing. Cheaper than multi-row transactions.
+- [Phase 06.5]: [Phase 06.5 P03] nextFreeBedSlot exported as pure helper alongside async writers — enables layout tests without mocks, Plan 04 UI placement preview, and future Phase 7 snap-to-grid reuse.
+- [Phase 06.5]: [Phase 06.5 P03] dismissDraft uses a single EntityName-narrowed writeWithOutbox<AnyRow> call with literal entity cast — keeps the generic across three draft tables without per-table duplication.
+- [Phase 06.5]: [Phase 06.5 P03] promoteObservationDraft does NOT write plan_elements (Pitfall-3) — observations are annotations, single observation_drafts status update only. Third parameter _importItemId reserved for future caller-symmetry.
 
 ### Roadmap Evolution
 
@@ -149,6 +154,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-12T14:49:14Z
-Stopped at: Phase 06.5 Plan 02 (schema foundation) COMPLETE — Plan 03 (promotion repo) next
+Last session: 2026-05-12T15:07:24.382Z
+Stopped at: Phase 06.5 Plan 03 (promotion repo) COMPLETE — Plan 04 (review screen) next
 Resume file: None
