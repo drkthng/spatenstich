@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: Ready to execute
-stopped_at: Phase 6 complete — all 4 plans executed, migration pushed to Supabase
-last_updated: "2026-05-12T14:11:52.459Z"
-last_activity: 2026-05-12 -- Phase 06.5 planning complete
+status: Executing
+stopped_at: Phase 06.5 Plan 01 (wave-0 test scaffold) COMPLETE — Plan 02 next
+last_updated: "2026-05-12T14:32:12Z"
+last_activity: 2026-05-12 -- Phase 06.5 Plan 01 executed (7 test stubs, 39 todos)
 progress:
   total_phases: 11
   completed_phases: 7
   total_plans: 34
-  completed_plans: 29
-  percent: 85
+  completed_plans: 30
+  percent: 88
 ---
 
 # Project State
@@ -22,17 +22,17 @@ See: .planning/PROJECT.md (updated 2026-05-08)
 See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 
 **Core value:** Manueller Plan-Editor + strukturierter Import aus Claude.ai (zero In-App AI seit Pivot M07 2026-05-08)
-**Current focus:** Phase 6 — Import-Flow + Companion-Prompt
+**Current focus:** Phase 6.5 — Draft-Sichtung + Promotion (Wave 0 complete)
 
 ## Current Position
 
-Phase: 6 (Import-Flow + Companion-Prompt) — COMPLETE
-Plan: 4 of 4 (all complete)
-Vorheriger Status: Phase 5 complete — AI-Removal + Import-Schema abgeschlossen
-Plans: 14/18 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~)
-Last activity: 2026-05-12 -- Phase 06.5 planning complete
+Phase: 6.5 (Draft-Sichtung + Promotion) — EXECUTING
+Plan: 1 of 5 (Wave-0 test scaffold) COMPLETE — next: Plan 02 (schema foundation)
+Vorheriger Status: Phase 6 complete — Import-Flow + Companion-Prompt
+Plans: 15/18 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 1/5)
+Last activity: 2026-05-12 -- Phase 06.5 Plan 01 (wave-0 test scaffold) executed: 7 stub files, 39 it.todo shells
 
-Progress: [█████░░░░░] 56% (14/18 Plans — Phase 4 plans excluded from count as superseded)
+Progress: [██████░░░░] 60% (15/18 Plans — Phase 4 plans excluded as superseded; Phase 06.5 5 plans added)
 
 ## Performance Metrics
 
@@ -72,6 +72,7 @@ Progress: [█████░░░░░] 56% (14/18 Plans — Phase 4 plans ex
 | Phase 06 P02 | 45 | 2 tasks | 11 files |
 | Phase 06 P03 | 35 | 2 tasks | 9 files |
 | Phase 06 P04 | 5 | 2 tasks | 0 files |
+| Phase 06.5 P01 | 12 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -111,6 +112,8 @@ Recent decisions affecting current work:
 - [Phase 06 P03]: ShareIntentProvider wraps AppLayout; resetShareIntent() immediately after push prevents re-navigation loop
 - [Phase 06 P03]: Import payload passed via Zustand importStore between screens (NOT navigation params — Pitfall 1)
 - [Phase 06 P03]: confidence <0.6 defaults toggle OFF in preview; red+selected shows manual-review warning in ImportEntityCard
+- [Phase 06.5 P01]: Wave-0 test-scaffold strategy — 7 stub files (4 hooks-project + 3 components-project) mit it.todo() shells; keine Imports von Production-Targets; Plans 02-04 müssen 39 named behaviours erfüllen (Crit-1..7 + Pitfall-1..3).
+- [Phase 06.5 P01]: pnpm run-script "--" Forward-Bug für jest CLI Flags — use `pnpm --filter app exec jest --testPathPattern=...` instead of `pnpm --filter app test -- --testPathPattern=...` (pnpm v9 swallows second `--`).
 
 ### Roadmap Evolution
 
@@ -142,6 +145,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-09T11:30:00Z
-Stopped at: Phase 6 complete — all 4 plans executed, migration pushed to Supabase
+Last session: 2026-05-12T14:32:12Z
+Stopped at: Phase 06.5 Plan 01 (wave-0 test scaffold) COMPLETE — Plan 02 (schema foundation) next
 Resume file: None

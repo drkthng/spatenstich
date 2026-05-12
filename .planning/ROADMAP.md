@@ -169,7 +169,12 @@ Plans:
   5. Auto-Promote-Toggle: confidence ≥ 0.8 wird automatisch promoted ohne User-Interaktion
   6. Nach "Fertig" auf Home: Gartenplan zeigt importierte Elemente (kein Empty-State mehr bei `plan_elements.length > 0`)
   7. i18n-Keys auf Deutsch — `import.review.*`
-**Plans**: TBD (geplant via `/gsd-plan-phase 6.5`)
+**Plans** (5 plans planned 2026-05-12):
+- [x] 06.5-01-wave0-test-scaffold-PLAN.md — Wave-0 test stubs (7 files, 39 todos) — completed 2026-05-12
+- [ ] 06.5-02-schema-foundation-PLAN.md — Migration 017 + types + mappers (Wave 1)
+- [ ] 06.5-03-promotion-repo-PLAN.md — draftPromotionRepo + idempotency + layout (Wave 2)
+- [ ] 06.5-04-review-screen-PLAN.md — review.tsx + DraftReviewCard + DraftEditForm + i18n (Wave 3)
+- [ ] 06.5-05-wire-and-push-PLAN.md — preview.tsx redirect + DB push + human-verify (Wave 4)
 **UI hint**: yes
 
 ### Phase 7: Plan-Editor + Drafts-Integration (M2 + M07.5)
