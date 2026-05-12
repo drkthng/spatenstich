@@ -7,6 +7,7 @@ import type {
   GardenRow,
   VereinsregelnRow,
   ProfileRow,
+  PlanElementRow,
 } from '@spatenstich/shared';
 import type { VereinsRegel } from '@spatenstich/shared';
 
@@ -19,6 +20,8 @@ import {
   localToVereinsregeln,
   profileToLocalRow,
   normalizeDisplayName,
+  planElementToDb,
+  planElementToLocal,
 } from '../mappers/rowMappers';
 import {
   OutboxEnqueueError,
@@ -236,5 +239,91 @@ describe('Error classes', () => {
   it('TargetNotMemberError has correct code', () => {
     const err = new TargetNotMemberError();
     expect(err.code).toBe('TARGET_NOT_MEMBER');
+  });
+});
+
+// ── Test 8: planElement mappers — Phase 6.5 provenance ────────────────────
+describe('planElement mappers — Phase 6.5 provenance', () => {
+  it('planElementToDb emits imported_from and provenance', () => {
+    const local: PlanElementRow = {
+      id: 'el-1',
+      gardenId: 'g-1',
+      elementType: 'Beet',
+      label: 'Hochbeet 1',
+      xM: 1,
+      yM: 1,
+      widthM: 2,
+      heightM: 1,
+      confidence: 'high',
+      isAccepted: true,
+      createdAt: '2026-05-12T10:00:00.000Z',
+      updatedAt: '2026-05-12T10:00:00.000Z',
+      updatedByUserId: 'user-1',
+      deletedAt: null,
+      importedFrom: 'item-uuid-1',
+      provenance: { source: 'claude-ai-project', sunExposure: 'sun' },
+    };
+    const db = planElementToDb(local);
+    expect(db['imported_from']).toBe('item-uuid-1');
+    expect(db['provenance']).toEqual({ source: 'claude-ai-project', sunExposure: 'sun' });
+  });
+
+  it('planElementToLocal reads imported_from + provenance and defaults to null when missing', () => {
+    const dbWith = {
+      id: 'el-1',
+      garden_id: 'g-1',
+      element_type: 'Beet',
+      label: 'x',
+      x_m: 0,
+      y_m: 0,
+      width_m: 1,
+      height_m: 1,
+      confidence: null,
+      is_accepted: true,
+      created_at: '2026-05-12T10:00:00.000Z',
+      updated_at: '2026-05-12T10:00:00.000Z',
+      updated_by_user_id: 'u',
+      deleted_at: null,
+      imported_from: 'item-1',
+      provenance: { foo: 'bar' },
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const local1 = planElementToLocal(dbWith as any);
+    expect(local1.importedFrom).toBe('item-1');
+    expect(local1.provenance).toEqual({ foo: 'bar' });
+
+    const dbWithout = { ...dbWith, imported_from: undefined, provenance: undefined };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const local2 = planElementToLocal(dbWithout as any);
+    expect(local2.importedFrom).toBeNull();
+    expect(local2.provenance).toBeNull();
+  });
+
+  it('round-trips null importedFrom + null provenance cleanly', () => {
+    const local: PlanElementRow = {
+      id: 'el-2',
+      gardenId: 'g-1',
+      elementType: 'Beet',
+      label: 'manual',
+      xM: 0,
+      yM: 0,
+      widthM: 1,
+      heightM: 1,
+      confidence: null,
+      isAccepted: true,
+      createdAt: '2026-05-12T10:00:00.000Z',
+      updatedAt: '2026-05-12T10:00:00.000Z',
+      updatedByUserId: 'u',
+      deletedAt: null,
+      importedFrom: null,
+      provenance: null,
+    };
+    const db = planElementToDb(local);
+    expect(db['imported_from']).toBeNull();
+    expect(db['provenance']).toBeNull();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const roundTripped = planElementToLocal(db as any);
+    expect(roundTripped.importedFrom).toBeNull();
+    expect(roundTripped.provenance).toBeNull();
   });
 });

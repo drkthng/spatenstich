@@ -73,6 +73,10 @@ export interface PlanElementRow extends RowBase {
   heightM: number;
   confidence: 'high' | 'medium' | 'low' | null;
   isAccepted: boolean;
+  /** Phase 6.5: UUID of source import_items row (null for manually-created elements) */
+  importedFrom: string | null;
+  /** Phase 6.5: free-form provenance metadata (chatReference, sunExposure, etc.) */
+  provenance: Record<string, unknown> | null;
 }
 
 export type AnyRow =

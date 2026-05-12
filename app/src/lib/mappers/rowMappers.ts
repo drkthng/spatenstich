@@ -383,6 +383,9 @@ type DbPlanElementRowLoose = {
   updated_at: string;
   updated_by_user_id?: string | null;
   deleted_at?: string | null;
+  // Phase 6.5: provenance link + free-form metadata
+  imported_from?: string | null;
+  provenance?: Record<string, unknown> | null;
 };
 
 /** Supabase→Local: snake_case DB-Row → camelCase lokale Row. */
@@ -402,6 +405,8 @@ export function planElementToLocal(db: DbPlanElementRowLoose): PlanElementRow {
     updatedAt: db.updated_at,
     updatedByUserId: db.updated_by_user_id ?? null,
     deletedAt: db.deleted_at ?? null,
+    importedFrom: db.imported_from ?? null,
+    provenance: (db.provenance as Record<string, unknown> | null | undefined) ?? null,
   };
 }
 
@@ -422,6 +427,8 @@ export function planElementToDb(local: PlanElementRow): Record<string, unknown> 
     updated_at: local.updatedAt,
     updated_by_user_id: local.updatedByUserId,
     deleted_at: local.deletedAt,
+    imported_from: local.importedFrom,
+    provenance: local.provenance,
   };
 }
 
@@ -469,6 +476,7 @@ export function importEntityToDb(
     updatedAt: 'updated_at',
     updatedByUserId: 'updated_by_user_id',
     deletedAt: 'deleted_at',
+    importedFrom: 'imported_from',
   };
 
   for (const [key, value] of Object.entries(row)) {
