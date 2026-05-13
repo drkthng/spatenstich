@@ -262,6 +262,7 @@ describe('planElement mappers — Phase 6.5 provenance', () => {
       deletedAt: null,
       importedFrom: 'item-uuid-1',
       provenance: { source: 'claude-ai-project', sunExposure: 'sun' },
+      layer: 'infrastructure',
     };
     const db = planElementToDb(local);
     expect(db['imported_from']).toBe('item-uuid-1');
@@ -317,6 +318,7 @@ describe('planElement mappers — Phase 6.5 provenance', () => {
       deletedAt: null,
       importedFrom: null,
       provenance: null,
+      layer: 'infrastructure',
     };
     const db = planElementToDb(local);
     expect(db['imported_from']).toBeNull();

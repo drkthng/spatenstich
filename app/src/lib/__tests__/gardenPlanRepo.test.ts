@@ -119,6 +119,7 @@ describe('gardenPlanRepo', () => {
           createdAt: '2026-05-03T00:00:00Z', updatedAt: '2026-05-03T00:00:00Z',
           updatedByUserId: 'user-001', deletedAt: null,
           importedFrom: null, provenance: null,
+          layer: 'infrastructure',
         },
         {
           id: 'el-002', gardenId, elementType: 'Laube',
@@ -127,6 +128,7 @@ describe('gardenPlanRepo', () => {
           createdAt: '2026-05-03T00:00:00Z', updatedAt: '2026-05-03T00:00:00Z',
           updatedByUserId: 'user-001', deletedAt: null,
           importedFrom: null, provenance: null,
+          layer: 'infrastructure',
         },
         {
           id: 'el-003', gardenId, elementType: 'Kompost',
@@ -135,6 +137,7 @@ describe('gardenPlanRepo', () => {
           createdAt: '2026-05-03T00:00:00Z', updatedAt: '2026-05-03T00:00:00Z',
           updatedByUserId: 'user-001', deletedAt: '2026-05-03T01:00:00Z',
           importedFrom: null, provenance: null,
+          layer: 'infrastructure',
         },
       ];
       mockStorageGetRowsByGarden.mockResolvedValue(elements);

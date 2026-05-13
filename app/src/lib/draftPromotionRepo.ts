@@ -116,6 +116,7 @@ export async function promoteBedDraft(
       sunExposure: draft.sunExposure,
       soilNotes: draft.soilNotes,
     },
+    layer: 'infrastructure',
   };
 
   // Write 1: insert plan_element.
@@ -200,6 +201,7 @@ export async function promotePlantDraft(
       healthNotes: draft.healthNotes,
       parentBedId: parentBedElement?.id ?? null,
     },
+    layer: 'seasonal',
   };
 
   // Write 1: insert plan_element.

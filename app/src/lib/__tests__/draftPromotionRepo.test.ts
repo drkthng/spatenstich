@@ -204,6 +204,7 @@ describe('draftPromotionRepo > promotePlantDraft', () => {
     deletedAt: null,
     importedFrom: 'item-bed-1',
     provenance: null,
+    layer: 'infrastructure',
   };
 
   it('links to parent bed via provenance.parentBedId when parentBedElement provided', async () => {

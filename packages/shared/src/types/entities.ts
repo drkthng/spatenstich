@@ -77,6 +77,8 @@ export interface PlanElementRow extends RowBase {
   importedFrom: string | null;
   /** Phase 6.5: free-form provenance metadata (chatReference, sunExposure, etc.) */
   provenance: Record<string, unknown> | null;
+  /** Phase 7: visual + behavioral grouping. 'infrastructure' = permanent, 'seasonal' = plants. */
+  layer: 'infrastructure' | 'seasonal';   // NEW (Migration 018)
 }
 
 export type AnyRow =

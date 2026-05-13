@@ -69,6 +69,7 @@ const bedAt = (
   deletedAt: null,
   importedFrom: null,
   provenance: null,
+  layer: 'infrastructure',
 });
 
 beforeEach(() => {

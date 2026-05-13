@@ -386,10 +386,20 @@ type DbPlanElementRowLoose = {
   // Phase 6.5: provenance link + free-form metadata
   imported_from?: string | null;
   provenance?: Record<string, unknown> | null;
+  // Phase 7: layer column (Migration 018). Optional on type for pre-018 rows that synced before push.
+  layer?: string | null;
 };
 
 /** Supabase→Local: snake_case DB-Row → camelCase lokale Row. */
 export function planElementToLocal(db: DbPlanElementRowLoose): PlanElementRow {
+  // Phase 7 Pitfall-8: if layer absent (pre-018 sync), derive from element_type.
+  // Priority: explicit DB value wins → element_type='Pflanze' falls back to 'seasonal' → otherwise 'infrastructure'.
+  const layerValue: 'infrastructure' | 'seasonal' =
+    db.layer === 'seasonal' ? 'seasonal'
+    : db.layer === 'infrastructure' ? 'infrastructure'
+    : db.element_type === 'Pflanze' ? 'seasonal'
+    : 'infrastructure';
+
   return {
     id: db.id,
     gardenId: db.garden_id,
@@ -407,6 +417,7 @@ export function planElementToLocal(db: DbPlanElementRowLoose): PlanElementRow {
     deletedAt: db.deleted_at ?? null,
     importedFrom: db.imported_from ?? null,
     provenance: (db.provenance as Record<string, unknown> | null | undefined) ?? null,
+    layer: layerValue,
   };
 }
 
@@ -429,6 +440,7 @@ export function planElementToDb(local: PlanElementRow): Record<string, unknown> 
     deleted_at: local.deletedAt,
     imported_from: local.importedFrom,
     provenance: local.provenance,
+    layer: local.layer,    // Phase 7 Migration 018
   };
 }
 

@@ -90,6 +90,7 @@ describe('draftPromotionRepo idempotency', () => {
       deletedAt: null,
       importedFrom: 'item-1',
       provenance: null,
+      layer: 'infrastructure',
     };
     const result = await promoteBedDraft(
       'account',
@@ -119,6 +120,7 @@ describe('draftPromotionRepo idempotency', () => {
       deletedAt: null,
       importedFrom: 'item-1',
       provenance: null,
+      layer: 'infrastructure',
     };
     await promoteBedDraft('account', fixtureBedDraft, fixtureDims, [existing], 'item-1');
     const planInserts = mockStorageWriteWithOutbox.mock.calls.filter(
@@ -145,6 +147,7 @@ describe('draftPromotionRepo idempotency', () => {
       deletedAt: null,
       importedFrom: 'item-1',
       provenance: null,
+      layer: 'infrastructure',
     };
     await promoteBedDraft('account', fixtureBedDraft, fixtureDims, [existing], 'item-1');
     const bedUpdates = mockStorageWriteWithOutbox.mock.calls.filter(
@@ -171,6 +174,7 @@ describe('draftPromotionRepo idempotency', () => {
       deletedAt: '2026-05-12T01:00:00.000Z',
       importedFrom: 'item-1',
       provenance: null,
+      layer: 'infrastructure',
     };
     await promoteBedDraft('account', fixtureBedDraft, fixtureDims, [deleted], 'item-1');
     const planInserts = mockStorageWriteWithOutbox.mock.calls.filter(
