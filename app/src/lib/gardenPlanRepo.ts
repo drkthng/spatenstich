@@ -138,3 +138,46 @@ export async function deleteAllElements(
 
   scheduleWriteDebounced();
 }
+
+// ── single-row editor writes (Phase 7 Plan 03) ─────────────────────────────
+
+/**
+ * Phase 7 Plan 03: Single-row write for the editor. Pairs with editorSaveDebounce's
+ * per-element 5s timer — Pattern K two-stage debounce (editor 5s -> outbox 500ms -> push).
+ *
+ * Caller passes a complete PlanElementRow snapshot. Repo detects insert-vs-update by
+ * checking the local storage layer for an existing row with the same id.
+ *
+ * @throws OutboxEnqueueError on storage write failure
+ * @throws Error 'gardens are account-only' when mode !== 'account'
+ * @throws Error 'not_authenticated' when userId is null
+ */
+export async function writePlanElement(
+  mode: AuthMode,
+  el: PlanElementRow,
+): Promise<void> {
+  assertAccount(mode);
+  const userId = useAuthStore.getState().userId;
+  if (!userId) throw new Error('not_authenticated');
+
+  // Detect insert vs update by checking local storage for an existing row.
+  const existing = await storage.getRowsByGarden<PlanElementRow>(
+    'plan_elements',
+    el.gardenId,
+  );
+  const op: 'insert' | 'update' = existing.some((r) => r.id === el.id)
+    ? 'update'
+    : 'insert';
+
+  try {
+    await storage.writeWithOutbox('plan_elements', el, {
+      entity: 'plan_elements',
+      rowId: el.id,
+      operation: op,
+      payload: el as unknown as Record<string, unknown>,
+    });
+    scheduleWriteDebounced();
+  } catch (cause) {
+    throw new OutboxEnqueueError('plan_elements', el.id, cause);
+  }
+}

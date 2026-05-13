@@ -77,6 +77,7 @@ export async function promoteBedDraft(
   dims: GardenDimensionsRow,
   existingElements: PlanElementRow[],
   importItemId: string,
+  finalCoords?: { xM: number; yM: number }, // Phase 7 Plan 03 — drop position override (DRAFT-02)
 ): Promise<PlanElementRow> {
   assertAccount(mode);
   const userId = useAuthStore.getState().userId;
@@ -92,7 +93,11 @@ export async function promoteBedDraft(
   // Pitfall-2: defaults when draft has null dimensions.
   const widthM = (draft.lengthCm ?? 150) / 100;
   const heightM = (draft.widthCm ?? 100) / 100;
-  const { xM, yM } = nextFreeBedSlot(existingElements, dims, { widthM, heightM });
+  // Phase 7 Plan 03: when caller (editor drop-handler) passes finalCoords, those override
+  // the auto-layout slot. Existing 5-arg call sites get unchanged auto-layout behavior.
+  const slot = nextFreeBedSlot(existingElements, dims, { widthM, heightM });
+  const xM = finalCoords?.xM ?? slot.xM;
+  const yM = finalCoords?.yM ?? slot.yM;
   const now = new Date().toISOString();
 
   const element: PlanElementRow = {
