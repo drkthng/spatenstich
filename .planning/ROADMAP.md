@@ -247,7 +247,7 @@ Plans:
 | 5. AI-Removal + Import-Schema (M07.1+2) | 3/3 | Complete   | 2026-05-09 |
 | 6. Import-Flow + Companion-Prompt (M07.3+4) | 1/4 | In Progress | - |
 | 6.5. Draft-Sichtung + Promotion (INSERTED) | 0/TBD | Not planned | - |
-| 7. Plan-Editor + Drafts (M2 + M07.5) | 0/TBD | Not started | - |
+| 7. Plan-Editor + Drafts (M2 + M07.5) | 5/6 | In Progress | - |
 | 8. Saatgut-Inventar (M3) | 0/TBD | Not started | - |
 | 9. Pflanz-/Aussaatkalender (M4) | 0/TBD | Not started | - |
 | **--- v1.1 Post-MVP ---** | | | |

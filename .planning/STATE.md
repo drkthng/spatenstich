@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: Phase 7 in progress (Wave 3 complete)
-stopped_at: Phase 7 Plan 04 complete — Skia EditorCanvas + EditorToolbar + ElementPalette + overlays ready for Wave 4
-last_updated: "2026-05-13T13:42:14.000Z"
+status: Phase 7 in progress (Wave 4 complete — DRAFT-01/02/03 closed)
+stopped_at: Phase 7 Plan 05 complete — DraftsTrayBottomSheet + BedPickerModal + plan/index.tsx screen + Home Plan öffnen CTA + 60+ editor.* i18n keys
+last_updated: "2026-05-13T14:03:23.000Z"
 last_activity: 2026-05-13
 progress:
   total_phases: 11
   completed_phases: 8
   total_plans: 40
-  completed_plans: 35
-  percent: 87
+  completed_plans: 36
+  percent: 90
 ---
 
 # Project State
@@ -26,13 +26,13 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 
 ## Current Position
 
-Phase: 7 (Plan-Editor + Drafts-Integration M2+M07.5) — Wave 3 COMPLETE
-Plan: 4 of 6 (Skia canvas + composed gestures + toolbar + 3-tab palette) COMPLETE — EditorCanvas (single outer Group, Race(Simultaneous(pinch,rotation), pan, Exclusive(longPress, tap))) + EditorToolbar (9 buttons, 3-state layer cycle via setActiveLayers W5) + ElementPalette + PaletteCard + SaveStateIndicator + PolygonInProgress (DashPathEffect W6) + GhostRing + GestureHandlerRootView outermost (Pitfall-7); 30 new assertions across 3 Wave-0 stub files (4 smoke + 6 palette + 20 toolbar); editor jest project now 99 passed / 14 todo (DraftsTray Wave 4 only); full app suite 450 passed
-Vorheriger Status: Phase 07 Plan 03 complete — editorStore + geometry + saveDebounce ready for Wave 3
-Plans: 22/22 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 5/5, Phase 07: 4/6)
+Phase: 7 (Plan-Editor + Drafts-Integration M2+M07.5) — Wave 4 COMPLETE
+Plan: 5 of 6 (Drafts-Tray + screen-wiring + i18n) COMPLETE — DraftsTrayBottomSheet (chip → expanded tray, filter chips Alle/Aktuell/Stale, 3 sections Beete/Pflanzen/Beobachtungen, stale-badge TrafficLightBadge amber for >30d) + BedPickerModal (RN Modal for plant-draft → bed selection) + plan/index.tsx (Expo Router screen composing Wave-3 + Wave-4 + Revision B4 screen-root Pan w/ promoteBedDraft 6-arg finalCoords) + Home 'Plan öffnen' CTA (2 testIDs in has-plan + empty-state) + loadPendingDraftsWithImportedAt (client-side JOIN imports → import_items, no migration) + DraftReviewCard.entityType opt-in prop (Revision B3 → accept-button-${type}-${id} testID) + 60+ editor.* i18n keys (UTF-8 Umlaute literal); DraftsTray.test.tsx fills 14 it.todo → 8 real assertions; editor jest 107 passed; full app suite 458 passed / 5 baseline failed
+Vorheriger Status: Phase 07 Plan 04 complete — Skia EditorCanvas + EditorToolbar + ElementPalette + overlays ready for Wave 4
+Plans: 23/23 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 5/5, Phase 07: 5/6)
 Last activity: 2026-05-13
 
-Progress: [███████░░░] ~70% within Phase 7 (4/6 plans done; 37 of an estimated 40 plans complete cross-project)
+Progress: [████████░░] ~83% within Phase 7 (5/6 plans done; 38 of an estimated 40 plans complete cross-project)
 
 ## Performance Metrics
 
@@ -80,6 +80,7 @@ Progress: [███████░░░] ~70% within Phase 7 (4/6 plans done; 
 | Phase 07 P02 | 25 | 2 tasks (TDD RED-then-GREEN) | 9 files |
 | Phase 07 P03 | 35 | 3 tasks (TDD GREEN, fills 8 Wave-0 stubs) | 18 files |
 | Phase 07 P04 | 11 | 3 tasks (TDD GREEN, fills 3 Wave-0 component stubs) | 10 files |
+| Phase 07 P05 | 12 | 4 tasks (TDD GREEN, fills last Wave-0 stub DraftsTray) | 9 files |
 
 ## Accumulated Context
 
@@ -148,6 +149,14 @@ Recent decisions affecting current work:
 - [Phase 07 P04] EditorToolbar temporal subscribe wiring uses `useEditorStore.temporal.subscribe(update)` in a useEffect; re-reads pastStates/futureStates lengths on every zundo snapshot. Simpler than wrapping zundo with a `useTemporalSelector` hook (zundo doesn't export one).
 - [Phase 07 P04] Editor jest setup.ts gains DashPathEffect (W6 dashed polygon) + onBegin/onChange chain methods on Gesture mock. Additive extensions — existing Wave 2 tests unchanged; enables Wave-3 callers without forcing per-test mock overrides.
 - [Phase 07 P04] Rotation accumulator helper extracted: commitRotation(rotationRadians) lives outside the `.onEnd((e) => runOnJS(commitRotation)(e.rotation))` worklet so the JS-thread store write never runs inside a worklet (Pattern 9). Helper defaults provenance.rotateDeg to 0 if absent, adds radians→degrees conversion, dispatches updateElement with { provenance: nextProvenance }.
+- [Phase 07 P05] DraftReviewCard `entityType?` opt-in prop (Revision B3): when supplied (tray sites pass 'bed' | 'plant' | 'observation'), Annehmen Button emits testID `accept-button-${entityType}-${draft.id}`. Phase 6.5 P04 review.tsx callers omit the prop and fall back to the legacy `accept-${draft.id}` testID — zero behavior change. Unlocks real DRAFT-02 unit test addressing the actual button vs the loose card-press fallback.
+- [Phase 07 P05] Stale detection (DRAFT-03) is client-side: loadPendingDraftsWithImportedAt JOINs import_items → imports via in-memory Map<itemId, importedAt>. No migration, no Edge Function — RESEARCH §Code Examples §9. Date.now() - importedAt > 30 * 24 * 60 * 60 * 1000 = "stale"; future-dated importedAt (clock skew) is rendered "fresh" — safe failure (T-07-23 accept).
+- [Phase 07 P05] Bottom-sheet kept minimal (chip ↔ expanded 50% View) per plan discretion — reanimated 50%/90% snap-point worklets deferred to v1.1 polish. Sufficient for DRAFT-01 "drafts visible as a tray" contract.
+- [Phase 07 P05] Revision B4 screen-root Pan in plan/index.tsx: `Gesture.Pan().activateAfterLongPress(220).onEnd(e => { if (bedDraftDragging.value) { screenToGarden(e.absoluteX, e.absoluteY, viewport.value) → runOnJS(handleBedDropAt)(xM, yM); } })`. The .activateAfterLongPress(220) matches the tray LongPress activation window so the tray seeds the shared value first. handleBedDropAt invokes promoteBedDraft via the 6-arg finalCoords form (Plan 03 signature).
+- [Phase 07 P05] BedPickerModal uses native `<Modal>` (not a new Expo Router route) — modal is local to the editor screen; simpler than introducing /(app)/plan/pick-bed. RN Modal stub added to app/src/__mocks__/react-native.ts (Rule 3 deviation — Modal was missing from mock and BedPickerModal tests couldn't render).
+- [Phase 07 P05] PlantDraftRow exposes `commonNameDe` not `label`; ObservationDraftRow exposes `summary`. DraftsTrayBottomSheet maps these into the DraftReviewCard.draft.label slot at the call site so the card UX is uniform across all 3 entity types without changing the shared card contract.
+- [Phase 07 P05] _layout.tsx left UNCHANGED — Expo Router auto-discovers `plan/index.tsx`. Per-route header set via inline `<Stack.Screen options={{ headerTitle: t('editor.title') }} />` inside plan/index.tsx (review.tsx analog).
+- [Phase 07 P05] D-18 Annehmen-tap accessibility fallback (Revision W8): Switch-Control / Voice-Control / non-touch users can drive bed-draft promotion via the Annehmen button which fires onBedDraftDragStart (same callback path as the long-press shared value seed). Both paths converge on promoteBedDraft with finalCoords. Documented in must_haves as a parallel a11y path, not a replacement for the long-press drag.
 
 ### Roadmap Evolution
 
@@ -179,7 +188,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-13T13:42:14.000Z
-Stopped at: Completed Phase 7 Plan 04 (Wave 3 — Skia EditorCanvas + composed gestures + EditorToolbar + ElementPalette + 2 overlays)
+Last session: 2026-05-13T14:03:23.000Z
+Stopped at: Completed Phase 7 Plan 05 (Wave 4 — DraftsTrayBottomSheet + BedPickerModal + plan/index.tsx screen + Home Plan öffnen CTA + 60+ editor.* i18n keys; DRAFT-01/02/03 closed)
 Resume file: None
-Next: Phase 7 Plan 05 (Wave 4 — DraftsTray + plan/index.tsx screen route + screen-root Pan drop handler + promoteBedDraft finalCoords integration)
+Next: Phase 7 Plan 06 (final wave) OR /gsd-verify-work 07 → Phase 7 verifier → milestone close

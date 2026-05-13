@@ -63,7 +63,7 @@
 
 - [x] **DRAFT-01**: Import-Drafts erscheinen als "Letzte Importe"-Tray im Plan-Editor
 - [x] **DRAFT-02**: Bed-Draft auf Canvas ziehen → platziert als echtes Beet-Element mit `importedFrom`-Provenance
-- [ ] **DRAFT-03**: Drafts nicht promoted innerhalb 30 Tagen → "Stale Imports"-Ansicht, nie auto-gelöscht
+- [x] **DRAFT-03**: Drafts nicht promoted innerhalb 30 Tagen → "Stale Imports"-Ansicht, nie auto-gelöscht
 
 ### Plan-Editor (M2)
 
@@ -219,7 +219,7 @@
 | IMPORT-08 | Phase 6 | Complete |
 | DRAFT-01 | Phase 6.5 | Complete |
 | DRAFT-02 | Phase 6.5 | Complete |
-| DRAFT-03 | Phase 7 | Pending |
+| DRAFT-03 | Phase 7 | Complete (P05) |
 | EDIT-01 | Phase 7 | Complete (P04) |
 | EDIT-02 | Phase 7 | Complete (P04) |
 | EDIT-03 | Phase 7 | Pending |
