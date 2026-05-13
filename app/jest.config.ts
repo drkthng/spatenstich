@@ -103,6 +103,35 @@ const config: Config = {
       },
       transformIgnorePatterns: ['node_modules/(?!(@testing-library)/)'],
     },
+    {
+      // Phase 7 Plan 01: Editor component + geometry + store tests.
+      displayName: 'editor',
+      preset: 'ts-jest',
+      testEnvironment: 'jsdom',
+      testMatch: [
+        '**/src/components/editor/__tests__/**/*.test.ts?(x)',
+        '**/src/lib/geometry/__tests__/**/*.test.ts?(x)',
+        '**/src/lib/editor/__tests__/**/*.test.ts?(x)',
+        '**/src/stores/__tests__/editorStore.*.test.ts?(x)',
+      ],
+      setupFiles: ['<rootDir>/src/components/editor/__tests__/setup.ts'],
+      moduleNameMapper: {
+        '^@spatenstich/shared$': '<rootDir>/../packages/shared/src/index.ts',
+        '^@spatenstich/shared/i18n/de$': '<rootDir>/../packages/shared/src/i18n/de.json',
+        '^react-native-url-polyfill/auto$': '<rootDir>/src/__mocks__/react-native-url-polyfill.ts',
+        '^react-native$': '<rootDir>/src/__mocks__/react-native.ts',
+        '^react-native-css-interop(.*)$': '<rootDir>/src/__mocks__/react-native-css-interop.ts',
+        '^nativewind(.*)$': '<rootDir>/src/__mocks__/react-native-css-interop.ts',
+        '^expo-secure-store$': '<rootDir>/src/__mocks__/expo-secure-store.ts',
+        '^@react-native-async-storage/async-storage$': '<rootDir>/src/__mocks__/async-storage.ts',
+        '^@/src/(.*)$': '<rootDir>/src/$1',
+        '^@/(.*)$': '<rootDir>/$1',
+      },
+      transform: {
+        '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.jest-components.json' }],
+      },
+      transformIgnorePatterns: ['node_modules/(?!(@testing-library|@shopify/react-native-skia|react-native-gesture-handler|react-native-reanimated|zundo)/)'],
+    },
   ],
   collectCoverageFrom: ['src/**/*.{ts,tsx}'],
 };

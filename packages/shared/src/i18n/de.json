@@ -229,6 +229,9 @@
     "emptyTitle": "Noch kein Gartenplan",
     "emptySubtitle": "Import-Funktion kommt bald."
   },
+  "editor": {
+    "_placeholder": "Phase 7 Plan 04 fills concrete strings per 07-UI-SPEC Copywriting Contract"
+  },
   "sync": {
     "badge": {
       "synced": "Synchronisiert",
