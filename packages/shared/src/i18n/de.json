@@ -230,7 +230,80 @@
     "emptySubtitle": "Import-Funktion kommt bald."
   },
   "editor": {
-    "_placeholder": "Phase 7 Plan 04 fills concrete strings per 07-UI-SPEC Copywriting Contract"
+    "title": "Plan-Editor",
+    "save": "Speichern",
+    "saving": "Wird gespeichert …",
+    "saved": "Gespeichert",
+    "saveError": "Speichern fehlgeschlagen. Versuche es erneut.",
+    "undo": "Rückgängig",
+    "redo": "Wiederholen",
+    "toggleGrid": "Gitter ein-/ausblenden",
+    "toggleLayerInfrastructure": "Infrastruktur-Layer ein-/ausblenden",
+    "toggleLayerSeasonal": "Jahresplan-Layer ein-/ausblenden",
+    "polygonStart": "Beet zeichnen",
+    "polygonFinish": "Beet abschließen",
+    "polygonCancel": "Zeichnen abbrechen",
+    "polygonHint": "Tippe auf den Plan, um Ecken zu setzen (mind. 3).",
+    "delete": "Löschen",
+    "deleteConfirmTitle": "Element löschen?",
+    "deleteConfirmBody": "Dieses Element wird aus dem Plan entfernt. Du kannst die Aktion sofort rückgängig machen.",
+    "deleteConfirmCta": "Ja, löschen",
+    "deleteCancel": "Abbrechen",
+    "rotate": "Drehen",
+    "scale": "Skalieren",
+    "palette": {
+      "tabBeete": "Beete",
+      "tabPflanzen": "Pflanzen",
+      "tabInfrastruktur": "Infrastruktur",
+      "longPressHint": "Lang drücken und auf den Plan ziehen.",
+      "emptyPlants": "Pflanzen erscheinen, sobald ein Beet angelegt ist.",
+      "items": {
+        "Beet": "Beet",
+        "Rasen": "Rasen",
+        "Weg": "Weg",
+        "Laube": "Laube",
+        "Kompost": "Kompost",
+        "Wasserstelle": "Wasserstelle",
+        "Zaun": "Zaun",
+        "Baum": "Baum",
+        "Sitzplatz": "Sitzplatz",
+        "Sonstiges": "Sonstiges"
+      }
+    },
+    "spacing": {
+      "warning": "Mindestabstand unterschritten",
+      "warningBody": "Trotzdem platziert — Pflanze steht zu nah an einer anderen.",
+      "okHint": "Abstand passt."
+    },
+    "trayChip": "Letzte Importe ({count})",
+    "tray": {
+      "title": "Letzte Importe",
+      "empty": "Keine offenen Importe.",
+      "filterAll": "Alle",
+      "filterFresh": "Aktuell",
+      "filterStale": "Stale",
+      "staleBadge": "Stale",
+      "staleHint": "Älter als 30 Tage — prüfe vor dem Übernehmen.",
+      "bedDragHint": "Auf den Plan ziehen, um das Beet zu setzen.",
+      "plantApplyCta": "Auf Beet anwenden",
+      "applyPlantModalTitle": "Auf welches Beet?",
+      "applyPlantModalEmpty": "Lege zuerst ein Beet an.",
+      "applyPlantConfirm": "Übernehmen",
+      "applyPlantCancel": "Abbrechen"
+    },
+    "emptyPlan": {
+      "heading": "Leerer Plan",
+      "body": "Wähle ein Element aus der Palette unten oder ziehe einen Import aus dem Tray.",
+      "cta": "Erstes Beet zeichnen"
+    },
+    "viewport": {
+      "resetLabel": "Ansicht zurücksetzen",
+      "zoomInLabel": "Hineinzoomen",
+      "zoomOutLabel": "Hinauszoomen"
+    },
+    "home": {
+      "openPlan": "Plan öffnen"
+    }
   },
   "sync": {
     "badge": {
