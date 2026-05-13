@@ -1162,7 +1162,7 @@ function RootLayout(): React.JSX.Element {
 | A11 | Element rotation is stored as a transformation field (`rotateDeg`) added to PlanElementRow as part of this phase. EDIT-04 mandates rotation but no rotation column exists in the schema. | Phase Requirements §EDIT-04 | MEDIUM — plan-phase may need a second migration (018b or 019) for `rotate_deg`. Alternative: store in `provenance.rotateDeg` (no migration) — recommended for MVP. **Flag this in plan-discussion.** |
 | A12 | The "Manual-Save button flushes all pending saves" — what should it do for an active drag gesture mid-flight? Assumption: complete the drag in the store (call `onEnd` programmatically) then flush. | Code Examples §5 | LOW |
 
-## Open Questions
+## Open Questions (RESOLVED — captured in CONTEXT D-15/D-16/D-17 and Plan 03 design choices)
 
 1. **`promoteBedDraft` signature: extend to accept finalCoords, or override post-promote?**
    - What we know: Existing signature is `promoteBedDraft(mode, draft, dims, existingElements, importItemId)`. It uses `nextFreeBedSlot()` to place the bed at a default position.

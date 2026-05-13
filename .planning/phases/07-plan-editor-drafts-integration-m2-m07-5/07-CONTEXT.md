@@ -39,6 +39,7 @@ Interaktiver 2D-Plan-Editor: Dirk (und Frau) platzieren, bewegen, rotieren, skal
 ### Drafts Integration
 - **D-14:** **„Letzte Importe"-Tray (DRAFT-01 Reuse):** Bottom-Sheet (collapsed: Chip mit Counter, expanded: scrollbare Card-Liste). Wiederverwendung von `DraftReviewCard.tsx` aus Phase 6.5 mit angepasstem Mini-Layout. Bed-Drafts: Drag aus Tray auf Canvas → ruft `promoteBedDraft(draftId, finalCoords)` aus `draftPromotionRepo.ts`. Pflanzen-Drafts: Tap-Aktion „Auf Beet anwenden" → modale Beet-Auswahl → `promotePlantDraft(...)`.
 - **D-15:** **Stale-Imports (DRAFT-03):** Berechnet on-render (`Date.now() - importedAt > 30 days`). „Stale"-Badge auf der Draft-Card im Tray; zusätzlicher Filter „Alle / Aktuell / Stale". **Keine** Auto-Delete-Logik. Keine Migration nötig (`imported_at` existiert seit Migration 016).
+- **D-18 (Amendment to D-14, Plan 05 revision response to checker W8):** **Annehmen-Tap auf Bed-Draft-Card bleibt als a11y-Fallback erhalten.** Der primäre Pfad ist Long-Press-Drag aus dem Tray auf den Canvas (D-14); der Annehmen-Tap-Pfad ist die Tastatur-/Non-Touch-Fallback-Variante, wenn Long-Press nicht möglich ist (Switch-Control, Voice-Control, externes Keyboard, Reduced-Motion).
 
 ### Data Model
 - **D-16:** **Migration 018** — `plan_elements.layer text not null default 'infrastructure'` mit CHECK `layer in ('infrastructure','seasonal')`. Backfill: bestehende Rows bleiben `infrastructure`. Plant-Rows (`kind='plant'`) bekommen beim nächsten Write `seasonal`. Folgt 6.5-P05-Push-Gate (list-linked → dry-run → push).
