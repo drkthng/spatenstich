@@ -2,12 +2,14 @@ import * as React from 'react';
 import { Platform } from 'react-native';
 import * as Sentry from '@sentry/react-native';
 import { Stack, SplashScreen, useSegments, useRouter } from 'expo-router';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 if (Platform.OS === 'web') {
   const { LogBox } = require('react-native');
   LogBox.ignoreAllLogs(true);
 }
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '@/src/lib/auth';
 import { useAuthStore } from '@/src/stores/authStore';
 import { ensureDefaultGardenForUser } from '@/src/lib/inviteCodeRepo';
@@ -23,6 +25,8 @@ Sentry.init({
 });
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
+
+const queryClient = new QueryClient();
 
 function SplashController(): null {
   const { isLoading } = useAuth();
@@ -107,9 +111,13 @@ function RootLayoutInner(): React.JSX.Element {
 
 function RootLayout(): React.JSX.Element {
   return (
-    <AuthProvider>
-      <RootLayoutInner />
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <RootLayoutInner />
+        </AuthProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }
 
