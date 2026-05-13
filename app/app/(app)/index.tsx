@@ -99,6 +99,16 @@ export default function HomeScreen(): React.JSX.Element {
               {t('import.home.importButton')}
             </Text>
           </Button>
+          <Button
+            variant="default"
+            onPress={() => router.push('/(app)/plan' as any)}
+            className="mt-2 w-full"
+            testID="home-open-plan-button"
+          >
+            <Text className="text-white font-semibold">
+              {t('editor.home.openPlan')}
+            </Text>
+          </Button>
         </ScrollView>
       </View>
     );
@@ -127,6 +137,16 @@ export default function HomeScreen(): React.JSX.Element {
         >
           <Text className="text-white font-semibold">
             {t('import.home.importButton')}
+          </Text>
+        </Button>
+        <Button
+          variant="outline"
+          onPress={() => router.push('/(app)/plan' as any)}
+          className="mt-2 w-full"
+          testID="home-open-plan-button-empty"
+        >
+          <Text className="font-semibold text-stone-700 dark:text-stone-200">
+            {t('editor.home.openPlan')}
           </Text>
         </Button>
       </View>
