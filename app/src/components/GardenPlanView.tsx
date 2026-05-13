@@ -5,39 +5,9 @@ import * as React from 'react';
 import { Dimensions as RNDimensions } from 'react-native';
 import Svg, { Rect, Line, Circle, Text as SvgText, G } from 'react-native-svg';
 import type { GardenDimensionsRow, PlanElementRow } from '@spatenstich/shared';
-
-/** Plan Rendering Colors — UI-SPEC D-09, sketch-warm palette. */
-const PLAN_COLORS: Record<string, string> = {
-  background: '#F5F0E8',
-  border: '#8B7355',
-  Rasen: '#8DB580',
-  Beet: '#C4956A',
-  Weg: '#D4C5A9',
-  Laube: '#A0785A',
-  Kompost: '#7A6148',
-  Wasserstelle: '#7EB5C4',
-  Zaun: '#8B7355',
-  Baum: '#6B9B5E',
-  Sitzplatz: '#C9B99A',
-  Sonstiges: '#B8AFA7',
-  grid: '#D6CFC4',
-};
-
-/** Darken a hex color by a factor (for strokes). */
-function darkenColor(hex: string, factor = 0.2): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  const dr = Math.round(r * (1 - factor));
-  const dg = Math.round(g * (1 - factor));
-  const db = Math.round(b * (1 - factor));
-  return `#${dr.toString(16).padStart(2, '0')}${dg.toString(16).padStart(2, '0')}${db.toString(16).padStart(2, '0')}`;
-}
-
-/** Truncate label to max length. */
-function truncateLabel(label: string, maxLen = 10): string {
-  return label.length > maxLen ? label.substring(0, maxLen - 1) + '\u2026' : label;
-}
+// Phase 7 Plan 03: PLAN_COLORS + darkenColor + truncateLabel extracted to shared module
+// so the Skia editor and this SVG read-only preview share one palette source.
+import { PLAN_COLORS, darkenColor, truncateLabel } from '@/src/lib/colors';
 
 export interface GardenPlanViewProps {
   dimensions: GardenDimensionsRow;
@@ -131,7 +101,7 @@ export function GardenPlanView({
 
       {/* 4. Elements */}
       {elements.map((el) => {
-        const fill = PLAN_COLORS[el.elementType] ?? PLAN_COLORS.Sonstiges;
+        const fill = PLAN_COLORS[el.elementType as keyof typeof PLAN_COLORS] ?? PLAN_COLORS.Sonstiges;
         const stroke = darkenColor(fill);
         const cx = el.xM * scale;
         const cy = el.yM * scale;
