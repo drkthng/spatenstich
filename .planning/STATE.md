@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: Ready to execute
-stopped_at: Phase 7 planned — 6 plans, plan-checker iteration 2 PASS
-last_updated: "2026-05-12T21:30:00.000Z"
-last_activity: 2026-05-12
+status: Phase 7 in progress (Wave 2 complete)
+stopped_at: Phase 7 Plan 03 complete — editorStore + geometry + saveDebounce ready for Wave 3
+last_updated: "2026-05-13T13:45:00.000Z"
+last_activity: 2026-05-13
 progress:
   total_phases: 11
   completed_phases: 8
@@ -26,13 +26,13 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 
 ## Current Position
 
-Phase: 6.5 (Draft-Sichtung + Promotion) — COMPLETE
-Plan: 5 of 5 (wire-and-push) COMPLETE — Migration 017 live on Supabase, preview redirect wired, all 5 plans done
-Vorheriger Status: Phase 06.5 Plan 04 complete — review screen
-Plans: 18/18 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 5/5)
-Last activity: 2026-05-12
+Phase: 7 (Plan-Editor + Drafts-Integration M2+M07.5) — Wave 2 COMPLETE
+Plan: 3 of 6 (state + save + geometry + repo extensions) COMPLETE — editorStore (zundo limit:20) + 3 geometry modules + saveDebounce + writePlanElement + promoteBedDraft finalCoords param all green; 69 new assertions in Wave-0 stubs filled
+Vorheriger Status: Phase 07 Plan 02 complete — Migration 018 + PlanElementRow.layer + Pitfall-8 lazy mapper default
+Plans: 21/21 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 5/5, Phase 07: 3/6)
+Last activity: 2026-05-13
 
-Progress: [██████████] 100% (18/18 Plans — Phase 4 plans excluded as superseded; Phase 06.5 5/5 complete)
+Progress: [██████░░░░] ~64% within Phase 7 (3/6 plans done; 36 of an estimated 40 plans complete cross-project)
 
 ## Performance Metrics
 
@@ -77,6 +77,8 @@ Progress: [██████████] 100% (18/18 Plans — Phase 4 plans e
 | Phase 06.5 P03 | 6 | 2 tasks | 4 files |
 | Phase 06.5 P04 | 14 | 2 tasks | 8 files |
 | Phase 06.5 P05 | 66 | 3 tasks (1 wire + 1 push + 1 manual-deferred) | 3 files |
+| Phase 07 P02 | 25 | 2 tasks (TDD RED-then-GREEN) | 9 files |
+| Phase 07 P03 | 35 | 3 tasks (TDD GREEN, fills 8 Wave-0 stubs) | 18 files |
 
 ## Accumulated Context
 
@@ -133,6 +135,12 @@ Recent decisions affecting current work:
 - [Phase 06.5]: [Phase 06.5 P05] Auto-mode autonomous DB-push gate established: (1) `migration list --linked` exit 0 + full local/remote diff, (2) `db push --dry-run --yes` exit 0, THEN (3) real push with `--yes`. Otherwise checkpoint:human-action. Both pre-flight gates passed in this plan; push completed without escalation.
 - [Phase 06.5]: [Phase 06.5 P05] lucide-react-native global jest mock added in `components/__tests__/setup.ts` (Rule 3 blocking fix) — unblocks every future component test that transitively imports lucide via InlineBanner. Preferable to per-test mocks; resolves the Plan 04 deferred infrastructure item.
 - [Phase 06.5]: [Phase 06.5 P05] Debug session `import-uebernehmen-noop` marked RESOLVED in `.planning/debug/import-uebernehmen-noop.md` with full resolution trail across Phase 6.5 Plans 01–05.
+- [Phase 07 P03] editorStore uses relative-path internal imports (`../lib/...` not `@/src/...`) so the same test files pass in both `stores` and `editor` jest projects — the `stores` project's moduleNameMapper lacks the `@/src/` alias and both projects pick up `editorStore.*.test.ts` per their testMatch.
+- [Phase 07 P03] zundo temporal middleware config: `limit:20`, `partialize:(state)=>({elements:state.elements})`, `equality:(a,b)=>a.elements===b.elements`. Reference-equality dedup is the cheapest possible filter — works because every elements-mutating action returns a new array reference while no-op actions (setSelection/setViewport/setTool) keep the reference identical.
+- [Phase 07 P03] selection-clear-on-undo/redo implemented as a module-load IIFE that replaces `temporalApi.getState().undo` + `.redo` via `temporalApi.setState(...)`. Callers get the behavior transparently; cheaper than writing custom zundo middleware.
+- [Phase 07 P03] Pattern K two-stage debounce: editorSaveDebounce (5s per element) → writePlanElement → scheduleWriteDebounced (500ms outbox push). Per-element `Map<id, Timeout>` so concurrent edits on different ids don't stomp each other.
+- [Phase 07 P03] promoteBedDraft gains optional 6th param `finalCoords?: { xM: number; yM: number }` — additive, existing 5-arg call sites unchanged. Editor drop handler in Wave 3 will pass touch-up coords to override the nextFreeBedSlot auto-layout.
+- [Phase 07 P03] colors.ts extracted with strict `Record<PlanColorKey, string>` typing — GardenPlanView call site now uses `as keyof typeof PLAN_COLORS` narrowing cast with the existing `?? PLAN_COLORS.Sonstiges` fallback. Runtime behavior identical; visual contract preserved per UI-SPEC.
 
 ### Roadmap Evolution
 
@@ -164,6 +172,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-12T16:50:28.141Z
-Stopped at: context exhaustion at 90% (2026-05-12)
+Last session: 2026-05-13T13:45:00.000Z
+Stopped at: Completed Phase 7 Plan 03 (Wave 2 — state + save + geometry + repo extensions)
 Resume file: None
+Next: Phase 7 Plan 04 (Wave 3 — Skia canvas + gestures + EditorToolbar/DraftsTray/ElementPalette composition on top of useEditorStore)
