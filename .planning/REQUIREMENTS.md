@@ -67,17 +67,17 @@
 
 ### Plan-Editor (M2)
 
-- [ ] **EDIT-01**: Canvas mit Maß-Gitter (1×1 m, ein-/ausblendbar) — @shopify/react-native-skia (GPU-threaded, 60fps)
-- [ ] **EDIT-02**: Element-Palette: Beete, Pflanzen, Infrastruktur
+- [x] **EDIT-01**: Canvas mit Maß-Gitter (1×1 m, ein-/ausblendbar) — @shopify/react-native-skia (GPU-threaded, 60fps)
+- [x] **EDIT-02**: Element-Palette: Beete, Pflanzen, Infrastruktur
 - [ ] **EDIT-03**: Drag & Drop auf Canvas (react-native-gesture-handler)
-- [ ] **EDIT-04**: Rotation und Skalierung
+- [x] **EDIT-04**: Rotation und Skalierung
 - [ ] **EDIT-05**: Beet-Polygon zeichnen
 - [ ] **EDIT-06**: Koordinaten in Gartenmetern (nicht Pixel)
 - [ ] **EDIT-07**: Pflanzenabstand-Hinweis beim Platzieren
-- [ ] **EDIT-08**: Zwei Layer: Infrastruktur (dauerhaft) und Jahresplan (saison-spezifisch)
+- [x] **EDIT-08**: Zwei Layer: Infrastruktur (dauerhaft) und Jahresplan (saison-spezifisch)
 - [ ] **EDIT-09**: Auto-Save alle 5 Sekunden + manuelles Speichern
 - [ ] ~~**EDIT-10**: Vereinsregel-Warnung inline~~ — **DEFERRED zu Phase 10 (v1.1)**
-- [ ] **EDIT-11**: Undo/Redo (mind. 20 Schritte)
+- [x] **EDIT-11**: Undo/Redo (mind. 20 Schritte)
 - [ ] **EDIT-12**: 60fps bei bis zu 200 Elementen auf echtem iOS-Gerät
 
 ### Saatgut-Inventar (M3) — manuell only
@@ -220,16 +220,16 @@
 | DRAFT-01 | Phase 6.5 | Complete |
 | DRAFT-02 | Phase 6.5 | Complete |
 | DRAFT-03 | Phase 7 | Pending |
-| EDIT-01 | Phase 7 | Pending |
-| EDIT-02 | Phase 7 | Pending |
+| EDIT-01 | Phase 7 | Complete (P04) |
+| EDIT-02 | Phase 7 | Complete (P04) |
 | EDIT-03 | Phase 7 | Pending |
-| EDIT-04 | Phase 7 | Pending |
+| EDIT-04 | Phase 7 | Complete (P04) |
 | EDIT-05 | Phase 7 | Pending |
 | EDIT-06 | Phase 7 | Pending |
 | EDIT-07 | Phase 7 | Pending |
-| EDIT-08 | Phase 7 | Pending |
+| EDIT-08 | Phase 7 | Complete (P04) |
 | EDIT-09 | Phase 7 | Pending |
-| EDIT-11 | Phase 7 | Pending |
+| EDIT-11 | Phase 7 | Complete (P04) |
 | EDIT-12 | Phase 7 | Pending |
 | SEED-02 | Phase 8 | Pending |
 | SEED-03 | Phase 8 | Pending |

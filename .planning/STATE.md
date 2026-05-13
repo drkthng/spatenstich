@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: Phase 7 in progress (Wave 2 complete)
-stopped_at: Phase 7 Plan 03 complete — editorStore + geometry + saveDebounce ready for Wave 3
-last_updated: "2026-05-13T13:45:00.000Z"
+status: Phase 7 in progress (Wave 3 complete)
+stopped_at: Phase 7 Plan 04 complete — Skia EditorCanvas + EditorToolbar + ElementPalette + overlays ready for Wave 4
+last_updated: "2026-05-13T13:42:14.000Z"
 last_activity: 2026-05-13
 progress:
   total_phases: 11
   completed_phases: 8
   total_plans: 40
-  completed_plans: 34
-  percent: 85
+  completed_plans: 35
+  percent: 87
 ---
 
 # Project State
@@ -26,13 +26,13 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 
 ## Current Position
 
-Phase: 7 (Plan-Editor + Drafts-Integration M2+M07.5) — Wave 2 COMPLETE
-Plan: 3 of 6 (state + save + geometry + repo extensions) COMPLETE — editorStore (zundo limit:20) + 3 geometry modules + saveDebounce + writePlanElement + promoteBedDraft finalCoords param all green; 69 new assertions in Wave-0 stubs filled
-Vorheriger Status: Phase 07 Plan 02 complete — Migration 018 + PlanElementRow.layer + Pitfall-8 lazy mapper default
-Plans: 21/21 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 5/5, Phase 07: 3/6)
+Phase: 7 (Plan-Editor + Drafts-Integration M2+M07.5) — Wave 3 COMPLETE
+Plan: 4 of 6 (Skia canvas + composed gestures + toolbar + 3-tab palette) COMPLETE — EditorCanvas (single outer Group, Race(Simultaneous(pinch,rotation), pan, Exclusive(longPress, tap))) + EditorToolbar (9 buttons, 3-state layer cycle via setActiveLayers W5) + ElementPalette + PaletteCard + SaveStateIndicator + PolygonInProgress (DashPathEffect W6) + GhostRing + GestureHandlerRootView outermost (Pitfall-7); 30 new assertions across 3 Wave-0 stub files (4 smoke + 6 palette + 20 toolbar); editor jest project now 99 passed / 14 todo (DraftsTray Wave 4 only); full app suite 450 passed
+Vorheriger Status: Phase 07 Plan 03 complete — editorStore + geometry + saveDebounce ready for Wave 3
+Plans: 22/22 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 5/5, Phase 07: 4/6)
 Last activity: 2026-05-13
 
-Progress: [██████░░░░] ~64% within Phase 7 (3/6 plans done; 36 of an estimated 40 plans complete cross-project)
+Progress: [███████░░░] ~70% within Phase 7 (4/6 plans done; 37 of an estimated 40 plans complete cross-project)
 
 ## Performance Metrics
 
@@ -79,6 +79,7 @@ Progress: [██████░░░░] ~64% within Phase 7 (3/6 plans done; 
 | Phase 06.5 P05 | 66 | 3 tasks (1 wire + 1 push + 1 manual-deferred) | 3 files |
 | Phase 07 P02 | 25 | 2 tasks (TDD RED-then-GREEN) | 9 files |
 | Phase 07 P03 | 35 | 3 tasks (TDD GREEN, fills 8 Wave-0 stubs) | 18 files |
+| Phase 07 P04 | 11 | 3 tasks (TDD GREEN, fills 3 Wave-0 component stubs) | 10 files |
 
 ## Accumulated Context
 
@@ -141,6 +142,12 @@ Recent decisions affecting current work:
 - [Phase 07 P03] Pattern K two-stage debounce: editorSaveDebounce (5s per element) → writePlanElement → scheduleWriteDebounced (500ms outbox push). Per-element `Map<id, Timeout>` so concurrent edits on different ids don't stomp each other.
 - [Phase 07 P03] promoteBedDraft gains optional 6th param `finalCoords?: { xM: number; yM: number }` — additive, existing 5-arg call sites unchanged. Editor drop handler in Wave 3 will pass touch-up coords to override the nextFreeBedSlot auto-layout.
 - [Phase 07 P03] colors.ts extracted with strict `Record<PlanColorKey, string>` typing — GardenPlanView call site now uses `as keyof typeof PLAN_COLORS` narrowing cast with the existing `?? PLAN_COLORS.Sonstiges` fallback. Runtime behavior identical; visual contract preserved per UI-SPEC.
+- [Phase 07 P04] EditorCanvas gesture handlers use `.onChange()` (not `.onUpdate()`) for Pan/Pinch — the PanGestureChangeEventPayload/PinchGestureChangeEventPayload types carry the per-frame deltas (changeX/changeY/scaleChange) accessed via the `.onChange` overload in gesture-handler v2.31. `.onUpdate` only sees translationX/Y/scale cumulative.
+- [Phase 07 P04] Single outer Group transform via `useDerivedValue` — collects 3 SharedValues (tx/ty/scale) into one Transforms3d array on the UI thread. Skia's `AnimatedProp<Transforms3d>` accepts `T | { value: T }`, so a SharedValue<Transforms3d> works but per-element SharedValues inside the array don't. The derived value is the idiomatic glue.
+- [Phase 07 P04] Skia Line testID cast via `const LineAny = Line as unknown as React.FC<Record<string, unknown>>`. Skia v1.12.4 LineProps doesn't declare testID; runtime renderer ignores unknown props; jest mock surfaces them. Local cast + comment, no `any` proliferation. Required for Revision B2 grid-line smoke-test queryAllByTestId assertion.
+- [Phase 07 P04] EditorToolbar temporal subscribe wiring uses `useEditorStore.temporal.subscribe(update)` in a useEffect; re-reads pastStates/futureStates lengths on every zundo snapshot. Simpler than wrapping zundo with a `useTemporalSelector` hook (zundo doesn't export one).
+- [Phase 07 P04] Editor jest setup.ts gains DashPathEffect (W6 dashed polygon) + onBegin/onChange chain methods on Gesture mock. Additive extensions — existing Wave 2 tests unchanged; enables Wave-3 callers without forcing per-test mock overrides.
+- [Phase 07 P04] Rotation accumulator helper extracted: commitRotation(rotationRadians) lives outside the `.onEnd((e) => runOnJS(commitRotation)(e.rotation))` worklet so the JS-thread store write never runs inside a worklet (Pattern 9). Helper defaults provenance.rotateDeg to 0 if absent, adds radians→degrees conversion, dispatches updateElement with { provenance: nextProvenance }.
 
 ### Roadmap Evolution
 
@@ -172,7 +179,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-13T13:45:00.000Z
-Stopped at: Completed Phase 7 Plan 03 (Wave 2 — state + save + geometry + repo extensions)
+Last session: 2026-05-13T13:42:14.000Z
+Stopped at: Completed Phase 7 Plan 04 (Wave 3 — Skia EditorCanvas + composed gestures + EditorToolbar + ElementPalette + 2 overlays)
 Resume file: None
-Next: Phase 7 Plan 04 (Wave 3 — Skia canvas + gestures + EditorToolbar/DraftsTray/ElementPalette composition on top of useEditorStore)
+Next: Phase 7 Plan 05 (Wave 4 — DraftsTray + plan/index.tsx screen route + screen-root Pan drop handler + promoteBedDraft finalCoords integration)
