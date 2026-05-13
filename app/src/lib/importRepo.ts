@@ -299,6 +299,58 @@ export async function loadPendingDrafts(gardenId: string): Promise<PendingDrafts
   };
 }
 
+// ── loadPendingDraftsWithImportedAt (Phase 7 P05 — DRAFT-03 stale detection) ─────────
+//
+// Extends loadPendingDrafts by JOINing import_items.import_id → imports.importedAt,
+// so consumers can compute Date.now() - importedAt > 30d for the stale-badge UI.
+// RESEARCH §Code Examples §9 — client-side JOIN per D-15 (no migration).
+
+export interface DraftWithMeta<T> {
+  row: T;
+  importedAt: string;
+}
+
+export interface PendingDraftsWithImportedAt {
+  beds: DraftWithMeta<BedDraftRow>[];
+  plants: DraftWithMeta<PlantDraftRow>[];
+  observations: DraftWithMeta<ObservationDraftRow>[];
+}
+
+export async function loadPendingDraftsWithImportedAt(
+  gardenId: string,
+): Promise<PendingDraftsWithImportedAt> {
+  const [bedRows, plantRows, obsRows, importItems, imports] = await Promise.all([
+    storage.getRowsByGarden<BedDraftRow>('bed_drafts', gardenId),
+    storage.getRowsByGarden<PlantDraftRow>('plant_drafts', gardenId),
+    storage.getRowsByGarden<ObservationDraftRow>('observation_drafts', gardenId),
+    storage.getRowsByGarden<ImportItemRow>('import_items', gardenId),
+    storage.getRowsByGarden<ImportRow>('imports', gardenId),
+  ]);
+
+  // Build import_item.id → imports.importedAt map
+  const importedAtByItemId = new Map<string, string>();
+  for (const ii of importItems) {
+    const imp = imports.find((i) => i.id === ii.importId);
+    if (imp) importedAtByItemId.set(ii.id, imp.importedAt);
+  }
+
+  const enrich = <T extends { importItemId: string; status: string; deletedAt: string | null }>(
+    rows: T[],
+  ): DraftWithMeta<T>[] =>
+    rows
+      .filter((r) => r.status === 'pending' && r.deletedAt === null)
+      .map((r) => ({
+        row: r,
+        importedAt: importedAtByItemId.get(r.importItemId) ?? new Date(0).toISOString(),
+      }));
+
+  return {
+    beds: enrich(bedRows),
+    plants: enrich(plantRows),
+    observations: enrich(obsRows),
+  };
+}
+
 // Re-export types for consumers
 export type {
   ImportPayloadBed,
