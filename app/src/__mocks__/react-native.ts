@@ -37,6 +37,10 @@ export const Switch = ({ testID, value, onValueChange, accessibilityLabel, ...pr
   React.createElement('Switch', { testID, value, onValueChange, accessibilityLabel, ...props });
 export const TouchableOpacity = ({ children, onPress, testID, ...props }: any) =>
   React.createElement('TouchableOpacity', { testID, onPress, ...props }, children);
+// Phase 7 Plan 05: Modal stub for BedPickerModal tests — renders children when visible,
+// null otherwise (matches react-native semantics where Modal mounts only when visible).
+export const Modal = ({ children, visible, testID, ...props }: any) =>
+  visible ? React.createElement('Modal', { testID, ...props }, children) : null;
 
 // Dimensions stub
 export const Dimensions = {

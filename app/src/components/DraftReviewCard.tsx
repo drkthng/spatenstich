@@ -38,6 +38,12 @@ export interface DraftReviewCardProps {
   details?: React.ReactNode;
   children?: React.ReactNode;
   testID?: string;
+  /**
+   * Phase 7 Plan 05 (Revision B3): when provided, the Annehmen Button emits
+   * testID={`accept-button-${entityType}-${draft.id}`}. Opt-in — Phase 6.5
+   * P04 review.tsx callers omit it and stay unchanged.
+   */
+  entityType?: 'bed' | 'plant' | 'observation';
 }
 
 export function DraftReviewCard({
@@ -49,6 +55,7 @@ export function DraftReviewCard({
   details,
   children,
   testID,
+  entityType,
 }: DraftReviewCardProps): React.JSX.Element {
   const confidence = draft.confidence ?? undefined;
   const state = confidenceToState(confidence);
@@ -70,7 +77,11 @@ export function DraftReviewCard({
       ) : (
         <CardContent>
           <View className="flex-row gap-2">
-            <Button onPress={onAccept} variant="default" testID={`accept-${draft.id}`}>
+            <Button
+              onPress={onAccept}
+              variant="default"
+              testID={entityType ? `accept-button-${entityType}-${draft.id}` : `accept-${draft.id}`}
+            >
               <Text className="text-white font-semibold">{t('import.review.accept')}</Text>
             </Button>
             <Button onPress={onEdit} variant="outline" testID={`edit-${draft.id}`}>
