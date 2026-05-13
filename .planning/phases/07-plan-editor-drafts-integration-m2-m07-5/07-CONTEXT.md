@@ -42,7 +42,7 @@ Interaktiver 2D-Plan-Editor: Dirk (und Frau) platzieren, bewegen, rotieren, skal
 - **D-18 (Amendment to D-14, Plan 05 revision response to checker W8):** **Annehmen-Tap auf Bed-Draft-Card bleibt als a11y-Fallback erhalten.** Der primäre Pfad ist Long-Press-Drag aus dem Tray auf den Canvas (D-14); der Annehmen-Tap-Pfad ist die Tastatur-/Non-Touch-Fallback-Variante, wenn Long-Press nicht möglich ist (Switch-Control, Voice-Control, externes Keyboard, Reduced-Motion).
 
 ### Data Model
-- **D-16:** **Migration 018** — `plan_elements.layer text not null default 'infrastructure'` mit CHECK `layer in ('infrastructure','seasonal')`. Backfill: bestehende Rows bleiben `infrastructure`. Plant-Rows (`kind='plant'`) bekommen beim nächsten Write `seasonal`. Folgt 6.5-P05-Push-Gate (list-linked → dry-run → push).
+- **D-16:** **Migration 018** — `plan_elements.layer text not null default 'infrastructure'` mit CHECK `layer in ('infrastructure','seasonal')`. Backfill: bestehende Rows bleiben `infrastructure`. Plant-Rows (`kind='plant'`) bekommen beim nächsten Write `seasonal`. Folgt 6.5-P05-Push-Gate (list-linked → dry-run → push). **Status (Plan 06): APPLIED. Live on Supabase project `vitrqkzxkiqvadqfzrcx` as of 2026-05-13.**
 - **D-17:** **Provenance bei Promotion bleibt aus 6.5:** `imported_from = draftId`, `provenance = 'import'` für promoted Elemente; manuelle Elemente bekommen `provenance = 'manual'`. Schema dieser Spalten ist seit Migration 017 live.
 
 ### Claude's Discretion

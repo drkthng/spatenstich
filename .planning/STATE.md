@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: Phase 7 in progress (Wave 4 complete — DRAFT-01/02/03 closed)
-stopped_at: Phase 7 Plan 05 complete — DraftsTrayBottomSheet + BedPickerModal + plan/index.tsx screen + Home Plan öffnen CTA + 60+ editor.* i18n keys
-last_updated: "2026-05-13T14:03:23.000Z"
+status: Phase 7 COMPLETE (Wave 5 — Migration 018 LIVE; manual smoke deferred to user via 07-HUMAN-VERIFY.md)
+stopped_at: Phase 7 Plan 06 complete — Migration 20260513000018 pushed to live Supabase (vitrqkzxkiqvadqfzrcx, Frankfurt); 07-HUMAN-VERIFY.md written with 4 manual smoke sections (EDIT-12/EDIT-09/DRAFT-02/DRAFT-03)
+last_updated: "2026-05-13T14:15:00.000Z"
 last_activity: 2026-05-13
 progress:
   total_phases: 11
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 40
-  completed_plans: 36
-  percent: 90
+  completed_plans: 37
+  percent: 92
 ---
 
 # Project State
@@ -26,13 +26,13 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 
 ## Current Position
 
-Phase: 7 (Plan-Editor + Drafts-Integration M2+M07.5) — Wave 4 COMPLETE
-Plan: 5 of 6 (Drafts-Tray + screen-wiring + i18n) COMPLETE — DraftsTrayBottomSheet (chip → expanded tray, filter chips Alle/Aktuell/Stale, 3 sections Beete/Pflanzen/Beobachtungen, stale-badge TrafficLightBadge amber for >30d) + BedPickerModal (RN Modal for plant-draft → bed selection) + plan/index.tsx (Expo Router screen composing Wave-3 + Wave-4 + Revision B4 screen-root Pan w/ promoteBedDraft 6-arg finalCoords) + Home 'Plan öffnen' CTA (2 testIDs in has-plan + empty-state) + loadPendingDraftsWithImportedAt (client-side JOIN imports → import_items, no migration) + DraftReviewCard.entityType opt-in prop (Revision B3 → accept-button-${type}-${id} testID) + 60+ editor.* i18n keys (UTF-8 Umlaute literal); DraftsTray.test.tsx fills 14 it.todo → 8 real assertions; editor jest 107 passed; full app suite 458 passed / 5 baseline failed
-Vorheriger Status: Phase 07 Plan 04 complete — Skia EditorCanvas + EditorToolbar + ElementPalette + overlays ready for Wave 4
-Plans: 23/23 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 5/5, Phase 07: 5/6)
+Phase: 7 (Plan-Editor + Drafts-Integration M2+M07.5) — Wave 5 COMPLETE → PHASE 7 COMPLETE
+Plan: 6 of 6 (Migration push gate + HUMAN-VERIFY.md) COMPLETE — Migration 20260513000018 (`plan_elements.layer text NOT NULL DEFAULT 'infrastructure' CHECK in ('infrastructure','seasonal')` + Pflanze→seasonal backfill) pushed to live Supabase project `vitrqkzxkiqvadqfzrcx` (Frankfurt) via autonomous 4-gate flow (sanity → migration list --linked → db push --dry-run → real db push); DO-block notice `migration_018 ok: plan_elements.layer added with CHECK + plant backfill` fired; post-push `migration list --linked` shows 20260513000018 in both Local + Remote columns; post-dry-run reports "Remote database is up to date"; 07-HUMAN-VERIFY.md written with 4 deferred manual smoke sections (Setup/Steps/Expected/Fail-signals/Pass-criterion/Reply-format) for EDIT-12 (60fps@200), EDIT-09 (autosave force-quit), DRAFT-02 (bed-draft drop accuracy), DRAFT-03 (stale-filter visual sanity)
+Vorheriger Status: Phase 07 Plan 05 complete — DraftsTrayBottomSheet + BedPickerModal + plan/index.tsx screen + Home Plan öffnen CTA + 60+ editor.* i18n keys; DRAFT-01/02/03 closed via automated tests
+Plans: 24/24 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 5/5, Phase 07: 6/6)
 Last activity: 2026-05-13
 
-Progress: [████████░░] ~83% within Phase 7 (5/6 plans done; 38 of an estimated 40 plans complete cross-project)
+Progress: [██████████] 100% within Phase 7 (6/6 plans done; 39 of an estimated 40 plans complete cross-project)
 
 ## Performance Metrics
 
@@ -157,6 +157,8 @@ Recent decisions affecting current work:
 - [Phase 07 P05] PlantDraftRow exposes `commonNameDe` not `label`; ObservationDraftRow exposes `summary`. DraftsTrayBottomSheet maps these into the DraftReviewCard.draft.label slot at the call site so the card UX is uniform across all 3 entity types without changing the shared card contract.
 - [Phase 07 P05] _layout.tsx left UNCHANGED — Expo Router auto-discovers `plan/index.tsx`. Per-route header set via inline `<Stack.Screen options={{ headerTitle: t('editor.title') }} />` inside plan/index.tsx (review.tsx analog).
 - [Phase 07 P05] D-18 Annehmen-tap accessibility fallback (Revision W8): Switch-Control / Voice-Control / non-touch users can drive bed-draft promotion via the Annehmen button which fires onBedDraftDragStart (same callback path as the long-press shared value seed). Both paths converge on promoteBedDraft with finalCoords. Documented in must_haves as a parallel a11y path, not a replacement for the long-press drag.
+- [Phase 07 P06] Migration 20260513000018 (plan_elements.layer) pushed to live Supabase project (ref `vitrqkzxkiqvadqfzrcx`, Frankfurt) — verified via `supabase migration list --linked` showing Local + Remote columns populated (`20260513000018 | 20260513000018 | 2026-05-13 00:00:18`). DO-block notice `migration_018 ok: plan_elements.layer added with CHECK + plant backfill` fired. Both pre-flight gates green (Gate 1 `migration list --linked` exit 0, Gate 2 `db push --dry-run --linked --yes` exit 0); real push completed non-interactively. plan_elements now has `layer text NOT NULL DEFAULT 'infrastructure'` + CHECK `layer in ('infrastructure','seasonal')`; backfill promoted existing `element_type='Pflanze'` rows to `seasonal`. Date: 2026-05-13.
+- [Phase 07 P06] 07-HUMAN-VERIFY.md written with 4 deferred manual smoke sections (EDIT-12 60fps@200, EDIT-09 autosave-crash, DRAFT-02 bed-drop, DRAFT-03 stale-filter). Status `pending` until Dirk runs on iPhone; `/gsd-verify-work` should flag these 4 as outstanding manual-pass.
 
 ### Roadmap Evolution
 
@@ -188,7 +190,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-13T14:03:23.000Z
-Stopped at: Completed Phase 7 Plan 05 (Wave 4 — DraftsTrayBottomSheet + BedPickerModal + plan/index.tsx screen + Home Plan öffnen CTA + 60+ editor.* i18n keys; DRAFT-01/02/03 closed)
+Last session: 2026-05-13T14:15:00.000Z
+Stopped at: Completed Phase 7 Plan 06 (Wave 5 — Migration 20260513000018 plan_elements.layer pushed LIVE to Supabase vitrqkzxkiqvadqfzrcx Frankfurt via autonomous 4-gate flow; 07-HUMAN-VERIFY.md with 4 deferred manual smoke sections written). Phase 7 COMPLETE.
 Resume file: None
-Next: Phase 7 Plan 06 (final wave) OR /gsd-verify-work 07 → Phase 7 verifier → milestone close
+Next: /gsd-verify-work 07 → Phase 7 verifier (will flag EDIT-12 + EDIT-09 + DRAFT-02 + DRAFT-03 as outstanding manual-pass until Dirk runs 07-HUMAN-VERIFY.md on iPhone) → milestone v1.1 close consideration
