@@ -33,6 +33,7 @@ jest.mock('@shopify/react-native-skia', () => {
     Path: stub('Path'),
     Circle: stub('Circle'),
     Line: stub('Line'),
+    DashPathEffect: stub('DashPathEffect'),
     Skia: { Path: { Make: () => ({ moveTo: jest.fn(), lineTo: jest.fn(), close: jest.fn() }) } },
   };
 });
@@ -42,7 +43,8 @@ jest.mock('react-native-gesture-handler', () => {
   const React = require('react');
   const mkGesture = () => {
     const g: any = {
-      onUpdate: () => g, onStart: () => g, onEnd: () => g, onTouchesMove: () => g,
+      onBegin: () => g, onUpdate: () => g, onStart: () => g, onEnd: () => g,
+      onChange: () => g, onTouchesMove: () => g,
       minDuration: () => g, manualActivation: () => g,
     };
     return g;
