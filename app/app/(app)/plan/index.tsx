@@ -7,7 +7,7 @@
 // matches the tray LongPress activation window so the tray seeds bedDraftDragging first.
 
 import * as React from 'react';
-import { View, ActivityIndicator, Text } from 'react-native';
+import { View, ActivityIndicator, Text, Platform, Pressable } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import { useSharedValue, runOnJS } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -22,6 +22,7 @@ import { EditorCanvas } from '@/src/components/editor/EditorCanvas';
 import { EditorToolbar } from '@/src/components/editor/EditorToolbar';
 import { ElementPalette, type PaletteTab } from '@/src/components/editor/ElementPalette';
 import { DraftsTrayBottomSheet } from '@/src/components/editor/DraftsTrayBottomSheet';
+import { GardenPlanView } from '@/src/components/GardenPlanView';
 import de from '@spatenstich/shared/i18n/de';
 
 const t = (key: string): string =>
@@ -142,6 +143,55 @@ export default function PlanScreen(): React.JSX.Element {
     return (
       <View className="flex-1 items-center justify-center bg-stone-50 dark:bg-stone-900">
         <ActivityIndicator />
+      </View>
+    );
+  }
+
+  // Web fallback (CONTEXT D-09 §Open Constraints): Skia + gesture-handler don't run
+  // on Expo Web without CanvasKit-WASM + COOP/COEP headers. Render the existing
+  // static GardenPlanView read-only so wife's Desktop browser shows the plan
+  // instead of crashing on `PictureRecorder undefined`. Editor is mobile-only in MVP.
+  if (Platform.OS === 'web') {
+    const elements = useEditorStore.getState().elements;
+    return (
+      <View className="flex-1 bg-stone-50 dark:bg-stone-900" testID="editor-screen-web-fallback">
+        <Stack.Screen options={{ headerTitle: t('editor.webFallback.title') }} />
+        <View className="px-6 pt-4 pb-2">
+          <Text className="text-sm text-stone-700 dark:text-stone-300">
+            {t('editor.webFallback.banner')}
+          </Text>
+        </View>
+        {dimensions ? (
+          <View className="flex-1 items-center justify-center px-4">
+            <GardenPlanView
+              dimensions={dimensions}
+              elements={elements}
+              showGrid={true}
+              testID="web-fallback-plan-view"
+            />
+          </View>
+        ) : (
+          <View className="flex-1 items-center justify-center px-6">
+            <Text className="text-base font-semibold text-stone-800 dark:text-stone-200 text-center mb-2">
+              {t('editor.webFallback.emptyTitle')}
+            </Text>
+            <Text className="text-sm text-stone-500 dark:text-stone-400 text-center">
+              {t('editor.webFallback.emptyBody')}
+            </Text>
+          </View>
+        )}
+        <View className="px-6 py-4 border-t border-stone-200 dark:border-stone-700">
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push('/(app)/import/review')}
+            className="bg-stone-900 dark:bg-stone-100 py-3 rounded-lg items-center"
+            testID="web-fallback-review-cta"
+          >
+            <Text className="text-base font-medium text-stone-50 dark:text-stone-900">
+              {t('editor.webFallback.reviewCta')}
+            </Text>
+          </Pressable>
+        </View>
       </View>
     );
   }

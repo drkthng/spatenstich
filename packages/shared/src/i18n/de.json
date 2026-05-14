@@ -251,6 +251,13 @@
     "deleteCancel": "Abbrechen",
     "rotate": "Drehen",
     "scale": "Skalieren",
+    "webFallback": {
+      "title": "Plan-Ansicht",
+      "banner": "Der interaktive Editor ist zurzeit nur in der App verfügbar (iOS/Android). Hier siehst du deinen Plan als Vorschau.",
+      "reviewCta": "Importe sichten",
+      "emptyTitle": "Noch kein Plan",
+      "emptyBody": "Importiere eine Analyse aus deinem Claude.ai-Projekt oder lege Elemente in der App an."
+    },
     "palette": {
       "tabBeete": "Beete",
       "tabPflanzen": "Pflanzen",
