@@ -23,6 +23,9 @@ import { EditorToolbar } from '@/src/components/editor/EditorToolbar';
 import { ElementPalette, type PaletteTab } from '@/src/components/editor/ElementPalette';
 import { DraftsTrayBottomSheet } from '@/src/components/editor/DraftsTrayBottomSheet';
 import { GardenPlanView } from '@/src/components/GardenPlanView';
+import { WebPlanEditor } from '@/src/components/editor/web/WebPlanEditor';
+import { WebPaletteBar } from '@/src/components/editor/web/WebPaletteBar';
+import { WebEditorToolbar } from '@/src/components/editor/web/WebEditorToolbar';
 import de from '@spatenstich/shared/i18n/de';
 
 const t = (key: string): string =>
@@ -147,53 +150,35 @@ export default function PlanScreen(): React.JSX.Element {
     );
   }
 
-  // Web fallback (CONTEXT D-09 §Open Constraints): Skia + gesture-handler don't run
-  // on Expo Web without CanvasKit-WASM + COOP/COEP headers. Render the existing
-  // static GardenPlanView read-only so wife's Desktop browser shows the plan
-  // instead of crashing on `PictureRecorder undefined`. Editor is mobile-only in MVP.
+  // Phase 7.5 — Web-native interactive editor (SVG + mouse events).
+  // Replaces the read-only fallback after user decision (2026-05-16): Desktop is a
+  // primary use case, not mobile-first. CONTEXT D-09 revised. Skia editor remains
+  // for iOS/Android; web uses parallel SVG implementation. Shared editorStore + repos.
   if (Platform.OS === 'web') {
-    const elements = useEditorStore.getState().elements;
-    return (
-      <View className="flex-1 bg-stone-50 dark:bg-stone-900" testID="editor-screen-web-fallback">
-        <Stack.Screen options={{ headerTitle: t('editor.webFallback.title') }} />
-        <View className="px-6 pt-4 pb-2">
-          <Text className="text-sm text-stone-700 dark:text-stone-300">
-            {t('editor.webFallback.banner')}
+    if (!dimensions) {
+      return (
+        <View className="flex-1 items-center justify-center bg-stone-50 dark:bg-stone-900 px-6">
+          <Stack.Screen options={{ headerTitle: t('editor.title') }} />
+          <Text className="text-base font-semibold text-stone-800 dark:text-stone-200 text-center mb-2">
+            {t('editor.webFallback.emptyTitle')}
           </Text>
-        </View>
-        {dimensions ? (
-          <View className="flex-1 items-center justify-center px-4">
-            <GardenPlanView
-              dimensions={dimensions}
-              elements={elements}
-              showGrid={true}
-              testID="web-fallback-plan-view"
-            />
-          </View>
-        ) : (
-          <View className="flex-1 items-center justify-center px-6">
-            <Text className="text-base font-semibold text-stone-800 dark:text-stone-200 text-center mb-2">
-              {t('editor.webFallback.emptyTitle')}
-            </Text>
-            <Text className="text-sm text-stone-500 dark:text-stone-400 text-center">
-              {t('editor.webFallback.emptyBody')}
-            </Text>
-          </View>
-        )}
-        <View className="px-6 py-4 border-t border-stone-200 dark:border-stone-700">
+          <Text className="text-sm text-stone-500 dark:text-stone-400 text-center mb-6">
+            {t('editor.webFallback.emptyBody')}
+          </Text>
           <Pressable
             accessibilityRole="button"
             onPress={() => router.push('/(app)/import/review')}
-            className="bg-stone-900 dark:bg-stone-100 py-3 rounded-lg items-center"
-            testID="web-fallback-review-cta"
+            className="bg-stone-900 dark:bg-stone-100 py-3 px-6 rounded-lg"
+            testID="web-empty-review-cta"
           >
             <Text className="text-base font-medium text-stone-50 dark:text-stone-900">
               {t('editor.webFallback.reviewCta')}
             </Text>
           </Pressable>
         </View>
-      </View>
-    );
+      );
+    }
+    return <WebEditorShell dimensions={dimensions} router={router} />;
   }
 
   if (!dimensions) {
@@ -233,6 +218,40 @@ export default function PlanScreen(): React.JSX.Element {
         gardenId={activeGardenId ?? ''}
         dims={dimensions}
         onBedDraftDragStart={handleBedDraftDragStart}
+      />
+    </View>
+  );
+}
+
+// Phase 7.5 — Web editor shell wrapping the SVG editor + toolbar + palette.
+// Local placingKind state primed by palette, consumed by editor on next canvas click.
+function WebEditorShell({
+  dimensions,
+  router,
+}: {
+  dimensions: GardenDimensionsRow;
+  router: ReturnType<typeof useRouter>;
+}): React.JSX.Element {
+  const activeGardenId = useAuthStore((s) => s.activeGardenId);
+  const userId = useAuthStore((s) => s.userId);
+  const [placingKind, setPlacingKind] = React.useState<string | null>(null);
+  return (
+    <View className="flex-1 bg-stone-50 dark:bg-stone-900" testID="web-editor-shell">
+      <Stack.Screen options={{ headerTitle: t('editor.title'), headerShown: false }} />
+      <WebEditorToolbar onBack={() => router.back()} />
+      <View className="flex-1">
+        <WebPlanEditor
+          dimensions={dimensions}
+          gardenId={activeGardenId ?? ''}
+          userId={userId ?? ''}
+          placingKind={placingKind}
+          onPlaced={() => setPlacingKind(null)}
+        />
+      </View>
+      <WebPaletteBar
+        placingKind={placingKind}
+        onSelectKind={setPlacingKind}
+        onCancel={() => setPlacingKind(null)}
       />
     </View>
   );
