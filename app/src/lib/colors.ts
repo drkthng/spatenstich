@@ -5,7 +5,7 @@
 export type PlanColorKey =
   | 'background' | 'border' | 'grid'
   | 'Beet' | 'Rasen' | 'Weg' | 'Laube' | 'Kompost' | 'Wasserstelle'
-  | 'Zaun' | 'Baum' | 'Sitzplatz' | 'Sonstiges' | 'plant';
+  | 'Zaun' | 'Baum' | 'Sitzplatz' | 'Sonstiges' | 'Pflanze' | 'plant';
 
 export const PLAN_COLORS: Record<PlanColorKey, string> = {
   background: '#F5F0E8',
@@ -21,7 +21,8 @@ export const PLAN_COLORS: Record<PlanColorKey, string> = {
   Baum: '#6B9B5E',
   Sitzplatz: '#C9B99A',
   Sonstiges: '#B8AFA7',
-  plant: '#6B9B5E',
+  Pflanze: '#9BC07A',
+  plant: '#9BC07A',
 };
 
 /** Darken a hex color by `amount` (0..1). Default 0.2 (Phase 4 historical default). */
