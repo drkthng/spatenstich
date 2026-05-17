@@ -12,12 +12,28 @@ import type {
   GardenDimensionsRow,
   EntityName,
   AnyRow,
+  PlantDbBundle,
 } from '@spatenstich/shared';
 import { OutboxEnqueueError } from './errors';
 import { scheduleWriteDebounced } from './sync/SyncTriggers';
+import plantsBundle from '@spatenstich/shared/data/plants';
 
 function assertAccount(mode: AuthMode): void {
   if (mode !== 'account') throw new Error('drafts are account-only');
+}
+
+/**
+ * Resolve plantSlug from a German common name label (D-13).
+ * Case-insensitive match against nameDe + nameAltDe in the plants.json bundle.
+ */
+function resolveSlugFromLabel(label: string): string | null {
+  const bundle = plantsBundle as unknown as PlantDbBundle;
+  const normalized = label.trim().toLowerCase();
+  for (const p of bundle.plants) {
+    if (p.nameDe.toLowerCase() === normalized) return p.slug;
+    if (p.nameAltDe?.some((alt: string) => alt.toLowerCase() === normalized)) return p.slug;
+  }
+  return null;
 }
 
 function randomId(): string {
@@ -205,6 +221,7 @@ export async function promotePlantDraft(
       stageEstimate: draft.stageEstimate,
       healthNotes: draft.healthNotes,
       parentBedId: parentBedElement?.id ?? null,
+      plantSlug: resolveSlugFromLabel(draft.commonNameDe),
     },
     layer: 'seasonal',
   };
