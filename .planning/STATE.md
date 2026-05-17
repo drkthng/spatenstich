@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Foundation
 status: Phase 8 COMPLETE — Migration 019 LIVE + seed-plants Edge Function deployed + SQL seed verified; PLANT-DB-01..09 closed
-stopped_at: context exhaustion at 90% (2026-05-17)
-last_updated: "2026-05-17T13:23:19.409Z"
+stopped_at: Phase 9 planned — 4 plans in 3 waves ready
+last_updated: "2026-05-17T13:44:26.362Z"
 last_activity: 2026-05-17
 progress:
   total_phases: 11
   completed_phases: 10
-  total_plans: 44
+  total_plans: 48
   completed_plans: 44
-  percent: 100
+  percent: 92
 ---
 
 # Project State
@@ -199,7 +199,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-17T13:23:19.394Z
-Stopped at: context exhaustion at 90% (2026-05-17)
-Resume file: None
+Last session: 2026-05-17T13:44:26.353Z
+Stopped at: Phase 9 planned — 4 plans in 3 waves ready
+Resume file: .planning/phases/09-companion-hinweis/09-01-PLAN.md
 Next: Phase 9 (Companion-Hinweis) — red/green banner when placing plants in beds based on plant_companions table.
