@@ -1,18 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Post-MVP
+milestone: v1.0
+milestone_name: Foundation
 status: Phase 8 COMPLETE — Migration 019 LIVE + seed-plants Edge Function deployed + SQL seed verified; PLANT-DB-01..09 closed
-stopped_at: Phase 8 Plan 04 complete — Migration 019 pushed to live Supabase (vitrqkzxkiqvadqfzrcx, Frankfurt); seed-plants Edge Function deployed via Docker; SQL seed verified 90 plants + 38 companions live. All 4 plans complete.
-last_updated: "2026-05-17T15:10:00.000Z"
+stopped_at: Phase 9 context gathered
+last_updated: "2026-05-17T13:18:05.853Z"
 last_activity: 2026-05-17
-resume_file:
 progress:
   total_phases: 11
   completed_phases: 10
   total_plans: 44
-  completed_plans: 42
-  percent: 95
+  completed_plans: 44
+  percent: 100
 ---
 
 # Project State
@@ -200,7 +199,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-17T15:10:00.000Z
-Stopped at: Phase 8 COMPLETE. All 4 plans executed. Migration 019 live, 90 plants + 38 companions seeded via SQL fallback, plantRepo + usePlants hooks GREEN. PLANT-DB-01..09 closed.
-Resume file: None
+Last session: 2026-05-17T13:18:05.843Z
+Stopped at: Phase 9 context gathered
+Resume file: .planning/phases/09-companion-hinweis/09-CONTEXT.md
 Next: Phase 9 (Companion-Hinweis) — red/green banner when placing plants in beds based on plant_companions table.
