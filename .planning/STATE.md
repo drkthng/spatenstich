@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Foundation
-status: Phase 8 COMPLETE — Migration 019 LIVE + seed-plants Edge Function deployed + SQL seed verified; PLANT-DB-01..09 closed
+status: Executing Phase 09
 stopped_at: Phase 9 planned — 4 plans in 3 waves ready
-last_updated: "2026-05-17T13:44:26.362Z"
-last_activity: 2026-05-17
+last_updated: "2026-05-17T13:46:27.810Z"
+last_activity: 2026-05-17 -- Phase 09 execution started
 progress:
   total_phases: 11
   completed_phases: 10
@@ -22,15 +22,15 @@ See: .planning/PROJECT.md (updated 2026-05-08)
 See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 
 **Core value:** Manueller Plan-Editor + strukturierter Import aus Claude.ai (zero In-App AI seit Pivot M07 2026-05-08)
-**Current focus:** Phase 6.5 — Draft-Sichtung + Promotion (Wave 0 complete)
+**Current focus:** Phase 09 — companion-hinweis
 
 ## Current Position
 
-Phase: 8 (Plant-DB Foundation) — Wave 0 COMPLETE
-Plan: 1 of 4 (Wave 0 test scaffold + stubs) COMPLETE — 10 new files (canonical plant-db.v1 JSON Schema with `dataSource` enum that explicitly omits `"gartenplaner"`; Ajv2020 validator stub; PlantRow/PlantCompanionRow/PlantDbBundle types + 5 enum unions; empty plants.json stub; LICENSES.md attribution doc; 4 test stubs with 42 total `it.todo` entries; pgTAP RLS skeleton at supabase/tests/plants_rls.sql with 5 TEST blocks); 3 modified config files (packages/shared/src/index.ts re-exports plants types; packages/shared/package.json gains exports map entry + ajv@8.20.0 + ajv-formats@3.0.1 deps; app/jest.config.ts gains @spatenstich/shared/data/plants moduleNameMapper in hooks + editor + components projects); ajv installed via pnpm install (1 lockfile bump). Verification: `pnpm --filter @spatenstich/shared exec jest plants` → 16 todo / 16 total; `pnpm --filter app exec jest --selectProjects hooks --testPathPattern='plantRepo|usePlants'` → 14 todo / 14 total; full shared run shows 28 plant-related todos + 33 passes (i18n/klimazonen/vereinsregeln pre-existing). No NEW typecheck errors; pre-existing supabase.ts DEFERRED-1 unchanged. 6 atomic commits ce44334 / 6b05808 / 1f19dd8 / 6b9a471 / 9fa51ae / 421aade. Duration: ~6 min.
+Phase: 09 (companion-hinweis) — EXECUTING
+Plan: 1 of 4
 Vorheriger Status: Phase 7 COMPLETE — Migration 20260513000018 (plan_elements.layer) pushed live; 07-HUMAN-VERIFY.md with 4 deferred manual smoke sections
 Plans: 25/25 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 5/5, Phase 07: 6/6, Phase 08: 1/4)
-Last activity: 2026-05-17
+Last activity: 2026-05-17 -- Phase 09 execution started
 
 Progress: [██████░░░░] 25% within Phase 8 (1/4 plans done; 40 of an estimated 44 plans complete cross-project)
 
