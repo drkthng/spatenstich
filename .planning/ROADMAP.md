@@ -127,7 +127,7 @@
 **Plans:** 4 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Wave 0 test scaffold (8 stub files: schema, validator stub, types, JSON stub, package config, jest mapper, repo+hook test stubs, pgTAP skeleton)
+- [x] 08-01-PLAN.md — Wave 0 test scaffold ✅ (2026-05-17) — 10 new files + 2 config mods + lockfile; 42 it.todo entries pin PLANT-DB-01/02/03/04/06/07/08/09; `pnpm --filter @spatenstich/shared exec jest plants` → 16 todo / 16 total; gartenplaner literal three-walled out (schema enum + smoke-test + LICENSES.md)
 - [ ] 08-02-PLAN.md — Wave 1 schema + types + validator (Migration 019 + filled validator with cross-ref checks + filled pgTAP RLS test + 9 PLANT-DB-* in REQUIREMENTS.md)
 - [ ] 08-03-PLAN.md — Wave 2 data curation (100-120 real plant entries + 30+ companion pairs + filled smoke tests, license-hygiene PLANT-DB-09 enforced)
 - [ ] 08-04-PLAN.md — Wave 3 Edge Function + repo + hook + Migration 019 push + manual seed deploy (autonomous 3-gate push + Docker deploy + curl invoke)

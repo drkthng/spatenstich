@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: Phase 7 COMPLETE (Wave 5 — Migration 018 LIVE; manual smoke deferred to user via 07-HUMAN-VERIFY.md)
-stopped_at: Phase 7 Plan 06 complete — Migration 20260513000018 pushed to live Supabase (vitrqkzxkiqvadqfzrcx, Frankfurt); 07-HUMAN-VERIFY.md written with 4 manual smoke sections (EDIT-12/EDIT-09/DRAFT-02/DRAFT-03)
-last_updated: "2026-05-13T14:15:00.000Z"
-last_activity: 2026-05-13
+status: Phase 8 Plan 01 COMPLETE (Wave 0 — test scaffold + stubs landed; 6 commits, 14 files)
+stopped_at: Phase 8 Plan 01 complete — 10 new files (schema, validator stub, types, data stub, LICENSES.md, 4 test stubs, pgTAP skeleton) + 2 modified config files (index.ts, package.json, jest.config.ts) + pnpm-lock.yaml bump; 42 it.todo entries pinned coverage for PLANT-DB-01/02/03/04/06/07/08/09; gartenplaner literal three-walled out (schema enum + smoke-test PLANT-DB-09 + LICENSES.md)
+last_updated: "2026-05-17T06:08:30.000Z"
+last_activity: 2026-05-17
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 40
-  completed_plans: 37
-  percent: 92
+  total_plans: 44
+  completed_plans: 38
+  percent: 86
 ---
 
 # Project State
@@ -26,13 +26,13 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 
 ## Current Position
 
-Phase: 7 (Plan-Editor + Drafts-Integration M2+M07.5) — Wave 5 COMPLETE → PHASE 7 COMPLETE
-Plan: 6 of 6 (Migration push gate + HUMAN-VERIFY.md) COMPLETE — Migration 20260513000018 (`plan_elements.layer text NOT NULL DEFAULT 'infrastructure' CHECK in ('infrastructure','seasonal')` + Pflanze→seasonal backfill) pushed to live Supabase project `vitrqkzxkiqvadqfzrcx` (Frankfurt) via autonomous 4-gate flow (sanity → migration list --linked → db push --dry-run → real db push); DO-block notice `migration_018 ok: plan_elements.layer added with CHECK + plant backfill` fired; post-push `migration list --linked` shows 20260513000018 in both Local + Remote columns; post-dry-run reports "Remote database is up to date"; 07-HUMAN-VERIFY.md written with 4 deferred manual smoke sections (Setup/Steps/Expected/Fail-signals/Pass-criterion/Reply-format) for EDIT-12 (60fps@200), EDIT-09 (autosave force-quit), DRAFT-02 (bed-draft drop accuracy), DRAFT-03 (stale-filter visual sanity)
-Vorheriger Status: Phase 07 Plan 05 complete — DraftsTrayBottomSheet + BedPickerModal + plan/index.tsx screen + Home Plan öffnen CTA + 60+ editor.* i18n keys; DRAFT-01/02/03 closed via automated tests
-Plans: 24/24 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 5/5, Phase 07: 6/6)
-Last activity: 2026-05-13
+Phase: 8 (Plant-DB Foundation) — Wave 0 COMPLETE
+Plan: 1 of 4 (Wave 0 test scaffold + stubs) COMPLETE — 10 new files (canonical plant-db.v1 JSON Schema with `dataSource` enum that explicitly omits `"gartenplaner"`; Ajv2020 validator stub; PlantRow/PlantCompanionRow/PlantDbBundle types + 5 enum unions; empty plants.json stub; LICENSES.md attribution doc; 4 test stubs with 42 total `it.todo` entries; pgTAP RLS skeleton at supabase/tests/plants_rls.sql with 5 TEST blocks); 3 modified config files (packages/shared/src/index.ts re-exports plants types; packages/shared/package.json gains exports map entry + ajv@8.20.0 + ajv-formats@3.0.1 deps; app/jest.config.ts gains @spatenstich/shared/data/plants moduleNameMapper in hooks + editor + components projects); ajv installed via pnpm install (1 lockfile bump). Verification: `pnpm --filter @spatenstich/shared exec jest plants` → 16 todo / 16 total; `pnpm --filter app exec jest --selectProjects hooks --testPathPattern='plantRepo|usePlants'` → 14 todo / 14 total; full shared run shows 28 plant-related todos + 33 passes (i18n/klimazonen/vereinsregeln pre-existing). No NEW typecheck errors; pre-existing supabase.ts DEFERRED-1 unchanged. 6 atomic commits ce44334 / 6b05808 / 1f19dd8 / 6b9a471 / 9fa51ae / 421aade. Duration: ~6 min.
+Vorheriger Status: Phase 7 COMPLETE — Migration 20260513000018 (plan_elements.layer) pushed live; 07-HUMAN-VERIFY.md with 4 deferred manual smoke sections
+Plans: 25/25 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 5/5, Phase 07: 6/6, Phase 08: 1/4)
+Last activity: 2026-05-17
 
-Progress: [██████████] 100% within Phase 7 (6/6 plans done; 39 of an estimated 40 plans complete cross-project)
+Progress: [██████░░░░] 25% within Phase 8 (1/4 plans done; 40 of an estimated 44 plans complete cross-project)
 
 ## Performance Metrics
 
@@ -81,6 +81,7 @@ Progress: [██████████] 100% within Phase 7 (6/6 plans done; 
 | Phase 07 P03 | 35 | 3 tasks (TDD GREEN, fills 8 Wave-0 stubs) | 18 files |
 | Phase 07 P04 | 11 | 3 tasks (TDD GREEN, fills 3 Wave-0 component stubs) | 10 files |
 | Phase 07 P05 | 12 | 4 tasks (TDD GREEN, fills last Wave-0 stub DraftsTray) | 9 files |
+| Phase 08 P01 | 6 | 6 tasks (Wave-0 test scaffold + stubs) | 14 files |
 
 ## Accumulated Context
 
@@ -159,6 +160,11 @@ Recent decisions affecting current work:
 - [Phase 07 P05] D-18 Annehmen-tap accessibility fallback (Revision W8): Switch-Control / Voice-Control / non-touch users can drive bed-draft promotion via the Annehmen button which fires onBedDraftDragStart (same callback path as the long-press shared value seed). Both paths converge on promoteBedDraft with finalCoords. Documented in must_haves as a parallel a11y path, not a replacement for the long-press drag.
 - [Phase 07 P06] Migration 20260513000018 (plan_elements.layer) pushed to live Supabase project (ref `vitrqkzxkiqvadqfzrcx`, Frankfurt) — verified via `supabase migration list --linked` showing Local + Remote columns populated (`20260513000018 | 20260513000018 | 2026-05-13 00:00:18`). DO-block notice `migration_018 ok: plan_elements.layer added with CHECK + plant backfill` fired. Both pre-flight gates green (Gate 1 `migration list --linked` exit 0, Gate 2 `db push --dry-run --linked --yes` exit 0); real push completed non-interactively. plan_elements now has `layer text NOT NULL DEFAULT 'infrastructure'` + CHECK `layer in ('infrastructure','seasonal')`; backfill promoted existing `element_type='Pflanze'` rows to `seasonal`. Date: 2026-05-13.
 - [Phase 07 P06] 07-HUMAN-VERIFY.md written with 4 deferred manual smoke sections (EDIT-12 60fps@200, EDIT-09 autosave-crash, DRAFT-02 bed-drop, DRAFT-03 stale-filter). Status `pending` until Dirk runs on iPhone; `/gsd-verify-work` should flag these 4 as outstanding manual-pass.
+- [Phase 08 P01] dataSource enum gates license hygiene at the JSON Schema layer — `"gartenplaner"` literal is FORBIDDEN; smoke-test PLANT-DB-09 anchor is second wall; LICENSES.md is third (PR-review aid). Three independent walls so any future Gartenplaner-CSV ingestion path that forgets re-attribution gets caught at PR time.
+- [Phase 08 P01] plants.json empty stub WILL FAIL schema's `minItems:80` — intentional. Wave 0 smoke tests use `it.todo` so jest does not assert; Wave 2 (Plan 03) fills the bundle and validator returns `{ok:true}`. Schema stays authoritative (no relax-then-tighten ratchet considered).
+- [Phase 08 P01] PlantRow does NOT extend RowBase (no LWW triggers, no `updatedByUserId`, no `deletedAt`) — global ref DB has different lifecycle than user-scoped rows. `PlantCompanionRow` likewise omits LWW fields. Wire-format `PlantDbBundle` uses `Omit<PlantRow, 'id' | 'createdAt' | 'updatedAt'>` for plants array (no UUIDs in bundle, slug-based cross-refs in companions).
+- [Phase 08 P01] Jest moduleNameMapper added only in `hooks` + `editor` + `components` projects — not in `node`/`stores`/`photos` — because no plants tests run there in Phase 8 (additive minimal-noise rule). Future phases can extend if/when plants surfaces in those projects.
+- [Phase 08 P01] All test stubs use `it.todo()` exclusively — no `it.skip()`, no `expect(false)`. Plans 02–04 fill the 42 todos (16 smoke + 12 validator + 10 plantRepo + 4 usePlants); jest reports todo counts as a coverage-progress signal during downstream waves.
 
 ### Roadmap Evolution
 
@@ -190,7 +196,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-13T14:15:00.000Z
-Stopped at: Completed Phase 7 Plan 06 (Wave 5 — Migration 20260513000018 plan_elements.layer pushed LIVE to Supabase vitrqkzxkiqvadqfzrcx Frankfurt via autonomous 4-gate flow; 07-HUMAN-VERIFY.md with 4 deferred manual smoke sections written). Phase 7 COMPLETE.
+Last session: 2026-05-17T06:08:30.000Z
+Stopped at: Completed Phase 8 Plan 01 (Wave 0 — test scaffold + stubs landed; 6 atomic commits; `pnpm --filter @spatenstich/shared exec jest plants` shows 16 todo / 16 total; app/hooks plant tests show 14 todo / 14 total). Wave 0 verification surface locked.
 Resume file: None
-Next: /gsd-verify-work 07 → Phase 7 verifier (will flag EDIT-12 + EDIT-09 + DRAFT-02 + DRAFT-03 as outstanding manual-pass until Dirk runs 07-HUMAN-VERIFY.md on iPhone) → milestone v1.1 close consideration
+Next: Plan 02 (Wave 1 — fill validator cross-ref body + author Migration 019 plants + plant_companions tables + RLS policies + CHECK constraint + fill 5 pgTAP TEST blocks + push via autonomous 4-gate flow).
