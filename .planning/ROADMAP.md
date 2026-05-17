@@ -148,8 +148,8 @@ Plans:
 
 Plans:
 - [x] 09-01-PLAN.md — Foundation: PiP utility, InlineBanner variant extension, i18n keys
-- [ ] 09-02-PLAN.md — Core: useCompanionDetection hook + plantSlug write path
-- [ ] 09-03-PLAN.md — UI: CompanionToast floating toast component
+- [x] 09-02-PLAN.md — Core: useCompanionDetection hook + plantSlug write path
+- [x] 09-03-PLAN.md — UI: CompanionToast floating toast component
 - [ ] 09-04-PLAN.md — Integration: Canvas overlays (Skia + SVG) + wiring into editor screen
 **UI hint**: yes
 
