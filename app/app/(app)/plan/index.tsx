@@ -26,6 +26,8 @@ import { GardenPlanView } from '@/src/components/GardenPlanView';
 import { WebPlanEditor } from '@/src/components/editor/web/WebPlanEditor';
 import { WebPaletteBar } from '@/src/components/editor/web/WebPaletteBar';
 import { WebEditorToolbar } from '@/src/components/editor/web/WebEditorToolbar';
+import { useCompanionDetection } from '@/src/hooks/useCompanionDetection';
+import { CompanionToast } from '@/src/components/editor/CompanionToast';
 import de from '@spatenstich/shared/i18n/de';
 
 const t = (key: string): string =>
@@ -192,6 +194,8 @@ export default function PlanScreen(): React.JSX.Element {
     );
   }
 
+  const { conflictElementIds, toastState, dismissToast } = useCompanionDetection();
+
   const elementsForPalette = useEditorStore.getState().elements;
   const hasAnyBed = elementsForPalette.some(
     (e) => e.elementType === 'Beet' && e.deletedAt === null,
@@ -205,7 +209,7 @@ export default function PlanScreen(): React.JSX.Element {
           consumes the bed-draft drag handoff seeded by the tray LongPress. */}
       <GestureDetector gesture={screenRootPan}>
         <View className="flex-1" testID="editor-canvas-wrapper">
-          <EditorCanvas dimensions={dimensions} />
+          <EditorCanvas dimensions={dimensions} conflictElementIds={conflictElementIds} />
         </View>
       </GestureDetector>
       <ElementPalette
@@ -219,6 +223,14 @@ export default function PlanScreen(): React.JSX.Element {
         dims={dimensions}
         onBedDraftDragStart={handleBedDraftDragStart}
       />
+      {toastState && (
+        <CompanionToast
+          variant={toastState.variant}
+          message={toastState.message}
+          onDismiss={dismissToast}
+          testID={`companion-toast-${toastState.variant}`}
+        />
+      )}
     </View>
   );
 }
@@ -235,6 +247,7 @@ function WebEditorShell({
   const activeGardenId = useAuthStore((s) => s.activeGardenId);
   const userId = useAuthStore((s) => s.userId);
   const [placingKind, setPlacingKind] = React.useState<string | null>(null);
+  const { conflictElementIds, toastState, dismissToast } = useCompanionDetection();
   return (
     <View className="flex-1 bg-stone-50 dark:bg-stone-900" testID="web-editor-shell">
       <Stack.Screen options={{ headerTitle: t('editor.title'), headerShown: false }} />
@@ -246,6 +259,7 @@ function WebEditorShell({
           userId={userId ?? ''}
           placingKind={placingKind}
           onPlaced={() => setPlacingKind(null)}
+          conflictElementIds={conflictElementIds}
         />
       </View>
       <WebPaletteBar
@@ -253,6 +267,14 @@ function WebEditorShell({
         onSelectKind={setPlacingKind}
         onCancel={() => setPlacingKind(null)}
       />
+      {toastState && (
+        <CompanionToast
+          variant={toastState.variant}
+          message={toastState.message}
+          onDismiss={dismissToast}
+          testID={`companion-toast-${toastState.variant}`}
+        />
+      )}
     </View>
   );
 }
