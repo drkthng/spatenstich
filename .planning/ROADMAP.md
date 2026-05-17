@@ -136,7 +136,7 @@ Plans:
 ### Phase 9: Companion-Hinweis
 **Goal**: Beim Setzen einer Pflanze auf ein Beet (oder einer existierenden Pflanze in dasselbe Beet) sofort visuell sehen: passt das zusammen?
 **Depends on**: Phase 7, Phase 7.5a, Phase 8
-**Requirements**: (neue COMP-* Requirements in `/gsd-discuss-phase` ausgearbeitet)
+**Requirements**: SC-1 (Detection), SC-2 (roter Banner), SC-3 (grüner Banner), SC-4 (nicht-blockierend), SC-5 (persistente Markierung), SC-6 (plant_companions)
 **Success Criteria** (what must be TRUE):
   1. Beim Setzen einer Pflanze in ein Beet (Web + iPhone): Detection läuft gegen alle anderen Pflanzen in demselben Beet-Polygon
   2. **Roter Banner** bei Konflikt: *"⚠ Konflikt: Tomate verträgt sich nicht mit Fenchel"* (i18n)
@@ -144,7 +144,13 @@ Plans:
   4. Beide Banner sind nicht-blockierend (Dirk darf trotzdem platzieren — er kennt seinen Garten besser)
   5. Persistente Markierung: rotes Dreieck-Icon an Pflanzen mit aktivem Konflikt (visible auch nach Banner-Dismiss)
   6. Adjacency-Logik via Phase 8 `plant_companions`-Tabelle
-**Plans**: TBD
+**Plans:** 4 plans
+
+Plans:
+- [ ] 09-01-PLAN.md — Foundation: PiP utility, InlineBanner variant extension, i18n keys
+- [ ] 09-02-PLAN.md — Core: useCompanionDetection hook + plantSlug write path
+- [ ] 09-03-PLAN.md — UI: CompanionToast floating toast component
+- [ ] 09-04-PLAN.md — Integration: Canvas overlays (Skia + SVG) + wiring into editor screen
 **UI hint**: yes
 
 ### Phase 10: Aussaatkalender v1
@@ -223,7 +229,7 @@ Plans:
 | **--- v1.1 Saison 2026 Ready ---** | | | |
 | 7.5b. Web Editor Polish | 0/TBD | Not started (optional) | - |
 | 8. Plant-DB Foundation | 4/4 | ✅ Complete | 2026-05-17 |
-| 9. Companion-Hinweis | 0/TBD | Not started | - |
+| 9. Companion-Hinweis | 0/4 | Not started | - |
 | 10. Aussaatkalender v1 | 0/TBD | Not started | - |
 | **--- v1.2 Saison-Tools ---** | | | |
 | 11. Garten-Journal | 0/TBD | Not started | - |
@@ -247,4 +253,4 @@ Plans:
 
 ---
 
-*Last updated: 2026-05-17 — Roadmap-Restructure nach Repo-Research + User-Entscheidung Desktop-First*
+*Last updated: 2026-05-17 — Phase 9 plans created*
