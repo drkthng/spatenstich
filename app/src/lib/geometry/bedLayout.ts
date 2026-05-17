@@ -15,6 +15,26 @@ export interface Bbox {
   heightM: number;
 }
 
+/**
+ * Ray-casting point-in-polygon test (D-05, Phase 9).
+ * Returns true if point is strictly inside polygon.
+ * Points on edge: implementation-defined. O(n) vertex count.
+ */
+export function pointInPolygon(point: Point2D, polygon: Point2D[]): boolean {
+  if (polygon.length < 3) return false;
+  let inside = false;
+  const { x: px, y: py } = point;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].x, yi = polygon[i].y;
+    const xj = polygon[j].x, yj = polygon[j].y;
+    const intersect =
+      yi > py !== yj > py &&
+      px < ((xj - xi) * (py - yi)) / (yj - yi) + xi;
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
 export function polygonToBbox(points: Point2D[]): Bbox {
   if (points.length < 3) {
     throw new Error('polygon needs at least 3 points');
