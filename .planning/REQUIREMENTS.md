@@ -80,6 +80,18 @@
 - [x] **EDIT-11**: Undo/Redo (mind. 20 Schritte)
 - [ ] **EDIT-12**: 60fps bei bis zu 200 Elementen auf echtem iOS-Gerät
 
+### Plant-DB Foundation (Phase 8 — neu 2026-05-17)
+
+- [ ] **PLANT-DB-01**: `plants` Supabase-Tabelle mit ≥80 (Ziel: 100–120) Pflanzen + reichem Schema (id, slug, nameDe, nameAltDe[], nameBotanical, family, category, spacing/depth, sun/water, climate zone, sow/plant/harvest DOY ranges, daysToHarvest, nitrogenFixing, perennial, notesDe, iconEmoji, dataSource, timestamps)
+- [ ] **PLANT-DB-02**: `plant_companions`-Tabelle mit kanonischer (plant_a_id < plant_b_id) UUID-Ordnung, UNIQUE-Pair, relationship-CHECK enum (companion | incompatible | neutral)
+- [ ] **PLANT-DB-03**: JSON-Bundle in `packages/shared/src/data/plants.json` mit `schemaVersion: "plant-db.v1"`, validiert gegen ajv-Schema in `packages/shared/src/schemas/plant-db.v1.json`
+- [ ] **PLANT-DB-04**: Read-only RLS Policy `<table>_read_authenticated` USING `auth.uid() IS NOT NULL` für beide Tables (plants + plant_companions); FOR SELECT TO authenticated; KEINE INSERT/UPDATE/DELETE-Policies
+- [ ] **PLANT-DB-05**: Edge Function `seed-plants` idempotent (upsert plants on slug, rebuild companions); static-file-bundled JSON via supabase/config.toml `static_files`
+- [ ] **PLANT-DB-06**: `usePlants()` Hook mit TanStack-Query `initialData` aus JSON-Bundle für Cold-Start-Fallback + `initialDataUpdatedAt: 0` für Background-Refetch
+- [ ] **PLANT-DB-07**: `plantRepo.ts` reine Read-Funktionen (loadAllPlants, loadPlantBySlug, loadCompanionsFor symmetric, searchPlants ILIKE), KEIN assertAccount (Pflanzen sind global lesbar nach PLANT-DB-04 RLS)
+- [ ] **PLANT-DB-08**: Smoke-Test-Suite (Wave 0) deckt Anker-Tests ab (Tomate=Solanaceae, Erdbeere=Rosaceae, Buschbohne=nitrogenFixing, Apfel=perennial, Tomate+Basilikum=companion) + Bundle-Invarianten (≥80 plants, unique slug, no self-companion, canonical pair uniqueness)
+- [ ] **PLANT-DB-09**: Quellen-Lizenz-Hygiene — `dataSource`-Enum forbids the literal `"gartenplaner"`; allowed values: `gardeneus` | `garden-planner` | `own-research` | `merged`; LICENSES.md in `packages/shared/src/data/` dokumentiert die Hygiene-Regel
+
 ### Saatgut-Inventar (M3) — manuell only
 
 - [ ] ~~**SEED-01**: Claude Vision extrahiert Sorteninfo aus Samentüten-Fotos~~ — **DROPPED (Pivot M07, keine In-App AI)**
@@ -231,17 +243,26 @@
 | EDIT-09 | Phase 7 | Pending |
 | EDIT-11 | Phase 7 | Complete (P04) |
 | EDIT-12 | Phase 7 | Pending |
-| SEED-02 | Phase 8 | Pending |
-| SEED-03 | Phase 8 | Pending |
-| SEED-04 | Phase 8 | Pending |
-| SEED-05 | Phase 8 | Pending |
-| SEED-06 | Phase 8 | Pending |
-| CAL-01 | Phase 9 | Pending |
-| CAL-02 | Phase 9 | Pending |
-| CAL-03 | Phase 9 | Pending |
-| CAL-04 | Phase 9 | Pending |
-| CAL-05 | Phase 9 | Pending |
-| CAL-06 | Phase 9 | Pending |
+| SEED-02 | Phase 13 | Pending |
+| SEED-03 | Phase 13 | Pending |
+| SEED-04 | Phase 13 | Pending |
+| SEED-05 | Phase 13 | Pending |
+| SEED-06 | Phase 13 | Pending |
+| PLANT-DB-01 | Phase 8 | Pending |
+| PLANT-DB-02 | Phase 8 | Pending |
+| PLANT-DB-03 | Phase 8 | Pending |
+| PLANT-DB-04 | Phase 8 | Pending |
+| PLANT-DB-05 | Phase 8 | Pending |
+| PLANT-DB-06 | Phase 8 | Pending |
+| PLANT-DB-07 | Phase 8 | Pending |
+| PLANT-DB-08 | Phase 8 | Pending |
+| PLANT-DB-09 | Phase 8 | Pending |
+| CAL-01 | Phase 10 | Pending |
+| CAL-02 | Phase 10 | Pending |
+| CAL-03 | Phase 10 | Pending |
+| CAL-04 | Phase 10 | Pending |
+| CAL-05 | Phase 10 | Pending |
+| CAL-06 | Phase 10 | Pending |
 | NFR-02 | - | Superseded (M07) |
 | NFR-03 | - | Superseded (M07) |
 | RULES-02 | Phase 10 | Deferred (v1.1) |
@@ -251,7 +272,8 @@
 | EDIT-10 | Phase 10 | Deferred (v1.1) |
 
 **Coverage:**
-- v1 active requirements: 62 total (FOUND×5 active, AUTH×5, GARDEN×4, PROF×4, REMOVE×3, IMPORT×8, DRAFT×3, EDIT×11, SEED×5, CAL×6, SYNC×4, NFR×4 active)
+- v1 active requirements: 71 total (FOUND×5 active, AUTH×5, GARDEN×4, PROF×4, REMOVE×3, IMPORT×8, DRAFT×3, EDIT×11, PLANT-DB×9, SEED×5, CAL×6, SYNC×4, NFR×4 active)
+- **Phase 8 (Plant-DB Foundation, new 2026-05-17):** PLANT-DB-01..PLANT-DB-09 (9 requirements)
 - Superseded/dropped by M07: 15 (PHOTO×8, SEED-01, FOUND-06/07/08, NFR-02/03, RULES-01)
 - Deferred to v1.1: 5 (RULES-02/03/04/05, EDIT-10)
 - Mapped to phases: all ✓
