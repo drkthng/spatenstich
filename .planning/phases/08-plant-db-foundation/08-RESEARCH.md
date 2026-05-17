@@ -1189,32 +1189,32 @@ describe('plants.json — Phase 8 smoke tests', () => {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED — captured below as inline decisions; each marked RESOLVED with chosen path)
 
 1. **Should the Edge Function emit a `seed_runs` audit log row?**
    - What we know: D-17 specifies the seed workflow but doesn't require an audit log. The function could write to a new `seed_runs(id, ran_at, sha256, plants_count, companions_count, ran_by_user_id)` table.
    - What's unclear: Whether Dirk needs to know "when was the last successful seed run" outside of git history.
-   - Recommendation: **Skip in v1.** Git history of `plants.json` + Edge Function deploy log give traceability. Add `seed_runs` only if a debugging need surfaces.
+   - **RESOLVED:** **Skip in v1.** Git history of `plants.json` + Edge Function deploy log give traceability. Add `seed_runs` only if a debugging need surfaces.
 
 2. **Should the JSON bundle include companion-pair `notes` in German or English?**
    - What we know: D-08 says `notes` is optional free-text.
    - What's unclear: Are these notes ever shown to the user? Phase 9 Companion-Hinweis spec doesn't explicitly mention them.
-   - Recommendation: **German** by default, since they may surface in Phase 9 banner or hover-tooltip. Consistent with all other German-text fields.
+   - **RESOLVED:** **German** by default, since they may surface in Phase 9 banner or hover-tooltip. Consistent with all other German-text fields.
 
 3. **Should `searchPlants(query)` use Postgres full-text search or simple ILIKE?**
    - What we know: D-09 says "fuzzy match". Postgres has `pg_trgm` and `tsvector` but neither is enabled by default in our Supabase project.
    - What's unclear: Will ILIKE on 120 rows perform acceptably? Probably yes (it's <1ms either way at this size).
-   - Recommendation: **ILIKE in Phase 8.** Defer pg_trgm or tsvector setup to Phase 13 (when Saatgut-Inventar autocomplete needs sub-100ms response over a larger universe).
+   - **RESOLVED:** **ILIKE in Phase 8.** Defer pg_trgm or tsvector setup to Phase 13 (when Saatgut-Inventar autocomplete needs sub-100ms response over a larger universe).
 
 4. **Should the Edge Function be triggered by a manual `curl` (D-17 implies this) or by a scheduled cron?**
    - What we know: D-17 says "manuell triggern".
    - What's unclear: Could a `pg_cron` job trigger it daily for free without harm (idempotent anyway)?
-   - Recommendation: **Manual only in v1.** Cron adds complexity (`pg_cron` extension, scheduling syntax) for no clear benefit. The data doesn't change without a human edit anyway.
+   - **RESOLVED:** **Manual only in v1.** Cron adds complexity (`pg_cron` extension, scheduling syntax) for no clear benefit. The data doesn't change without a human edit anyway.
 
 5. **Should the canonical `data_source` enum include a distinct "merged" sub-enum?**
    - What we know: D-06 lists `"merged"` as a valid value but doesn't specify sub-format.
    - What's unclear: Is `"merged:gardeneus+own-research"` more useful than just `"merged"`?
-   - Recommendation: **Start with bare `"merged"`** for v1. If during data curation the audit trail needs more granularity, switch to sub-format in the JSON schema (no DB migration needed since `data_source` is a free `text` column at DB level).
+   - **RESOLVED:** **Start with bare `"merged"`** for v1. If during data curation the audit trail needs more granularity, switch to sub-format in the JSON schema (no DB migration needed since `data_source` is a free `text` column at DB level).
 
 ---
 

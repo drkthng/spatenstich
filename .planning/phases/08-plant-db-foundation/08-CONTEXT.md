@@ -153,6 +153,10 @@ Zentrale, deutschsprachige Pflanzen-Datenbank mit allen Infos die Phase 9 (Compa
 
 - **D-17:** **Daten-Pflege-Workflow für die Zukunft**: JSON-Datei editieren → PR → Smoke-Tests müssen grün sein → merge → Edge Function neu deployen → seed-plants manuell triggern. Nicht direkt in Supabase Dashboard editieren — geht sonst beim nächsten Seed verloren.
 
+### Roadmap Bookkeeping
+
+- **D-18:** **REQUIREMENTS.md Phase→Plan-Mapping wird in Phase 8 Wave 1 inline aktualisiert** (Migration 019 + new PLANT-DB-* requirements registry naturally touch REQUIREMENTS.md anyway). Specifically: (a) insert 9 new PLANT-DB-01..PLANT-DB-09 entries mapped to Phase 8; (b) re-map SEED-02..SEED-06 from `Phase 8` to `Phase 13` (Saatgut-Inventar pivot per ROADMAP); (c) re-map CAL-01..CAL-06 from `Phase 9` to `Phase 10` (Aussaatkalender pivot per ROADMAP). The CAL-* and SEED-* re-mappings are part of the **v1.1 hot-path roadmap restructure dated 2026-05-17**, bundled here for one-pass file edit rather than spread across multiple phases. Authority: ROADMAP.md as of 2026-05-17 (which already reflects the new phase numbering); REQUIREMENTS.md catches up.
+
 ### Claude's Discretion
 - Exakte Pflanzenliste-Reihenfolge (alphabetisch im JSON für Diff-Lesbarkeit)
 - Genaue DOY-Werte pro Pflanze (Mitteldeutschland-Standardwerte; spätere Klimazonenspezifische Variation in Phase 10)

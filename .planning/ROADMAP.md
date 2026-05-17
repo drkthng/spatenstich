@@ -124,7 +124,13 @@
   4. Migration 019 erstellt + seeded
   5. `usePlants()` Hook lädt + cacht lokal (expo-sqlite oder JSON-Bundle)
   6. Datenquellen dokumentiert (Gardeneus MIT, garden-planner MIT, Gartenplaner als Inspiration, eigene Recherche)
-**Plans**: TBD
+**Plans:** 4 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Wave 0 test scaffold (8 stub files: schema, validator stub, types, JSON stub, package config, jest mapper, repo+hook test stubs, pgTAP skeleton)
+- [ ] 08-02-PLAN.md — Wave 1 schema + types + validator (Migration 019 + filled validator with cross-ref checks + filled pgTAP RLS test + 9 PLANT-DB-* in REQUIREMENTS.md)
+- [ ] 08-03-PLAN.md — Wave 2 data curation (100-120 real plant entries + 30+ companion pairs + filled smoke tests, license-hygiene PLANT-DB-09 enforced)
+- [ ] 08-04-PLAN.md — Wave 3 Edge Function + repo + hook + Migration 019 push + manual seed deploy (autonomous 3-gate push + Docker deploy + curl invoke)
 **UI hint**: no *(reine Daten-Phase, UI in Phase 9 + 10)*
 
 ### Phase 9: Companion-Hinweis
