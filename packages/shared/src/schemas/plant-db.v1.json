@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spatenstich.app/schemas/plant-db.v1.json",
+  "title": "Spatenstich Plant Database v1",
+  "description": "Pflanzen-Referenzdatensatz und Mischkultur-Beziehungen für deutsche Kleingärten (Klimazone 7a-8a).",
+  "type": "object",
+  "required": ["schemaVersion", "plants", "companions"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": "plant-db.v1" },
+    "plants": {
+      "type": "array",
+      "minItems": 80,
+      "items": { "$ref": "#/$defs/plant" }
+    },
+    "companions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/companion" }
+    }
+  },
+  "$defs": {
+    "plant": {
+      "type": "object",
+      "required": ["slug", "nameDe", "family", "category", "sunRequirement", "waterNeeds", "dataSource"],
+      "additionalProperties": false,
+      "properties": {
+        "slug":               { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$", "minLength": 2, "maxLength": 64 },
+        "nameDe":             { "type": "string", "minLength": 1 },
+        "nameAltDe":          { "type": "array", "items": { "type": "string" } },
+        "nameBotanical":      { "type": ["string", "null"] },
+        "family":             { "type": "string", "minLength": 1 },
+        "category":           { "enum": ["Gemüse", "Kraut", "Beere", "Obstbaum", "Blume"] },
+        "minSpacingCm":       { "type": ["integer", "null"], "minimum": 1, "maximum": 500 },
+        "rowSpacingCm":       { "type": ["integer", "null"], "minimum": 1, "maximum": 500 },
+        "depthCm":            { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
+        "sunRequirement":     { "enum": ["sonnig", "halb_schattig", "schattig"] },
+        "waterNeeds":         { "enum": ["niedrig", "mittel", "hoch"] },
+        "climateZoneMin":     { "type": ["integer", "null"], "minimum": 1, "maximum": 11 },
+        "climateZoneMax":     { "type": ["integer", "null"], "minimum": 1, "maximum": 11 },
+        "sowOutdoorDoyStart": { "type": ["integer", "null"], "minimum": 1, "maximum": 366 },
+        "sowOutdoorDoyEnd":   { "type": ["integer", "null"], "minimum": 1, "maximum": 366 },
+        "sowIndoorDoyStart":  { "type": ["integer", "null"], "minimum": 1, "maximum": 366 },
+        "sowIndoorDoyEnd":    { "type": ["integer", "null"], "minimum": 1, "maximum": 366 },
+        "plantDoyStart":      { "type": ["integer", "null"], "minimum": 1, "maximum": 366 },
+        "plantDoyEnd":        { "type": ["integer", "null"], "minimum": 1, "maximum": 366 },
+        "harvestDoyStart":    { "type": ["integer", "null"], "minimum": 1, "maximum": 366 },
+        "harvestDoyEnd":      { "type": ["integer", "null"], "minimum": 1, "maximum": 366 },
+        "daysToHarvest":      { "type": ["integer", "null"], "minimum": 1, "maximum": 1000 },
+        "nitrogenFixing":     { "type": "boolean" },
+        "perennial":          { "type": "boolean" },
+        "notesDe":            { "type": ["string", "null"] },
+        "iconEmoji":          { "type": ["string", "null"], "maxLength": 8 },
+        "dataSource":         { "enum": ["gardeneus", "garden-planner", "own-research", "merged"] }
+      }
+    },
+    "companion": {
+      "type": "object",
+      "required": ["plantASlug", "plantBSlug", "relationship", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "plantASlug":   { "type": "string" },
+        "plantBSlug":   { "type": "string" },
+        "relationship": { "enum": ["companion", "incompatible", "neutral"] },
+        "source":       { "enum": ["gardeneus", "garden-planner", "own-research", "merged"] },
+        "notes":        { "type": ["string", "null"] }
+      }
+    }
+  }
+}

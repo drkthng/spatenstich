@@ -6,13 +6,18 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./i18n/de": "./src/i18n/de.json"
+    "./i18n/de": "./src/i18n/de.json",
+    "./data/plants": "./src/data/plants.json"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "test": "jest --passWithNoTests",
     "build": "echo 'no build — source-only package'"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1"
   },
   "devDependencies": {
     "typescript": "6.0.2",

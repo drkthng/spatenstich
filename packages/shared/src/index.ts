@@ -32,5 +32,15 @@ export type {
   ImportPayloadObservation,
   ImportPayloadComplianceFlag,
 } from './types/entities';
+export type {
+  PlantRow,
+  PlantCompanionRow,
+  PlantDbBundle,
+  PlantCategory,
+  SunRequirement,
+  WaterNeeds,
+  CompanionRelationship,
+  DataSource,
+} from './types/plants';
 export type { QueryOptions } from './types/storage';
 // i18n JSON wird via Pfad-Import konsumiert: `@spatenstich/shared/i18n/de`
