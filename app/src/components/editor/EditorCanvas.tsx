@@ -12,6 +12,7 @@ import {
   Rect,
   Circle,
   Line,
+  Path,
 } from '@shopify/react-native-skia';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useSharedValue, useDerivedValue, runOnJS } from 'react-native-reanimated';
@@ -23,6 +24,7 @@ import { PolygonInProgress } from './PolygonInProgress';
 
 interface Props {
   dimensions: GardenDimensionsRow;
+  conflictElementIds?: Set<string>;
 }
 
 // Skia's `Line` type does not include `testID` in its props declaration, but the runtime
@@ -31,7 +33,7 @@ interface Props {
 // Cast through `any` at the JSX call site is local + commented.
 const LineAny = Line as unknown as React.FC<Record<string, unknown>>;
 
-export function EditorCanvas({ dimensions }: Props): React.JSX.Element {
+export function EditorCanvas({ dimensions, conflictElementIds = new Set() }: Props): React.JSX.Element {
   const elements = useEditorStore((s) => s.elements);
   const showGrid = useEditorStore((s) => s.showGrid);
   const activeLayers = useEditorStore((s) => s.activeLayers);
@@ -262,6 +264,25 @@ export function EditorCanvas({ dimensions }: Props): React.JSX.Element {
                 color={PLAN_COLORS.plant}
               />
             ))}
+          </Group>
+          {/* Conflict triangle overlays (D-10: persistent visual markers) */}
+          <Group opacity={activeLayers.seasonal ? 1 : 0}>
+            {seasonalEls
+              .filter((el) => conflictElementIds.has(el.id))
+              .map((el) => {
+                const r = Math.min(el.widthM, el.heightM) / 2;
+                const s = 0.3; // 0.3 metres — fixed physical marker size (RESEARCH Open Q 2)
+                const tx = el.xM + r + 0.05; // offset slightly outside the circle
+                const ty = el.yM - r - 0.05;
+                return (
+                  <Path
+                    key={`conflict-${el.id}`}
+                    path={`M ${tx} ${ty} L ${tx + s} ${ty + s / 2} L ${tx} ${ty + s} Z`}
+                    color="#DC2626"
+                    opacity={0.9}
+                  />
+                );
+              })}
           </Group>
           {polygonInProgress && (
             <PolygonInProgress points={polygonInProgress.pointsM} />
