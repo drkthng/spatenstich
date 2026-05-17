@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: Phase 8 Plan 04 PAUSED at checkpoint:human-action (Wave 3 Task 5 — Edge Function deploy via Docker + service-role-key invoke required)
-stopped_at: Migration 019 LIVE on Supabase Frankfurt (vitrqkzxkiqvadqfzrcx). Edge Function seed-plants deployed via --use-api WITHOUT plants.json bundle (Pitfall 1 confirmed — needs Docker re-deploy). Tasks 1-4 of Plan 04 committed (0846bd9 Edge Function source, 26bd1ac plantRepo, ebeabf9 usePlants hook). Tasks 5-6 blocked. Continue via `.planning/phases/08-plant-db-foundation/.continue-here.md`
-last_updated: "2026-05-17T07:30:00.000Z"
+status: Phase 8 COMPLETE — Migration 019 LIVE + seed-plants Edge Function deployed + SQL seed verified; PLANT-DB-01..09 closed
+stopped_at: Phase 8 Plan 04 complete — Migration 019 pushed to live Supabase (vitrqkzxkiqvadqfzrcx, Frankfurt); seed-plants Edge Function deployed via Docker; SQL seed verified 90 plants + 38 companions live. All 4 plans complete.
+last_updated: "2026-05-17T15:10:00.000Z"
 last_activity: 2026-05-17
-resume_file: .planning/phases/08-plant-db-foundation/.continue-here.md
+resume_file:
 progress:
   total_phases: 11
-  completed_phases: 9
+  completed_phases: 10
   total_plans: 44
-  completed_plans: 38
-  percent: 86
+  completed_plans: 42
+  percent: 95
 ---
 
 # Project State
@@ -168,6 +168,7 @@ Recent decisions affecting current work:
 - [Phase 08 P01] All test stubs use `it.todo()` exclusively — no `it.skip()`, no `expect(false)`. Plans 02–04 fill the 42 todos (16 smoke + 12 validator + 10 plantRepo + 4 usePlants); jest reports todo counts as a coverage-progress signal during downstream waves.
 - [Phase 08 P02] Migration 019 (plants + plant_companions) file committed to git; NOT pushed (Plan 04 owns push gate). plant-db-v1 validator filled with full cross-ref check loop; 12 validator tests GREEN. pgTAP RLS skeleton filled (5 invariants for PLANT-DB-04). REQUIREMENTS.md gained 9 PLANT-DB-* IDs; SEED-02..SEED-06 re-pointed to Phase 13; CAL-* re-pointed to Phase 10. Date: 2026-05-17.
 - [Phase 08 P03] plants.json curated with 90 plants + 38 companion pairs covering Gemüse/Kraut/Beere/Obstbaum/Blume distribution per CONTEXT D-05. Anker-Tests GREEN (Tomate=Solanaceae, Erdbeere=Rosaceae, Buschbohne nitrogenFixing, Apfel perennial, Tomate-Basilikum companion). License-hygiene PLANT-DB-09 enforced — `dataSource` enum strict; zero `"gartenplaner"` literals; plants split own-research=78 / merged=11 / gardeneus=1 / garden-planner=0; companions own-research=25 / merged=7 / gardeneus=6 / garden-planner=0. 16 smoke tests + 12 validator tests = 28 plant-db tests GREEN; full shared-package suite shows 61 passed. LICENSES.md updated with per-source counts. Native UTF-8 Umlaute throughout. Date: 2026-05-17.
+- [Phase 08 P04] Migration 019 pushed live (vitrqkzxkiqvadqfzrcx, Frankfurt). Edge Function seed-plants deployed via Docker (Pitfall 1 fix — `--use-api` bundled ohne plants.json). Seed via SQL-Fallback (Option C) mit LEAST/GREATEST UUID-Canonicalization. Verified: 90 plants + 38 companions in Supabase. plantRepo 10 GREEN + usePlants 4 GREEN; shared suite 61 GREEN. Phase 8 COMPLETE — PLANT-DB-01..09 closed. Date: 2026-05-17.
 
 ### Roadmap Evolution
 
@@ -199,7 +200,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-17T06:08:30.000Z
-Stopped at: Completed Phase 8 Plan 01 (Wave 0 — test scaffold + stubs landed; 6 atomic commits; `pnpm --filter @spatenstich/shared exec jest plants` shows 16 todo / 16 total; app/hooks plant tests show 14 todo / 14 total). Wave 0 verification surface locked.
+Last session: 2026-05-17T15:10:00.000Z
+Stopped at: Phase 8 COMPLETE. All 4 plans executed. Migration 019 live, 90 plants + 38 companions seeded via SQL fallback, plantRepo + usePlants hooks GREEN. PLANT-DB-01..09 closed.
 Resume file: None
-Next: Plan 02 (Wave 1 — fill validator cross-ref body + author Migration 019 plants + plant_companions tables + RLS policies + CHECK constraint + fill 5 pgTAP TEST blocks + push via autonomous 4-gate flow).
+Next: Phase 9 (Companion-Hinweis) — red/green banner when placing plants in beds based on plant_companions table.

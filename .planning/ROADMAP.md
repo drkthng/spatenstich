@@ -32,7 +32,7 @@
 
 ### v1.1 "Saison 2026 Ready" — Hot Path
 - [ ] **Phase 7.5b: Web Editor Polish** — Polygon-Zeichnen + Drafts-Tray + Pflanzenabstand-Ring im Web *(optional, parallel)*
-- [ ] **Phase 8: Plant-DB Foundation** — Zentrale Pflanzen-Datenbank mit deutschen Namen, Familien, Anbau-Infos, Companion-Beziehungen
+- [x] **Phase 8: Plant-DB Foundation** — 90 Pflanzen + 38 Companion-Paare + Edge Function seed (2026-05-17)
 - [ ] **Phase 9: Companion-Hinweis** — Roter/grüner Banner beim Pflanzen-Setzen wenn Nachbarn schlecht/gut zusammenpassen
 - [ ] **Phase 10: Aussaatkalender v1** — "Diese Woche" Wochenview + Gantt-Detail pro Pflanze, klimazonen-angepasst
 
@@ -222,7 +222,7 @@ Plans:
 | 7.5a. Web Plan-Editor (SVG) | 1/1 | ✅ Code Complete | 2026-05-17 |
 | **--- v1.1 Saison 2026 Ready ---** | | | |
 | 7.5b. Web Editor Polish | 0/TBD | Not started (optional) | - |
-| 8. Plant-DB Foundation | 0/TBD | **NEXT** | - |
+| 8. Plant-DB Foundation | 4/4 | ✅ Complete | 2026-05-17 |
 | 9. Companion-Hinweis | 0/TBD | Not started | - |
 | 10. Aussaatkalender v1 | 0/TBD | Not started | - |
 | **--- v1.2 Saison-Tools ---** | | | |

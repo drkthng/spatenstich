@@ -138,7 +138,11 @@ Zentrale, deutschsprachige Pflanzen-Datenbank mit allen Infos die Phase 9 (Compa
 ### Migration + Seed
 
 - **D-12:** **Migration 019** = Schema only (CREATE TABLE plants + plant_companions + Indizes + RLS).
+
+    **Status (Plan 04):** APPLIED. Live on Supabase project `vitrqkzxkiqvadqfzrcx` as of 2026-05-17. Migration list shows 20260517000019 in Local + Remote columns.
 - **D-13:** **Seed-Mechanismus:** Separate Edge Function `seed-plants` (idempotent: löscht & re-inserted oder upsert by slug). Aufruf manuell nach Migration-Push. JSON wird vom Function aus dem `packages/shared/src/data/plants.json` File gelesen (kopiert ins Function-Deployment).
+
+    **Status (Plan 04):** DEPLOYED via Docker 2026-05-17. Edge Function `--use-api` deploy bundled ohne `plants.json` (Pitfall 1 bestätigt); Docker-Deploy erfolgreich. Seed via SQL-Fallback (Option C) ausgeführt — `LEAST/GREATEST` UUID-Canonicalization für companions. Verifiziert: 90 plants + 38 companions live auf `vitrqkzxkiqvadqfzrcx`.
 - **D-14:** **Seed-Idempotenz:** `INSERT ... ON CONFLICT (slug) DO UPDATE SET ...` für `plants`; für `plant_companions` clear-and-rebuild (Tabelle ist klein, einfacher als diff).
 - **D-15:** **Migration-Push-Gate**: Pattern von Phase 6.5 P05 + Phase 7 P06: pre-flight `migration list --linked` → `db push --dry-run --yes` → real push. Bei Fehler checkpoint:human-action.
 
