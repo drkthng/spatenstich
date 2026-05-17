@@ -9,7 +9,7 @@
 
 import * as React from 'react';
 import { View } from 'react-native';
-import Svg, { Rect, Line, Circle, Text as SvgText, G } from 'react-native-svg';
+import Svg, { Rect, Line, Circle, Text as SvgText, G, Polygon } from 'react-native-svg';
 import type { GardenDimensionsRow, PlanElementRow } from '@spatenstich/shared';
 import { useEditorStore } from '@/src/stores/editorStore';
 import { PLAN_COLORS, darkenColor, truncateLabel } from '@/src/lib/colors';
@@ -21,6 +21,7 @@ export interface WebPlanEditorProps {
   /** When the palette has primed a kind to place, the next canvas click drops it. */
   placingKind: string | null;
   onPlaced: () => void;
+  conflictElementIds?: Set<string>;
 }
 
 interface DragState {
@@ -60,6 +61,7 @@ export function WebPlanEditor({
   userId,
   placingKind,
   onPlaced,
+  conflictElementIds,
 }: WebPlanEditorProps): React.JSX.Element {
   const elements = useEditorStore((s) => s.elements);
   const selection = useEditorStore((s) => s.selection);
@@ -317,6 +319,15 @@ export function WebPlanEditor({
                   stroke="#0EA5E9"
                   strokeWidth={2}
                   strokeDasharray="4 2"
+                  pointerEvents="none"
+                />
+              )}
+              {/* Conflict triangle (D-10: persistent visual marker) */}
+              {conflictElementIds?.has(el.id) && (
+                <Polygon
+                  points={`${(el.xM + el.widthM) * scale - 2},${el.yM * scale + 2} ${(el.xM + el.widthM) * scale + 12},${el.yM * scale + 9} ${(el.xM + el.widthM) * scale - 2},${el.yM * scale + 16}`}
+                  fill="#DC2626"
+                  opacity={0.9}
                   pointerEvents="none"
                 />
               )}
