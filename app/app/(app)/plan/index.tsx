@@ -144,6 +144,8 @@ export default function PlanScreen(): React.JSX.Element {
     [bedDraftDragging, viewport, handleBedDropAt],
   );
 
+  const { conflictElementIds, toastState, dismissToast } = useCompanionDetection();
+
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-stone-50 dark:bg-stone-900">
@@ -193,8 +195,6 @@ export default function PlanScreen(): React.JSX.Element {
       </View>
     );
   }
-
-  const { conflictElementIds, toastState, dismissToast } = useCompanionDetection();
 
   const elementsForPalette = useEditorStore.getState().elements;
   const hasAnyBed = elementsForPalette.some(
