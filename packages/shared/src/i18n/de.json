@@ -312,6 +312,13 @@
       "openPlan": "Plan öffnen"
     }
   },
+  "companion": {
+    "conflict_single": "⚠ Konflikt: {{plantA}} verträgt sich nicht mit {{plantB}}",
+    "conflict_multi": "⚠ Konflikt: {{plantA}} verträgt sich nicht mit {{others}}",
+    "good_single": "✓ Gute Nachbarschaft: {{plantA}} + {{plantB}}",
+    "good_multi": "✓ Gute Nachbarschaft: {{plantA}} + {{others}}",
+    "dismiss": "Hinweis schließen"
+  },
   "sync": {
     "badge": {
       "synced": "Synchronisiert",
