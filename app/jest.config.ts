@@ -28,6 +28,7 @@ const config: Config = {
       moduleNameMapper: {
         '^@spatenstich/shared$': '<rootDir>/../packages/shared/src/index.ts',
         '^@spatenstich/shared/i18n/de$': '<rootDir>/../packages/shared/src/i18n/de.json',
+        '^@spatenstich/shared/data/plants$': '<rootDir>/../packages/shared/src/data/plants.json',
         '^react-native-url-polyfill/auto$': '<rootDir>/src/__mocks__/react-native-url-polyfill.ts',
         '^react-native$': '<rootDir>/src/__mocks__/react-native.ts',
         '^expo-secure-store$': '<rootDir>/src/__mocks__/expo-secure-store.ts',
@@ -88,6 +89,7 @@ const config: Config = {
       moduleNameMapper: {
         '^@spatenstich/shared$': '<rootDir>/../packages/shared/src/index.ts',
         '^@spatenstich/shared/i18n/de$': '<rootDir>/../packages/shared/src/i18n/de.json',
+        '^@spatenstich/shared/data/plants$': '<rootDir>/../packages/shared/src/data/plants.json',
         '^react-native-url-polyfill/auto$': '<rootDir>/src/__mocks__/react-native-url-polyfill.ts',
         '^react-native$': '<rootDir>/src/__mocks__/react-native.ts',
         '^react-native-css-interop(.*)$': '<rootDir>/src/__mocks__/react-native-css-interop.ts',
@@ -118,6 +120,7 @@ const config: Config = {
       moduleNameMapper: {
         '^@spatenstich/shared$': '<rootDir>/../packages/shared/src/index.ts',
         '^@spatenstich/shared/i18n/de$': '<rootDir>/../packages/shared/src/i18n/de.json',
+        '^@spatenstich/shared/data/plants$': '<rootDir>/../packages/shared/src/data/plants.json',
         '^react-native-url-polyfill/auto$': '<rootDir>/src/__mocks__/react-native-url-polyfill.ts',
         '^react-native$': '<rootDir>/src/__mocks__/react-native.ts',
         '^react-native-css-interop(.*)$': '<rootDir>/src/__mocks__/react-native-css-interop.ts',
