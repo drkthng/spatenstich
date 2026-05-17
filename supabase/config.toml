@@ -381,6 +381,13 @@ deno_version = 2
 # so the function's own CORS handler can respond with correct headers.
 # Each function still validates auth inside its handler (defense-in-depth).
 
+[functions.seed-plants]
+verify_jwt = false  # Function uses service-role bypass; trigger-token guard optional
+static_files = [ "../packages/shared/src/data/plants.json:./plants.json" ]
+# static_files paths are relative to supabase/ dir. ":./plants.json" suffix remaps
+# the bundled file to the function's working directory. Requires Supabase CLI >= 2.7.0.
+# IMPORTANT: First deploy MUST use Docker (not --use-api) per RESEARCH Pitfall 1.
+
 
 [analytics]
 enabled = true
