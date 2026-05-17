@@ -165,6 +165,7 @@ Recent decisions affecting current work:
 - [Phase 08 P01] PlantRow does NOT extend RowBase (no LWW triggers, no `updatedByUserId`, no `deletedAt`) — global ref DB has different lifecycle than user-scoped rows. `PlantCompanionRow` likewise omits LWW fields. Wire-format `PlantDbBundle` uses `Omit<PlantRow, 'id' | 'createdAt' | 'updatedAt'>` for plants array (no UUIDs in bundle, slug-based cross-refs in companions).
 - [Phase 08 P01] Jest moduleNameMapper added only in `hooks` + `editor` + `components` projects — not in `node`/`stores`/`photos` — because no plants tests run there in Phase 8 (additive minimal-noise rule). Future phases can extend if/when plants surfaces in those projects.
 - [Phase 08 P01] All test stubs use `it.todo()` exclusively — no `it.skip()`, no `expect(false)`. Plans 02–04 fill the 42 todos (16 smoke + 12 validator + 10 plantRepo + 4 usePlants); jest reports todo counts as a coverage-progress signal during downstream waves.
+- [Phase 08 P02] Migration 019 (plants + plant_companions) file committed to git; NOT pushed (Plan 04 owns push gate). plant-db-v1 validator filled with full cross-ref check loop; 12 validator tests GREEN. pgTAP RLS skeleton filled (5 invariants for PLANT-DB-04). REQUIREMENTS.md gained 9 PLANT-DB-* IDs; SEED-02..SEED-06 re-pointed to Phase 13; CAL-* re-pointed to Phase 10. Date: 2026-05-17.
 
 ### Roadmap Evolution
 
