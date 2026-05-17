@@ -48,7 +48,7 @@ describe('CompanionToast', () => {
     const { getByLabelText } = render(
       <CompanionToast variant="error" message="test" onDismiss={onDismiss} />
     );
-    fireEvent.press(getByLabelText('Hinweis schliessen'));
+    fireEvent.press(getByLabelText('Hinweis schließen'));
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 
