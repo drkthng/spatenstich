@@ -2,10 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Post-MVP
-status: Phase 8 Plan 01 COMPLETE (Wave 0 — test scaffold + stubs landed; 6 commits, 14 files)
-stopped_at: Phase 8 Plan 01 complete — 10 new files (schema, validator stub, types, data stub, LICENSES.md, 4 test stubs, pgTAP skeleton) + 2 modified config files (index.ts, package.json, jest.config.ts) + pnpm-lock.yaml bump; 42 it.todo entries pinned coverage for PLANT-DB-01/02/03/04/06/07/08/09; gartenplaner literal three-walled out (schema enum + smoke-test PLANT-DB-09 + LICENSES.md)
-last_updated: "2026-05-17T06:08:30.000Z"
+status: Phase 8 Plan 04 PAUSED at checkpoint:human-action (Wave 3 Task 5 — Edge Function deploy via Docker + service-role-key invoke required)
+stopped_at: Migration 019 LIVE on Supabase Frankfurt (vitrqkzxkiqvadqfzrcx). Edge Function seed-plants deployed via --use-api WITHOUT plants.json bundle (Pitfall 1 confirmed — needs Docker re-deploy). Tasks 1-4 of Plan 04 committed (0846bd9 Edge Function source, 26bd1ac plantRepo, ebeabf9 usePlants hook). Tasks 5-6 blocked. Continue via `.planning/phases/08-plant-db-foundation/.continue-here.md`
+last_updated: "2026-05-17T07:30:00.000Z"
 last_activity: 2026-05-17
+resume_file: .planning/phases/08-plant-db-foundation/.continue-here.md
 progress:
   total_phases: 11
   completed_phases: 9
