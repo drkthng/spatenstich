@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.1
-milestone_name: Saison 2026 Ready
+milestone_name: Saison 2026 Ready" — Hot Path
 status: Milestone complete
-last_updated: "2026-05-29T07:35:09.433Z"
-last_activity: 2026-05-17
+last_updated: "2026-05-29T08:53:05.811Z"
+last_activity: 2026-05-29 -- Phase 09.1 planning complete
 progress:
   total_phases: 15
   completed_phases: 10
-  total_plans: 44
+  total_plans: 50
   completed_plans: 44
   percent: 67
 ---
@@ -29,7 +29,7 @@ Phase: 09.1
 Plan: Not started
 Vorheriger Status: Phase 7 COMPLETE — Migration 20260513000018 (plan_elements.layer) pushed live; 07-HUMAN-VERIFY.md with 4 deferred manual smoke sections
 Plans: 25/25 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 5/5, Phase 07: 6/6, Phase 08: 1/4)
-Last activity: 2026-05-17
+Last activity: 2026-05-29 -- Phase 09.1 planning complete
 
 Progress: [██████░░░░] 25% within Phase 8 (1/4 plans done; 40 of an estimated 44 plans complete cross-project)
 
@@ -199,7 +199,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-29T07:35:09.419Z
-Stopped at: Phase 09.1 context gathered
-Resume file: .planning/phases/09.1-editor-element-bearbeitung/09.1-CONTEXT.md
+Last session: 2026-05-29T08:53:01.237Z
+Stopped at: context exhaustion at 78% (2026-05-29)
+Resume file: None
 Next: Phase 9 (Companion-Hinweis) — red/green banner when placing plants in beds based on plant_companions table.
