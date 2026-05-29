@@ -154,7 +154,7 @@ export function WebPlanEditor({
   const handleSvgClick = React.useCallback(
     (e: React.MouseEvent<SVGSVGElement>) => {
       // Ignore clicks that originated on an element (bubbled up)
-      if ((e.target as HTMLElement) !== e.currentTarget && !placingKind) return;
+      if ((e.target as EventTarget) !== e.currentTarget && !placingKind) return;
       // If we're in placing mode, drop a new element at the click position
       if (placingKind) {
         const rect = (e.currentTarget as unknown as SVGSVGElement).getBoundingClientRect();
