@@ -36,7 +36,7 @@
 - [ ] **Phase 7.5b: Web Editor Polish** — Polygon-Zeichnen + Drafts-Tray + Pflanzenabstand-Ring im Web *(optional, parallel)*
 - [x] **Phase 8: Plant-DB Foundation** — 90 Pflanzen + 38 Companion-Paare + Edge Function seed (2026-05-17)
 - [ ] **Phase 9: Companion-Hinweis** — Roter/grüner Banner beim Pflanzen-Setzen wenn Nachbarn schlecht/gut zusammenpassen
-- [ ] **Phase 9.1: Editor-Element-Bearbeitung** *(INSERTED)* — Resize/Rotate per Doppelklick, Properties (Name etc.), Z-Order für überlappende Elemente
+- [x] **Phase 9.1: Editor-Element-Bearbeitung** *(INSERTED)* — Resize/Rotate per Doppelklick, Properties (Name etc.), Z-Order für überlappende Elemente (completed 2026-05-29)
 - [ ] **Phase 10: Aussaatkalender v1** — "Diese Woche" Wochenview + Gantt-Detail pro Pflanze, klimazonen-angepasst
 
 ### v1.2 "Saison-Tools" — August–September 2026
@@ -190,7 +190,7 @@ Plans:
 **Goal:** Vollständige Element-Bearbeitung im Plan-Editor — Resize-Handles (Eck-4-Punkt), Rotations-Handle (15°-Snap mit Shift-Bypass auf Web), Properties-Modal mit Name/Breite/Höhe/Rotation/Notiz/Pflanzdatum/Akzentfarbe und Photoshop-Style Z-Order-Buttons. Konsistent auf Web (Doppelklick öffnet Modal) und Mobile (Long-Press öffnet Modal).
 **Requirements**: D-01..D-24 (siehe 09.1-CONTEXT.md)
 **Depends on:** Phase 9
-**Plans:** 5/6 plans executed
+**Plans:** 6/6 plans complete
 
 Plans:
 
@@ -198,7 +198,7 @@ Plans:
 - [x] 09.1-01-store-layer-PLAN.md — Wave 1: editorStore.editingElementId + zundo pause/resume + zOrder/rotationSnap algorithms
 - [x] 09.1-02-modal-trigger-PLAN.md — Wave 2: ElementEditorModal + Doppelklick (Web) + LongPress (Skia) + hitTest.ts GREEN + Mount in plan/index.tsx
 - [x] 09.1-03-canvas-handles-PLAN.md — Wave 3: ResizeHandle/RotationHandle für Skia + Web (4+1 Komponenten)
-- [ ] 09.1-04-render-pipeline-PLAN.md — Wave 3: sortByZOrder + Rotation-Transform in beiden Renderern
+- [x] 09.1-04-render-pipeline-PLAN.md — Wave 3: sortByZOrder + Rotation-Transform in beiden Renderern
 - [x] 09.1-05-i18n-verification-PLAN.md — Wave 3: editor.elementEditor.* keys + Mapper round-trip + HUMAN-VERIFY
 
 ### Phase 10: Aussaatkalender v1
