@@ -310,6 +310,26 @@
     },
     "home": {
       "openPlan": "Plan öffnen"
+    },
+    "elementEditor": {
+      "title": "Element bearbeiten",
+      "name": "Bezeichnung",
+      "width": "Breite (cm)",
+      "height": "Höhe (cm)",
+      "rotation": "Rotation (°)",
+      "zOrder": "Ebene",
+      "note": "Notiz",
+      "plantedAt": "Pflanzdatum",
+      "accentColor": "Akzentfarbe",
+      "bringToFront": "Ganz nach vorne",
+      "bringForward": "Eine Ebene vor",
+      "sendBackward": "Eine Ebene zurück",
+      "sendToBack": "Ganz nach hinten",
+      "cancel": "Abbrechen",
+      "save": "Speichern",
+      "delete": "Löschen",
+      "moreFields": "Mehr Felder",
+      "lessFields": "Weniger Felder"
     }
   },
   "companion": {
