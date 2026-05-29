@@ -8,8 +8,9 @@
 //     is screen-relative (scaled by viewport.scale) to keep visual size constant at all zoom levels.
 //
 // MVP Carve-Out (RESEARCH §A1):
-//   TODO: Resize handles are hidden when rotateDeg !== 0 (rotated-resize inverse transform math
-//   deferred to v1.1). Only the rotation handle is shown for rotated elements in MVP.
+//   TODO v1.1: rotated-resize math currently NOT implemented. Caller MUST hide resize handles when
+//   (el.provenance?.rotateDeg ?? 0) !== 0. Until then, user falls back to Modal numeric width/height
+//   input (D-04 Hybrid: handles are the optional fast-path, Modal is precise-path).
 //   Track: DEFERRED-rotated-resize-math
 
 import type { PlanElementRow } from '@spatenstich/shared';
@@ -29,11 +30,18 @@ export interface CornerHandles {
  * - bl = (xM - widthM/2,  yM + heightM/2)
  * - br = (xM + widthM/2,  yM + heightM/2)
  *
- * MVP: Caller must hide these handles when el.provenance.rotateDeg !== 0
+ * MVP: Caller must hide these handles when (el.provenance?.rotateDeg ?? 0) !== 0
  * (rotated-resize math not yet implemented — see carve-out above).
  */
 export function computeCornerHandles(el: PlanElementRow): CornerHandles {
-  throw new Error('TODO Plan 03 GREEN');
+  const halfW = el.widthM / 2;
+  const halfH = el.heightM / 2;
+  return {
+    tl: { xM: el.xM - halfW, yM: el.yM - halfH },
+    tr: { xM: el.xM + halfW, yM: el.yM - halfH },
+    bl: { xM: el.xM - halfW, yM: el.yM + halfH },
+    br: { xM: el.xM + halfW, yM: el.yM + halfH },
+  };
 }
 
 /**
@@ -43,11 +51,16 @@ export function computeCornerHandles(el: PlanElementRow): CornerHandles {
  * `scale` is the current viewport scale (pixels-per-meter) to convert offsetPx to meters.
  *
  * Position: { xM: el.xM, yM: el.yM - el.heightM/2 - offsetPx/scale }
+ *
+ * The offsetPx/scale conversion keeps the visual distance constant regardless of zoom level.
  */
 export function computeRotationHandle(
   el: PlanElementRow,
   offsetPx: number,
   scale: number,
 ): { xM: number; yM: number } {
-  throw new Error('TODO Plan 03 GREEN');
+  return {
+    xM: el.xM,
+    yM: el.yM - el.heightM / 2 - offsetPx / scale,
+  };
 }
