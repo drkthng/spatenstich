@@ -2,11 +2,12 @@
 // Pattern: importStore.ts (transient Zustand) + zundo (RESEARCH §Pattern 8).
 //
 // Pitfall-3: partialize { elements } only — selection/viewport/tool/activeLayers/showGrid
-//   /polygonInProgress/gestureActive excluded from history. Only element-set is undoable.
+//   /polygonInProgress/gestureActive/editingElementId excluded from history. Only element-set is undoable.
 // Pitfall-5: drag-in-flight (gestureActive=true) bypasses the autosave subscription.
 // Open Q 4: selection is cleared on every undo/redo to avoid stale pointers to deleted ids.
 //
 // Auto-save subscription wires elements -> scheduleSaveElement at module load.
+// Phase 09.1: gestureActive subscription pauses/resumes zundo temporal for Live-Preview (D-22).
 
 import { create } from 'zustand';
 import { temporal } from 'zundo';
@@ -28,6 +29,8 @@ export interface EditorState {
   polygonInProgress: { gardenId: string; pointsM: Point2D[] } | null;
   /** Pitfall-5: true while a touch gesture is mid-update; autosave subscription bails out. */
   gestureActive: boolean;
+  /** T-09.1-MODAL-ESC: UI-only ephemeral state — NOT in zundo partialize (opening modal must not be in undo history). */
+  editingElementId: string | null;
 
   // Actions
   addElement: (el: PlanElementRow) => void;
@@ -36,6 +39,7 @@ export interface EditorState {
   setSelection: (id: string | null) => void;
   setTool: (tool: EditorState['tool']) => void;
   setGestureActive: (active: boolean) => void;
+  setEditingElementId: (editingElementId: string | null) => void;
   toggleLayer: (layer: 'infrastructure' | 'seasonal') => void;
   /** Bulk-set both layer flags atomically — used by EditorToolbar 3-state layer cycle. */
   setActiveLayers: (activeLayers: { infrastructure: boolean; seasonal: boolean }) => void;
@@ -64,6 +68,7 @@ export const useEditorStore = create<EditorState>()(
       showGrid: true,
       polygonInProgress: null,
       gestureActive: false,
+      editingElementId: null,
 
       addElement: (el) => set((s) => ({ elements: [...s.elements, el] })),
 
@@ -86,6 +91,7 @@ export const useEditorStore = create<EditorState>()(
       setSelection: (id) => set({ selection: id }),
       setTool: (tool) => set({ tool }),
       setGestureActive: (gestureActive) => set({ gestureActive }),
+      setEditingElementId: (editingElementId) => set({ editingElementId }),
 
       toggleLayer: (layer) =>
         set((s) => ({
@@ -144,6 +150,7 @@ export const useEditorStore = create<EditorState>()(
     }),
     {
       limit: 20, // EDIT-11
+      // editingElementId NOT in partialize: opening modal must not be in undo history (T-09.1-MODAL-ESC).
       partialize: (state) => ({ elements: state.elements }), // Pitfall-3
       equality: (a, b) => a.elements === b.elements, // shallow ref dedup
     },
@@ -169,6 +176,17 @@ export const useEditorStore = create<EditorState>()(
     },
   });
 }
+
+// Phase 09.1: pause zundo during active gestures so handle drags don't spam
+// the 20-step history. One final updateElement after gesture end captures one snapshot.
+// T-09.1-RESUME-LEAK mitigation: resume is called synchronously on gestureActive=false.
+useEditorStore.subscribe((state, prev) => {
+  if (state.gestureActive && !prev.gestureActive) {
+    useEditorStore.temporal.getState().pause();
+  } else if (!state.gestureActive && prev.gestureActive) {
+    useEditorStore.temporal.getState().resume();
+  }
+});
 
 // Auto-save subscription (Pitfall-5: skip during active gesture; account-only).
 useEditorStore.subscribe((state, prev) => {

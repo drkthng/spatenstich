@@ -7,6 +7,8 @@
 //   - Mobile has no Shift key — freeRotation is always false on Skia canvas.
 //   - Modal input field uses raw numeric entry without snap (D-07: "Modal-Eingabe: freie Grad").
 
+const SNAP_DEG = 15;
+
 /**
  * Snaps a rotation angle to the nearest 15° increment.
  *
@@ -16,5 +18,9 @@
  * @returns Normalized angle in [0, 360), snapped to nearest 15° unless freeRotation.
  */
 export function snapRotation(deg: number, freeRotation: boolean): number {
-  throw new Error('TODO Plan 01 GREEN');
+  // Normalize to [0, 360) — handles negative and >360 inputs
+  const normalized = ((deg % 360) + 360) % 360;
+  if (freeRotation) return normalized;
+  // Snap to nearest SNAP_DEG; explicit % 360 ensures 360 wraps to 0
+  return (Math.round(normalized / SNAP_DEG) * SNAP_DEG) % 360;
 }
