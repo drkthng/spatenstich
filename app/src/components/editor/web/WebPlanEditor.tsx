@@ -14,6 +14,7 @@ import type { GardenDimensionsRow, PlanElementRow } from '@spatenstich/shared';
 import type { PlantMeta } from './WebPaletteBar';
 import { useEditorStore } from '@/src/stores/editorStore';
 import { PLAN_COLORS, darkenColor, truncateLabel } from '@/src/lib/colors';
+import { sortByZOrder } from '@/src/lib/editor/zOrder';
 import { computeCornerHandles, computeRotationHandle } from '@/src/lib/editor/handleGeometry';
 import { WebResizeHandle } from './WebResizeHandle';
 import { WebRotationHandle } from './WebRotationHandle';
@@ -343,14 +344,23 @@ export function WebPlanEditor({
         />
 
         {/* 4. Elements */}
-        {visibleElements.map((el) => {
+        {sortByZOrder(visibleElements).map((el) => {
           const fill =
             PLAN_COLORS[el.elementType as keyof typeof PLAN_COLORS] ?? PLAN_COLORS.Sonstiges;
           const stroke = darkenColor(fill, 0.25);
           const selected = el.id === selection;
+          const prov = (el.provenance ?? {}) as Record<string, unknown>;
+          const rotateDegRaw = typeof prov.rotateDeg === 'number' ? prov.rotateDeg : 0;
+          const rotateDeg = Number.isFinite(rotateDegRaw) ? rotateDegRaw : 0;
+          const cxPx = el.xM * scale;
+          const cyPx = el.yM * scale;
+          const accentRaw = typeof prov.accentColor === 'string' ? prov.accentColor : null;
+          const safeAccent = accentRaw && /^#[0-9a-fA-F]{6}$/.test(accentRaw) ? accentRaw : null;
+          const finalFill = safeAccent ?? fill;
           return (
             <G
               key={el.id}
+              transform={`rotate(${rotateDeg}, ${cxPx}, ${cyPx})`}
               onMouseDown={((e: React.MouseEvent) => handleElementMouseDown(el.id, e)) as any}
               onDoubleClick={((e: React.MouseEvent) => {
                 // D-01: Web double-click opens ElementEditorModal (T-09.1-DBLCLICK-RACE mitigation)
@@ -365,7 +375,7 @@ export function WebPlanEditor({
                 y={(el.yM - el.heightM / 2) * scale}
                 width={el.widthM * scale}
                 height={el.heightM * scale}
-                fill={fill}
+                fill={finalFill}
                 stroke={stroke}
                 strokeWidth={selected ? 3 : 1}
               />
@@ -373,7 +383,7 @@ export function WebPlanEditor({
                 x={el.xM * scale}
                 y={el.yM * scale + 4}
                 fontSize={Math.max(10, Math.min(13, el.widthM * scale * 0.18))}
-                fill={darkenColor(fill, 0.5)}
+                fill={darkenColor(finalFill, 0.5)}
                 textAnchor="middle"
                 pointerEvents="none"
               >

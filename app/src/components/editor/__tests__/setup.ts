@@ -45,7 +45,7 @@ jest.mock('react-native-gesture-handler', () => {
     const g: any = {
       onBegin: () => g, onUpdate: () => g, onStart: () => g, onEnd: () => g,
       onChange: () => g, onTouchesMove: () => g,
-      minDuration: () => g, manualActivation: () => g,
+      minDuration: () => g, maxDistance: () => g, manualActivation: () => g,
     };
     return g;
   };

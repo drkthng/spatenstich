@@ -18,6 +18,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useSharedValue, useDerivedValue, runOnJS } from 'react-native-reanimated';
 import type { GardenDimensionsRow } from '@spatenstich/shared';
 import { PLAN_COLORS } from '@/src/lib/colors';
+import { sortByZOrder } from '@/src/lib/editor/zOrder';
 import { useEditorStore } from '@/src/stores/editorStore';
 import { screenToGarden } from '@/src/lib/geometry/viewMatrix';
 import { PolygonInProgress } from './PolygonInProgress';
@@ -262,32 +263,70 @@ export function EditorCanvas({ dimensions, conflictElementIds = new Set() }: Pro
           />
           {gridLines}
           <Group opacity={activeLayers.infrastructure ? 1 : 0}>
-            {infrastructureEls.map((el) => {
+            {sortByZOrder(infrastructureEls).map((el) => {
               const fill =
                 (PLAN_COLORS as Record<string, string>)[el.elementType] ??
                 PLAN_COLORS.Sonstiges;
+              const prov = (el.provenance ?? {}) as Record<string, unknown>;
+              const rotateDegRaw = typeof prov.rotateDeg === 'number' ? prov.rotateDeg : 0;
+              const rotateDeg = Number.isFinite(rotateDegRaw) ? rotateDegRaw : 0;
+              const rotateRad = (rotateDeg * Math.PI) / 180;
+              const cx = el.xM;
+              const cy = el.yM;
+              const accentRaw = typeof prov.accentColor === 'string' ? prov.accentColor : null;
+              const safeAccent = accentRaw && /^#[0-9a-fA-F]{6}$/.test(accentRaw) ? accentRaw : null;
               return (
-                <Rect
+                <Group
                   key={el.id}
-                  x={el.xM - el.widthM / 2}
-                  y={el.yM - el.heightM / 2}
-                  width={el.widthM}
-                  height={el.heightM}
-                  color={fill}
-                />
+                  transform={[
+                    { translateX: cx },
+                    { translateY: cy },
+                    { rotate: rotateRad },
+                    { translateX: -cx },
+                    { translateY: -cy },
+                  ]}
+                >
+                  <Rect
+                    x={el.xM - el.widthM / 2}
+                    y={el.yM - el.heightM / 2}
+                    width={el.widthM}
+                    height={el.heightM}
+                    color={safeAccent ?? fill}
+                  />
+                </Group>
               );
             })}
           </Group>
           <Group opacity={activeLayers.seasonal ? 1 : 0}>
-            {seasonalEls.map((el) => (
-              <Circle
-                key={el.id}
-                cx={el.xM}
-                cy={el.yM}
-                r={Math.min(el.widthM, el.heightM) / 2}
-                color={PLAN_COLORS.plant}
-              />
-            ))}
+            {sortByZOrder(seasonalEls).map((el) => {
+              const prov = (el.provenance ?? {}) as Record<string, unknown>;
+              const rotateDegRaw = typeof prov.rotateDeg === 'number' ? prov.rotateDeg : 0;
+              const rotateDeg = Number.isFinite(rotateDegRaw) ? rotateDegRaw : 0;
+              const rotateRad = (rotateDeg * Math.PI) / 180;
+              const cx = el.xM;
+              const cy = el.yM;
+              const accentRaw = typeof prov.accentColor === 'string' ? prov.accentColor : null;
+              const safeAccent = accentRaw && /^#[0-9a-fA-F]{6}$/.test(accentRaw) ? accentRaw : null;
+              return (
+                <Group
+                  key={el.id}
+                  transform={[
+                    { translateX: cx },
+                    { translateY: cy },
+                    { rotate: rotateRad },
+                    { translateX: -cx },
+                    { translateY: -cy },
+                  ]}
+                >
+                  <Circle
+                    cx={el.xM}
+                    cy={el.yM}
+                    r={Math.min(el.widthM, el.heightM) / 2}
+                    color={safeAccent ?? PLAN_COLORS.plant}
+                  />
+                </Group>
+              );
+            })}
           </Group>
           {/* Conflict triangle overlays (D-10: persistent visual markers) */}
           <Group opacity={activeLayers.seasonal ? 1 : 0}>
