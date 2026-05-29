@@ -3,12 +3,9 @@
 import * as React from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { UserPlus, Smartphone, UsersRound, ChevronDown, ChevronUp } from 'lucide-react-native';
+import { UserPlus, LogIn, UsersRound, ChevronDown, ChevronUp } from 'lucide-react-native';
 import de from '@spatenstich/shared/i18n/de';
 import { AuthChoiceCard } from '@/src/components/AuthChoiceCard';
-import { getOrCreateLocalUUID } from '@/src/lib/auth';
-import { useAuthStore } from '@/src/stores/authStore';
-import { useAuth } from '@/src/lib/auth';
 
 // Phase-2 inline i18n helper (no full i18n library yet; a later phase will swap this out).
 // Keys like 'auth.choice.tagline' are read from the shared de.json bundle.
@@ -17,17 +14,7 @@ const t = (key: string): string =>
 
 export default function AuthChoiceScreen(): React.JSX.Element {
   const router = useRouter();
-  const { switchToLocal } = useAuth();
   const [disclaimerOpen, setDisclaimerOpen] = React.useState(false);
-
-  const handleLocal = React.useCallback(async () => {
-    // Create / read local UUID, update Zustand mode (used by profileRepo), and flip
-    // AuthProvider identity (drives Stack.Protected). switchToLocal calls
-    // getOrCreateLocalUUID internally and sets context identity to local.
-    const uuid = await getOrCreateLocalUUID();
-    useAuthStore.getState().setLocalMode(uuid);
-    await switchToLocal();
-  }, [switchToLocal]);
 
   return (
     <ScrollView
@@ -51,11 +38,11 @@ export default function AuthChoiceScreen(): React.JSX.Element {
             testID="auth-choice-account"
           />
           <AuthChoiceCard
-            icon={Smartphone}
-            title={t('auth.choice.local_start')}
-            description="Daten nur auf diesem Gerät, kein Account nötig"
-            onPress={handleLocal}
-            testID="auth-choice-local"
+            icon={LogIn}
+            title={t('auth.choice.login')}
+            description={t('auth.choice.login_desc')}
+            onPress={() => router.push('/(auth)/login')}
+            testID="auth-choice-login"
           />
           <AuthChoiceCard
             icon={UsersRound}

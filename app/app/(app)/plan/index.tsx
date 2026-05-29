@@ -24,7 +24,7 @@ import { ElementPalette, type PaletteTab } from '@/src/components/editor/Element
 import { DraftsTrayBottomSheet } from '@/src/components/editor/DraftsTrayBottomSheet';
 import { GardenPlanView } from '@/src/components/GardenPlanView';
 import { WebPlanEditor } from '@/src/components/editor/web/WebPlanEditor';
-import { WebPaletteBar } from '@/src/components/editor/web/WebPaletteBar';
+import { WebPaletteBar, type PlantMeta } from '@/src/components/editor/web/WebPaletteBar';
 import { WebEditorToolbar } from '@/src/components/editor/web/WebEditorToolbar';
 import { useCompanionDetection } from '@/src/hooks/useCompanionDetection';
 import { CompanionToast } from '@/src/components/editor/CompanionToast';
@@ -247,6 +247,7 @@ function WebEditorShell({
   const activeGardenId = useAuthStore((s) => s.activeGardenId);
   const userId = useAuthStore((s) => s.userId);
   const [placingKind, setPlacingKind] = React.useState<string | null>(null);
+  const [plantMeta, setPlantMeta] = React.useState<PlantMeta | null>(null);
   const { conflictElementIds, toastState, dismissToast } = useCompanionDetection();
   return (
     <View className="flex-1 bg-stone-50 dark:bg-stone-900" testID="web-editor-shell">
@@ -258,14 +259,16 @@ function WebEditorShell({
           gardenId={activeGardenId ?? ''}
           userId={userId ?? ''}
           placingKind={placingKind}
-          onPlaced={() => setPlacingKind(null)}
+          plantMeta={plantMeta}
+          onPlaced={() => { setPlacingKind(null); setPlantMeta(null); }}
           conflictElementIds={conflictElementIds}
         />
       </View>
       <WebPaletteBar
         placingKind={placingKind}
         onSelectKind={setPlacingKind}
-        onCancel={() => setPlacingKind(null)}
+        onSelectPlant={setPlantMeta}
+        onCancel={() => { setPlacingKind(null); setPlantMeta(null); }}
       />
       {toastState && (
         <CompanionToast

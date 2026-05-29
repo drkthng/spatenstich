@@ -11,6 +11,7 @@ import * as React from 'react';
 import { View } from 'react-native';
 import Svg, { Rect, Line, Circle, Text as SvgText, G, Polygon } from 'react-native-svg';
 import type { GardenDimensionsRow, PlanElementRow } from '@spatenstich/shared';
+import type { PlantMeta } from './WebPaletteBar';
 import { useEditorStore } from '@/src/stores/editorStore';
 import { PLAN_COLORS, darkenColor, truncateLabel } from '@/src/lib/colors';
 
@@ -20,6 +21,7 @@ export interface WebPlanEditorProps {
   userId: string;
   /** When the palette has primed a kind to place, the next canvas click drops it. */
   placingKind: string | null;
+  plantMeta?: PlantMeta | null;
   onPlaced: () => void;
   conflictElementIds?: Set<string>;
 }
@@ -60,6 +62,7 @@ export function WebPlanEditor({
   gardenId,
   userId,
   placingKind,
+  plantMeta,
   onPlaced,
   conflictElementIds,
 }: WebPlanEditorProps): React.JSX.Element {
@@ -127,12 +130,12 @@ export function WebPlanEditor({
       const dxM = (e.clientX - drag.startMouseX) / scale;
       const dyM = (e.clientY - drag.startMouseY) / scale;
       const newXM = Math.max(
-        0,
-        Math.min(dimensions.widthM - elWidth, drag.elStartXM + dxM),
+        elWidth / 2,
+        Math.min(dimensions.widthM - elWidth / 2, drag.elStartXM + dxM),
       );
       const newYM = Math.max(
-        0,
-        Math.min(dimensions.heightM - elHeight, drag.elStartYM + dyM),
+        elHeight / 2,
+        Math.min(dimensions.heightM - elHeight / 2, drag.elStartYM + dyM),
       );
       useEditorStore.getState().updateElement(drag.id, { xM: newXM, yM: newYM });
     };
@@ -150,6 +153,8 @@ export function WebPlanEditor({
 
   const handleSvgClick = React.useCallback(
     (e: React.MouseEvent<SVGSVGElement>) => {
+      // Ignore clicks that originated on an element (bubbled up)
+      if ((e.target as HTMLElement) !== e.currentTarget && !placingKind) return;
       // If we're in placing mode, drop a new element at the click position
       if (placingKind) {
         const rect = (e.currentTarget as unknown as SVGSVGElement).getBoundingClientRect();
@@ -158,14 +163,16 @@ export function WebPlanEditor({
         const xM = xPx / scale;
         const yM = yPx / scale;
         const size = DEFAULT_SIZES[placingKind] ?? DEFAULT_SIZES.Sonstiges;
-        // Center the element on the click point and clamp to garden bounds
+        // Store center point (app convention: xM/yM = element center)
+        const centerX = Math.max(size.widthM / 2, Math.min(dimensions.widthM - size.widthM / 2, xM));
+        const centerY = Math.max(size.heightM / 2, Math.min(dimensions.heightM - size.heightM / 2, yM));
         const newEl: PlanElementRow = {
           id: randomId(),
           gardenId,
           elementType: placingKind,
-          label: placingKind,
-          xM: Math.max(0, Math.min(dimensions.widthM - size.widthM, xM - size.widthM / 2)),
-          yM: Math.max(0, Math.min(dimensions.heightM - size.heightM, yM - size.heightM / 2)),
+          label: plantMeta?.label ?? placingKind,
+          xM: centerX,
+          yM: centerY,
           widthM: size.widthM,
           heightM: size.heightM,
           confidence: null,
@@ -175,7 +182,7 @@ export function WebPlanEditor({
           updatedByUserId: userId,
           deletedAt: null,
           importedFrom: null,
-          provenance: { source: 'manual' },
+          provenance: { source: 'manual', ...(plantMeta?.slug ? { plantSlug: plantMeta.slug } : {}) },
           layer: placingKind === 'Pflanze' ? 'seasonal' : 'infrastructure',
         };
         useEditorStore.getState().addElement(newEl);
@@ -186,7 +193,7 @@ export function WebPlanEditor({
       // Otherwise: deselect
       useEditorStore.getState().setSelection(null);
     },
-    [placingKind, scale, gardenId, userId, dimensions.widthM, dimensions.heightM, onPlaced],
+    [placingKind, plantMeta, scale, gardenId, userId, dimensions.widthM, dimensions.heightM, onPlaced],
   );
 
   const handleElementMouseDown = React.useCallback(
@@ -227,13 +234,13 @@ export function WebPlanEditor({
       className="flex-1 items-center justify-center"
       testID="web-plan-editor-container"
     >
+      <div onClick={handleSvgClick as any} style={cursorStyle}>
       <Svg
         width={svgWidth}
         height={svgHeight}
         viewBox={`0 0 ${svgWidth} ${svgHeight}`}
         accessibilityLabel={`Interaktiver Gartenplan mit ${visibleElements.length} Elementen`}
         testID="web-plan-editor-svg"
-        {...({ onClick: handleSvgClick, style: cursorStyle } as any)}
       >
         {/* 1. Background */}
         <Rect x={0} y={0} width={svgWidth} height={svgHeight} fill={PLAN_COLORS.background} />
@@ -290,8 +297,8 @@ export function WebPlanEditor({
               style={{ cursor: 'grab' } as any}
             >
               <Rect
-                x={el.xM * scale}
-                y={el.yM * scale}
+                x={(el.xM - el.widthM / 2) * scale}
+                y={(el.yM - el.heightM / 2) * scale}
                 width={el.widthM * scale}
                 height={el.heightM * scale}
                 fill={fill}
@@ -299,8 +306,8 @@ export function WebPlanEditor({
                 strokeWidth={selected ? 3 : 1}
               />
               <SvgText
-                x={el.xM * scale + (el.widthM * scale) / 2}
-                y={el.yM * scale + (el.heightM * scale) / 2 + 4}
+                x={el.xM * scale}
+                y={el.yM * scale + 4}
                 fontSize={Math.max(10, Math.min(13, el.widthM * scale * 0.18))}
                 fill={darkenColor(fill, 0.5)}
                 textAnchor="middle"
@@ -311,8 +318,8 @@ export function WebPlanEditor({
               {/* Selection outline */}
               {selected && (
                 <Rect
-                  x={el.xM * scale - 3}
-                  y={el.yM * scale - 3}
+                  x={(el.xM - el.widthM / 2) * scale - 3}
+                  y={(el.yM - el.heightM / 2) * scale - 3}
                   width={el.widthM * scale + 6}
                   height={el.heightM * scale + 6}
                   fill="none"
@@ -325,7 +332,7 @@ export function WebPlanEditor({
               {/* Conflict triangle (D-10: persistent visual marker) */}
               {conflictElementIds?.has(el.id) && (
                 <Polygon
-                  points={`${(el.xM + el.widthM) * scale - 2},${el.yM * scale + 2} ${(el.xM + el.widthM) * scale + 12},${el.yM * scale + 9} ${(el.xM + el.widthM) * scale - 2},${el.yM * scale + 16}`}
+                  points={`${(el.xM + el.widthM / 2) * scale - 2},${(el.yM - el.heightM / 2) * scale + 2} ${(el.xM + el.widthM / 2) * scale + 12},${(el.yM - el.heightM / 2) * scale + 9} ${(el.xM + el.widthM / 2) * scale - 2},${(el.yM - el.heightM / 2) * scale + 16}`}
                   fill="#DC2626"
                   opacity={0.9}
                   pointerEvents="none"
@@ -335,6 +342,7 @@ export function WebPlanEditor({
           );
         })}
       </Svg>
+      </div>
     </View>
   );
 }

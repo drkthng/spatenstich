@@ -6,6 +6,7 @@ import * as React from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { PLAN_COLORS } from '@/src/lib/colors';
 import de from '@spatenstich/shared/i18n/de';
+import plantsBundle from '@spatenstich/shared/data/plants';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
@@ -22,15 +23,24 @@ const TABS: { id: PaletteTab; label: string; kinds: string[] }[] = [
   },
 ];
 
+export interface PlantMeta {
+  slug: string;
+  label: string;
+}
+
 export interface WebPaletteBarProps {
   placingKind: string | null;
   onSelectKind: (kind: string) => void;
+  onSelectPlant?: (meta: PlantMeta) => void;
   onCancel: () => void;
 }
+
+const sortedPlants = [...plantsBundle.plants].sort((a, b) => a.nameDe.localeCompare(b.nameDe, 'de'));
 
 export function WebPaletteBar({
   placingKind,
   onSelectKind,
+  onSelectPlant,
   onCancel,
 }: WebPaletteBarProps): React.JSX.Element {
   const [activeTab, setActiveTab] = React.useState<PaletteTab>('beete');
@@ -87,35 +97,60 @@ export function WebPaletteBar({
         })}
       </View>
 
-      {/* Swatch grid for current tab */}
-      <View className="flex-row flex-wrap p-3 gap-3" testID={`web-palette-swatches-${activeTab}`}>
-        {currentTab.kinds.map((kind) => {
-          const color = PLAN_COLORS[kind as keyof typeof PLAN_COLORS] ?? PLAN_COLORS.Sonstiges;
-          const active = placingKind === kind;
-          return (
-            <Pressable
-              key={kind}
-              onPress={() => onSelectKind(kind)}
-              className={`items-center ${active ? 'opacity-100' : 'opacity-90 hover:opacity-100'}`}
-              testID={`web-palette-swatch-${kind}`}
-              accessibilityRole="button"
-              accessibilityLabel={`${kind} zur Platzierung wählen`}
-            >
-              <View
-                style={{
-                  width: 64,
-                  height: 64,
-                  backgroundColor: color,
-                  borderRadius: 6,
-                  borderWidth: active ? 3 : 1,
-                  borderColor: active ? '#0EA5E9' : '#8B7355',
-                }}
-              />
-              <Text className="text-xs text-stone-700 dark:text-stone-300 mt-1">{kind}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
+      {/* Swatch grid / plant dropdown for current tab */}
+      {activeTab === 'pflanzen' ? (
+        <View className="p-3" testID="web-palette-swatches-pflanzen">
+          <select
+            onChange={(e: any) => {
+              const slug = e.target.value;
+              if (!slug) return;
+              const plant = sortedPlants.find((p) => p.slug === slug);
+              if (plant) {
+                onSelectPlant?.({ slug: plant.slug, label: plant.nameDe });
+                onSelectKind('Pflanze');
+              }
+            }}
+            value=""
+            style={{ padding: 8, fontSize: 14, borderRadius: 6, width: '100%', border: '1px solid #a8a29e' }}
+          >
+            <option value="">Pflanze wählen...</option>
+            {sortedPlants.map((p) => (
+              <option key={p.slug} value={p.slug}>
+                {p.iconEmoji} {p.nameDe}
+              </option>
+            ))}
+          </select>
+        </View>
+      ) : (
+        <View className="flex-row flex-wrap p-3 gap-3" testID={`web-palette-swatches-${activeTab}`}>
+          {currentTab.kinds.map((kind) => {
+            const color = PLAN_COLORS[kind as keyof typeof PLAN_COLORS] ?? PLAN_COLORS.Sonstiges;
+            const active = placingKind === kind;
+            return (
+              <Pressable
+                key={kind}
+                onPress={() => onSelectKind(kind)}
+                className={`items-center ${active ? 'opacity-100' : 'opacity-90 hover:opacity-100'}`}
+                testID={`web-palette-swatch-${kind}`}
+                accessibilityRole="button"
+                accessibilityLabel={`${kind} zur Platzierung wählen`}
+              >
+                <View
+                  style={{
+                    width: 64,
+                    height: 64,
+                    backgroundColor: color,
+                    borderRadius: 6,
+                    borderWidth: active ? 3 : 1,
+                    borderColor: active ? '#0EA5E9' : '#8B7355',
+                  }}
+                />
+                <Text className="text-xs text-stone-700 dark:text-stone-300 mt-1">{kind}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 }

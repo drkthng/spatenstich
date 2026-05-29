@@ -29,6 +29,12 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
       type: 'sourceFile',
     };
   }
+  if (moduleName === '@spatenstich/shared/data/plants') {
+    return {
+      filePath: path.resolve(monorepoRoot, 'packages/shared/src/data/plants.json'),
+      type: 'sourceFile',
+    };
+  }
   return defaultResolveRequest
     ? defaultResolveRequest(context, moduleName, platform)
     : context.resolveRequest(context, moduleName, platform);

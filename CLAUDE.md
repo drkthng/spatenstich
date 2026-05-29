@@ -3,22 +3,21 @@
 
 **Kleingarten-App**
 
-Persönlicher digitaler Kleingarten-Assistent für deutsche Kleingärtner. Die App übersetzt eine reale Parzelle per Foto-Analyse in einen interaktiven 2D-Plan und kombiniert jahreszyklische Aussaat-/Pflanzplanung mit rechtlich-regulatorischem Kontext (BKleingG + Vereinssatzungen). MVP für Einzelnutzer (Dirk), optimiert für iPhone und Desktop-Browser.
+Persönlicher digitaler Kleingarten-Assistent für deutsche Kleingärtner. Die App ermöglicht manuelle Gartenplanung mit interaktivem 2D-Plan-Editor und kombiniert jahreszyklische Aussaat-/Pflanzplanung. Optional: KI-gestützte Analyse über externes Claude.ai-Projekt (Dirks Max-Abo), dessen strukturierte JSON-Ergebnisse per Import-Bridge in die App fließen. MVP für 2 Nutzer (Dirk + Frau) im Shared Garden Model. **Die App selbst macht null ausgehende KI-API-Aufrufe.**
 
-**Core Value:** Foto rein → Plan und Kalender raus: Die KI-gestützte Überführung einer realen Parzelle in einen digital planbaren, regelkonformen Kleingarten-Assistenten.
+**Core Value:** Manueller Plan-Editor + strukturierter Import aus Claude.ai: Dirk plant seine Parzelle digital — per Hand oder beschleunigt durch KI-Analyse im externen Claude.ai-Projekt.
 
 ### Constraints
 
 - **Tech Stack:** Expo (React Native) mit Web-Export — eine Codebase für iOS, Android, Desktop-Browser
 - **Backend:** Supabase (Frankfurt, EU) — Postgres + Auth + Storage + Edge Functions. DSGVO-konform.
-- **Offline:** App startet und zeigt letzten Plan ohne Netz; Foto-Queue offline. KI-Calls und Sync erfordern Verbindung.
+- **Keine In-App AI:** Zero outbound AI calls. Kein Anthropic SDK, kein Pl@ntNet, kein Replicate. Import-Bridge für Claude.ai-Ergebnisse ist der einzige KI-Weg.
+- **Offline:** App startet und zeigt letzten Plan ohne Netz; Import-Queue offline. Sync erfordert Verbindung.
 - **Plan-Rendering:** SVG-basiert (react-native-svg / natives SVG im Web). Bei > 50 Elementen: Upgrade auf @shopify/react-native-skia erwogen.
-- **Lokale Persistenz:** expo-sqlite (strukturierte Daten) + expo-file-system (Foto-Queue). Sync-Layer: eigene simple Operation-Log-Queue, Last-Write-Wins (Single-User).
-- **KI-Budget:** Soft-Limit 50 Claude-Calls/User/Tag, Hard-Limit 200/Tag.
-- **Datenschutz:** Fotos verschlüsselt at-rest, Geo-Daten opt-in, DSGVO-Konformität (EU-Hosting).
+- **Lokale Persistenz:** expo-sqlite (strukturierte Daten) + expo-file-system. Sync-Layer: eigene simple Operation-Log-Queue, Last-Write-Wins (2-User Shared Garden).
+- **Datenschutz:** Fotos bleiben auf dem Gerät oder im Claude.ai-Chat. Spatenstich importiert Analyse, nicht Bilder. DSGVO-konform (EU-Hosting).
 - **Monorepo:** pnpm workspaces mit `app/`, `supabase/` (Migrations + Edge Functions), `packages/shared`.
 - **Timeline:** MVP-Ziel Ende Juni 2026 (realistisch mit Buffer). Harte Deadline: Saison 2026 muss nutzbar sein.
-- **Pl@ntNet API:** Nichtkommerzielle Nutzung frei; bei Kommerzialisierung Vereinbarung nötig.
 <!-- GSD:project-end -->
 
 <!-- GSD:stack-start source:research/STACK.md -->
@@ -41,11 +40,11 @@ Persönlicher digitaler Kleingarten-Assistent für deutsche Kleingärtner. Die A
 | @supabase/supabase-js | 2.49.5+ | Postgres + Auth + Storage + Realtime | MEDIUM |
 | expo-sqlite | 15.x (bundled SDK 55) | Local structured storage, offline plan persistence | MEDIUM |
 | expo-file-system | latest | Photo queue offline storage | HIGH |
-| expo-camera / expo-image-picker | latest | Guided photo capture flow (M1) | HIGH |
+| expo-image-picker | latest | Photo selection for manual attachments | HIGH |
 | expo-secure-store | latest | Token storage for auth | HIGH |
 | TypeScript | 5.x | Type safety throughout | HIGH |
 | pnpm workspaces | 9.x | Monorepo: app/, supabase/, packages/shared | MEDIUM |
-| Deno (Supabase Edge Functions) | 2.x | Server-side Claude Vision + Pl@ntNet calls | HIGH |
+| Deno (Supabase Edge Functions) | 2.x | Server-side utilities (no AI calls) | HIGH |
 ## Key Findings
 ## What NOT to Use
 | Rejected | Why Not |
@@ -59,7 +58,8 @@ Persönlicher digitaler Kleingarten-Assistent für deutsche Kleingärtner. Die A
 | Expo Webpack | Deprecated. Expo Router on Metro is the only supported web path in SDK 52+. |
 | `@supabase/supabase-js` < 2.49.5 | Broken under Metro ES module resolution (RN 0.79+). The `ws` stream import error blocks all Supabase usage, not just Realtime. |
 | react-native-reanimated v4 | Not yet stable with NativeWind v4 on SDK 53-54. Stay on v3 until compatibility is confirmed on SDK 55. |
-| Pl@ntNet client-side | API key must remain server-side. Route through Edge Functions same as Claude calls. |
+| Pl@ntNet client-side | No longer relevant — all AI calls removed (Pivot M07). |
+| Anthropic SDK in client | Zero in-app AI calls. All analysis via external Claude.ai project. |
 ## Open Questions
 ## Sources
 - [Expo SDK 55 Changelog](https://expo.dev/changelog/sdk-55)
