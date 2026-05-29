@@ -14,6 +14,9 @@ import type { GardenDimensionsRow, PlanElementRow } from '@spatenstich/shared';
 import type { PlantMeta } from './WebPaletteBar';
 import { useEditorStore } from '@/src/stores/editorStore';
 import { PLAN_COLORS, darkenColor, truncateLabel } from '@/src/lib/colors';
+import { computeCornerHandles, computeRotationHandle } from '@/src/lib/editor/handleGeometry';
+import { WebResizeHandle } from './WebResizeHandle';
+import { WebRotationHandle } from './WebRotationHandle';
 
 export interface WebPlanEditorProps {
   dimensions: GardenDimensionsRow;
@@ -264,6 +267,11 @@ export function WebPlanEditor({
     [elements],
   );
 
+  // Selected element (for handle rendering)
+  const selectedEl = selection
+    ? elements.find((e) => e.id === selection && e.deletedAt === null)
+    : null;
+
   // Filter by layer + deletion status
   const visibleElements = elements.filter((el) => {
     if (el.deletedAt !== null) return false;
@@ -397,6 +405,69 @@ export function WebPlanEditor({
             </G>
           );
         })}
+
+        {/* 5. Resize handles — only shown when selection && rotateDeg === 0 (MVP carve-out A1).
+            Rotated-resize inverse transform is deferred to v1.1. User falls back to Modal for
+            numeric width/height input when element is rotated (D-04 Hybrid). */}
+        {selectedEl && (() => {
+          const prov = (selectedEl.provenance ?? {}) as Record<string, unknown>;
+          const rotateDeg = typeof prov.rotateDeg === 'number' ? prov.rotateDeg : 0;
+          if (rotateDeg === 0) {
+            const corners = computeCornerHandles(selectedEl);
+            return (
+              <>
+                <WebResizeHandle
+                  key="resize-tl"
+                  elementId={selectedEl.id}
+                  corner="tl"
+                  xPx={corners.tl.xM * scale}
+                  yPx={corners.tl.yM * scale}
+                  scale={scale}
+                />
+                <WebResizeHandle
+                  key="resize-tr"
+                  elementId={selectedEl.id}
+                  corner="tr"
+                  xPx={corners.tr.xM * scale}
+                  yPx={corners.tr.yM * scale}
+                  scale={scale}
+                />
+                <WebResizeHandle
+                  key="resize-bl"
+                  elementId={selectedEl.id}
+                  corner="bl"
+                  xPx={corners.bl.xM * scale}
+                  yPx={corners.bl.yM * scale}
+                  scale={scale}
+                />
+                <WebResizeHandle
+                  key="resize-br"
+                  elementId={selectedEl.id}
+                  corner="br"
+                  xPx={corners.br.xM * scale}
+                  yPx={corners.br.yM * scale}
+                  scale={scale}
+                />
+              </>
+            );
+          }
+          return null;
+        })()}
+
+        {/* 6. Rotation handle — always shown for selected element (any rotateDeg) */}
+        {selectedEl && (() => {
+          const rotHandle = computeRotationHandle(selectedEl, 20, scale);
+          return (
+            <WebRotationHandle
+              key="rotation-handle"
+              elementId={selectedEl.id}
+              xPx={rotHandle.xM * scale}
+              yPx={rotHandle.yM * scale}
+              centerXPx={selectedEl.xM * scale}
+              centerYPx={selectedEl.yM * scale}
+            />
+          );
+        })()}
       </Svg>
       </div>
     </View>
