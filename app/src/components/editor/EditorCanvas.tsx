@@ -22,6 +22,9 @@ import { useEditorStore } from '@/src/stores/editorStore';
 import { screenToGarden } from '@/src/lib/geometry/viewMatrix';
 import { PolygonInProgress } from './PolygonInProgress';
 import { findElementAtPoint } from '@/src/lib/editor/hitTest';
+import { computeCornerHandles, computeRotationHandle } from '@/src/lib/editor/handleGeometry';
+import { ResizeHandle } from './ResizeHandle';
+import { RotationHandle } from './RotationHandle';
 
 interface Props {
   dimensions: GardenDimensionsRow;
@@ -319,6 +322,63 @@ export function EditorCanvas({ dimensions, conflictElementIds = new Set() }: Pro
               color="#0EA5E9"
             />
           )}
+          {/* Phase 09.1 Plan 03: Resize handles — only shown when rotateDeg === 0 (MVP carve-out A1).
+              Rotated-resize inverse transform is deferred to v1.1. User falls back to Modal for
+              numeric width/height input when element is rotated (D-04 Hybrid). */}
+          {selectedEl && (() => {
+            const prov = (selectedEl.provenance ?? {}) as Record<string, unknown>;
+            const rotateDeg = typeof prov.rotateDeg === 'number' ? prov.rotateDeg : 0;
+            if (rotateDeg === 0) {
+              const corners = computeCornerHandles(selectedEl);
+              return (
+                <>
+                  <ResizeHandle
+                    elementId={selectedEl.id}
+                    corner="tl"
+                    xM={corners.tl.xM}
+                    yM={corners.tl.yM}
+                    scale={scale.value}
+                  />
+                  <ResizeHandle
+                    elementId={selectedEl.id}
+                    corner="tr"
+                    xM={corners.tr.xM}
+                    yM={corners.tr.yM}
+                    scale={scale.value}
+                  />
+                  <ResizeHandle
+                    elementId={selectedEl.id}
+                    corner="bl"
+                    xM={corners.bl.xM}
+                    yM={corners.bl.yM}
+                    scale={scale.value}
+                  />
+                  <ResizeHandle
+                    elementId={selectedEl.id}
+                    corner="br"
+                    xM={corners.br.xM}
+                    yM={corners.br.yM}
+                    scale={scale.value}
+                  />
+                </>
+              );
+            }
+            return null;
+          })()}
+          {/* Rotation handle: always shown for selected element (any rotateDeg) — D-08 additive */}
+          {selectedEl && (() => {
+            const rotHandle = computeRotationHandle(selectedEl, 20, scale.value);
+            return (
+              <RotationHandle
+                elementId={selectedEl.id}
+                xM={rotHandle.xM}
+                yM={rotHandle.yM}
+                centerXM={selectedEl.xM}
+                centerYM={selectedEl.yM}
+                scale={scale.value}
+              />
+            );
+          })()}
         </Group>
       </Canvas>
     </GestureDetector>
