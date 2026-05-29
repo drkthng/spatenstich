@@ -28,6 +28,7 @@ import { WebPaletteBar, type PlantMeta } from '@/src/components/editor/web/WebPa
 import { WebEditorToolbar } from '@/src/components/editor/web/WebEditorToolbar';
 import { useCompanionDetection } from '@/src/hooks/useCompanionDetection';
 import { CompanionToast } from '@/src/components/editor/CompanionToast';
+import { ElementEditorModal } from '@/src/components/editor/ElementEditorModal';
 import de from '@spatenstich/shared/i18n/de';
 
 const t = (key: string): string =>
@@ -145,6 +146,9 @@ export default function PlanScreen(): React.JSX.Element {
   );
 
   const { conflictElementIds, toastState, dismissToast } = useCompanionDetection();
+  // Phase 09.1 Plan 02: Modal trigger state (D-01/D-16)
+  const editingElementId = useEditorStore((s) => s.editingElementId);
+  const elements = useEditorStore((s) => s.elements);
 
   if (loading) {
     return (
@@ -231,6 +235,22 @@ export default function PlanScreen(): React.JSX.Element {
           testID={`companion-toast-${toastState.variant}`}
         />
       )}
+      {/* Phase 09.1 Plan 02: ElementEditorModal — conditional mount (D-01/D-16) */}
+      {editingElementId && (
+        <ElementEditorModal
+          visible={true}
+          element={elements.find((e) => e.id === editingElementId)!}
+          onSave={(patch) => {
+            useEditorStore.getState().updateElement(editingElementId, patch);
+            useEditorStore.getState().setEditingElementId(null);
+          }}
+          onCancel={() => useEditorStore.getState().setEditingElementId(null)}
+          onDelete={() => {
+            useEditorStore.getState().deleteElement(editingElementId);
+            useEditorStore.getState().setEditingElementId(null);
+          }}
+        />
+      )}
     </View>
   );
 }
@@ -249,6 +269,9 @@ function WebEditorShell({
   const [placingKind, setPlacingKind] = React.useState<string | null>(null);
   const [plantMeta, setPlantMeta] = React.useState<PlantMeta | null>(null);
   const { conflictElementIds, toastState, dismissToast } = useCompanionDetection();
+  // Phase 09.1 Plan 02: Modal trigger state for Web shell (D-01/D-16)
+  const editingElementId = useEditorStore((s) => s.editingElementId);
+  const webElements = useEditorStore((s) => s.elements);
   return (
     <View className="flex-1 bg-stone-50 dark:bg-stone-900" testID="web-editor-shell">
       <Stack.Screen options={{ headerTitle: t('editor.title'), headerShown: false }} />
@@ -276,6 +299,22 @@ function WebEditorShell({
           message={toastState.message}
           onDismiss={dismissToast}
           testID={`companion-toast-${toastState.variant}`}
+        />
+      )}
+      {/* Phase 09.1 Plan 02: ElementEditorModal — Web shell conditional mount (D-01/D-16) */}
+      {editingElementId && (
+        <ElementEditorModal
+          visible={true}
+          element={webElements.find((e) => e.id === editingElementId)!}
+          onSave={(patch) => {
+            useEditorStore.getState().updateElement(editingElementId, patch);
+            useEditorStore.getState().setEditingElementId(null);
+          }}
+          onCancel={() => useEditorStore.getState().setEditingElementId(null)}
+          onDelete={() => {
+            useEditorStore.getState().deleteElement(editingElementId);
+            useEditorStore.getState().setEditingElementId(null);
+          }}
         />
       )}
     </View>

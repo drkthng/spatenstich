@@ -41,6 +41,9 @@ export const TouchableOpacity = ({ children, onPress, testID, ...props }: any) =
 // null otherwise (matches react-native semantics where Modal mounts only when visible).
 export const Modal = ({ children, visible, testID, ...props }: any) =>
   visible ? React.createElement('Modal', { testID, ...props }, children) : null;
+// Phase 09.1 Plan 02: TextInput stub for ElementEditorModal tests.
+export const TextInput = ({ testID, value, onChangeText, ...props }: any) =>
+  React.createElement('TextInput', { testID, value, onChange: onChangeText ? (e: any) => onChangeText(e.nativeEvent?.text ?? e.target?.value ?? '') : undefined, ...props });
 
 // Dimensions stub
 export const Dimensions = {

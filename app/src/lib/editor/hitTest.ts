@@ -9,8 +9,11 @@
 //   - Uses widthM/heightM dedicated columns (D-20), NOT provenance.widthM (which does not exist).
 //   - Hit-test is simple axis-aligned bounding-box (AABB) check for MVP.
 //     Rotated elements use un-rotated bbox in MVP (rotated hit-test deferred to v1.1).
+// MVP carve-out: axis-aligned bbox (RESEARCH A1). Rotated-element hit-test deferred to v1.1 —
+//   User-tap auf rotated element greift solange Punkt in der achsenparallelen bbox liegt.
 
 import type { PlanElementRow } from '@spatenstich/shared';
+import { sortByZOrder } from './zOrder';
 
 /**
  * Finds the topmost plan element whose axis-aligned bounding box contains the point (xM, yM).
@@ -36,5 +39,21 @@ export function findElementAtPoint(
   xM: number,
   yM: number,
 ): PlanElementRow | undefined {
-  throw new Error('TODO Plan 02 GREEN');
+  // Filter out soft-deleted elements
+  const live = elements.filter((e) => e.deletedAt === null);
+  // Sort ascending by zOrder — top-most element is last in sorted array
+  const sorted = sortByZOrder(live);
+  // Collect all elements whose axis-aligned bbox contains the point
+  const hits = sorted.filter((e) => {
+    const halfW = e.widthM / 2;
+    const halfH = e.heightM / 2;
+    return (
+      xM >= e.xM - halfW &&
+      xM <= e.xM + halfW &&
+      yM >= e.yM - halfH &&
+      yM <= e.yM + halfH
+    );
+  });
+  // Return top-most (last in ascending-sorted hits array) or undefined if no hits
+  return hits.length === 0 ? undefined : hits[hits.length - 1];
 }

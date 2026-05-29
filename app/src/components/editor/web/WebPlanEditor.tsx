@@ -26,7 +26,20 @@ export interface WebPlanEditorProps {
   conflictElementIds?: Set<string>;
 }
 
+// RESEARCH §Open Q 2 / T-09.1-DBLCLICK-RACE: mousedown stays passive until
+// 5px movement threshold exceeded — leaves native dblclick window intact.
+const MOUSE_DRAG_THRESHOLD_PX = 5;
+
 interface DragState {
+  id: string;
+  startMouseX: number;
+  startMouseY: number;
+  elStartXM: number;
+  elStartYM: number;
+}
+
+// Pending drag capture before threshold promotion
+interface PendingDrag {
   id: string;
   startMouseX: number;
   startMouseY: number;
@@ -73,6 +86,8 @@ export function WebPlanEditor({
 
   const [drag, setDrag] = React.useState<DragState | null>(null);
   const [containerSize, setContainerSize] = React.useState({ w: 800, h: 600 });
+  // Pending drag: captures mousedown coords before the 5px threshold is exceeded (MOUSE_DRAG_THRESHOLD_PX)
+  const pendingDragRef = React.useRef<PendingDrag | null>(null);
 
   // Compute scale (px per meter) to fit garden into available viewport with padding.
   const PADDING = 24;
@@ -151,6 +166,39 @@ export function WebPlanEditor({
     };
   }, [drag, scale, dimensions.widthM, dimensions.heightM, elements]);
 
+  // Pending drag threshold effect: promotes pendingDragRef → active drag once mousemove exceeds 5px.
+  // This frees the dblclick path (T-09.1-DBLCLICK-RACE mitigation, RESEARCH §Open Q 2).
+  React.useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      const pending = pendingDragRef.current;
+      if (!pending) return;
+      const dx = Math.abs(e.clientX - pending.startMouseX);
+      const dy = Math.abs(e.clientY - pending.startMouseY);
+      if (dx >= MOUSE_DRAG_THRESHOLD_PX || dy >= MOUSE_DRAG_THRESHOLD_PX) {
+        // Threshold exceeded — promote to active drag
+        pendingDragRef.current = null;
+        useEditorStore.getState().setGestureActive(true);
+        setDrag({
+          id: pending.id,
+          startMouseX: pending.startMouseX,
+          startMouseY: pending.startMouseY,
+          elStartXM: pending.elStartXM,
+          elStartYM: pending.elStartYM,
+        });
+      }
+    };
+    const onUp = () => {
+      // Mouseup before threshold: clear pending without starting drag (dblclick still fires)
+      pendingDragRef.current = null;
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, []); // stable — no deps needed, uses refs
+
   const handleSvgClick = React.useCallback(
     (e: React.MouseEvent<SVGSVGElement>) => {
       // Ignore clicks that originated on an element (bubbled up)
@@ -202,14 +250,16 @@ export function WebPlanEditor({
       const el = elements.find((x) => x.id === id);
       if (!el || el.deletedAt !== null) return;
       useEditorStore.getState().setSelection(id);
-      useEditorStore.getState().setGestureActive(true);
-      setDrag({
+      // MOUSE_DRAG_THRESHOLD_PX: capture pending drag but do NOT start drag or setGestureActive yet.
+      // Only promote to active drag once mousemove exceeds MOUSE_DRAG_THRESHOLD_PX (5px).
+      // This leaves the native dblclick event window intact (T-09.1-DBLCLICK-RACE).
+      pendingDragRef.current = {
         id,
         startMouseX: e.clientX,
         startMouseY: e.clientY,
         elStartXM: el.xM,
         elStartYM: el.yM,
-      });
+      };
     },
     [elements],
   );
@@ -294,6 +344,12 @@ export function WebPlanEditor({
             <G
               key={el.id}
               onMouseDown={((e: React.MouseEvent) => handleElementMouseDown(el.id, e)) as any}
+              onDoubleClick={((e: React.MouseEvent) => {
+                // D-01: Web double-click opens ElementEditorModal (T-09.1-DBLCLICK-RACE mitigation)
+                e.stopPropagation();
+                useEditorStore.getState().setSelection(el.id);
+                useEditorStore.getState().setEditingElementId(el.id);
+              }) as any}
               style={{ cursor: 'grab' } as any}
             >
               <Rect

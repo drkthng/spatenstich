@@ -21,6 +21,7 @@ import { PLAN_COLORS } from '@/src/lib/colors';
 import { useEditorStore } from '@/src/stores/editorStore';
 import { screenToGarden } from '@/src/lib/geometry/viewMatrix';
 import { PolygonInProgress } from './PolygonInProgress';
+import { findElementAtPoint } from '@/src/lib/editor/hitTest';
 
 interface Props {
   dimensions: GardenDimensionsRow;
@@ -82,6 +83,20 @@ export function EditorCanvas({ dimensions, conflictElementIds = new Set() }: Pro
       }
     },
     [tool, dimensions.gardenId, elements, tx, ty, scale],
+  );
+
+  // D-01/D-02: Long-Press hit-test — uses findElementAtPoint from hitTest.ts (centralized).
+  // runOnJS-safe: all store access on JS thread (RESEARCH §Pattern 1).
+  const handleLongPressAt = React.useCallback(
+    (xPx: number, yPx: number) => {
+      const vm = { tx: tx.value, ty: ty.value, scale: scale.value };
+      const { xM, yM } = screenToGarden(xPx, yPx, vm);
+      const hit = findElementAtPoint(useEditorStore.getState().elements, xM, yM);
+      if (!hit) return; // Pitfall 1: no modal if no element underneath
+      useEditorStore.getState().setSelection(hit.id);
+      useEditorStore.getState().setEditingElementId(hit.id);
+    },
+    [tx, ty, scale],
   );
 
   const onGestureBegin = React.useCallback(
@@ -146,8 +161,14 @@ export function EditorCanvas({ dimensions, conflictElementIds = new Set() }: Pro
   const tap = Gesture.Tap().onEnd((e) => {
     runOnJS(handleCanvasTap)(e.x, e.y);
   });
-  // Reserved for future context-menu (long-press on canvas, not on palette card).
-  const longPress = Gesture.LongPress().minDuration(500).onStart(() => {});
+  // D-01/D-02: Long-Press opens ElementEditorModal after 500ms without 10px movement.
+  // Uses findElementAtPoint (centralized hit-test from hitTest.ts, T-09.1-HITTEST-DUP mitigation).
+  const longPress = Gesture.LongPress()
+    .minDuration(500)
+    .maxDistance(10)
+    .onStart((e) => {
+      runOnJS(handleLongPressAt)(e.x, e.y);
+    });
 
   // Phase 7 Plan 04 revision B1: Rotation gesture (EDIT-04) — coexists with Pinch (both are 2-finger).
   // Per RESEARCH §Pattern 2, Gesture.Race is wrong for rotation+pinch; both must be Simultaneous.
