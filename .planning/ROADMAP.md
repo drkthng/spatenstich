@@ -34,6 +34,7 @@
 - [ ] **Phase 7.5b: Web Editor Polish** — Polygon-Zeichnen + Drafts-Tray + Pflanzenabstand-Ring im Web *(optional, parallel)*
 - [x] **Phase 8: Plant-DB Foundation** — 90 Pflanzen + 38 Companion-Paare + Edge Function seed (2026-05-17)
 - [ ] **Phase 9: Companion-Hinweis** — Roter/grüner Banner beim Pflanzen-Setzen wenn Nachbarn schlecht/gut zusammenpassen
+- [ ] **Phase 9.1: Editor-Element-Bearbeitung** *(INSERTED)* — Resize/Rotate per Doppelklick, Properties (Name etc.), Z-Order für überlappende Elemente
 - [ ] **Phase 10: Aussaatkalender v1** — "Diese Woche" Wochenview + Gantt-Detail pro Pflanze, klimazonen-angepasst
 
 ### v1.2 "Saison-Tools" — August–September 2026
@@ -152,6 +153,16 @@ Plans:
 - [x] 09-03-PLAN.md — UI: CompanionToast floating toast component
 - [x] 09-04-PLAN.md — Integration: Canvas overlays (Skia + SVG) + wiring into editor screen
 **UI hint**: yes
+
+### Phase 09.1: Editor-Element-Bearbeitung (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 9
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 09.1 to break down)
 
 ### Phase 10: Aussaatkalender v1
 **Goal**: "Was sollte ich diese Woche im Garten tun?" — eine Wochen-Übersicht + Gantt-Detail pro Pflanze, gefiltert nach Klimazone und den Pflanzen in deinem Plan.

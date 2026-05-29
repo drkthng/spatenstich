@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: Foundation
+milestone: v1.1
+milestone_name: Saison 2026 Ready
 status: Milestone complete
-stopped_at: Phase 9 planned — 4 plans in 3 waves ready
-last_updated: "2026-05-17T14:23:18.764Z"
+last_updated: "2026-05-29T07:35:09.433Z"
 last_activity: 2026-05-17
 progress:
-  total_phases: 11
-  completed_phases: 11
-  total_plans: 48
-  completed_plans: 48
-  percent: 100
+  total_phases: 15
+  completed_phases: 10
+  total_plans: 44
+  completed_plans: 44
+  percent: 67
 ---
 
 # Project State
@@ -22,11 +21,11 @@ See: .planning/PROJECT.md (updated 2026-05-08)
 See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 
 **Core value:** Manueller Plan-Editor + strukturierter Import aus Claude.ai (zero In-App AI seit Pivot M07 2026-05-08)
-**Current focus:** Phase 09 — companion-hinweis
+**Current focus:** Phase 09.1 — editor-element-bearbeitung (context gathered)
 
 ## Current Position
 
-Phase: 09
+Phase: 09.1
 Plan: Not started
 Vorheriger Status: Phase 7 COMPLETE — Migration 20260513000018 (plan_elements.layer) pushed live; 07-HUMAN-VERIFY.md with 4 deferred manual smoke sections
 Plans: 25/25 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 5/5, Phase 07: 6/6, Phase 08: 1/4)
@@ -172,6 +171,7 @@ Recent decisions affecting current work:
 ### Roadmap Evolution
 
 - Phase 6.5 inserted after Phase 6 (2026-05-12): Draft-Sichtung + Promotion-Flow Draft → `plan_elements` (URGENT). Trigger: Debug-Session `import-uebernehmen-noop` — Phase 6 endete mit Drafts gespeichert, aber kein Pfad zur Anzeige im Plan; Home-Screen zeigt "Noch kein Gartenplan" obwohl Import erfolgreich. Phase 7's `depends_on` sollte überprüft werden (jetzt logisch Phase 6.5 statt Phase 6).
+- Phase 09.1 inserted after Phase 9: Editor-Element-Bearbeitung: Resize/Rotate/Properties/Z-Order (URGENT)
 
 ### Pending Todos
 
@@ -199,7 +199,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-17T13:44:26.353Z
-Stopped at: Phase 9 planned — 4 plans in 3 waves ready
-Resume file: .planning/phases/09-companion-hinweis/09-01-PLAN.md
+Last session: 2026-05-29T07:35:09.419Z
+Stopped at: Phase 09.1 context gathered
+Resume file: .planning/phases/09.1-editor-element-bearbeitung/09.1-CONTEXT.md
 Next: Phase 9 (Companion-Hinweis) — red/green banner when placing plants in beds based on plant_companions table.
