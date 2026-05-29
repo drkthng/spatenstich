@@ -187,13 +187,19 @@ Plans:
 
 ### Phase 09.1: Editor-Element-Bearbeitung (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
+**Goal:** Vollständige Element-Bearbeitung im Plan-Editor — Resize-Handles (Eck-4-Punkt), Rotations-Handle (15°-Snap mit Shift-Bypass auf Web), Properties-Modal mit Name/Breite/Höhe/Rotation/Notiz/Pflanzdatum/Akzentfarbe und Photoshop-Style Z-Order-Buttons. Konsistent auf Web (Doppelklick öffnet Modal) und Mobile (Long-Press öffnet Modal).
+**Requirements**: D-01..D-24 (siehe 09.1-CONTEXT.md)
 **Depends on:** Phase 9
-**Plans:** 3/6 plans executed
+**Plans:** 6 plans
+
 Plans:
 
-- [ ] TBD (run /gsd-plan-phase 09.1 to break down)
+- [ ] 09.1-00-test-scaffold-helper-modules-PLAN.md — Wave 0: Test-Stubs + Picker-Installs + 4 Helper-Module
+- [ ] 09.1-01-store-layer-PLAN.md — Wave 1: editorStore.editingElementId + zundo pause/resume + zOrder/rotationSnap algorithms
+- [ ] 09.1-02-modal-trigger-PLAN.md — Wave 2: ElementEditorModal + Doppelklick (Web) + LongPress (Skia) + hitTest.ts GREEN + Mount in plan/index.tsx
+- [ ] 09.1-03-canvas-handles-PLAN.md — Wave 3: ResizeHandle/RotationHandle für Skia + Web (4+1 Komponenten)
+- [ ] 09.1-04-render-pipeline-PLAN.md — Wave 3: sortByZOrder + Rotation-Transform in beiden Renderern
+- [ ] 09.1-05-i18n-verification-PLAN.md — Wave 3: editor.elementEditor.* keys + Mapper round-trip + HUMAN-VERIFY
 
 ### Phase 10: Aussaatkalender v1
 
