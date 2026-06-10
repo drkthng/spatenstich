@@ -30,7 +30,7 @@ Phase: 09.1 — COMPLETE (2026-05-29)
 Next: Phase 10 — Aussaatkalender v1
 Note: Phase 7.5b (Web Editor Polish) remains optional/open.
 Plans: 31/31 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 7/7, Phase 04: ~~4/4 superseded~~, Phase 05: 3/3, Phase 06: 4/4, Phase 06.5: 5/5, Phase 07: 6/6, Phase 07.5a: 1/1, Phase 08: 4/4, Phase 09: 4/4, Phase 09.1: 6/6)
-Last activity: 2026-06-10 -- quick-260610-jtf forensic cleanup; Phase 09.1 confirmed complete
+Last activity: 2026-06-10 -- Completed quick task 260610-jtf: Forensik-Sweep (CI grün: 81/81 Suites, 640/640 Tests)
 
 Progress: [████████████] v1.0 Foundation complete; v1.1 Hot Path: Phase 10 next
 
@@ -186,6 +186,7 @@ None yet.
 | 260421-v43 | Roadmap-Pivot: shared-garden MVP, defer vereinsregeln+photorealism to post-MVP | 2026-04-21 | (pending) | [260421-v43-roadmap-pivot](.planning/quick/260421-v43-roadmap-pivot/) |
 | 260508-m07 | M07 Pivot: Manual Planning + Claude.ai Bridge — roadmap overhaul | 2026-05-08 | (pending) | - |
 | 260510-r5p | Phase-06 Import-Bug Triple Fix: file-picker + sync-cases + import-items updated_at | 2026-05-11 | a3321e1 | [260510-r5p-phase-06-import-bug-triple-fix-file-pick](.planning/quick/260510-r5p-phase-06-import-bug-triple-fix-file-pick/) |
+| 260610-jtf | Forensik-Sweep: CI-Fixes (supabase.ts, auth-Mock, rotated-resize, storage-Proxy) + Repo-Hygiene + Planning-Konsistenz | 2026-06-10 | dab65a9 | [260610-jtf-forensik-sweep-ci-fixes-repo-hygiene-pla](.planning/quick/260610-jtf-forensik-sweep-ci-fixes-repo-hygiene-pla/) |
 
 ### Blockers/Concerns
 
@@ -198,7 +199,7 @@ None yet.
 - ~~Phase 03 uploadPending() wiring gap.~~ — **RESOLVED: SyncTriggers.ts confirmed wired (reconnect + foreground syncAll)**
 - ~~DEFERRED-1: supabase.ts first-line CLI stdout garbage.~~ — **RESOLVED by quick-260610-jtf (2026-06-10)**
 - **NEW**: Schema drift risk between Claude.ai project prompt and app's `spatenstich-import.v1` schema. Mitigated by "Copy current schema" button in import error screen.
-- **NOTE**: Pre-existing red tests in hooks project (migrateLocalToAccount.rowtables Test 1, useSyncStatus Tests 5+7) — not introduced by this quick task; tracked for future investigation.
+- ~~Pre-existing red tests in hooks project (migrateLocalToAccount.rowtables Test 1, useSyncStatus Tests 5+7).~~ — **RESOLVED by quick-260610-jtf Nachtrag: storage-Proxy set-Trap (jest.spyOn schlug am get-only-Proxy still fehl) + Test-Angleichung an reale EntityName-Liste (photo_queue war nie Row-Sync-Entity)**
 
 ## Session Continuity
 
