@@ -21,10 +21,6 @@ export interface WebRotationHandleProps {
   centerYPx: number;
 }
 
-interface RotationDragState {
-  active: true;
-}
-
 export function WebRotationHandle({
   elementId,
   xPx,
@@ -33,14 +29,12 @@ export function WebRotationHandle({
   centerYPx,
 }: WebRotationHandleProps): React.JSX.Element {
   const [isShiftDown, setIsShiftDown] = React.useState(false);
-  const dragRef = React.useRef<RotationDragState | null>(null);
+  const [centerScreen, setCenterScreen] = React.useState<{ x: number; y: number } | null>(null);
 
-  // Pattern S5 + Pitfall 7: Shift-key listener with INPUT/TEXTAREA guard.
-  // Without the guard, Shift in modal text input is hijacked by this handler.
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return; // Pitfall 7 guard
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
       setIsShiftDown(e.shiftKey);
     };
     window.addEventListener('keydown', onKey);
@@ -51,13 +45,11 @@ export function WebRotationHandle({
     };
   }, []);
 
-  // Window-level drag effect: fires when drag is active (dragRef.current !== null).
-  // Uses isShiftDown from closure — captured at time effect re-runs.
   React.useEffect(() => {
-    if (!dragRef.current) return;
+    if (!centerScreen) return;
 
     const onMove = (e: MouseEvent) => {
-      const rawDeg = (Math.atan2(e.clientY - centerYPx, e.clientX - centerXPx) * 180) / Math.PI;
+      const rawDeg = (Math.atan2(e.clientY - centerScreen.y, e.clientX - centerScreen.x) * 180) / Math.PI;
       const newDeg = snapRotation(rawDeg, isShiftDown);
       const el = useEditorStore.getState().elements.find((x) => x.id === elementId);
       if (!el) return;
@@ -69,9 +61,8 @@ export function WebRotationHandle({
 
     const onUp = () => {
       try {
-        dragRef.current = null;
+        setCenterScreen(null);
       } finally {
-        // Pitfall 8: always release gestureActive even on error
         useEditorStore.getState().setGestureActive(false);
       }
     };
@@ -82,15 +73,24 @@ export function WebRotationHandle({
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
     };
-  });
+  }, [centerScreen, isShiftDown, elementId]);
 
   const onMouseDown = React.useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      dragRef.current = { active: true };
+      const currentTarget = e.currentTarget as (SVGElement & { ownerSVGElement?: SVGSVGElement }) | null | undefined;
+      const svgEl = currentTarget?.ownerSVGElement ?? null;
+      const rect = svgEl
+        ? svgEl.getBoundingClientRect()
+        : currentTarget
+          ? (currentTarget as Element).getBoundingClientRect()
+          : null;
+      if (rect) {
+        setCenterScreen({ x: rect.left + centerXPx, y: rect.top + centerYPx });
+      }
       useEditorStore.getState().setGestureActive(true);
     },
-    [],
+    [centerXPx, centerYPx],
   );
 
   return (

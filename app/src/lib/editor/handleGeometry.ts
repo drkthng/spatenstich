@@ -1,5 +1,6 @@
 // Phase 09.1 Wave 0: Handle-Geometry pure-function stubs.
 // GREEN-fill: Plan 03 (resize handles) + Plan 03 (rotation handle).
+// Rotated-resize math implemented at handle layer: quick-260610-jtf.
 //
 // Design decisions (D-05/D-06/D-08):
 //   - 4 corner handles for resize (D-05). No edge-mid handles in MVP.
@@ -7,11 +8,10 @@
 //   - Handle coordinates are in garden meters (xM/yM space), except rotation handle offset which
 //     is screen-relative (scaled by viewport.scale) to keep visual size constant at all zoom levels.
 //
-// MVP Carve-Out (RESEARCH §A1):
-//   TODO v1.1: rotated-resize math currently NOT implemented. Caller MUST hide resize handles when
-//   (el.provenance?.rotateDeg ?? 0) !== 0. Until then, user falls back to Modal numeric width/height
-//   input (D-04 Hybrid: handles are the optional fast-path, Modal is precise-path).
-//   Track: DEFERRED-rotated-resize-math
+// Corner handle contract:
+//   computeCornerHandles returns axis-aligned local-frame corners (element's own unrotated space).
+//   The caller (WebPlanEditor) wraps handles in a rotation <G> for display and passes rotateDeg
+//   to WebResizeHandle so drag deltas are converted into local frame before applying resize math.
 
 import type { PlanElementRow } from '@spatenstich/shared';
 
@@ -25,13 +25,15 @@ export interface CornerHandles {
 
 /**
  * Computes the four corner handle positions for an element in garden-meter space.
+ * Corners are computed in the element's local (unrotated) frame:
  * - tl = (xM - widthM/2,  yM - heightM/2)
  * - tr = (xM + widthM/2,  yM - heightM/2)
  * - bl = (xM - widthM/2,  yM + heightM/2)
  * - br = (xM + widthM/2,  yM + heightM/2)
  *
- * MVP: Caller must hide these handles when (el.provenance?.rotateDeg ?? 0) !== 0
- * (rotated-resize math not yet implemented — see carve-out above).
+ * Caller wraps these in a rotation <G> for display and passes rotateDeg to
+ * WebResizeHandle so drag deltas are converted to local frame. This function
+ * is unchanged; rotated-resize math lives in WebResizeHandle.computeResize.
  */
 export function computeCornerHandles(el: PlanElementRow): CornerHandles {
   const halfW = el.widthM / 2;

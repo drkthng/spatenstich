@@ -3,7 +3,8 @@
 // Pattern S3 (gestureActive discipline): setGestureActive(true) on mousedown, false on mouseup.
 // Window-level mousemove/mouseup pattern mirrors WebPlanEditor.tsx:119-152 (drag state effect).
 // Pitfall 8 mitigation: try/finally ensures gestureActive is always reset even on error.
-// MVP Carve-Out: Only rendered when rotateDeg === 0 (caller enforces, WebPlanEditor render-gate).
+// Rotated-resize: drag deltas converted to element's local frame via inverse rotation; center
+// shift rotated back to world frame. Implemented in Phase quick-260610-jtf.
 // D-05: 4 corner handles. D-20: widthM/heightM are dedicated columns — no provenance touch.
 
 import * as React from 'react';
@@ -21,6 +22,8 @@ export interface WebResizeHandleProps {
   yPx: number;
   /** Current viewport scale (px per meter) */
   scale: number;
+  /** Element rotation in degrees (clockwise, y-down). Default 0. */
+  rotateDeg?: number;
 }
 
 interface ResizeDragState {
@@ -28,6 +31,8 @@ interface ResizeDragState {
   startMouseY: number;
   startWidthM: number;
   startHeightM: number;
+  startXM: number;
+  startYM: number;
 }
 
 /**
@@ -39,8 +44,14 @@ function cornerCursor(corner: 'tl' | 'tr' | 'bl' | 'br'): string {
 }
 
 /**
- * Computes new widthM/heightM from a drag delta, anchored at the opposite corner.
- * Pure function, safe to call in event handlers.
+ * Computes new dimensions + center offset, anchored at the opposite corner.
+ * Supports rotated elements: drag deltas are converted to the element's local frame
+ * using the inverse rotation, and the center shift is rotated back to world frame.
+ *
+ * θ = rotateDeg in radians (positive = clockwise in screen y-down coords).
+ * dxLocal = ( dxPx * cos(θ) + dyPx * sin(θ) ) / scale
+ * dyLocal = ( -dxPx * sin(θ) + dyPx * cos(θ) ) / scale
+ * Center shift computed in local frame, then rotated back to world.
  */
 function computeResize(
   corner: 'tl' | 'tr' | 'bl' | 'br',
@@ -49,31 +60,30 @@ function computeResize(
   dxPx: number,
   dyPx: number,
   scale: number,
-): { newW: number; newH: number } {
-  const dxM = dxPx / scale;
-  const dyM = dyPx / scale;
-  let newW = startWidthM;
-  let newH = startHeightM;
+  theta: number,
+): { newW: number; newH: number; cxAdj: number; cyAdj: number } {
+  const cosT = Math.cos(theta);
+  const sinT = Math.sin(theta);
 
-  if (corner === 'br') {
-    newW = startWidthM + dxM;
-    newH = startHeightM + dyM;
-  } else if (corner === 'tl') {
-    newW = startWidthM - dxM;
-    newH = startHeightM - dyM;
-  } else if (corner === 'tr') {
-    newW = startWidthM + dxM;
-    newH = startHeightM - dyM;
-  } else {
-    // bl
-    newW = startWidthM - dxM;
-    newH = startHeightM + dyM;
-  }
+  // Rotate screen delta into local (unrotated) element frame
+  const dxLocal = (dxPx * cosT + dyPx * sinT) / scale;
+  const dyLocal = (-dxPx * sinT + dyPx * cosT) / scale;
 
-  return {
-    newW: Math.max(MIN_DIM_M, newW),
-    newH: Math.max(MIN_DIM_M, newH),
-  };
+  const sxW = corner === 'tl' || corner === 'bl' ? -1 : 1;
+  const syH = corner === 'tl' || corner === 'tr' ? -1 : 1;
+
+  const newW = Math.max(MIN_DIM_M, startWidthM + sxW * dxLocal);
+  const newH = Math.max(MIN_DIM_M, startHeightM + syH * dyLocal);
+
+  // Center shift in local frame
+  const cxLocal = sxW * (newW - startWidthM) / 2;
+  const cyLocal = syH * (newH - startHeightM) / 2;
+
+  // Rotate center shift back to world frame
+  const cxAdj = cxLocal * cosT - cyLocal * sinT;
+  const cyAdj = cxLocal * sinT + cyLocal * cosT;
+
+  return { newW, newH, cxAdj, cyAdj };
 }
 
 export function WebResizeHandle({
@@ -82,25 +92,38 @@ export function WebResizeHandle({
   xPx,
   yPx,
   scale,
+  rotateDeg,
 }: WebResizeHandleProps): React.JSX.Element {
-  const dragRef = React.useRef<ResizeDragState | null>(null);
+  const theta = ((rotateDeg ?? 0) * Math.PI) / 180;
+  const [drag, setDrag] = React.useState<ResizeDragState | null>(null);
 
   React.useEffect(() => {
-    if (!dragRef.current) return;
-    const drag = dragRef.current;
+    if (!drag) return;
 
     const onMove = (e: MouseEvent) => {
       const dxPx = e.clientX - drag.startMouseX;
       const dyPx = e.clientY - drag.startMouseY;
-      const { newW, newH } = computeResize(corner, drag.startWidthM, drag.startHeightM, dxPx, dyPx, scale);
-      useEditorStore.getState().updateElement(elementId, { widthM: newW, heightM: newH });
+      const { newW, newH, cxAdj, cyAdj } = computeResize(
+        corner,
+        drag.startWidthM,
+        drag.startHeightM,
+        dxPx,
+        dyPx,
+        scale,
+        theta,
+      );
+      useEditorStore.getState().updateElement(elementId, {
+        widthM: newW,
+        heightM: newH,
+        xM: drag.startXM + cxAdj,
+        yM: drag.startYM + cyAdj,
+      });
     };
 
     const onUp = () => {
       try {
-        dragRef.current = null;
+        setDrag(null);
       } finally {
-        // Pitfall 8: always release gestureActive even on error
         useEditorStore.getState().setGestureActive(false);
       }
     };
@@ -111,19 +134,21 @@ export function WebResizeHandle({
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
     };
-  });
+  }, [drag, corner, elementId, scale, theta]);
 
   const onMouseDown = React.useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
       const el = useEditorStore.getState().elements.find((x) => x.id === elementId);
       if (!el || el.deletedAt !== null) return;
-      dragRef.current = {
+      setDrag({
         startMouseX: e.clientX,
         startMouseY: e.clientY,
         startWidthM: el.widthM,
         startHeightM: el.heightM,
-      };
+        startXM: el.xM,
+        startYM: el.yM,
+      });
       useEditorStore.getState().setGestureActive(true);
     },
     [elementId],

@@ -416,52 +416,53 @@ export function WebPlanEditor({
           );
         })}
 
-        {/* 5. Resize handles — only shown when selection && rotateDeg === 0 (MVP carve-out A1).
-            Rotated-resize inverse transform is deferred to v1.1. User falls back to Modal for
-            numeric width/height input when element is rotated (D-04 Hybrid). */}
+        {/* 5. Resize handles — shown for any selected element */}
         {selectedEl && (() => {
+          const corners = computeCornerHandles(selectedEl);
           const prov = (selectedEl.provenance ?? {}) as Record<string, unknown>;
           const rotateDeg = typeof prov.rotateDeg === 'number' ? prov.rotateDeg : 0;
-          if (rotateDeg === 0) {
-            const corners = computeCornerHandles(selectedEl);
-            return (
-              <>
-                <WebResizeHandle
-                  key="resize-tl"
-                  elementId={selectedEl.id}
-                  corner="tl"
-                  xPx={corners.tl.xM * scale}
-                  yPx={corners.tl.yM * scale}
-                  scale={scale}
-                />
-                <WebResizeHandle
-                  key="resize-tr"
-                  elementId={selectedEl.id}
-                  corner="tr"
-                  xPx={corners.tr.xM * scale}
-                  yPx={corners.tr.yM * scale}
-                  scale={scale}
-                />
-                <WebResizeHandle
-                  key="resize-bl"
-                  elementId={selectedEl.id}
-                  corner="bl"
-                  xPx={corners.bl.xM * scale}
-                  yPx={corners.bl.yM * scale}
-                  scale={scale}
-                />
-                <WebResizeHandle
-                  key="resize-br"
-                  elementId={selectedEl.id}
-                  corner="br"
-                  xPx={corners.br.xM * scale}
-                  yPx={corners.br.yM * scale}
-                  scale={scale}
-                />
-              </>
-            );
-          }
-          return null;
+          const cxPx = selectedEl.xM * scale;
+          const cyPx = selectedEl.yM * scale;
+          return (
+            <G transform={rotateDeg !== 0 ? `rotate(${rotateDeg}, ${cxPx}, ${cyPx})` : undefined}>
+              <WebResizeHandle
+                key="resize-tl"
+                elementId={selectedEl.id}
+                corner="tl"
+                xPx={corners.tl.xM * scale}
+                yPx={corners.tl.yM * scale}
+                scale={scale}
+                rotateDeg={rotateDeg}
+              />
+              <WebResizeHandle
+                key="resize-tr"
+                elementId={selectedEl.id}
+                corner="tr"
+                xPx={corners.tr.xM * scale}
+                yPx={corners.tr.yM * scale}
+                scale={scale}
+                rotateDeg={rotateDeg}
+              />
+              <WebResizeHandle
+                key="resize-bl"
+                elementId={selectedEl.id}
+                corner="bl"
+                xPx={corners.bl.xM * scale}
+                yPx={corners.bl.yM * scale}
+                scale={scale}
+                rotateDeg={rotateDeg}
+              />
+              <WebResizeHandle
+                key="resize-br"
+                elementId={selectedEl.id}
+                corner="br"
+                xPx={corners.br.xM * scale}
+                yPx={corners.br.yM * scale}
+                scale={scale}
+                rotateDeg={rotateDeg}
+              />
+            </G>
+          );
         })()}
 
         {/* 6. Rotation handle — always shown for selected element (any rotateDeg) */}

@@ -1,6 +1,6 @@
 // Phase 09.1 Wave 0 RED: it.todo() pins; Wave 3 GREEN fills.
 // Plan 03 GREEN-fill: computeCornerHandles + computeRotationHandle geometry math.
-// Pins RESEARCH §Pattern 3 + MVP carve-out A1 (hidden handles when rotateDeg !== 0).
+// Updated quick-260610-jtf: rotated-resize math implemented at WebResizeHandle layer.
 
 import type { PlanElementRow } from '@spatenstich/shared';
 import { computeCornerHandles, computeRotationHandle } from '../handleGeometry';
@@ -69,11 +69,11 @@ describe('lib/editor/handleGeometry', () => {
     expect(handle.yM).toBeCloseTo(4.3);
   });
 
-  it('MVP carve-out: rotated-resize math TODO; resize handles hidden when rotateDeg !== 0 (A1)', () => {
-    // This test verifies the no-op contract: computeCornerHandles does NOT throw for
-    // rotated elements, but callers are documented to hide the result.
-    // The MVP carve-out is enforced at the render layer (EditorCanvas / WebPlanEditor),
-    // not in this pure function. The function should still return valid geometry.
+  it('computeCornerHandles returns axis-aligned local-frame corners for rotated element (A1 contract)', () => {
+    // computeCornerHandles always returns corners in the element's local (unrotated) frame.
+    // The caller (WebPlanEditor) wraps them in a rotation <G> for display;
+    // WebResizeHandle.computeResize converts drag deltas into local frame using rotateDeg.
+    // This function is unchanged — the rotated-resize math lives at the handle layer.
     const el = makeEl({
       xM: 3,
       yM: 3,
@@ -81,10 +81,10 @@ describe('lib/editor/handleGeometry', () => {
       heightM: 1,
       provenance: { source: 'manual', rotateDeg: 45 } as any,
     });
-    // Should not throw — carve-out is caller-enforced
+    // Should not throw — pure geometry, rotation is display-only at this layer
     expect(() => computeCornerHandles(el)).not.toThrow();
     const handles = computeCornerHandles(el);
-    // Even for rotated elements, axis-aligned corners still computed correctly
+    // Axis-aligned local-frame corners are correct regardless of rotateDeg
     expect(handles.tl.xM).toBeCloseTo(2.5);
     expect(handles.tl.yM).toBeCloseTo(2.5);
   });
