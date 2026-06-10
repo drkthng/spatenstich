@@ -203,7 +203,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-10T00:00:00.000Z
-Stopped at: quick-260610-jtf forensic cleanup complete
-Resume file: None
-Next: Phase 10 (Aussaatkalender v1) — weekly view + Gantt per plant, climate-zone adjusted.
+Last session: 2026-06-10 (Session "spaten")
+Stopped at: Feature-Sweep pausiert nach Forensik (User-Stop, Token-Budget) — Web-Tiefenrecherche gestoppt, resume-fähig
+Resume file: .planning/HANDOFF-2026-06-10-feature-sweep.md
+Next: Tiefenrecherche fortsetzen/neu starten → Feature-Ranking → ROADMAP/Backlog-Update → /gsd-plan-phase Phase 10 (Aussaatkalender v1).
