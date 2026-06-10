@@ -208,7 +208,11 @@ export async function migrateLocalToAccount(
  * Bootstrap local Row-Tables after migration.
  * Pulls current state from Supabase for all Phase-3 entities and stores
  * via upsertRowFromServer (NO Outbox entry — this is server-state pull).
- * Sets sync_state.lastPullAt to server_now() ISO-Timestamp for all 6 entities.
+ * Sets sync_state.lastPullAt to server_now() ISO-Timestamp for alle 5
+ * Row-Sync-Entities (gardens, profiles, vereinsregeln, garden_members,
+ * invite_codes). Die Foto-Queue ist dateibasiert (photoQueueRepo) und kein
+ * Row-Sync; spätere Entities (plan_elements, imports, drafts …) starten mit
+ * lastPullAt=null → harmloser Full-Pull beim ersten Sync.
  *
  * Called from migrateLocalToAccount Step 9 (fail-soft: caller catches + logs).
  * Exported for direct testing.

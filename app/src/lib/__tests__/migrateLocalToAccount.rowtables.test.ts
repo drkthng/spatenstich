@@ -1,7 +1,10 @@
 // migrateLocalToAccount — Row-Tables bootstrap tests — Plan 03-03 Task 03.
-// TDD RED: written BEFORE Step 9 exists in migrateLocalToAccount.ts.
-// Tests cover SYNC-01 bootstrap: after migration, 6 entities get lastPullAt set
-// and upsertRowFromServer is called for available data (no Outbox entries).
+// Tests cover SYNC-01 bootstrap: after migration, all 5 Row-Sync-Entities get
+// lastPullAt set and upsertRowFromServer is called for available data (no Outbox entries).
+// NOTE: 'photo_queue' wurde nie Teil von EntityName — die Foto-Queue ist eine
+// dateibasierte Queue (photoQueueRepo, expo-file-system), kein Row-Sync.
+// Spätere Entities (plan_elements, imports, drafts …) brauchen kein Bootstrap:
+// lastPullAt=null führt im SyncWorker zum harmlosen Full-Pull.
 //
 // NOTE: Uses jest mocks for storage + supabase — real StorageAdapter not available in node env.
 
@@ -155,7 +158,7 @@ beforeEach(() => {
 
 // ── Test 1: setSyncState called for all 6 entities ────────────────────
 describe('bootstrapRowTables', () => {
-  it('sets lastPullAt=server_now for all 6 entities', async () => {
+  it('sets lastPullAt=server_now for all 5 row-sync entities', async () => {
     setupBootstrapMocks();
 
     await bootstrapRowTables(USER_ID, GARDEN_ID);
@@ -166,7 +169,6 @@ describe('bootstrapRowTables', () => {
       'vereinsregeln',
       'garden_members',
       'invite_codes',
-      'photo_queue',
     ];
     expect(mockSetSyncState).toHaveBeenCalledTimes(entities.length);
     for (const entity of entities) {
