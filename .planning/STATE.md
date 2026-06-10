@@ -26,13 +26,13 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 
 ## Current Position
 
-Phase: 09.1 — COMPLETE
-Plan: 1 of 6
-Vorheriger Status: Phase 7 COMPLETE — Migration 20260513000018 (plan_elements.layer) pushed live; 07-HUMAN-VERIFY.md with 4 deferred manual smoke sections
-Plans: 25/25 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 6/7, Phase 04: ~~4/4 superseded~~, Phase 06.5: 5/5, Phase 07: 6/6, Phase 08: 1/4)
-Last activity: 2026-05-29 -- Phase 09.1 marked complete
+Phase: 09.1 — COMPLETE (2026-05-29)
+Next: Phase 10 — Aussaatkalender v1
+Note: Phase 7.5b (Web Editor Polish) remains optional/open.
+Plans: 31/31 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 7/7, Phase 04: ~~4/4 superseded~~, Phase 05: 3/3, Phase 06: 4/4, Phase 06.5: 5/5, Phase 07: 6/6, Phase 07.5a: 1/1, Phase 08: 4/4, Phase 09: 4/4, Phase 09.1: 6/6)
+Last activity: 2026-06-10 -- quick-260610-jtf forensic cleanup; Phase 09.1 confirmed complete
 
-Progress: [██████░░░░] 25% within Phase 8 (1/4 plans done; 40 of an estimated 44 plans complete cross-project)
+Progress: [████████████] v1.0 Foundation complete; v1.1 Hot Path: Phase 10 next
 
 ## Performance Metrics
 
@@ -195,12 +195,14 @@ None yet.
 - Open question: pnpm + EAS Build compatibility (eas-cli issue #3247).
 - ~~Risk: Claude Vision structural extraction quality for German allotment plots.~~ — **RESOLVED by M07 Pivot (no in-app AI)**
 - ~~Open question: API-Key-Strategie für Claude Vision / Gemini / PDF-Extraktion.~~ — **RESOLVED by M07 Pivot (zero API keys needed)**
+- ~~Phase 03 uploadPending() wiring gap.~~ — **RESOLVED: SyncTriggers.ts confirmed wired (reconnect + foreground syncAll)**
+- ~~DEFERRED-1: supabase.ts first-line CLI stdout garbage.~~ — **RESOLVED by quick-260610-jtf (2026-06-10)**
 - **NEW**: Schema drift risk between Claude.ai project prompt and app's `spatenstich-import.v1` schema. Mitigated by "Copy current schema" button in import error screen.
-- **NEW**: Phase 4 code needs clean removal in Phase 5 — significant deletion scope (Edge Functions, capture screens, parseElements, photoResizer, ai-job-consumer).
+- **NOTE**: Pre-existing red tests in hooks project (migrateLocalToAccount.rowtables Test 1, useSyncStatus Tests 5+7) — not introduced by this quick task; tracked for future investigation.
 
 ## Session Continuity
 
-Last session: 2026-05-29T08:53:01.237Z
-Stopped at: context exhaustion at 78% (2026-05-29)
+Last session: 2026-06-10T00:00:00.000Z
+Stopped at: quick-260610-jtf forensic cleanup complete
 Resume file: None
-Next: Phase 9 (Companion-Hinweis) — red/green banner when placing plants in beds based on plant_companions table.
+Next: Phase 10 (Aussaatkalender v1) — weekly view + Gantt per plant, climate-zone adjusted.

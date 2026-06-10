@@ -23,7 +23,7 @@
 - [x] **Phase 1: Foundation** — Monorepo, StorageAdapter, Supabase + RLS, pgmq, feature flags, EAS CI (2026-04-17)
 - [x] **Phase 2: Auth & Profile** — Account/local mode, PLZ/Klimazone, Archetyp. Vereinsregeln-Code flagged off bis v1.3 (2026-04-20)
 - [x] **Phase 2.5: Shared Garden Model** — gardens + garden_members, Member-RLS, Invite-Code-Flow (2026-04-23)
-- [x] **Phase 3: Offline & Sync** — Outbox + 2-User-LWW, Photo-Queue (6/7 plans done; gap closure pending)
+- [x] **Phase 3: Offline & Sync** — Outbox + 2-User-LWW, Photo-Queue. uploadPending()-Wiring via SyncTriggers.ts (reconnect + foreground syncAll) bestätigt geschlossen (2026-06-10)
 - [x] ~~**Phase 4: Garten-Erfassung (M1)**~~ — **SUPERSEDED durch Pivot M07** (2026-05-08)
 - [x] **Phase 5: AI-Removal + Import-Schema** — Alle AI-Clients entfernt, `spatenstich-import.v1` Schema (2026-05-09)
 - [x] **Phase 6: Import-Flow + Companion-Prompt** — Claude.ai-Prompt, Share-Intent, Preview, Draft-Tables (2026-05-09)
@@ -35,7 +35,7 @@
 
 - [ ] **Phase 7.5b: Web Editor Polish** — Polygon-Zeichnen + Drafts-Tray + Pflanzenabstand-Ring im Web *(optional, parallel)*
 - [x] **Phase 8: Plant-DB Foundation** — 90 Pflanzen + 38 Companion-Paare + Edge Function seed (2026-05-17)
-- [ ] **Phase 9: Companion-Hinweis** — Roter/grüner Banner beim Pflanzen-Setzen wenn Nachbarn schlecht/gut zusammenpassen
+- [x] **Phase 9: Companion-Hinweis** — Roter/grüner Banner beim Pflanzen-Setzen wenn Nachbarn schlecht/gut zusammenpassen (2026-05-29)
 - [x] **Phase 9.1: Editor-Element-Bearbeitung** *(INSERTED)* — Resize/Rotate per Doppelklick, Properties (Name etc.), Z-Order für überlappende Elemente (completed 2026-05-29)
 - [ ] **Phase 10: Aussaatkalender v1** — "Diese Woche" Wochenview + Gantt-Detail pro Pflanze, klimazonen-angepasst
 
@@ -72,7 +72,7 @@
 ### Phase 3: Offline & Sync (2-User Shared State)
 
 **Goal**: Offline-First, Outbox-Sync, 2-User-LWW.
-**Status**: ⚠ 6/7 Plans complete; Plan 03-07 (uploadPending() wiring gap closure) offen — funktional aber nicht 100% sauber. Wird in v1.2 oder v1.3 nachgezogen.
+**Status**: ✅ Code Complete 2026-06-10. 7/7 Plans: uploadPending()-Wiring-Lücke bestätigt geschlossen — `app/src/lib/sync/SyncTriggers.ts` ruft `syncAll()` beim NetInfo-Reconnect (Zeile 50) und AppState-Foreground (Zeile 59) auf, registriert via `registerSyncTriggers()`. Wiring war vorhanden aber im ROADMAP als offen markiert.
 
 ### Phase 5: AI-Removal + Import-Schema
 
@@ -277,7 +277,7 @@ Plans:
 | 1. Foundation | 3/3 | ✅ Complete | 2026-04-17 |
 | 2. Auth & Profile | 4/4 | ✅ Code Complete | 2026-04-20 |
 | 2.5. Shared Garden Model | 4/4 | ✅ Code Complete | 2026-04-23 |
-| 3. Offline & Sync | 6/7 | ⚠ Gap pending | - |
+| 3. Offline & Sync | 7/7 | ✅ Code Complete | 2026-06-10 |
 | ~~4. Garten-Erfassung (M1)~~ | 4/4 | **SUPERSEDED** (M07) | - |
 | 5. AI-Removal + Import-Schema | 3/3 | ✅ Complete | 2026-05-09 |
 | 6. Import-Flow + Companion-Prompt | 4/4 | ✅ Code Complete | 2026-05-09 |
@@ -287,7 +287,7 @@ Plans:
 | **--- v1.1 Saison 2026 Ready ---** | | | |
 | 7.5b. Web Editor Polish | 0/TBD | Not started (optional) | - |
 | 8. Plant-DB Foundation | 4/4 | ✅ Complete | 2026-05-17 |
-| 9. Companion-Hinweis | 0/4 | Not started | - |
+| 9. Companion-Hinweis | 4/4 | ✅ Complete | 2026-05-29 |
 | 10. Aussaatkalender v1 | 0/TBD | Not started | - |
 | **--- v1.2 Saison-Tools ---** | | | |
 | 11. Garten-Journal | 0/TBD | Not started | - |
