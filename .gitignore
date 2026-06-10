@@ -9,3 +9,7 @@ coverage/
 .env.local
 # Deno generates deno.lock next to deno.json — not committed (matches Phase 01-03 ai-job-consumer convention)
 deno.lock
+# Agenten-Worktrees und lokaler Agent-State gehören nicht ins Repo
+.claude/
+# Windows/MSYS Crash-Dumps — entstehen bei abgestürzten bash/git-Prozessen
+*.stackdump
