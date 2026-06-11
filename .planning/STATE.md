@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: "Saison 2026 Ready" — Hot Path
-status: Ready to execute
-stopped_at: Phase 10 Plan 03 complete (GanttStreifen+KalenderWochenCard+Wochen-View)
-last_updated: "2026-06-11T06:16:33.149Z"
+status: Phase complete — ready for verification
+stopped_at: "Phase 10 Plan 04 complete (PflanzenDetail + FruchtfolgeWarnung — checkpoint:human-verify pending)"
+last_updated: "2026-06-11T06:27:03.043Z"
 last_activity: 2026-06-11 -- Phase 10 execution started
 progress:
   total_phases: 13
-  completed_phases: 12
+  completed_phases: 13
   total_plans: 58
-  completed_plans: 57
-  percent: 92
+  completed_plans: 58
+  percent: 100
 ---
 
 # Project State
@@ -87,6 +87,7 @@ Progress: [████████████] v1.0 Foundation complete; v1.1 
 | Phase 10 P02 | 8 | 2 tasks | 4 files |
 | Phase 10 P03 | 12 | 2 tasks (TDD RED+GREEN + Task 2) | 7 files |
 | Phase 10 P03 | 12 | 2 tasks | 7 files |
+| Phase 10 P04 | 6 | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -180,6 +181,7 @@ Recent decisions affecting current work:
 - [Phase 10 P03]: FARBEN exported from GanttStreifen.tsx — single source of truth for Aktionstyp phase colors (#A78BFA/#34D399/#60A5FA/#FB923C), imported by KalenderWochenCard
 - [Phase 10 P03]: Filter-Chip useEffect-Sync — lazy-initializer returns false on async hook load; useEffect corrects after first data load (per UI-SPEC default-ON rule when meinePflanzenslugs.size > 0)
 - [Phase 10 P03]: klimazone??4 fallback in PflanzenKalenderZeile prevents NaN from propagating to GanttStreifen; Zone-4-Baseline matches zoneOffset() Security Guard
+- [Phase ?]: Phase 10 P04: t() helper extended with vars param; Fruchtfolge check falls back to all beds when plant not yet placed
 
 ### Roadmap Evolution
 
@@ -215,7 +217,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-11T06:16:33.136Z
-Stopped at: Phase 10 Plan 02 complete (useKalenderData + findBeeteForPlant)
+Last session: 2026-06-11T06:27:03.028Z
+Stopped at: Phase 10 Plan 04 complete (PflanzenDetail + FruchtfolgeWarnung — checkpoint:human-verify pending)
 Resume file: None
 Next: /gsd-plan-phase 10 — Aussaatkalender v1 (Markt-Evidenz + Vorbilder stehen im ROADMAP-Phase-10-Block und in .planning/research/)
