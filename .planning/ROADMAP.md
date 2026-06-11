@@ -218,7 +218,7 @@ Plans:
 **Markt-Evidenz (Recherche 2026-06-11)**: Kalender-Automation aus Pflanzendaten = verifiziertes Top-Demand-Signal (HortusFox #511/#502/#509); GrowVegs frostgenaue Pflanzliste = meistgelobtes Feature des Marktführers; Fryd-Gründungs-These ist exakt diese Wochen-Frage. → Kalender MUSS sich aus Plan + Plant-DB selbst befüllen (kein manuelles Eintragen).
 **Implementierungs-Vorbilder**: Gardeneus `dates.ts` (frostrelative Fenster, MIT — lokal vorhanden) für die Logik; PyQt-Gartenplaner für die UX (2-Wochen-Raster × 3 Methoden Freiland/Vorkultur/Frühbeet, eingefrorene Pflanzen-Spalte) — nur Idee, kein Code/Daten (keine Lizenz). Details: `.planning/research/2026-06-10-ref-apps-feature-synthesis.md`.
 
-**Plans:** 4/4 plans complete
+**Plans:** 9 plans (4 initial complete + 5 gap-closure)
 Plans:
 **Wave 1**
 
@@ -235,6 +235,22 @@ Plans:
 **Wave 4** *(blocked on Wave 3 completion)*
 
 - [x] 10-04-PLAN.md — Pflanzen-Detail [slug] Screen + Fruchtfolge-Warnung + Human-Verify (CAL-05/06)
+
+**Gap-Closure (aus 10-VERIFICATION.md + 10-REVIEW.md — 3 Blocker + 7 Warnings)**
+
+*Gap-Wave 1 (Engine + Geometrie, parallel)*
+
+- [ ] 10-05-PLAN.md — kalenderEngine: getAktuelleKw Math.floor (WR-03) + ISO-Wochen-Wrap (WR-04) + GanttStreifen Breiten-Guard (CAL-01/02)
+- [ ] 10-06-PLAN.md — kalenderBeete: bbox-CENTER-Konvention (WR-01) + neuer findPflanzenInBeet-Helper (CAL-04/06)
+
+*Gap-Wave 2 (Screen + Hook, parallel, blocked on 10-06)*
+
+- [ ] 10-07-PLAN.md — Detail-Screen [slug]: Rules-of-Hooks-Crash (CR-01) + beet-scoped Fruchtfolge (WR-02) + de.json-Strings (CAL-01/05/06)
+- [ ] 10-08-PLAN.md — useKalenderData: In-Bed-Placement (WR-06) + cancelled-Flag/Reset (WR-07) + mode-Guard (CAL-04/05)
+
+*Gap-Wave 3 (Wochen-View, blocked on 10-08)*
+
+- [ ] 10-09-PLAN.md — Wochen-View: Filter-Chip wirkt auf WochenCard (WR-05) + kein useEffect-Override (CAL-01/04)
 
 **UI hint**: yes
 
