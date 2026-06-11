@@ -12,8 +12,8 @@ import { useRouter, Stack, useLocalSearchParams } from 'expo-router';
 import de from '@spatenstich/shared/i18n/de';
 import { usePlants } from '@/src/hooks/usePlants';
 import { useKalenderData } from '@/src/hooks/useKalenderData';
-import { findBeeteForPlant, getPlantSlug } from '@/src/lib/kalenderBeete';
-import { pruefeEinfacheFruchtfolge, getFensterFuerPflanze } from '@spatenstich/shared';
+import { findBeeteForPlant, findPflanzenInBeet, getPlantSlug } from '@/src/lib/kalenderBeete';
+import { pruefeEinfacheFruchtfolge } from '@spatenstich/shared';
 import { Button } from '@/src/components/ui/button';
 import { InlineBanner } from '@/src/components/InlineBanner';
 import { GanttStreifen } from '@/src/components/kalender/GanttStreifen';
@@ -55,23 +55,12 @@ export default function PflanzenDetailScreen(): React.JSX.Element {
   const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
-  // Plant not found guard (T-10-08)
-  if (!loading && !plant) {
-    return (
-      <View className="flex-1 bg-[#F9F7F4] dark:bg-[#1C1917]">
-        <Stack.Screen options={{ headerTitle: slug ?? '' }} />
-        <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, gap: 16 }}>
-          <InlineBanner variant="warning" message={`Pflanze "${slug}" nicht gefunden.`} />
-        </ScrollView>
-      </View>
-    );
-  }
-
   // PLZ/klimazone guard — render warning but still show everything else
   const klimazoneNum = klimazone ?? 4;
 
   // ── CAL-06: Fruchtfolge warning ───────────────────────────────────────────
   // Compute: check if a same-family plant already occupies any bed
+  // WR-02 Fix: beet-scoped via findPflanzenInBeet (Plan 10-06/10-07).
   const fruchtfolgeGrund: string | null = React.useMemo(() => {
     if (!plant || !elements.length) return null;
 
@@ -87,14 +76,10 @@ export default function PflanzenDetailScreen(): React.JSX.Element {
     );
 
     for (const beet of targetBeete) {
-      // Get all other Pflanze elements in this bed
-      const otherPflanzenInBeet = elements.filter((e) => {
-        if (e.deletedAt !== null) return false;
-        if (e.elementType !== 'Pflanze') return false;
-        const ps = getPlantSlug(e);
-        if (!ps || ps === plant.slug) return false; // exclude self (T-10-10)
-        return true;
-      });
+      // WR-02 Fix: Get Pflanze elements scoped to THIS bed via PiP (Plan 10-06 findPflanzenInBeet).
+      // Exclude the plant being viewed (T-10-10).
+      const otherPflanzenInBeet = findPflanzenInBeet(elements, beet)
+        .filter((e) => getPlantSlug(e) !== plant.slug);
 
       const beetPflanzen = otherPflanzenInBeet
         .map((e) => {
@@ -133,11 +118,24 @@ export default function PflanzenDetailScreen(): React.JSX.Element {
       await addPlantToPlan(plant);
       setSuccessMessage(t('kalender.hinzugefuegtBanner', { name: plant.nameDe }));
     } catch {
-      setErrorMessage('Hinzufügen fehlgeschlagen. Versuche es erneut.');
+      setErrorMessage(t('kalender.hinzufuegenFehler'));
     } finally {
       setAddLoading(false);
     }
   }, [plant, addPlantToPlan]);
+
+  // Plant not found guard (T-10-08) — AFTER all hooks (CR-01 Fix: hook count stable across renders).
+  // The useMemos above null-guard plant internally, so they run safely when plant === undefined.
+  if (!loading && !plant) {
+    return (
+      <View className="flex-1 bg-[#F9F7F4] dark:bg-[#1C1917]">
+        <Stack.Screen options={{ headerTitle: slug ?? '' }} />
+        <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, gap: 16 }}>
+          <InlineBanner variant="warning" message={t('kalender.nichtGefunden', { slug: slug ?? '' })} />
+        </ScrollView>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-[#F9F7F4] dark:bg-[#1C1917]">

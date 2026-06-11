@@ -406,6 +406,8 @@
       "auspflanzen": "Auspflanzen",
       "ernte": "Ernte"
     },
+    "nichtGefunden": "Pflanze \"{slug}\" nicht gefunden.",
+    "hinzufuegenFehler": "Hinzufügen fehlgeschlagen. Versuche es erneut.",
     "detail": {
       "mindestabstand": "Mindestabstand: {cm} cm",
       "sonnenbedarf": "Sonnenbedarf: {value}",
