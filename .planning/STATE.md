@@ -203,7 +203,8 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-4 offen (Editor-Notizen aus Phase-10-UAT, 2026-06-11):
+5 offen (Notizen aus Phase-10-UAT, 2026-06-11):
+- [Bug: Home verlinkt Profil/Einstellungen nicht — Screens verwaist](todos/pending/2026-06-11-home-navigation-profil-settings-fehlt.md)
 - [Bug: erste Rotation springt um ~90°/270°](todos/pending/2026-06-11-rotation-springt-bei-erstem-drehen.md)
 - [Selektiertes Element per Pfeiltasten verschieben](todos/pending/2026-06-11-element-per-pfeiltasten-verschieben.md)
 - [Beet per Klick-Ziehen-Loslassen aufziehen](todos/pending/2026-06-11-beet-per-drag-aufziehen.md)
