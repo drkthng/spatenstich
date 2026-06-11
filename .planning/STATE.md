@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: "Saison 2026 Ready" — Hot Path
 status: Ready to execute
-stopped_at: Phase 10 Plan 06 VOLLSTAENDIG — WR-01 Center-Konvention-Fix + findPflanzenInBeet exportiert; alle 17 Tests gruen
-last_updated: "2026-06-11T08:03:38.654Z"
+stopped_at: "Phase 10 Gap-Closure: Wave 1 (10-05, 10-06) abgeschlossen — Wave 2 (10-07, 10-08) und Wave 3 (10-09) ausstehend"
+last_updated: "2026-06-11T08:04:26.973Z"
 last_activity: 2026-06-11 -- Phase 10 execution started
 progress:
   total_phases: 13
@@ -223,7 +223,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-11T08:03:38.641Z
-Stopped at: Phase 10 Plan 06 VOLLSTAENDIG — WR-01 Center-Konvention-Fix + findPflanzenInBeet exportiert; alle 17 Tests gruen
-Resume file: None
+Last session: 2026-06-11T08:04:26.959Z
+Stopped at: Phase 10 Gap-Closure: Wave 1 (10-05, 10-06) abgeschlossen — Wave 2 (10-07, 10-08) und Wave 3 (10-09) ausstehend
+Resume file: .planning/phases/10-aussaatkalender-v1/10-07-PLAN.md
 Next: /gsd-verify-work 10 für manuelle UAT-Verifikation (CAL-01..CAL-06 auf Gerät), dann nächste Phase
