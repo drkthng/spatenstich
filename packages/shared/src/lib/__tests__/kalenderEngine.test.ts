@@ -152,6 +152,67 @@ describe('kalenderEngine', () => {
       expect(kw).toBeGreaterThanOrEqual(1);
       expect(kw).toBeLessThanOrEqual(53);
     });
+
+    // WR-03: Sonntags-/Montags-Assertion mit injiziertem Datum
+    it('WR-03: Sonntag 14.06.2026 liefert KW 24 (nicht KW 25)', () => {
+      // 2026-06-14 ist ein Sonntag — Math.ceil lieferte hier fälschlich DOY+1 → KW 25
+      const sonntag = new Date(2026, 5, 14); // Monat 0-basiert: 5 = Juni
+      expect(getAktuelleKw(sonntag)).toBe(24);
+    });
+
+    it('WR-03: Montag 15.06.2026 liefert KW 25', () => {
+      const montag = new Date(2026, 5, 15);
+      expect(getAktuelleKw(montag)).toBe(25);
+    });
+  });
+
+  // ── WR-04: ISO-Wochen-Wrap-Invariante ─────────────────────────────────
+  describe('getFensterFuerPflanze — ISO-KW-Wrap-Invariante (WR-04)', () => {
+    // Pflanze mit jahresanfang-nahen DOY: Zone-1-Offset (-30) verschiebt in negativen Bereich
+    // sowIndoorDoyStart=25, sowIndoorDoyEnd=40 → Zone1-Offset=-30 → s=-5, e=10 → clamp 1..10
+    // doyToIsoKw(1) kann ISO-KW 52/53 des Vorjahres liefern → startKw > endKw ohne Fix
+    const jahresanfangPflanzeMock = {
+      sowIndoorDoyStart: 25,
+      sowIndoorDoyEnd: 40,
+      sowOutdoorDoyStart: null,
+      sowOutdoorDoyEnd: null,
+      plantDoyStart: null,
+      plantDoyEnd: null,
+      harvestDoyStart: null,
+      harvestDoyEnd: null,
+      family: 'Testaceae',
+      slug: 'wrap-test-jahresanfang',
+    };
+
+    // Pflanze mit jahresende-nahen DOY: endDoy im ISO-Wrap-Bereich (DOY >= 359)
+    const jahresendePflanzeMock = {
+      sowIndoorDoyStart: null,
+      sowIndoorDoyEnd: null,
+      sowOutdoorDoyStart: null,
+      sowOutdoorDoyEnd: null,
+      plantDoyStart: null,
+      plantDoyEnd: null,
+      harvestDoyStart: 340,
+      harvestDoyEnd: 365,
+      family: 'Testaceae',
+      slug: 'wrap-test-jahresende',
+    };
+
+    it('WR-04: alle Fenster aus Zone 1 mit jahresanfang-nahen DOY erfüllen startKw <= endKw', () => {
+      const fenster = getFensterFuerPflanze(jahresanfangPflanzeMock, 1);
+      // Muss mindestens ein Fenster geben (Vorkultur)
+      expect(fenster.length).toBeGreaterThan(0);
+      for (const f of fenster) {
+        expect(f.startKw).toBeLessThanOrEqual(f.endKw);
+      }
+    });
+
+    it('WR-04: Fenster mit jahresende-nahem endDoy (DOY 340-365) erfüllt startKw <= endKw', () => {
+      const fenster = getFensterFuerPflanze(jahresendePflanzeMock, 4);
+      // Muss genau ein Ernte-Fenster geben
+      expect(fenster.length).toBe(1);
+      expect(fenster[0]!.startKw).toBeLessThanOrEqual(fenster[0]!.endKw);
+    });
   });
 
   // ── pruefeEinfacheFruchtfolge (CAL-06) ─────────────────────────────────
