@@ -29,6 +29,7 @@ jest.mock('@/src/hooks/useKalenderData', () => ({
 // ── kalenderBeete mock ────────────────────────────────────────────────────────
 jest.mock('@/src/lib/kalenderBeete', () => ({
   findBeeteForPlant: jest.fn(),
+  findPflanzenInBeet: jest.fn(),
   getPlantSlug: jest.fn((el: any) => {
     const prov = el.provenance as Record<string, unknown> | null;
     if (!prov || typeof prov.plantSlug !== 'string') return null;
@@ -46,7 +47,7 @@ jest.mock('@spatenstich/shared', () => ({
 import { useLocalSearchParams } from 'expo-router';
 import { usePlants } from '@/src/hooks/usePlants';
 import { useKalenderData } from '@/src/hooks/useKalenderData';
-import { findBeeteForPlant } from '@/src/lib/kalenderBeete';
+import { findBeeteForPlant, findPflanzenInBeet } from '@/src/lib/kalenderBeete';
 import { pruefeEinfacheFruchtfolge } from '@spatenstich/shared';
 import PflanzenDetailScreen from '../../../../app/(app)/kalender/[slug]';
 
@@ -147,6 +148,8 @@ beforeEach(() => {
   (usePlants as jest.Mock).mockReturnValue({ data: [MOCK_PLANT] });
   (useKalenderData as jest.Mock).mockReturnValue({ ...baseKalenderData, addPlantToPlan: jest.fn().mockResolvedValue(MOCK_PLANT) });
   (findBeeteForPlant as jest.Mock).mockReturnValue([]);
+  // findPflanzenInBeet: default returns empty (no other plants in bed → no Fruchtfolge warning).
+  (findPflanzenInBeet as jest.Mock).mockReturnValue([]);
   (pruefeEinfacheFruchtfolge as jest.Mock).mockReturnValue({ warnung: false, grund: null });
 });
 
@@ -195,7 +198,7 @@ describe('PflanzenDetailScreen', () => {
     });
   });
 
-  // (d) same-family plant in a bed → fruchtfolge-warnung testID appears
+  // (d) same-family plant IN the target bed → fruchtfolge-warnung testID appears
   it('(d) same-family plant in bed → renders fruchtfolge-warnung testID', () => {
     // MOCK_PLANT is Solanaceae (tomate); MOCK_PFLANZE_PAPRIKA is also Solanaceae (paprika)
     // Setup: elements include the bed and the paprika Pflanze
@@ -206,6 +209,8 @@ describe('PflanzenDetailScreen', () => {
     });
     // findBeeteForPlant returns the bed (plant placed in it for context)
     (findBeeteForPlant as jest.Mock).mockReturnValue([MOCK_BEET]);
+    // WR-02: findPflanzenInBeet for the target bed returns the paprika element (beet-scoped)
+    (findPflanzenInBeet as jest.Mock).mockReturnValue([MOCK_PFLANZE_PAPRIKA]);
     // pruefeEinfacheFruchtfolge returns a warning
     (pruefeEinfacheFruchtfolge as jest.Mock).mockReturnValue({
       warnung: true,
@@ -223,5 +228,57 @@ describe('PflanzenDetailScreen', () => {
 
     const { getByTestId } = render(<PflanzenDetailScreen />);
     expect(getByTestId('fruchtfolge-warnung')).toBeTruthy();
+  });
+
+  // (e) WR-02: same-family plant in a DIFFERENT bed → NO fruchtfolge-warnung
+  it('(e) same-family plant in another bed → does NOT render fruchtfolge-warnung', () => {
+    // Tomate is Solanaceae. Paprika is also Solanaceae but in a different bed.
+    // The target bed (MOCK_BEET) does NOT contain the paprika plant.
+    (useKalenderData as jest.Mock).mockReturnValue({
+      ...baseKalenderData,
+      elements: [MOCK_BEET, MOCK_PFLANZE_PAPRIKA],
+      hasBeetImPlan: true,
+    });
+    // findBeeteForPlant: tomate is placed in MOCK_BEET
+    (findBeeteForPlant as jest.Mock).mockReturnValue([MOCK_BEET]);
+    // findPflanzenInBeet: MOCK_BEET does NOT contain paprika (it's in a different bed)
+    (findPflanzenInBeet as jest.Mock).mockReturnValue([]);
+    // pruefeEinfacheFruchtfolge: called with empty list → no warning
+    (pruefeEinfacheFruchtfolge as jest.Mock).mockReturnValue({ warnung: false, grund: null });
+    const paprikaPlant: PlantRow = {
+      ...MOCK_PLANT,
+      id: 'bundle:paprika',
+      slug: 'paprika',
+      nameDe: 'Paprika',
+      family: 'Solanaceae',
+    };
+    (usePlants as jest.Mock).mockReturnValue({ data: [MOCK_PLANT, paprikaPlant] });
+
+    const { queryByTestId } = render(<PflanzenDetailScreen />);
+    // Same family in ANOTHER bed must NOT trigger the warning (WR-02)
+    expect(queryByTestId('fruchtfolge-warnung')).toBeNull();
+  });
+
+  // (f) CR-01: Not-found path — unknown slug + loading=false → no crash, shows nichtGefunden banner
+  it('(f) unknown slug after loading=false → no crash, renders nichtGefunden banner', () => {
+    // Simulate: slug 'unbekannt' not in plants list
+    (useLocalSearchParams as jest.Mock).mockReturnValue({ slug: 'unbekannt' });
+    (usePlants as jest.Mock).mockReturnValue({ data: [] });
+    (useKalenderData as jest.Mock).mockReturnValue({
+      ...baseKalenderData,
+      loading: false,
+      elements: [],
+    });
+
+    // Must NOT throw — hook count is now stable (CR-01 fix)
+    let renderFn: (() => ReturnType<typeof render>) | undefined;
+    expect(() => {
+      renderFn = () => render(<PflanzenDetailScreen />);
+      renderFn();
+    }).not.toThrow();
+
+    const { getByText } = render(<PflanzenDetailScreen />);
+    // Banner text contains the slug (via kalender.nichtGefunden de.json key)
+    expect(getByText(/unbekannt/)).toBeTruthy();
   });
 });
