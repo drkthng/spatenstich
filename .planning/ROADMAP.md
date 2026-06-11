@@ -219,12 +219,23 @@ Plans:
 **Implementierungs-Vorbilder**: Gardeneus `dates.ts` (frostrelative Fenster, MIT — lokal vorhanden) für die Logik; PyQt-Gartenplaner für die UX (2-Wochen-Raster × 3 Methoden Freiland/Vorkultur/Frühbeet, eingefrorene Pflanzen-Spalte) — nur Idee, kein Code/Daten (keine Lizenz). Details: `.planning/research/2026-06-10-ref-apps-feature-synthesis.md`.
 
 **Plans:** 4 plans
-
 Plans:
+**Wave 1**
+
 - [ ] 10-01-PLAN.md — Kalender-Engine (DOY→KW, Klimazonenoffset, Fruchtfolge-Check) + i18n kalender.* + Test-Scaffold (CAL-02/03/06)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 10-02-PLAN.md — useKalenderData Hook (lädt Plan-Elemente via Repo) + findBeeteForPlant + addPlantToPlan (CAL-04/05)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 10-03-PLAN.md — Gantt/Legende/Wochen-Card Komponenten + Wochen-View Screen + Home-Button (CAL-01/03)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 10-04-PLAN.md — Pflanzen-Detail [slug] Screen + Fruchtfolge-Warnung + Human-Verify (CAL-05/06)
+
 **UI hint**: yes
 
 ---
