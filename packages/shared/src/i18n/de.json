@@ -359,7 +359,7 @@
   "sync": {
     "badge": {
       "synced": "Synchronisiert",
-      "syncing": "Synchronisiere \u2026",
+      "syncing": "Synchronisiere …",
       "degraded": "Probleme beim Synchronisieren",
       "offline": "Offline",
       "pendingCount": "{n} ausstehend",
@@ -369,8 +369,8 @@
       "title": "Sync-Status",
       "pendingHeader": "Ausstehend",
       "failedHeader": "Fehlgeschlagen",
-      "empty": "Alle \u00c4nderungen sind synchronisiert.",
-      "entryLabel": "{entity} \u00b7 {op}",
+      "empty": "Alle Änderungen sind synchronisiert.",
+      "entryLabel": "{entity} · {op}",
       "retryButton": "Erneut versuchen",
       "discardButton": "Verwerfen",
       "discardConfirm": "Änderung wirklich verwerfen? Dein lokaler Wert wird durch den Server-Stand überschrieben.",
@@ -379,6 +379,37 @@
       "lastError": "Letzter Fehler",
       "attemptsLabel": "Versuche: {n}",
       "conflictLabel": "Konflikt — älterer Stand, wurde verworfen."
+    }
+  },
+  "kalender": {
+    "title": "Aussaatkalender",
+    "kwLabel": "KW {kw} · {year}",
+    "dieseWoche": "Diese Woche",
+    "jahresuebersicht": "Alle Pflanzen (Jahresübersicht)",
+    "filterMeinePflanzen": "Nur meine Pflanzen",
+    "klimazoneLabel": "Klimazone: {zone} ({name})",
+    "aufWelchemBeet": "Auf welchem Beet?",
+    "zuPlanHinzufuegen": "Zu Plan hinzufügen",
+    "planOeffnen": "Plan öffnen",
+    "hinzugefuegtBanner": "{name} wurde dem Plan hinzugefügt",
+    "nochNichtImPlan": "Noch nicht im Plan",
+    "plzFehlt": "PLZ noch nicht gesetzt — Klimazone unbekannt.",
+    "plzJetztEingeben": "Jetzt eingeben",
+    "keinBeetImPlan": "Noch kein Beet im Plan — lege zuerst ein Beet im Plan-Editor an.",
+    "keineAktionenDieseWoche": "Diese Woche keine Aussaat- oder Ernteaktionen.",
+    "keinePflanzenImPlan": "Keine Pflanzen im Plan",
+    "keinePflanzenImPlanBody": "Füge Pflanzen im Plan-Editor hinzu, um deinen persönlichen Kalender zu sehen.",
+    "ohneKalenderDaten": "Diese Pflanzen wurden vor Phase 9 angelegt und haben keine Kalender-Verknüpfung.",
+    "legende": {
+      "vorkultur": "Vorkultur",
+      "direktsaat": "Direktsaat",
+      "auspflanzen": "Auspflanzen",
+      "ernte": "Ernte"
+    },
+    "detail": {
+      "mindestabstand": "Mindestabstand: {cm} cm",
+      "sonnenbedarf": "Sonnenbedarf: {value}",
+      "familie": "Familie: {family}"
     }
   }
 }

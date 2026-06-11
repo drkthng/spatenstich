@@ -84,7 +84,7 @@ const config: Config = {
       displayName: 'components',
       preset: 'ts-jest',
       testEnvironment: 'jsdom',
-      testMatch: ['**/src/components/__tests__/**/*.test.ts?(x)'],
+      testMatch: ['**/src/components/__tests__/**/*.test.ts?(x)', '**/src/components/kalender/__tests__/**/*.test.ts?(x)'],
       setupFiles: ['<rootDir>/src/components/__tests__/setup.ts'],
       moduleNameMapper: {
         '^@spatenstich/shared$': '<rootDir>/../packages/shared/src/index.ts',
