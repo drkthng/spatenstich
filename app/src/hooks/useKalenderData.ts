@@ -82,11 +82,44 @@ export function useKalenderData(options: UseKalenderDataOptions = {}): UseKalend
   const [dimensions, setDimensions] = React.useState<GardenDimensionsRow | null>(null);
   const [loading, setLoading] = React.useState(true);
 
-  const loadData = React.useCallback(async (): Promise<void> => {
+  // WR-07: Lade-Effekt mit cancelled-Flag — verhindert Race bei Gartenwechsel.
+  // Bei activeGardenId=null: sofortiger Reset (keine stale Daten).
+  // Pattern: app/app/(app)/index.tsx:28-36 + 10-REVIEW.md WR-07.
+  React.useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+
     if (!activeGardenId) {
+      // WR-07: Reset statt nur loading=false — verhindert Cross-Garden-Datenleck.
+      setElements([]);
+      setDimensions(null);
       setLoading(false);
       return;
     }
+
+    (async () => {
+      try {
+        const [dims, elems] = await Promise.all([
+          loadDimensions(activeGardenId),
+          loadAcceptedElements(activeGardenId),
+        ]);
+        if (!cancelled) {
+          setDimensions(dims);
+          setElements(elems);
+        }
+      } catch (err) {
+        console.error('useKalenderData: load failed', err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [activeGardenId]);
+
+  // refresh: manueller Reload nach addPlantToPlan (kein cancelled-Flag nötig — kein Race).
+  const refresh = React.useCallback(async (): Promise<void> => {
+    if (!activeGardenId) return;
     try {
       const [dims, elems] = await Promise.all([
         loadDimensions(activeGardenId),
@@ -95,20 +128,9 @@ export function useKalenderData(options: UseKalenderDataOptions = {}): UseKalend
       setDimensions(dims);
       setElements(elems);
     } catch (err) {
-      console.error('useKalenderData: load failed', err);
-    } finally {
-      setLoading(false);
+      console.error('useKalenderData: refresh failed', err);
     }
   }, [activeGardenId]);
-
-  React.useEffect(() => {
-    setLoading(true);
-    void loadData();
-  }, [loadData]);
-
-  const refresh = React.useCallback(async (): Promise<void> => {
-    await loadData();
-  }, [loadData]);
 
   // "Nur meine Pflanzen" filter: set of plantSlugs present in non-deleted Pflanze elements.
   const meinePflanzenslugs = React.useMemo<Set<string>>(() => {
