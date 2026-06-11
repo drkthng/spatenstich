@@ -86,8 +86,17 @@ export function getFensterFuerPflanze(
     const s = Math.max(1, Math.min(365, start));
     const e = Math.max(1, Math.min(365, end));
     // Fallstrick 4: KW clamp 1..53
-    const startKw = Math.min(53, doyToIsoKw(s));
-    const endKw = Math.min(53, doyToIsoKw(e));
+    let startKw = Math.min(53, doyToIsoKw(s));
+    let endKw = Math.min(53, doyToIsoKw(e));
+    // WR-04: ISO-Wochen-Wrap normalisieren — Jahresgrenzen-Inversion reparieren.
+    // doyToIsoKw() gibt die echte ISO-KW zurück, die an Jahresgrenzen wrappt:
+    // Früh-Januar kann ISO-KW 52/53 des Vorjahres ergeben (startKw > endKw).
+    // Spät-Dezember kann ISO-KW 1 des Folgejahres ergeben (endKw < startKw).
+    // Lösung: Kantenpinning — invertiertes Fenster an Kalenderkante klammern.
+    if (startKw > endKw) {
+      if (s <= 7) startKw = 1;   // Früh-Januar → auf KW 1 pinnen
+      if (e >= 359) endKw = 53;  // Spät-Dezember → auf KW 53 pinnen
+    }
     windows.push({ typ, startDoy: s, endDoy: e, startKw, endKw });
   };
 
@@ -101,13 +110,18 @@ export function getFensterFuerPflanze(
 
 /**
  * Gibt die aktuelle ISO-Kalenderwoche zurück (1..53).
+ * WR-03: Optionaler `now`-Parameter für testbare Injektion; Default `new Date()` für Produktion.
+ * Rückwärtskompatibel — bestehende no-arg-Aufrufer bleiben unverändert.
+ * Fix: Direkte UTC-Arithmetik (wie in doyToIsoKw) — vermeidet den DOY-Umweg sowie
+ * DST-bedingte Rundungsfehler, die Math.ceil/-floor beim Local-Zeit-Diff verursachen.
  */
-export function getAktuelleKw(): number {
-  const now = new Date();
-  const doy = Math.ceil(
-    (now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000,
-  );
-  return Math.min(53, doyToIsoKw(doy));
+export function getAktuelleKw(now: Date = new Date()): number {
+  // Lokale Datumskomponenten in UTC umwandeln, um DST-Drift zu eliminieren
+  const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const dayNum = d.getUTCDay() || 7; // 1=Mo..7=So (ISO-Wochentag)
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum); // auf nächsten Donnerstag verschieben
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.min(53, Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7));
 }
 
 /**
