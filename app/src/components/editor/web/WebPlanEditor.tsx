@@ -413,7 +413,7 @@ export function WebPlanEditor({
   }, [scale, gardenId, userId, dimensions.widthM, dimensions.heightM, placingKind, plantMeta, onPlaced]);
 
   const handleSvgClick = React.useCallback(
-    (e: React.MouseEvent<HTMLDivElement | SVGSVGElement>) => {
+    (e: React.MouseEvent<SVGSVGElement>) => {
       // quick-260611-vk4: Unterdrücke Klick direkt nach Drag-to-create (justCreatedRef-Flag).
       // Das mouseup des Drag-Endes setzt justCreatedRef — der folgende click soll weder
       // deselecten noch ein zweites Beet über den Klick-Pfad erzeugen.
@@ -424,8 +424,7 @@ export function WebPlanEditor({
       // Der Klick-Pfad bleibt aber als Fallback aktiv (z.B. reiner Klick ohne Drag),
       // sodass ein einzelner Klick im Beet-Modus ein Beet mit Default-Größe platziert.
       if (placingKind) {
-        const svgEl = (e.currentTarget as HTMLElement).querySelector('svg') ?? e.currentTarget;
-        const rect = (svgEl as Element).getBoundingClientRect();
+        const rect = (e.currentTarget as unknown as SVGSVGElement).getBoundingClientRect();
         const xPx = e.clientX - rect.left;
         const yPx = e.clientY - rect.top;
         const xM = xPx / scale;
@@ -494,14 +493,15 @@ export function WebPlanEditor({
   // quick-260611-vk4: Canvas mousedown — startet Drag-to-create wenn placingKind === 'Beet'.
   // Für alle anderen Werkzeuge oder kein Werkzeug passiert hier nichts; Klick-Platzierung
   // läuft weiter über handleSvgClick (click-Event).
+  // Handler liegt am <Svg>-Element, damit e.currentTarget das SVG selbst ist und
+  // getBoundingClientRect() direkt darauf aufgerufen werden kann.
   const handleCanvasMouseDown = React.useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+    (e: React.MouseEvent<SVGSVGElement>) => {
       if (placingKind !== 'Beet') return;
-      // SVG-lokale Koordinaten für den Aufzieh-Startpunkt ermitteln.
-      // Wir suchen das SVG-Element innerhalb des div-Containers.
-      const svgEl = (e.currentTarget as HTMLElement).querySelector('svg');
-      if (!svgEl) return;
-      const rect = svgEl.getBoundingClientRect();
+      // SVG-lokale Koordinaten für den Aufzieh-Startpunkt.
+      // Fallback auf left=0/top=0 wenn getBoundingClientRect nicht verfügbar (z.B. Tests).
+      const svgDomEl = e.currentTarget as unknown as SVGSVGElement;
+      const rect = svgDomEl?.getBoundingClientRect?.() ?? { left: 0, top: 0 };
       const startSvgX = e.clientX - rect.left;
       const startSvgY = e.clientY - rect.top;
       createDragRef.current = {
@@ -540,14 +540,16 @@ export function WebPlanEditor({
       className="flex-1 items-center justify-center"
       testID="web-plan-editor-container"
     >
-      {/* quick-260611-vk4: onMouseDown startet Drag-to-create für Beet */}
-      <div onClick={handleSvgClick as any} onMouseDown={handleCanvasMouseDown as any} style={cursorStyle}>
+      <div style={cursorStyle}>
+      {/* quick-260611-vk4: onClick (Deselect/Klick-Platzierung) + onMouseDown (Drag-to-create) am SVG.
+          Spread-Cast nötig, weil react-native-svg SvgProps onClick nicht deklariert. */}
       <Svg
         width={svgWidth}
         height={svgHeight}
         viewBox={`0 0 ${svgWidth} ${svgHeight}`}
         accessibilityLabel={`Interaktiver Gartenplan mit ${visibleElements.length} Elementen`}
         testID="web-plan-editor-svg"
+        {...({ onClick: handleSvgClick, onMouseDown: handleCanvasMouseDown } as any)}
       >
         {/* 1. Background */}
         <Rect x={0} y={0} width={svgWidth} height={svgHeight} fill={PLAN_COLORS.background} />
