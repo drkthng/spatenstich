@@ -203,7 +203,11 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+4 offen (Editor-Notizen aus Phase-10-UAT, 2026-06-11):
+- [Bug: erste Rotation springt um ~90°/270°](todos/pending/2026-06-11-rotation-springt-bei-erstem-drehen.md)
+- [Selektiertes Element per Pfeiltasten verschieben](todos/pending/2026-06-11-element-per-pfeiltasten-verschieben.md)
+- [Beet per Klick-Ziehen-Loslassen aufziehen](todos/pending/2026-06-11-beet-per-drag-aufziehen.md)
+- [Automatisches Speichern bei Beet-Veränderungen](todos/pending/2026-06-11-autosave-bei-beetaenderungen.md)
 
 ### Quick Tasks Completed
 
