@@ -7,6 +7,8 @@
 // Fallstrick 2: klimazone null → empty wochenAktionen (no NaN).
 // Fallstrick 3: elements without provenance.plantSlug are excluded from meinePflanzenslugs.
 // Fallstrick 5: addPlantToPlan guards hasBeetImPlan + dimensions before writing.
+// Plan 10-08 WR-06: addPlantToPlan platziert Pflanze IM Beet (Beet-Center + parentBedId).
+// Plan 10-08 IN-04: expliziter mode !== 'account'-Guard vor dem Write statt mode!-Assertion.
 
 import * as React from 'react';
 import { usePlants } from './usePlants';
@@ -17,7 +19,6 @@ import {
   loadDimensions,
   writePlanElement,
 } from '../lib/gardenPlanRepo';
-import { nextFreeBedSlot } from '../lib/draftPromotionRepo';
 import { getPlantSlug } from '../lib/kalenderBeete';
 import {
   getFensterFuerPflanze,
@@ -152,11 +153,22 @@ export function useKalenderData(options: UseKalenderDataOptions = {}): UseKalend
   // CAL-05: Add a plant to the active garden plan
   const addPlantToPlan = React.useCallback(
     async (plant: PlantRow): Promise<PlanElementRow> => {
+      // IN-04: Expliziter mode-Guard VOR dem Write — drückt Vorbedingung aus und
+      // liefert klare Fehlerursache statt mode!-Assertion (10-REVIEW IN-04).
+      if (mode !== 'account') throw new Error('account_erforderlich');
       if (!hasBeetImPlan) throw new Error('kein_beet_im_plan');
       if (!dimensions) throw new Error('keine_dimensions');
       if (!activeGardenId) throw new Error('kein_aktiver_garten');
 
-      const slot = nextFreeBedSlot(elements, dimensions, { widthM: 0.3, heightM: 0.3 });
+      // WR-06: In-Bed-Placement — wähle erstes nicht-gelöschtes Beet.
+      // Center-Konvention (Plan 10-06/10-08): xM/yM = bbox center, garantiert
+      // innerhalb des Rechteck-Polygons → findBeeteForPlant/findBedForPlant findet die Pflanze.
+      // D-03 Fast-Path: parentBedId in provenance → findBedForPlant Fast-Path (Phase 9).
+      const targetBeet = elements.find(
+        (e) => e.elementType === 'Beet' && e.deletedAt === null,
+      );
+      if (!targetBeet) throw new Error('kein_beet_im_plan');
+
       const now = new Date().toISOString();
       const userId = useAuthStore.getState().userId;
 
@@ -165,14 +177,14 @@ export function useKalenderData(options: UseKalenderDataOptions = {}): UseKalend
         gardenId: activeGardenId,
         elementType: 'Pflanze',
         label: plant.nameDe,
-        xM: slot.xM,
-        yM: slot.yM,
+        xM: targetBeet.xM,
+        yM: targetBeet.yM,
         widthM: 0.3,
         heightM: 0.3,
         confidence: null,
         isAccepted: true,
         importedFrom: null,
-        provenance: { plantSlug: plant.slug },
+        provenance: { plantSlug: plant.slug, parentBedId: targetBeet.id },
         layer: 'seasonal',
         createdAt: now,
         updatedAt: now,
@@ -180,8 +192,8 @@ export function useKalenderData(options: UseKalenderDataOptions = {}): UseKalend
         deletedAt: null,
       };
 
-      // assertAccount is called inside writePlanElement — throws if mode !== 'account'
-      await writePlanElement(mode!, element);
+      // Defense-in-depth: assertAccount in writePlanElement bleibt zweite Verteidigungslinie.
+      await writePlanElement(mode, element);
       await refresh();
       return element;
     },

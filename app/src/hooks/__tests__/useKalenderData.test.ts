@@ -239,9 +239,10 @@ describe('useKalenderData', () => {
 
   describe('add plant: writes PlanElementRow (CAL-05)', () => {
     it('calls writePlanElement with a row having elementType=Pflanze, layer=seasonal, provenance.plantSlug=slug', async () => {
-      mockLoadAcceptedElements.mockResolvedValue([makeBeet()]);
+      // Beet mit Center (5, 4) — Pflanze wird an Beet-Center platziert (WR-06 In-Bed-Placement)
+      const BEET = makeBeet({ xM: 5, yM: 4, widthM: 2, heightM: 2 });
+      mockLoadAcceptedElements.mockResolvedValue([BEET]);
       mockLoadDimensions.mockResolvedValue(MOCK_DIMS);
-      mockNextFreeBedSlot.mockReturnValue({ xM: 2, yM: 3 });
 
       const qc = newQC();
       const { result } = renderHook(() => useKalenderData(), { wrapper: wrap(qc) });
@@ -264,8 +265,9 @@ describe('useKalenderData', () => {
       expect(writtenElement!.layer).toBe('seasonal');
       expect(writtenElement!.isAccepted).toBe(true);
       expect(writtenElement!.provenance).toEqual(expect.objectContaining({ plantSlug: 'tomate' }));
-      expect(writtenElement!.xM).toBe(2);
-      expect(writtenElement!.yM).toBe(3);
+      // WR-06: Platzierung am Beet-Center (Center-Konvention Plan 10-06/08)
+      expect(writtenElement!.xM).toBe(5);
+      expect(writtenElement!.yM).toBe(4);
       expect(writtenElement!.widthM).toBe(0.3);
       expect(writtenElement!.heightM).toBe(0.3);
     });
