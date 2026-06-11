@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: "Saison 2026 Ready" — Hot Path
 status: Ready to execute
-stopped_at: Phase 10 Plan 08 abgeschlossen — WR-06/WR-07/IN-04 geschlossen
-last_updated: "2026-06-11T09:26:24.185Z"
+stopped_at: Phase 10 Plan 09 abgeschlossen — WR-05 Filter-Chip geschlossen, Phase 10 vollstaendig
+last_updated: "2026-06-11T09:35:58.805Z"
 last_activity: 2026-06-11 -- Phase 10 execution started
 progress:
   total_phases: 13
-  completed_phases: 12
+  completed_phases: 13
   total_plans: 63
-  completed_plans: 62
-  percent: 98
+  completed_plans: 63
+  percent: 100
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 ## Current Position
 
 Phase: 10 (Aussaatkalender v1 (Gap-Closure)) — EXECUTING
-Plan: 5 of 9
+Plan: 6 of 9
 Next: Phase 10 — Aussaatkalender v1
 Note: Phase 7.5b (Web Editor Polish) remains optional/open.
 Plans: 31/31 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 7/7, Phase 04: ~~4/4 superseded~~, Phase 05: 3/3, Phase 06: 4/4, Phase 06.5: 5/5, Phase 07: 6/6, Phase 07.5a: 1/1, Phase 08: 4/4, Phase 09: 4/4, Phase 09.1: 6/6)
@@ -194,6 +194,7 @@ Recent decisions affecting current work:
 - [Phase 10 P08]: WR-06 In-Bed-Placement: addPlantToPlan platziert Pflanze am Beet-Center + parentBedId (D-03 Fast-Path) statt via nextFreeBedSlot neben den Beeten — findBeeteForPlant findet die Pflanze jetzt
 - [Phase 10 P08]: WR-07 cancelled-Flag: Lade-Effekt nach index.tsx-Muster; bei activeGardenId=null: setElements([]) + setDimensions(null) statt nur setLoading(false) — kein stale Cross-Garden-State
 - [Phase 10 P08]: IN-04 expliziter mode-Guard: if (mode !== 'account') throw new Error('account_erforderlich') VOR writePlanElement — Defense-in-depth mit assertAccount als zweite Linie
+- [Phase ?]: [Phase 10 P09]: WR-05 useKalenderData({ nurMeinePflanzen }) mit Chip-State
 
 ### Roadmap Evolution
 
@@ -229,7 +230,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-11T09:26:24.171Z
-Stopped at: Phase 10 Plan 07 abgeschlossen — Wave 2 Plan 10-08 ausstehend
-Resume file: .planning/phases/10-aussaatkalender-v1/10-08-PLAN.md
+Last session: 2026-06-11T09:35:58.792Z
+Stopped at: Phase 10 Plan 09 abgeschlossen — WR-05 Filter-Chip geschlossen, Phase 10 vollstaendig
+Resume file: None
 Next: /gsd-verify-work 10 für manuelle UAT-Verifikation (CAL-01..CAL-06 auf Gerät), dann nächste Phase
