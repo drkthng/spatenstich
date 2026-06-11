@@ -5,6 +5,7 @@ export * from './constants/flags';
 export * from './constants/klimazonen';
 export * from './constants/archetypes';
 export * from './constants/vereinsregeln';
+export * from './lib/kalenderEngine';
 export * from './utils';
 // Phase 3: Row-Types + Entity-Definitions
 export type {
