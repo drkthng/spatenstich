@@ -1,7 +1,8 @@
 ---
 phase: 10
 slug: aussaatkalender-v1
-status: draft
+status: approved
+reviewed_at: 2026-06-11
 shadcn_initialized: true
 preset: "new-york / stone"
 created: 2026-06-11
