@@ -204,9 +204,8 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-4 offen (Notizen aus Phase-10-UAT, 2026-06-11):
+3 offen (Notizen aus Phase-10-UAT, 2026-06-11):
 
-- [Bug: Element-Positionen im Beet nach Reload nicht persistiert](todos/pending/2026-06-11-element-positionen-im-beet-nicht-persistiert.md)
 - [Selektiertes Element per Pfeiltasten verschieben](todos/pending/2026-06-11-element-per-pfeiltasten-verschieben.md)
 - [Beet per Klick-Ziehen-Loslassen aufziehen](todos/pending/2026-06-11-beet-per-drag-aufziehen.md)
 - [Automatisches Speichern bei Beet-Veränderungen](todos/pending/2026-06-11-autosave-bei-beetaenderungen.md)
@@ -223,6 +222,7 @@ Recent decisions affecting current work:
 | 260611-jrl | Home-Header: Profil-Icon ergänzt — Profil/Einstellungen wieder erreichbar (UAT-Test-5-Blocker) | 2026-06-11 | da5f42e | [260611-jrl-home-header-profil-icon-erg-nzen-navigat](.planning/quick/260611-jrl-home-header-profil-icon-erg-nzen-navigat/) |
 | 260611-jzl | Editor-Bug: Rotations-Sprung beim ersten Drehen gefixt — Start-Offset in beiden RotationHandles | 2026-06-11 | 98a75d0 | [260611-jzl-editor-bug-erste-rotation-springt-um-90-](.planning/quick/260611-jzl-editor-bug-erste-rotation-springt-um-90-/) |
 | 260611-kpl | Web-Editor: Text-Selektion beim Rotieren/Resizen/Verschieben unterbunden (preventDefault + userSelect:none) | 2026-06-11 | 8f5d230 | [260611-kpl-web-editor-text-selektion-beim-rotieren-](.planning/quick/260611-kpl-web-editor-text-selektion-beim-rotieren-/) |
+| 260611-l5y | Persistenz-Bug gefixt: Gesture-End-Flush im editorStore — Move/Resize/Rotate erreichen jetzt den Outbox-Pfad | 2026-06-11 | 42fa000 | [260611-l5y-persistenz-bug-element-positionen-im-bee](.planning/quick/260611-l5y-persistenz-bug-element-positionen-im-bee/) |
 
 ### Blockers/Concerns
 
