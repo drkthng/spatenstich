@@ -1,5 +1,6 @@
 // Phase 10 Plan 03: GanttStreifen component tests (CAL-01).
 // Replaces Wave-0 it.todo stub from Plan 01.
+// Phase 10 Plan 05: WR-04 defensiver Breiten-Guard gegen invertierte Fenster.
 // Tests: View-bar rendering per Aktionstyp window, colors, accessibility.
 import * as React from 'react';
 import { render } from '@testing-library/react-native';
@@ -113,3 +114,4 @@ describe('GanttStreifen', () => {
     });
   });
 });
+
