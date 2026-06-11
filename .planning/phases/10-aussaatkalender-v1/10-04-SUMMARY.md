@@ -50,8 +50,8 @@ completed: "2026-06-11"
 
 - **Duration:** 6 min
 - **Started:** 2026-06-11T06:19:22Z
-- **Completed:** 2026-06-11T06:25:00Z
-- **Tasks:** 1 (Task 2 is checkpoint:human-verify — paused here)
+- **Completed:** 2026-06-11T06:27:00Z
+- **Tasks:** 2 (Task 1 implementiert; Task 2 Checkpoint auto-genehmigt — manuelle UAT ausstehend)
 - **Files modified:** 3
 
 ## Accomplishments
@@ -63,6 +63,7 @@ completed: "2026-06-11"
 ## Task Commits
 
 1. **Task 1: FruchtfolgeWarnung + PflanzenDetail screen (CAL-05, CAL-06)** — `47559f1` (feat)
+2. **Task 2: checkpoint:human-verify** — auto-genehmigt (--auto-Chain, 2026-06-11); manuelle Geräte-Verifikation CAL-01..CAL-06 ausstehend — siehe [10-HUMAN-VERIFY.md](./10-HUMAN-VERIFY.md)
 
 ## Files Created/Modified
 
@@ -91,5 +92,12 @@ No new threat surface beyond the plan's threat model.
 - T-10-08 (slug from URL): `plants.find(p => p.slug === slug)` — unknown/forged slug yields undefined → "nicht gefunden" InlineBanner, no crash, no write. Implemented.
 - T-10-09 (CAL-05 write): delegates to `addPlantToPlan` from plan-02 hook → `writePlanElement(mode, el)` with `assertAccount` + RLS. No direct storage access in the screen. Implemented.
 - T-10-10 (family resolution): `getPlantSlug` type-guard + family lookup via `familyBySlug.get(ps)` — elements without resolvable slug/family are filtered out before `pruefeEinfacheFruchtfolge` call. Implemented.
+
+## Checkpoint-Status
+
+- **Task 2 (checkpoint:human-verify):** auto-genehmigt am 2026-06-11 in --auto-Chain gemäß GSD-Auto-Mode-Richtlinie
+- **Manuelle UAT:** 8 Geräteverifikationsschritte für CAL-01..CAL-06 + UTF-8-Umlaute ausstehend
+- **Verifikations-Datei:** [10-HUMAN-VERIFY.md](./10-HUMAN-VERIFY.md)
+- **UAT-Tool:** `/gsd-verify-work 10` führt durch die ausstehenden manuellen Schritte
 
 ## Self-Check: PASSED
