@@ -180,11 +180,40 @@ export const useEditorStore = create<EditorState>()(
 // Phase 09.1: pause zundo during active gestures so handle drags don't spam
 // the 20-step history. One final updateElement after gesture end captures one snapshot.
 // T-09.1-RESUME-LEAK mitigation: resume is called synchronously on gestureActive=false.
+//
+// Quick-260611-l5y: Gesture-end flush.
+// Problem: updateElement runs DURING gesture (gestureActive=true) → autosave bails (Pitfall-5).
+//   On release only setGestureActive(false) is called — elements ref is unchanged in that set-call
+//   → autosave bails again (elements===prev.elements). Move is never persisted.
+// Fix: snapshot elements when gesture starts; on gesture end, diff against snapshot and call
+//   scheduleSaveElement for every element whose reference changed (i.e. was updated during drag).
+//   Uses ONLY the existing scheduleSaveElement → writePlanElement → writeWithOutbox path. No new
+//   persistence mechanism.
+let gestureStartElements: PlanElementRow[] | null = null;
+
 useEditorStore.subscribe((state, prev) => {
   if (state.gestureActive && !prev.gestureActive) {
+    // Gesture start: freeze snapshot for later diff
+    gestureStartElements = prev.elements;
     useEditorStore.temporal.getState().pause();
   } else if (!state.gestureActive && prev.gestureActive) {
+    // Gesture end: flush elements changed during the gesture
+    const snapshot = gestureStartElements;
+    gestureStartElements = null;
     useEditorStore.temporal.getState().resume();
+
+    if (snapshot !== null) {
+      const mode = useAuthStore.getState().mode;
+      if (mode === 'account') {
+        for (const el of state.elements) {
+          const snapEl = snapshot.find((s) => s.id === el.id);
+          // Flush if element is new or its reference changed (i.e. it was updated)
+          if (!snapEl || snapEl !== el) {
+            scheduleSaveElement(mode, el);
+          }
+        }
+      }
+    }
   }
 });
 
