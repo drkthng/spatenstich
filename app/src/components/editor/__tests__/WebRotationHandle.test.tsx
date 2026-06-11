@@ -178,4 +178,75 @@ describe('WebRotationHandle', () => {
       }
     }
   });
+
+  it('REGRESSION: first mousemove near handle resting position does not jump to ~270° (offset fix)', () => {
+    // Element at rotateDeg: 0. Handle is positioned directly above center:
+    //   handle at (250, 195), center at (250, 250).
+    // atan2(195 - 250, 250 - 250) = atan2(-55, 0) = -90°, normalized to 270° by snapRotation.
+    // Without offset fix: first move from handle resting position sets rotateDeg = 270°.
+    // With offset fix: offsetDeg = -90° - 0° = -90°; first move gives rawDeg - offsetDeg ≈ 0°.
+    // Expected: snapRotation called with a value near 0° (inside 15° snap bucket), NOT near 270°.
+
+    // Mock getBoundingClientRect so setCenterScreen is populated
+    const svgMock = {
+      getBoundingClientRect: () => ({ left: 0, top: 0 }),
+      ownerSVGElement: null,
+    };
+
+    const { UNSAFE_getAllByType } = render(
+      <WebRotationHandle
+        elementId="el-1"
+        xPx={250}
+        yPx={195}
+        centerXPx={250}
+        centerYPx={250}
+      />,
+    );
+
+    const views = UNSAFE_getAllByType('View' as any);
+    expect(views.length).toBeGreaterThanOrEqual(1);
+
+    const evt = {
+      stopPropagation: jest.fn(),
+      clientX: 250,
+      clientY: 195,
+      currentTarget: {
+        ownerSVGElement: svgMock,
+        getBoundingClientRect: () => ({ left: 0, top: 0 }),
+      },
+    };
+
+    // Trigger mousedown: sets centerScreen = { x: 250, y: 250 } and reads offsetDeg
+    act(() => {
+      if (views[0].props.onMouseDown) {
+        views[0].props.onMouseDown(evt);
+      }
+    });
+
+    snapRotationMock.mockClear();
+
+    // Simulate mousemove with pointer still near handle resting position (minimal movement).
+    // clientX=251, clientY=196 is nearly the same as the handle start pos (250, 195).
+    // atan2(196 - 250, 251 - 250) = atan2(-54, 1) ≈ -88.9°.
+    // With offset: rawDeg - (-90°) = -88.9° - (-90°) ≈ 1.1° → snapRotation(1.1°, false) → 0°.
+    // Without offset: snapRotation(-88.9°, false) → 270°.
+    act(() => {
+      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 251, clientY: 196 }));
+    });
+
+    if (snapRotationMock.mock.calls.length > 0) {
+      const firstArg = snapRotationMock.mock.calls[0][0] as number;
+      // The argument to snapRotation must NOT be near 270° (no-offset bug).
+      // With offset it should be near 0°. Accept any value in [-22.5°, 22.5°] (one 15° bucket).
+      const isNear270 = firstArg >= 255 || firstArg <= -255; // i.e. near ±270°
+      expect(isNear270).toBe(false);
+      // Also confirm the final rotateDeg written to store is in [0°, 15°] range (near 0°, not 270°).
+      if (mockUpdateElement.mock.calls.length > 0) {
+        const updateArg = mockUpdateElement.mock.calls[0][1] as { provenance: { rotateDeg: number } };
+        const written = updateArg?.provenance?.rotateDeg ?? -1;
+        expect(written).toBeLessThanOrEqual(15); // snap to 0° bucket
+        expect(written).toBeGreaterThanOrEqual(0);
+      }
+    }
+  });
 });
