@@ -215,6 +215,9 @@ Plans:
   5. Frost-Daten statisch pro Klimazone (last frost / first frost als ISO-Datum-Tabelle)
   6. Klick auf Pflanze in Wochen-View → Detail-View mit Gantt + Phase-8-Pflanzen-Infos + "Auf welchem Beet?"
 
+**Markt-Evidenz (Recherche 2026-06-11)**: Kalender-Automation aus Pflanzendaten = verifiziertes Top-Demand-Signal (HortusFox #511/#502/#509); GrowVegs frostgenaue Pflanzliste = meistgelobtes Feature des Marktführers; Fryd-Gründungs-These ist exakt diese Wochen-Frage. → Kalender MUSS sich aus Plan + Plant-DB selbst befüllen (kein manuelles Eintragen).
+**Implementierungs-Vorbilder**: Gardeneus `dates.ts` (frostrelative Fenster, MIT — lokal vorhanden) für die Logik; PyQt-Gartenplaner für die UX (2-Wochen-Raster × 3 Methoden Freiland/Vorkultur/Frühbeet, eingefrorene Pflanzen-Spalte) — nur Idee, kein Code/Daten (keine Lizenz). Details: `.planning/research/2026-06-10-ref-apps-feature-synthesis.md`.
+
 **Plans**: TBD
 **UI hint**: yes
 
@@ -222,16 +225,19 @@ Plans:
 
 ## v1.2 Saison-Tools (August–September 2026)
 
+> **Empfehlung aus Marktrecherche 2026-06-11:** Phase 12 (Task-Generator) eng an Phase 10 koppeln oder direkt danach ziehen — wiederkehrende, pflanzen-verknüpfte Aufgaben sind die zwei stärksten verifizierten Nachfrage-Signale des gesamten Marktes (HortusFox #9: 22👍, #281: 14 Reaktionen) und beantworten dieselbe User-Frage wie der Kalender.
+
 ### Phase 11: Garten-Journal
 
 **Goal**: Freitext-Beobachtungen, Ernten, optional Fotos pro Beet/Pflanze/Garten.
-**Inspiration**: HortusFox `PlantLogModel` (paginiert, audit-log, plant-FK).
+**Inspiration**: HortusFox `PlantLogModel` (paginiert, audit-log, plant-FK) + `PlantPhotoModel` (thumb/original/label/author) + Health-States (10 Zustände). Markt-Signal: Fryd v9.0 (06/2026) macht Foto-Journal zum Headline-Feature; XDA-Langzeitbericht: leichtgewichtige Quick-Notes schlagen Hochglanz.
 **Plans**: TBD
 
 ### Phase 12: Task-Generator
 
 **Goal**: Auto-generierte Wochenliste aus Phase-10-Kalender (z.B. "Diese Woche fällig: Tomaten ausgeizen, Erbsen säen") + Klimazone-spezifisch.
-**Inspiration**: Gardeneus `task-generator.ts` (deterministisch aus Plantings × Frost-Daten); HortusFox Task-Schema (recurring_time, recurring_scope, done).
+**Inspiration**: Gardeneus `task-generator.ts` (deterministisch aus Plantings × Frost-Daten, Dedupe über (plantingId, taskType)); HortusFox Task-Schema (recurring_time, recurring_scope, done) + M:N plant_tasks_ref.
+**Markt-Evidenz**: ✅ verifiziert stärkste Nachfrage-Kategorie überhaupt (siehe `.planning/research/2026-06-11-marktrecherche-feature-ranking.md` A.1+A.2). Pflanzen-Verknüpfung der Tasks ist Pflicht, nicht optional.
 **Plans**: TBD
 
 ### Phase 13: Saatgut-Inventar *(was v1.0 Phase 8)*
@@ -253,7 +259,7 @@ Plans:
 ### Phase 15: Fruchtfolge-Memory
 
 **Goal**: "Was war letztes Jahr auf Beet 3?" — mehrjähriges Pflanzen-History-Tracking + Familien-Konflikt-Warnung.
-**Inspiration**: Gardeneus `plant-families.ts` (18 Familien) + Fruchtfolge-Checker.
+**Inspiration**: Gardeneus `plant-families.ts` (18 Familien, `checkRotationConflict()` 3-Jahres-Regel, MIT — lokal vorhanden, ~20 Zeilen). Markt-Evidenz: Fruchtfolge ist Teil der GrowVeg-Sieger-Trias und Fryd-Paid-Lob (Vor-/Nachkultur). Voraussetzung klären: Pflanz-Historie (season-Feld an plan_elements oder deletedAt-Auswertung).
 **Plans**: TBD
 
 ### Phase 16: Vereinsregeln-Aktivierung *(was v1.1 Phase 10)*
@@ -303,6 +309,8 @@ Plans:
 
 ## Roadmap Evolution (Decisions Log)
 
+- **2026-06-11**: Feature-Sweep abgeschlossen (Marktrecherche + 4 Referenz-App-Analysen). Roadmap-Reihenfolge bestätigt; Phase 10/11/12/15 mit Markt-Evidenz + Implementierungs-Vorbildern angereichert; 11 neue Backlog-Items (999.2–999.12). Empfehlung notiert: Phase 12 eng an Phase 10 koppeln. Quellen: `.planning/research/2026-06-11-marktrecherche-feature-ranking.md` + `2026-06-10-ref-apps-feature-synthesis.md`.
+- **2026-06-10**: Forensik-Sweep quick-260610-jtf: CI grün (640/640), rotated-resize fertig, Phase 3+9 Status mit Code-Realität abgeglichen.
 - **2026-05-17**: Major re-prioritization nach User-Feedback "Desktop primär + Saison 2026 nutzbar". Plant-DB + Companion-Hinweis + Aussaatkalender vorgezogen (neue Phase 8-10). Saatgut-Inventar zurück zu v1.2 (Phase 13). Vereinsregeln zu v1.3 (Phase 16). Web-SVG-Editor als Phase 7.5a eingefügt nach Skia-Web-Crash auf Frau's Browser. Begründungsdokument: `.planning/roadmap-proposal-2026-05-17.md`.
 - **2026-05-13**: Migration 018 live. Phase 7 strukturell complete.
 - **2026-05-12**: Phase 6.5 (Draft-Sichtung) inserted nach Debug-Session `import-uebernehmen-noop`. Schloss die Lücke zwischen Phase 6 (Drafts speichern) und Phase 7 (Plan rendern).
@@ -311,4 +319,4 @@ Plans:
 
 ---
 
-*Last updated: 2026-05-17 — Phase 9 plans created*
+*Last updated: 2026-06-11 — Feature-Sweep: Markt-Evidenz eingearbeitet, Backlog erweitert*

@@ -203,7 +203,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-10 (Session "spaten")
-Stopped at: Feature-Sweep pausiert nach Forensik (User-Stop, Token-Budget) — Web-Tiefenrecherche gestoppt, resume-fähig
-Resume file: .planning/HANDOFF-2026-06-10-feature-sweep.md
-Next: Tiefenrecherche fortsetzen/neu starten → Feature-Ranking → ROADMAP/Backlog-Update → /gsd-plan-phase Phase 10 (Aussaatkalender v1).
+Last session: 2026-06-11 (Session "spaten")
+Stopped at: Feature-Sweep ABGESCHLOSSEN — Forensik ✅, Marktrecherche ✅, Ranking + ROADMAP/Backlog-Update ✅ (Handoff konsumiert + entfernt)
+Resume file: None
+Next: /gsd-plan-phase 10 — Aussaatkalender v1 (Markt-Evidenz + Vorbilder stehen im ROADMAP-Phase-10-Block und in .planning/research/)
