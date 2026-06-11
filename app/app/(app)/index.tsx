@@ -1,9 +1,11 @@
 // Home Screen — zeigt Gartenplan wenn Elemente vorhanden, sonst Placeholder.
 // Phase 5 Plan 05-02: Capture-Buttons entfernt (M07 Pivot — kein In-App AI).
 // Phase 6 Plan 06-03: "Aus Claude.ai importieren" Button in Empty State + Plan View.
+// Quick 260611-jrl: Profil-Icon in beiden Render-Branches ergänzt.
 import * as React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
+import { User } from 'lucide-react-native';
 import de from '@spatenstich/shared/i18n/de';
 import type { GardenDimensionsRow, PlanElementRow } from '@spatenstich/shared';
 import { useAuthStore } from '@/src/stores/authStore';
@@ -14,6 +16,21 @@ import { Button } from '@/src/components/ui/button';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
+
+function ProfileButton(): React.JSX.Element {
+  const router = useRouter();
+  return (
+    <Pressable
+      onPress={() => router.push('/(app)/profile' as any)}
+      accessibilityRole="button"
+      accessibilityLabel={t('home.profileButtonLabel')}
+      testID="home-profile-button"
+      className="min-w-[44px] min-h-[44px] items-center justify-center"
+    >
+      <User size={24} color="#78716C" />
+    </Pressable>
+  );
+}
 
 export default function HomeScreen(): React.JSX.Element {
   const mode = useAuthStore((s) => s.mode);
@@ -78,11 +95,14 @@ export default function HomeScreen(): React.JSX.Element {
           className="flex-1"
           contentContainerStyle={{ padding: 16, alignItems: 'center' }}
         >
-          {statusLabel ? (
-            <View className="self-end mb-2">
+          <View className="self-stretch flex-row items-center justify-between mb-2">
+            {statusLabel ? (
               <Text className="text-xs text-stone-400" testID="home-auth-status">{statusLabel}</Text>
-            </View>
-          ) : null}
+            ) : (
+              <View />
+            )}
+            <ProfileButton />
+          </View>
           <GardenPlanView
             dimensions={dimensions}
             elements={elements}
@@ -127,11 +147,12 @@ export default function HomeScreen(): React.JSX.Element {
   // Empty state: no plan yet
   return (
     <View className="flex-1 items-center justify-center bg-[#F9F7F4] dark:bg-[#1C1917] px-6">
-      {statusLabel ? (
-        <View className="absolute top-4 right-4">
+      <View className="absolute top-4 right-4 flex-row items-center gap-3">
+        {statusLabel ? (
           <Text className="text-xs text-stone-400" testID="home-auth-status">{statusLabel}</Text>
-        </View>
-      ) : null}
+        ) : null}
+        <ProfileButton />
+      </View>
       <View className="flex-1 items-center justify-center p-6">
         <Text className="text-lg font-semibold text-stone-700 dark:text-stone-200 mb-2">
           {t('import.home.emptyHeading')}
