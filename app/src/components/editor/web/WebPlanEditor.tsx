@@ -34,6 +34,12 @@ export interface WebPlanEditorProps {
 // 5px movement threshold exceeded — leaves native dblclick window intact.
 const MOUSE_DRAG_THRESHOLD_PX = 5;
 
+// quick-260611-ln5: Pfeiltasten-Move-Schrittweiten und Burst-Debounce.
+// Direkt unter MOUSE_DRAG_THRESHOLD_PX gemäß design_notes.
+const ARROW_STEP_M = 0.1;        // kleine Schrittweite (Pfeil ohne Modifier)
+const ARROW_STEP_SHIFT_M = 0.5;  // große Schrittweite (Shift+Pfeil)
+const ARROW_COMMIT_DEBOUNCE_MS = 400; // Burst-Fenster: nach dem letzten Pfeil bis setGestureActive(false)
+
 interface DragState {
   id: string;
   startMouseX: number;
@@ -131,6 +137,88 @@ export function WebPlanEditor({
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [selection]);
+
+  // quick-260611-ln5: Pfeiltasten-Move (Web-only).
+  // Eigenständiger useEffect — der bestehende Delete/Escape-Effekt bleibt unverändert.
+  // Ablauf: erster Pfeil → setGestureActive(true); updateElement pro Taste;
+  // 400ms-Debounce → setGestureActive(false) löst l5y-Flush + einen zundo-Snapshot aus.
+  const arrowBurstActiveRef = React.useRef(false);
+  const arrowDebounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(() => {
+    const onArrowKey = (e: KeyboardEvent) => {
+      const ARROW_KEYS = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+      if (!ARROW_KEYS.includes(e.key)) return;
+
+      // Fokus-Guard: In Eingabefeldern nichts abfangen (INPUT/TEXTAREA/contenteditable)
+      const active = document.activeElement as HTMLElement | null;
+      if (active?.isContentEditable) return;
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      // activeElement-Fallback (robuster in jsdom, da e.target window ist bei dispatchEvent)
+      const activeTag = active?.tagName;
+      if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
+
+      // Selektions-Guard: nur bei aktiver Selektion
+      const currentSelection = useEditorStore.getState().selection;
+      if (!currentSelection) return;
+      const currentElements = useEditorStore.getState().elements;
+      const el = currentElements.find((elem) => elem.id === currentSelection && elem.deletedAt === null);
+      if (!el) return;
+
+      // Tatsächliche Verschiebung — ab hier darf e.preventDefault() gerufen werden
+      e.preventDefault();
+
+      const step = e.shiftKey ? ARROW_STEP_SHIFT_M : ARROW_STEP_M;
+      let newXM = el.xM;
+      let newYM = el.yM;
+
+      if (e.key === 'ArrowLeft') newXM -= step;
+      else if (e.key === 'ArrowRight') newXM += step;
+      else if (e.key === 'ArrowUp') newYM -= step;
+      else if (e.key === 'ArrowDown') newYM += step;
+
+      // Clamping identisch zum Drag-onMove-Handler (xM/yM = Center)
+      const elWidth = el.widthM;
+      const elHeight = el.heightM;
+      newXM = Math.max(elWidth / 2, Math.min(dimensions.widthM - elWidth / 2, newXM));
+      newYM = Math.max(elHeight / 2, Math.min(dimensions.heightM - elHeight / 2, newYM));
+
+      // Burst-Gesture-Wrapping: erster Pfeil des Bursts aktiviert gestureActive
+      if (!arrowBurstActiveRef.current) {
+        arrowBurstActiveRef.current = true;
+        useEditorStore.getState().setGestureActive(true);
+      }
+
+      // Element verschieben (läuft im pausierten zundo-Fenster → kein per-Tastendruck-Snapshot)
+      useEditorStore.getState().updateElement(currentSelection, { xM: newXM, yM: newYM });
+
+      // Debounce-Timer zurücksetzen (gleitendes Fenster — ein Burst = ein Snapshot)
+      if (arrowDebounceTimerRef.current !== null) {
+        clearTimeout(arrowDebounceTimerRef.current);
+      }
+      arrowDebounceTimerRef.current = setTimeout(() => {
+        arrowDebounceTimerRef.current = null;
+        arrowBurstActiveRef.current = false;
+        // setGestureActive(false) → l5y-Subscription resumed (1 Snapshot) + scheduleSaveElement-Flush
+        useEditorStore.getState().setGestureActive(false);
+      }, ARROW_COMMIT_DEBOUNCE_MS);
+    };
+
+    window.addEventListener('keydown', onArrowKey);
+    return () => {
+      window.removeEventListener('keydown', onArrowKey);
+      // Cleanup: hängenden Burst-Timer schließen, damit kein gestureActive=true liegen bleibt
+      if (arrowDebounceTimerRef.current !== null) {
+        clearTimeout(arrowDebounceTimerRef.current);
+        arrowDebounceTimerRef.current = null;
+      }
+      if (arrowBurstActiveRef.current) {
+        arrowBurstActiveRef.current = false;
+        useEditorStore.getState().setGestureActive(false);
+      }
+    };
+  }, [selection, dimensions.widthM, dimensions.heightM, elements]);
 
   // Drag: window-level mouse move/up so the drag continues even if cursor leaves an
   // element. setGestureActive(true) bypasses the autosave subscription during drag

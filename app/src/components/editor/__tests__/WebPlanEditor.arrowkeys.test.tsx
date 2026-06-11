@@ -118,11 +118,6 @@ beforeEach(() => {
   mockDeleteElement.mockClear();
   editorState.elements = [makeEl('e-target')];
   editorState.selection = 'e-target';
-  jest.useFakeTimers();
-});
-
-afterEach(() => {
-  jest.useRealTimers();
 });
 
 // Hilfsfunktion: keydown auf window feuern
@@ -256,44 +251,53 @@ describe('WebPlanEditor > Pfeiltasten-Move (quick-260611-ln5)', () => {
 
   // Test 6: Persistenz-Pfad (setGestureActive true→false nach Debounce)
   it('Test 6 – erster ArrowRight ruft setGestureActive(true) auf; nach ARROW_COMMIT_DEBOUNCE_MS wird setGestureActive(false) aufgerufen', () => {
-    render(<WebPlanEditor {...defaultProps} />);
+    jest.useFakeTimers();
+    try {
+      render(<WebPlanEditor {...defaultProps} />);
 
-    fireArrowKey('ArrowRight');
+      fireArrowKey('ArrowRight');
 
-    // Erster Pfeil: gestureActive=true muss gesetzt sein
-    expect(mockSetGestureActive).toHaveBeenCalledWith(true);
+      // Erster Pfeil: gestureActive=true muss gesetzt sein
+      expect(mockSetGestureActive).toHaveBeenCalledWith(true);
 
-    // Noch nicht false (Debounce läuft)
-    const trueCallCount = mockSetGestureActive.mock.calls.filter((c) => c[0] === true).length;
-    const falseCallCount = mockSetGestureActive.mock.calls.filter((c) => c[0] === false).length;
-    expect(trueCallCount).toBeGreaterThanOrEqual(1);
+      // Debounce-Fenster noch offen — false noch nicht aufgerufen
+      const trueCallCount = mockSetGestureActive.mock.calls.filter((c) => c[0] === true).length;
+      expect(trueCallCount).toBeGreaterThanOrEqual(1);
 
-    // Debounce abwarten (ARROW_COMMIT_DEBOUNCE_MS = 400ms)
-    jest.advanceTimersByTime(400);
+      // Debounce abwarten (ARROW_COMMIT_DEBOUNCE_MS = 400ms)
+      jest.advanceTimersByTime(400);
 
-    // Nach Debounce: setGestureActive(false) muss aufgerufen worden sein
-    expect(mockSetGestureActive).toHaveBeenCalledWith(false);
+      // Nach Debounce: setGestureActive(false) muss aufgerufen worden sein
+      expect(mockSetGestureActive).toHaveBeenCalledWith(false);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   // Test 7: Key-Repeat — ein Burst = ein setGestureActive(true)-Aufruf
   it('Test 7 – drei aufeinanderfolgende ArrowRight (Burst ohne Debounce-Ablauf) → setGestureActive(true) exakt EINMAL aufgerufen', () => {
-    render(<WebPlanEditor {...defaultProps} />);
+    jest.useFakeTimers();
+    try {
+      render(<WebPlanEditor {...defaultProps} />);
 
-    // Drei Pfeiltasten schnell hintereinander (vor Debounce-Ablauf)
-    fireArrowKey('ArrowRight');
-    fireArrowKey('ArrowRight');
-    fireArrowKey('ArrowRight');
+      // Drei Pfeiltasten schnell hintereinander (vor Debounce-Ablauf)
+      fireArrowKey('ArrowRight');
+      fireArrowKey('ArrowRight');
+      fireArrowKey('ArrowRight');
 
-    // updateElement dreimal aufgerufen (eine pro Tastendruck)
-    expect(mockUpdateElement).toHaveBeenCalledTimes(3);
+      // updateElement dreimal aufgerufen (eine pro Tastendruck)
+      expect(mockUpdateElement).toHaveBeenCalledTimes(3);
 
-    // setGestureActive(true) nur EINMAL (beim ersten Pfeil des Bursts)
-    const trueCalls = mockSetGestureActive.mock.calls.filter((c) => c[0] === true);
-    expect(trueCalls).toHaveLength(1);
+      // setGestureActive(true) nur EINMAL (beim ersten Pfeil des Bursts)
+      const trueCalls = mockSetGestureActive.mock.calls.filter((c) => c[0] === true);
+      expect(trueCalls).toHaveLength(1);
 
-    // Debounce abwarten → setGestureActive(false) einmal
-    jest.advanceTimersByTime(400);
-    const falseCalls = mockSetGestureActive.mock.calls.filter((c) => c[0] === false);
-    expect(falseCalls).toHaveLength(1);
+      // Debounce abwarten → setGestureActive(false) einmal
+      jest.advanceTimersByTime(400);
+      const falseCalls = mockSetGestureActive.mock.calls.filter((c) => c[0] === false);
+      expect(falseCalls).toHaveLength(1);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
