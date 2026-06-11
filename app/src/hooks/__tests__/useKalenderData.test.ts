@@ -429,4 +429,29 @@ describe('useKalenderData', () => {
       expect(mockWritePlanElement).not.toHaveBeenCalled();
     });
   });
+
+  describe('WR-07: Reset bei activeGardenId = null — kein stale State', () => {
+    it('setzt elements und meinePflanzenslugs zurück wenn activeGardenId zu null wird', async () => {
+      // Initiale Daten laden
+      mockLoadAcceptedElements.mockResolvedValue([makeBeet(), makePflanze('tomate')]);
+      mockLoadDimensions.mockResolvedValue(MOCK_DIMS);
+
+      const qc = newQC();
+      const { result, rerender } = renderHook(() => useKalenderData(), { wrapper: wrap(qc) });
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      // Daten geladen
+      expect(result.current.elements.length).toBeGreaterThan(0);
+      expect(result.current.meinePflanzenslugs.size).toBeGreaterThan(0);
+
+      // Gartenwechsel → activeGardenId = null
+      mockActiveGardenId = null;
+      rerender({});
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      // Stale State muss geleert sein
+      expect(result.current.elements).toHaveLength(0);
+      expect(result.current.meinePflanzenslugs.size).toBe(0);
+    });
+  });
 });
