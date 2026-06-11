@@ -104,11 +104,11 @@
 ### Pflanz- & Aussaatkalender (M4)
 
 - [ ] **CAL-01**: Zeitachse (12 Monate, scrollbar) mit Aufgaben-Karten pro Sorte
-- [ ] **CAL-02**: Klimazonenspezifische Aufgaben-Daten
-- [ ] **CAL-03**: Unterscheidung: Vorkultur, Direktsaat, Auspflanzen, Ernte
+- [x] **CAL-02**: Klimazonenspezifische Aufgaben-Daten
+- [x] **CAL-03**: Unterscheidung: Vorkultur, Direktsaat, Auspflanzen, Ernte
 - [ ] **CAL-04**: Platzierungsvorschlag auf Plan (freie Fläche + Standort)
 - [ ] **CAL-05**: Bestätigung → Pflanze im Plan + Kalender-Aufgabe aktiv
-- [ ] **CAL-06**: Einfache Fruchtfolge-Warnung
+- [x] **CAL-06**: Einfache Fruchtfolge-Warnung
 
 ### Offline & Sync
 
@@ -258,11 +258,11 @@
 | PLANT-DB-08 | Phase 8 | Pending |
 | PLANT-DB-09 | Phase 8 | Pending |
 | CAL-01 | Phase 10 | Pending |
-| CAL-02 | Phase 10 | Pending |
-| CAL-03 | Phase 10 | Pending |
+| CAL-02 | Phase 10 | Complete |
+| CAL-03 | Phase 10 | Complete |
 | CAL-04 | Phase 10 | Pending |
 | CAL-05 | Phase 10 | Pending |
-| CAL-06 | Phase 10 | Pending |
+| CAL-06 | Phase 10 | Complete |
 | NFR-02 | - | Superseded (M07) |
 | NFR-03 | - | Superseded (M07) |
 | RULES-02 | Phase 10 | Deferred (v1.1) |
@@ -272,6 +272,7 @@
 | EDIT-10 | Phase 10 | Deferred (v1.1) |
 
 **Coverage:**
+
 - v1 active requirements: 71 total (FOUND×5 active, AUTH×5, GARDEN×4, PROF×4, REMOVE×3, IMPORT×8, DRAFT×3, EDIT×11, PLANT-DB×9, SEED×5, CAL×6, SYNC×4, NFR×4 active)
 - **Phase 8 (Plant-DB Foundation, new 2026-05-17):** PLANT-DB-01..PLANT-DB-09 (9 requirements)
 - Superseded/dropped by M07: 15 (PHOTO×8, SEED-01, FOUND-06/07/08, NFR-02/03, RULES-01)

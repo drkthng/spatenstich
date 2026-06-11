@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.1
-milestone_name: Saison 2026 Ready" — Hot Path
-status: Phase 09.1 complete
+milestone_name: "Saison 2026 Ready" — Hot Path
+status: Ready to execute
 stopped_at: Phase 10 UI-SPEC approved
-last_updated: "2026-06-11T05:40:56.503Z"
-last_activity: "2026-06-10 -- Completed quick task 260610-jtf: Forensik-Sweep (CI grün: 81/81 Suites, 640/640 Tests)"
+last_updated: "2026-06-11T05:53:09.687Z"
+last_activity: 2026-06-11 -- Phase 10 execution started
 progress:
   total_phases: 13
   completed_phases: 12
-  total_plans: 54
-  completed_plans: 54
+  total_plans: 58
+  completed_plans: 55
   percent: 92
 ---
 
@@ -22,15 +22,16 @@ See: .planning/PROJECT.md (updated 2026-05-08)
 See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 
 **Core value:** Manueller Plan-Editor + strukturierter Import aus Claude.ai (zero In-App AI seit Pivot M07 2026-05-08)
-**Current focus:** Phase 09.1 — editor-element-bearbeitung
+**Current focus:** Phase 10 — Aussaatkalender v1
 
 ## Current Position
 
-Phase: 09.1 — COMPLETE (2026-05-29)
+Phase: 10 (Aussaatkalender v1) — EXECUTING
+Plan: 2 of 4
 Next: Phase 10 — Aussaatkalender v1
 Note: Phase 7.5b (Web Editor Polish) remains optional/open.
 Plans: 31/31 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 7/7, Phase 04: ~~4/4 superseded~~, Phase 05: 3/3, Phase 06: 4/4, Phase 06.5: 5/5, Phase 07: 6/6, Phase 07.5a: 1/1, Phase 08: 4/4, Phase 09: 4/4, Phase 09.1: 6/6)
-Last activity: 2026-06-10 -- Completed quick task 260610-jtf: Forensik-Sweep (CI grün: 81/81 Suites, 640/640 Tests)
+Last activity: 2026-06-11 -- Phase 10 execution started
 
 Progress: [████████████] v1.0 Foundation complete; v1.1 Hot Path: Phase 10 next
 
@@ -82,6 +83,7 @@ Progress: [████████████] v1.0 Foundation complete; v1.1 
 | Phase 07 P04 | 11 | 3 tasks (TDD GREEN, fills 3 Wave-0 component stubs) | 10 files |
 | Phase 07 P05 | 12 | 4 tasks (TDD GREEN, fills last Wave-0 stub DraftsTray) | 9 files |
 | Phase 08 P01 | 6 | 6 tasks (Wave-0 test scaffold + stubs) | 14 files |
+| Phase 10 P01 | 8 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -168,6 +170,9 @@ Recent decisions affecting current work:
 - [Phase 08 P02] Migration 019 (plants + plant_companions) file committed to git; NOT pushed (Plan 04 owns push gate). plant-db-v1 validator filled with full cross-ref check loop; 12 validator tests GREEN. pgTAP RLS skeleton filled (5 invariants for PLANT-DB-04). REQUIREMENTS.md gained 9 PLANT-DB-* IDs; SEED-02..SEED-06 re-pointed to Phase 13; CAL-* re-pointed to Phase 10. Date: 2026-05-17.
 - [Phase 08 P03] plants.json curated with 90 plants + 38 companion pairs covering Gemüse/Kraut/Beere/Obstbaum/Blume distribution per CONTEXT D-05. Anker-Tests GREEN (Tomate=Solanaceae, Erdbeere=Rosaceae, Buschbohne nitrogenFixing, Apfel perennial, Tomate-Basilikum companion). License-hygiene PLANT-DB-09 enforced — `dataSource` enum strict; zero `"gartenplaner"` literals; plants split own-research=78 / merged=11 / gardeneus=1 / garden-planner=0; companions own-research=25 / merged=7 / gardeneus=6 / garden-planner=0. 16 smoke tests + 12 validator tests = 28 plant-db tests GREEN; full shared-package suite shows 61 passed. LICENSES.md updated with per-source counts. Native UTF-8 Umlaute throughout. Date: 2026-05-17.
 - [Phase 08 P04] Migration 019 pushed live (vitrqkzxkiqvadqfzrcx, Frankfurt). Edge Function seed-plants deployed via Docker (Pitfall 1 fix — `--use-api` bundled ohne plants.json). Seed via SQL-Fallback (Option C) mit LEAST/GREATEST UUID-Canonicalization. Verified: 90 plants + 38 companions in Supabase. plantRepo 10 GREEN + usePlants 4 GREEN; shared suite 61 GREEN. Phase 8 COMPLETE — PLANT-DB-01..09 closed. Date: 2026-05-17.
+- [Phase ?]: Pure DOY->KW engine (kalenderEngine.ts) in packages/shared — no date-fns, 6-line UTC arithmetic
+- [Phase ?]: zoneOffset() guard: invalid/null/out-of-range klimazone -> return 0 (Zone-4-Baseline, T-10-01 mitigated)
+- [Phase ?]: [Phase 10 P01] Wave-0 it.todo stub pattern for downstream Plans 02/03 — no production imports, pass immediately
 
 ### Roadmap Evolution
 
@@ -203,7 +208,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-11T05:23:59.685Z
+Last session: 2026-06-11T05:53:09.674Z
 Stopped at: Phase 10 UI-SPEC approved
 Resume file: .planning/phases/10-aussaatkalender-v1/10-UI-SPEC.md
 Next: /gsd-plan-phase 10 — Aussaatkalender v1 (Markt-Evidenz + Vorbilder stehen im ROADMAP-Phase-10-Block und in .planning/research/)
