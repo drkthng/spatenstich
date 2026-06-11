@@ -218,7 +218,7 @@ Plans:
 **Markt-Evidenz (Recherche 2026-06-11)**: Kalender-Automation aus Pflanzendaten = verifiziertes Top-Demand-Signal (HortusFox #511/#502/#509); GrowVegs frostgenaue Pflanzliste = meistgelobtes Feature des Marktführers; Fryd-Gründungs-These ist exakt diese Wochen-Frage. → Kalender MUSS sich aus Plan + Plant-DB selbst befüllen (kein manuelles Eintragen).
 **Implementierungs-Vorbilder**: Gardeneus `dates.ts` (frostrelative Fenster, MIT — lokal vorhanden) für die Logik; PyQt-Gartenplaner für die UX (2-Wochen-Raster × 3 Methoden Freiland/Vorkultur/Frühbeet, eingefrorene Pflanzen-Spalte) — nur Idee, kein Code/Daten (keine Lizenz). Details: `.planning/research/2026-06-10-ref-apps-feature-synthesis.md`.
 
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
 Plans:
 **Wave 1**
 
@@ -226,7 +226,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 10-02-PLAN.md — useKalenderData Hook (lädt Plan-Elemente via Repo) + findBeeteForPlant + addPlantToPlan (CAL-04/05)
+- [x] 10-02-PLAN.md — useKalenderData Hook (lädt Plan-Elemente via Repo) + findBeeteForPlant + addPlantToPlan (CAL-04/05)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -311,7 +311,7 @@ Plans:
 | 7.5b. Web Editor Polish | 0/TBD | Not started (optional) | - |
 | 8. Plant-DB Foundation | 4/4 | ✅ Complete | 2026-05-17 |
 | 9. Companion-Hinweis | 4/4 | ✅ Complete | 2026-05-29 |
-| 10. Aussaatkalender v1 | 1/4 | In Progress|  |
+| 10. Aussaatkalender v1 | 2/4 | In Progress|  |
 | **--- v1.2 Saison-Tools ---** | | | |
 | 11. Garten-Journal | 0/TBD | Not started | - |
 | 12. Task-Generator | 0/TBD | Not started | - |

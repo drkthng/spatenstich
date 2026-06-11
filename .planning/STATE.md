@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: "Saison 2026 Ready" — Hot Path
 status: Ready to execute
-stopped_at: Phase 10 UI-SPEC approved
-last_updated: "2026-06-11T05:53:09.687Z"
+stopped_at: Phase 10 Plan 02 complete (useKalenderData + findBeeteForPlant)
+last_updated: "2026-06-11T06:05:01.354Z"
 last_activity: 2026-06-11 -- Phase 10 execution started
 progress:
   total_phases: 13
   completed_phases: 12
   total_plans: 58
-  completed_plans: 55
+  completed_plans: 56
   percent: 92
 ---
 
@@ -27,7 +27,7 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 ## Current Position
 
 Phase: 10 (Aussaatkalender v1) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Next: Phase 10 — Aussaatkalender v1
 Note: Phase 7.5b (Web Editor Polish) remains optional/open.
 Plans: 31/31 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 7/7, Phase 04: ~~4/4 superseded~~, Phase 05: 3/3, Phase 06: 4/4, Phase 06.5: 5/5, Phase 07: 6/6, Phase 07.5a: 1/1, Phase 08: 4/4, Phase 09: 4/4, Phase 09.1: 6/6)
@@ -84,6 +84,7 @@ Progress: [████████████] v1.0 Foundation complete; v1.1 
 | Phase 07 P05 | 12 | 4 tasks (TDD GREEN, fills last Wave-0 stub DraftsTray) | 9 files |
 | Phase 08 P01 | 6 | 6 tasks (Wave-0 test scaffold + stubs) | 14 files |
 | Phase 10 P01 | 8 | 2 tasks | 8 files |
+| Phase 10 P02 | 8 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -173,6 +174,7 @@ Recent decisions affecting current work:
 - [Phase ?]: Pure DOY->KW engine (kalenderEngine.ts) in packages/shared — no date-fns, 6-line UTC arithmetic
 - [Phase ?]: zoneOffset() guard: invalid/null/out-of-range klimazone -> return 0 (Zone-4-Baseline, T-10-01 mitigated)
 - [Phase ?]: [Phase 10 P01] Wave-0 it.todo stub pattern for downstream Plans 02/03 — no production imports, pass immediately
+- [Phase ?]: Phase 10 P02: useKalenderData loads via loadAcceptedElements (NOT editorStore); findBeeteForPlant reuses pointInPolygon; useAuthStore mock combines hook+getState via Object.assign pattern
 
 ### Roadmap Evolution
 
@@ -208,7 +210,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-11T05:53:09.674Z
-Stopped at: Phase 10 UI-SPEC approved
-Resume file: .planning/phases/10-aussaatkalender-v1/10-UI-SPEC.md
+Last session: 2026-06-11T06:05:01.342Z
+Stopped at: Phase 10 Plan 02 complete (useKalenderData + findBeeteForPlant)
+Resume file: None
 Next: /gsd-plan-phase 10 — Aussaatkalender v1 (Markt-Evidenz + Vorbilder stehen im ROADMAP-Phase-10-Block und in .planning/research/)

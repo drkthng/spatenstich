@@ -106,8 +106,8 @@
 - [ ] **CAL-01**: Zeitachse (12 Monate, scrollbar) mit Aufgaben-Karten pro Sorte
 - [x] **CAL-02**: Klimazonenspezifische Aufgaben-Daten
 - [x] **CAL-03**: Unterscheidung: Vorkultur, Direktsaat, Auspflanzen, Ernte
-- [ ] **CAL-04**: Platzierungsvorschlag auf Plan (freie Fläche + Standort)
-- [ ] **CAL-05**: Bestätigung → Pflanze im Plan + Kalender-Aufgabe aktiv
+- [x] **CAL-04**: Platzierungsvorschlag auf Plan (freie Fläche + Standort)
+- [x] **CAL-05**: Bestätigung → Pflanze im Plan + Kalender-Aufgabe aktiv
 - [x] **CAL-06**: Einfache Fruchtfolge-Warnung
 
 ### Offline & Sync
@@ -260,8 +260,8 @@
 | CAL-01 | Phase 10 | Pending |
 | CAL-02 | Phase 10 | Complete |
 | CAL-03 | Phase 10 | Complete |
-| CAL-04 | Phase 10 | Pending |
-| CAL-05 | Phase 10 | Pending |
+| CAL-04 | Phase 10 | Complete |
+| CAL-05 | Phase 10 | Complete |
 | CAL-06 | Phase 10 | Complete |
 | NFR-02 | - | Superseded (M07) |
 | NFR-03 | - | Superseded (M07) |
