@@ -109,6 +109,16 @@ export default function HomeScreen(): React.JSX.Element {
               {t('editor.home.openPlan')}
             </Text>
           </Button>
+          <Button
+            variant="outline"
+            onPress={() => router.push('/(app)/kalender' as any)}
+            className="mt-2 w-full"
+            testID="home-kalender-button"
+          >
+            <Text className="font-semibold text-stone-700 dark:text-stone-200">
+              {t('kalender.title')}
+            </Text>
+          </Button>
         </ScrollView>
       </View>
     );
@@ -147,6 +157,16 @@ export default function HomeScreen(): React.JSX.Element {
         >
           <Text className="font-semibold text-stone-700 dark:text-stone-200">
             {t('editor.home.openPlan')}
+          </Text>
+        </Button>
+        <Button
+          variant="outline"
+          onPress={() => router.push('/(app)/kalender' as any)}
+          className="mt-2 w-full"
+          testID="home-kalender-button"
+        >
+          <Text className="font-semibold text-stone-700 dark:text-stone-200">
+            {t('kalender.title')}
           </Text>
         </Button>
       </View>
