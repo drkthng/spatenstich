@@ -34,6 +34,10 @@ export interface WebPlanEditorProps {
 // 5px movement threshold exceeded — leaves native dblclick window intact.
 const MOUSE_DRAG_THRESHOLD_PX = 5;
 
+// quick-260611-vk4: Drag-to-create Mindestgröße für Beete (Meter).
+// Zu kleine aufgezogene Beete werden auf diesen Wert aufgerundet (T-vk4-01).
+const MIN_BEET_M = 0.5;
+
 // quick-260611-ln5: Pfeiltasten-Move-Schrittweiten und Burst-Debounce.
 // Direkt unter MOUSE_DRAG_THRESHOLD_PX gemäß design_notes.
 const ARROW_STEP_M = 0.1;        // kleine Schrittweite (Pfeil ohne Modifier)
@@ -55,6 +59,22 @@ interface PendingDrag {
   startMouseY: number;
   elStartXM: number;
   elStartYM: number;
+}
+
+// quick-260611-vk4: Drag-to-create-Zustand für Beet-Aufzieh-Modus.
+interface CreateDrag {
+  startClientX: number;
+  startClientY: number;
+  startSvgX: number; // SVG-lokale Koordinate (px) des Dragebeginns
+  startSvgY: number;
+}
+
+// Vorschau-Rechteck für das aufzuziehende Beet (px im SVG-Koordinatensystem)
+interface CreateRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 }
 
 // Default element sizes in meters per kind. Tunable later.
@@ -98,6 +118,15 @@ export function WebPlanEditor({
   const [containerSize, setContainerSize] = React.useState({ w: 800, h: 600 });
   // Pending drag: captures mousedown coords before the 5px threshold is exceeded (MOUSE_DRAG_THRESHOLD_PX)
   const pendingDragRef = React.useRef<PendingDrag | null>(null);
+
+  // quick-260611-vk4: Drag-to-create Refs + Vorschau-State.
+  // createDragRef hält den laufenden Aufzieh-Vorgang (analog pendingDragRef).
+  const createDragRef = React.useRef<CreateDrag | null>(null);
+  // justCreatedRef verhindert, dass das mouseup-Ende eines Drag-to-create
+  // sofort das nachfolgende click-Event als Deselect-Klick interpretiert.
+  const justCreatedRef = React.useRef(false);
+  // Vorschau-Rechteck (gestrichelter Rahmen) während des Aufziehens.
+  const [createRect, setCreateRect] = React.useState<CreateRect | null>(null);
 
   // Compute scale (px per meter) to fit garden into available viewport with padding.
   const PADDING = 24;
@@ -291,13 +320,112 @@ export function WebPlanEditor({
     };
   }, []); // stable — no deps needed, uses refs
 
+  // quick-260611-vk4: Drag-to-create useEffect.
+  // Registriert window-level mousemove/mouseup-Listener, die aktiv sind, solange
+  // createDragRef.current gesetzt ist (analoges Muster zu drag-useEffect ab Zeile 226).
+  // Abhängigkeiten: scale, gardenId, userId, dimensions, placingKind, plantMeta, onPlaced.
+  React.useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      const cd = createDragRef.current;
+      if (!cd) return;
+      const dx = e.clientX - cd.startClientX;
+      const dy = e.clientY - cd.startClientY;
+      // Vorschau nur nach Überschreiten der Mindest-Drag-Distanz anzeigen
+      if (Math.abs(dx) >= MOUSE_DRAG_THRESHOLD_PX || Math.abs(dy) >= MOUSE_DRAG_THRESHOLD_PX) {
+        const x = Math.min(cd.startSvgX, cd.startSvgX + dx);
+        const y = Math.min(cd.startSvgY, cd.startSvgY + dy);
+        setCreateRect({ x, y, w: Math.abs(dx), h: Math.abs(dy) });
+      }
+    };
+    const onUp = (e: MouseEvent) => {
+      const cd = createDragRef.current;
+      if (!cd) return;
+      createDragRef.current = null;
+      setCreateRect(null);
+
+      const dx = e.clientX - cd.startClientX;
+      const dy = e.clientY - cd.startClientY;
+      // Mindest-Drag-Distanz muss in mindestens einer Achse überschritten sein
+      if (Math.abs(dx) < MOUSE_DRAG_THRESHOLD_PX && Math.abs(dy) < MOUSE_DRAG_THRESHOLD_PX) {
+        // Reiner Klick — kein Beet via Drag erzeugen; Drag-to-create löst nicht aus.
+        // BEWUSSTES DESIGN: Ein reiner Klick im Beet-Modus erzeugt KEIN Beet über
+        // den Drag-Pfad. Der bestehende click-Platzierungs-Pfad (handleSvgClick /
+        // Default-Größe 2×1) greift aber weiterhin, da kein justCreatedRef gesetzt wird.
+        return;
+      }
+
+      // Maße des aufgezogenen Rechtecks in Metern
+      let rawWidthM = Math.abs(dx) / scale;
+      let rawHeightM = Math.abs(dy) / scale;
+      // Mindestkantenlänge (T-vk4-01: verhindert 0-/Negativ-Beete)
+      const widthM = Math.max(MIN_BEET_M, rawWidthM);
+      const heightM = Math.max(MIN_BEET_M, rawHeightM);
+
+      // Center aus Mittelpunkt des aufgezogenen Rechtecks
+      const midSvgX = cd.startSvgX + dx / 2;
+      const midSvgY = cd.startSvgY + dy / 2;
+      const rawCenterX = midSvgX / scale;
+      const rawCenterY = midSvgY / scale;
+
+      // Clamping identisch zum Klick-Pfad in handleSvgClick (T-vk4-01)
+      const centerX = Math.max(widthM / 2, Math.min(dimensions.widthM - widthM / 2, rawCenterX));
+      const centerY = Math.max(heightM / 2, Math.min(dimensions.heightM - heightM / 2, rawCenterY));
+
+      const newEl: PlanElementRow = {
+        id: randomId(),
+        gardenId,
+        elementType: 'Beet',
+        label: plantMeta?.label ?? 'Beet',
+        xM: centerX,
+        yM: centerY,
+        widthM,
+        heightM,
+        confidence: null,
+        isAccepted: true,
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+        updatedByUserId: userId,
+        deletedAt: null,
+        importedFrom: null,
+        provenance: { source: 'manual', ...(plantMeta?.slug ? { plantSlug: plantMeta.slug } : {}) },
+        layer: 'infrastructure',
+      };
+
+      // Genau ein addElement — persistiert direkt über die auto-save Subscription
+      // (KEIN setGestureActive nötig, da addElement einen neuen elements-Ref erzeugt)
+      useEditorStore.getState().addElement(newEl);
+      useEditorStore.getState().setSelection(newEl.id);
+      onPlaced();
+
+      // Unterdrückt das unmittelbar folgende click-Event, damit kein Deselect ausgelöst wird
+      justCreatedRef.current = true;
+      setTimeout(() => {
+        justCreatedRef.current = false;
+      }, 0);
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [scale, gardenId, userId, dimensions.widthM, dimensions.heightM, placingKind, plantMeta, onPlaced]);
+
   const handleSvgClick = React.useCallback(
-    (e: React.MouseEvent<SVGSVGElement>) => {
-      // Ignore clicks that originated on an element (bubbled up)
-      if ((e.target as EventTarget) !== e.currentTarget && !placingKind) return;
-      // If we're in placing mode, drop a new element at the click position
+    (e: React.MouseEvent<HTMLDivElement | SVGSVGElement>) => {
+      // quick-260611-vk4: Unterdrücke Klick direkt nach Drag-to-create (justCreatedRef-Flag).
+      // Das mouseup des Drag-Endes setzt justCreatedRef — der folgende click soll weder
+      // deselecten noch ein zweites Beet über den Klick-Pfad erzeugen.
+      if (justCreatedRef.current) return;
+
+      // If we're in placing mode, drop a new element at the click position.
+      // quick-260611-vk4: Für placingKind === 'Beet' wird Drag-to-create bevorzugt (mousedown-Pfad).
+      // Der Klick-Pfad bleibt aber als Fallback aktiv (z.B. reiner Klick ohne Drag),
+      // sodass ein einzelner Klick im Beet-Modus ein Beet mit Default-Größe platziert.
       if (placingKind) {
-        const rect = (e.currentTarget as unknown as SVGSVGElement).getBoundingClientRect();
+        const svgEl = (e.currentTarget as HTMLElement).querySelector('svg') ?? e.currentTarget;
+        const rect = (svgEl as Element).getBoundingClientRect();
         const xPx = e.clientX - rect.left;
         const yPx = e.clientY - rect.top;
         const xM = xPx / scale;
@@ -330,7 +458,13 @@ export function WebPlanEditor({
         onPlaced();
         return;
       }
-      // Otherwise: deselect
+      // quick-260611-vk4: Deselect-Fix.
+      // Der frühere Early-Return `if (e.target !== e.currentTarget && !placingKind) return`
+      // verhinderte das Deselect, weil Klicks auf Hintergrund-SVG-Kinder (Rect, Svg) das
+      // Event bis zum <div> (handleSvgClick's currentTarget) bubblen, dabei aber
+      // e.target !== e.currentTarget gilt. Element-Klicks rufen bereits e.stopPropagation()
+      // in handleElementMouseDown und erreichen diesen Handler nie.
+      // Daher: Kein Early-Return mehr — jeder Klick auf die leere Canvas deselectiert.
       useEditorStore.getState().setSelection(null);
     },
     [placingKind, plantMeta, scale, gardenId, userId, dimensions.widthM, dimensions.heightM, onPlaced],
@@ -355,6 +489,29 @@ export function WebPlanEditor({
       };
     },
     [elements],
+  );
+
+  // quick-260611-vk4: Canvas mousedown — startet Drag-to-create wenn placingKind === 'Beet'.
+  // Für alle anderen Werkzeuge oder kein Werkzeug passiert hier nichts; Klick-Platzierung
+  // läuft weiter über handleSvgClick (click-Event).
+  const handleCanvasMouseDown = React.useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (placingKind !== 'Beet') return;
+      // SVG-lokale Koordinaten für den Aufzieh-Startpunkt ermitteln.
+      // Wir suchen das SVG-Element innerhalb des div-Containers.
+      const svgEl = (e.currentTarget as HTMLElement).querySelector('svg');
+      if (!svgEl) return;
+      const rect = svgEl.getBoundingClientRect();
+      const startSvgX = e.clientX - rect.left;
+      const startSvgY = e.clientY - rect.top;
+      createDragRef.current = {
+        startClientX: e.clientX,
+        startClientY: e.clientY,
+        startSvgX,
+        startSvgY,
+      };
+    },
+    [placingKind],
   );
 
   // Selected element (for handle rendering)
@@ -383,7 +540,8 @@ export function WebPlanEditor({
       className="flex-1 items-center justify-center"
       testID="web-plan-editor-container"
     >
-      <div onClick={handleSvgClick as any} style={cursorStyle}>
+      {/* quick-260611-vk4: onMouseDown startet Drag-to-create für Beet */}
+      <div onClick={handleSvgClick as any} onMouseDown={handleCanvasMouseDown as any} style={cursorStyle}>
       <Svg
         width={svgWidth}
         height={svgHeight}
@@ -569,6 +727,20 @@ export function WebPlanEditor({
             />
           );
         })()}
+        {/* quick-260611-vk4: Vorschau-Rechteck während Beet-Aufziehen (gestrichelter Rahmen) */}
+        {createRect && (
+          <Rect
+            x={createRect.x}
+            y={createRect.y}
+            width={createRect.w}
+            height={createRect.h}
+            fill="none"
+            stroke="#0EA5E9"
+            strokeWidth={2}
+            strokeDasharray="6 3"
+            pointerEvents="none"
+          />
+        )}
       </Svg>
       </div>
     </View>
