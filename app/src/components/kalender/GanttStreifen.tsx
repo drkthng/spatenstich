@@ -46,6 +46,10 @@ export function GanttStreifen({
       {fenster.map((f, i) => {
         const clampedStart = Math.max(1, f.startKw);
         const clampedEnd = Math.min(TOTAL_KW, f.endKw);
+        // WR-04 (zweite Verteidigungslinie): invertiertes Fenster überspringen.
+        // Nach Engine-Fix (Task 1) sollte clampedEnd >= clampedStart immer gelten,
+        // aber dieser Guard verhindert negative width-Prozentwerte bei degenerierten Eingaben.
+        if (clampedEnd < clampedStart) return null;
         const left = ((clampedStart - 1) / TOTAL_KW) * 100;
         const width = ((clampedEnd - clampedStart + 1) / TOTAL_KW) * 100;
         return (
