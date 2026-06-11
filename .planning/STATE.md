@@ -204,8 +204,10 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-3 offen (Notizen aus Phase-10-UAT, 2026-06-11):
+5 offen (Notizen aus Phase-10-UAT, 2026-06-11):
 
+- [Bug: Element-Positionen im Beet nach Reload nicht persistiert](todos/pending/2026-06-11-element-positionen-im-beet-nicht-persistiert.md)
+- [Bug: Text wird beim Rotieren/Drag markiert (Web)](todos/pending/2026-06-11-textauswahl-beim-rotieren-drag.md)
 - [Selektiertes Element per Pfeiltasten verschieben](todos/pending/2026-06-11-element-per-pfeiltasten-verschieben.md)
 - [Beet per Klick-Ziehen-Loslassen aufziehen](todos/pending/2026-06-11-beet-per-drag-aufziehen.md)
 - [Automatisches Speichern bei Beet-Veränderungen](todos/pending/2026-06-11-autosave-bei-beetaenderungen.md)
