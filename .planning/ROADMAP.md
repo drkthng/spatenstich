@@ -327,7 +327,7 @@ Plans:
 | 7.5b. Web Editor Polish | 0/TBD | Not started (optional) | - |
 | 8. Plant-DB Foundation | 4/4 | ✅ Complete | 2026-05-17 |
 | 9. Companion-Hinweis | 4/4 | ✅ Complete | 2026-05-29 |
-| 10. Aussaatkalender v1 | 9/9 | Complete   | 2026-06-11 |
+| 10. Aussaatkalender v1 | 9/9 | Complete    | 2026-06-11 |
 | **--- v1.2 Saison-Tools ---** | | | |
 | 11. Garten-Journal | 0/TBD | Not started | - |
 | 12. Task-Generator | 0/TBD | Not started | - |

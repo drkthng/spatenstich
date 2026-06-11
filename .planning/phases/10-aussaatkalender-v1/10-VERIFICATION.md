@@ -1,7 +1,7 @@
 ---
 phase: 10-aussaatkalender-v1
 verified: 2026-06-11T18:00:00Z
-status: human_needed
+status: passed
 score: 6/6 must-haves verified (3 gap-closure blockers resolved; WR-08 partial data defect on 2/90 plants classified as WARNING, not BLOCKER)
 overrides_applied: 0
 re_verification:

@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: "Saison 2026 Ready" — Hot Path
-status: Ready to execute
+status: Milestone complete
 stopped_at: Phase 10 Plan 09 abgeschlossen — WR-05 Filter-Chip geschlossen, Phase 10 vollstaendig
-last_updated: "2026-06-11T09:35:58.805Z"
-last_activity: 2026-06-11 -- Phase 10 execution started
+last_updated: "2026-06-11T12:12:53.766Z"
+last_activity: 2026-06-11
 progress:
   total_phases: 13
   completed_phases: 13
@@ -26,12 +26,12 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 
 ## Current Position
 
-Phase: 10 (Aussaatkalender v1 (Gap-Closure)) — EXECUTING
-Plan: 6 of 9
+Phase: 10
+Plan: Not started
 Next: Phase 10 — Aussaatkalender v1
 Note: Phase 7.5b (Web Editor Polish) remains optional/open.
 Plans: 31/31 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 7/7, Phase 04: ~~4/4 superseded~~, Phase 05: 3/3, Phase 06: 4/4, Phase 06.5: 5/5, Phase 07: 6/6, Phase 07.5a: 1/1, Phase 08: 4/4, Phase 09: 4/4, Phase 09.1: 6/6)
-Last activity: 2026-06-11 -- Phase 10 execution started
+Last activity: 2026-06-11
 
 Progress: [████████████] v1.0 Foundation complete; v1.1 Hot Path: Phase 10 next
 
@@ -39,7 +39,7 @@ Progress: [████████████] v1.0 Foundation complete; v1.1 
 
 **Velocity:**
 
-- Total plans completed: 4
+- Total plans completed: 13
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -48,6 +48,7 @@ Progress: [████████████] v1.0 Foundation complete; v1.1 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 09 | 4 | - | - |
+| 10 | 9 | - | - |
 
 **Recent Trend:**
 
@@ -204,6 +205,7 @@ Recent decisions affecting current work:
 ### Pending Todos
 
 5 offen (Notizen aus Phase-10-UAT, 2026-06-11):
+
 - [Bug: Home verlinkt Profil/Einstellungen nicht — Screens verwaist](todos/pending/2026-06-11-home-navigation-profil-settings-fehlt.md)
 - [Bug: erste Rotation springt um ~90°/270°](todos/pending/2026-06-11-rotation-springt-bei-erstem-drehen.md)
 - [Selektiertes Element per Pfeiltasten verschieben](todos/pending/2026-06-11-element-per-pfeiltasten-verschieben.md)
