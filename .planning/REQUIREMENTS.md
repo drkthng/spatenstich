@@ -103,7 +103,7 @@
 
 ### Pflanz- & Aussaatkalender (M4)
 
-- [ ] **CAL-01**: Zeitachse (12 Monate, scrollbar) mit Aufgaben-Karten pro Sorte
+- [x] **CAL-01**: Zeitachse (12 Monate, scrollbar) mit Aufgaben-Karten pro Sorte
 - [x] **CAL-02**: Klimazonenspezifische Aufgaben-Daten
 - [x] **CAL-03**: Unterscheidung: Vorkultur, Direktsaat, Auspflanzen, Ernte
 - [x] **CAL-04**: Platzierungsvorschlag auf Plan (freie Fläche + Standort)
@@ -257,7 +257,7 @@
 | PLANT-DB-07 | Phase 8 | Pending |
 | PLANT-DB-08 | Phase 8 | Pending |
 | PLANT-DB-09 | Phase 8 | Pending |
-| CAL-01 | Phase 10 | Pending |
+| CAL-01 | Phase 10 | Complete |
 | CAL-02 | Phase 10 | Complete |
 | CAL-03 | Phase 10 | Complete |
 | CAL-04 | Phase 10 | Complete |
