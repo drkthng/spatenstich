@@ -31,7 +31,7 @@ Plan: Not started
 Next: Phase 10 — Aussaatkalender v1
 Note: Phase 7.5b (Web Editor Polish) remains optional/open.
 Plans: 31/31 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 7/7, Phase 04: ~~4/4 superseded~~, Phase 05: 3/3, Phase 06: 4/4, Phase 06.5: 5/5, Phase 07: 6/6, Phase 07.5a: 1/1, Phase 08: 4/4, Phase 09: 4/4, Phase 09.1: 6/6)
-Last activity: 2026-06-11
+Last activity: 2026-06-11 - Quick Task 260611-vk4: Beet per Drag aufziehen + Deselect-Fix
 
 Progress: [████████████] v1.0 Foundation complete; v1.1 Hot Path: Phase 10 next
 
@@ -204,8 +204,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-2 offen (Notizen aus Phase-10-UAT, 2026-06-11):
-- [Beet per Klick-Ziehen-Loslassen aufziehen](todos/pending/2026-06-11-beet-per-drag-aufziehen.md)
+1 offen (Notizen aus Phase-10-UAT, 2026-06-11):
 - [Automatisches Speichern bei Beet-Veränderungen](todos/pending/2026-06-11-autosave-bei-beetaenderungen.md)
 
 ### Quick Tasks Completed
@@ -222,6 +221,7 @@ Recent decisions affecting current work:
 | 260611-kpl | Web-Editor: Text-Selektion beim Rotieren/Resizen/Verschieben unterbunden (preventDefault + userSelect:none) | 2026-06-11 | 8f5d230 | [260611-kpl-web-editor-text-selektion-beim-rotieren-](.planning/quick/260611-kpl-web-editor-text-selektion-beim-rotieren-/) |
 | 260611-l5y | Persistenz-Bug gefixt: Gesture-End-Flush im editorStore — Move/Resize/Rotate erreichen jetzt den Outbox-Pfad (UAT bestätigt 2026-06-11) | 2026-06-11 | 42fa000 | [260611-l5y-persistenz-bug-element-positionen-im-bee](.planning/quick/260611-l5y-persistenz-bug-element-positionen-im-bee/) |
 | 260611-ln5 | Feature: Pfeiltasten-Move im Web-Editor (0,1 m / Shift 0,5 m, Burst-Gesture-Wrapping, Fokus-Guards) | 2026-06-11 | 124bd20 | [260611-ln5-feature-selektiertes-element-per-pfeilta](.planning/quick/260611-ln5-feature-selektiertes-element-per-pfeilta/) |
+| 260611-vk4 | Feature: Beet per Drag aufziehen (Drag-to-create) + Deselect bei Klick auf freie Fläche gefixt | 2026-06-11 | 52b5f7e | [260611-vk4-beet-per-drag-aufziehen-au-erdem-wenn-el](.planning/quick/260611-vk4-beet-per-drag-aufziehen-au-erdem-wenn-el/) |
 
 ### Blockers/Concerns
 
