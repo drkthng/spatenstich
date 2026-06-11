@@ -68,6 +68,9 @@ jest.mock('../../lib/draftPromotionRepo', () => ({
   nextFreeBedSlot: (...args: unknown[]) => mockNextFreeBedSlot(...args),
 }));
 
+// ---- Mock kalenderBeete (pointInPolygon für In-Bed-Test wird nicht gemockt) ----
+// pointInPolygon aus geometry/bedLayout wird direkt im Test genutzt, nicht gemockt.
+
 // ---- Mock supabase (transitive dep via gardenPlanRepo) ----
 
 jest.mock('../../lib/supabase', () => ({
@@ -370,6 +373,58 @@ describe('useKalenderData', () => {
       expect(result.current.klimazone).toBeNull();
       expect(result.current.wochenAktionen).toHaveLength(0);
       // Ensure no NaN in wochenAktionen (by it being empty — no computation runs)
+    });
+  });
+
+  describe('WR-06: addPlantToPlan platziert Pflanze IM Beet (In-Bed-Placement)', () => {
+    it('schreibt Element mit Mittelpunkt innerhalb des Beet-Polygons und setzt provenance.parentBedId', async () => {
+      // Beet: Center (2, 2), 2x2 → Polygon [1,1]→[3,3]
+      const BEET = makeBeet({ id: 'beet-x', xM: 2, yM: 2, widthM: 2, heightM: 2 });
+      mockLoadAcceptedElements.mockResolvedValue([BEET]);
+      mockLoadDimensions.mockResolvedValue(MOCK_DIMS);
+
+      const qc = newQC();
+      const { result } = renderHook(() => useKalenderData(), { wrapper: wrap(qc) });
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      let writtenElement: PlanElementRow | undefined;
+      mockWritePlanElement.mockImplementation((_mode: unknown, el: PlanElementRow) => {
+        writtenElement = el;
+        return Promise.resolve();
+      });
+
+      await act(async () => {
+        await result.current.addPlantToPlan(MOCK_PLANT);
+      });
+
+      expect(writtenElement).toBeDefined();
+      // Pflanze-Mittelpunkt muss im Beet [1,1]→[3,3] liegen
+      expect(writtenElement!.xM).toBeGreaterThanOrEqual(1);
+      expect(writtenElement!.xM).toBeLessThanOrEqual(3);
+      expect(writtenElement!.yM).toBeGreaterThanOrEqual(1);
+      expect(writtenElement!.yM).toBeLessThanOrEqual(3);
+      // Im Plan 10-06 gelernt: CENTER = (2,2) → exakter Beet-Center-Test
+      expect(writtenElement!.xM).toBe(2);
+      expect(writtenElement!.yM).toBe(2);
+      // D-03 Fast-Path: parentBedId gesetzt
+      const prov = writtenElement!.provenance as Record<string, unknown>;
+      expect(prov.parentBedId).toBe('beet-x');
+    });
+  });
+
+  describe('IN-04: addPlantToPlan wirft bei lokalem Modus mit aussagekräftigem Fehler', () => {
+    it('rejects mit account_erforderlich wenn mode="local" und ruft writePlanElement NICHT auf', async () => {
+      mockMode = 'local';
+      const BEET = makeBeet();
+      mockLoadAcceptedElements.mockResolvedValue([BEET]);
+      mockLoadDimensions.mockResolvedValue(MOCK_DIMS);
+
+      const qc = newQC();
+      const { result } = renderHook(() => useKalenderData(), { wrapper: wrap(qc) });
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      await expect(result.current.addPlantToPlan(MOCK_PLANT)).rejects.toThrow('account_erforderlich');
+      expect(mockWritePlanElement).not.toHaveBeenCalled();
     });
   });
 });
