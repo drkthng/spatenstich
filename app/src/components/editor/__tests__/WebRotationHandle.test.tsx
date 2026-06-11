@@ -179,6 +179,28 @@ describe('WebRotationHandle', () => {
     }
   });
 
+  it('onMouseDown calls preventDefault to suppress browser text-selection during rotation drag', () => {
+    const { UNSAFE_getAllByType } = render(
+      <WebRotationHandle
+        elementId="el-1"
+        xPx={250}
+        yPx={195}
+        centerXPx={250}
+        centerYPx={250}
+      />,
+    );
+    const views = UNSAFE_getAllByType('View' as any);
+    expect(views.length).toBeGreaterThanOrEqual(1);
+    const evt = {
+      stopPropagation: jest.fn(),
+      preventDefault: jest.fn(),
+      clientX: 250,
+      clientY: 195,
+    };
+    act(() => { views[0].props.onMouseDown(evt); });
+    expect(evt.preventDefault).toHaveBeenCalled();
+  });
+
   it('REGRESSION: first mousemove near handle resting position does not jump to ~270° (offset fix)', () => {
     // Element at rotateDeg: 0. Handle is positioned directly above center:
     //   handle at (250, 195), center at (250, 250).

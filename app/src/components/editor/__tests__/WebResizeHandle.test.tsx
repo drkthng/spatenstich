@@ -89,6 +89,22 @@ describe('WebResizeHandle', () => {
     }
   });
 
+  it('onMouseDown calls preventDefault to suppress browser text-selection during resize drag', () => {
+    const { UNSAFE_getAllByType } = render(
+      <WebResizeHandle elementId="el-1" corner="br" xPx={300} yPx={250} scale={50} />,
+    );
+    const views = UNSAFE_getAllByType('View' as any);
+    expect(views.length).toBeGreaterThanOrEqual(1);
+    const evt = {
+      stopPropagation: jest.fn(),
+      preventDefault: jest.fn(),
+      clientX: 300,
+      clientY: 250,
+    };
+    act(() => { views[0].props.onMouseDown(evt); });
+    expect(evt.preventDefault).toHaveBeenCalled();
+  });
+
   it('cursor is nwse-resize for tl/br corners', () => {
     // This test verifies the cursor prop logic is applied by checking the corner prop is forwarded
     expect(() => {
