@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.1
-milestone_name: Saison 2026 Ready" — Hot Path
+milestone_name: "Saison 2026 Ready" — Hot Path
 status: Ready to execute
-stopped_at: Phase 10 Plan 04 VOLLSTÄNDIG — Checkpoint auto-genehmigt; 10-HUMAN-VERIFY.md erstellt (8 UAT-Schritte ausstehend); Phase 10 Aussaatkalender v1 abgeschlossen
-last_updated: "2026-06-11T07:25:15.251Z"
+stopped_at: Phase 10 Plan 05 VOLLSTAENDIG — WR-03/WR-04 geschlossen; kalenderEngine DST-fix + Wrap-Normalisierung + GanttStreifen-Guard; alle Tests gruen
+last_updated: "2026-06-11T07:57:56.443Z"
 last_activity: 2026-06-11 -- Phase 10 execution started
 progress:
   total_phases: 13
-  completed_phases: 13
-  total_plans: 58
-  completed_plans: 58
-  percent: 100
+  completed_phases: 12
+  total_plans: 63
+  completed_plans: 59
+  percent: 92
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-05-08)
 See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 
 **Core value:** Manueller Plan-Editor + strukturierter Import aus Claude.ai (zero In-App AI seit Pivot M07 2026-05-08)
-**Current focus:** Phase 10 — Aussaatkalender v1
+**Current focus:** Phase 10 — Aussaatkalender v1 (Gap-Closure)
 
 ## Current Position
 
-Phase: 10 (Aussaatkalender v1) — EXECUTING
-Plan: 4 of 4
+Phase: 10 (Aussaatkalender v1 (Gap-Closure)) — EXECUTING
+Plan: 2 of 9
 Next: Phase 10 — Aussaatkalender v1
 Note: Phase 7.5b (Web Editor Polish) remains optional/open.
 Plans: 31/31 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 7/7, Phase 04: ~~4/4 superseded~~, Phase 05: 3/3, Phase 06: 4/4, Phase 06.5: 5/5, Phase 07: 6/6, Phase 07.5a: 1/1, Phase 08: 4/4, Phase 09: 4/4, Phase 09.1: 6/6)
@@ -88,6 +88,7 @@ Progress: [████████████] v1.0 Foundation complete; v1.1 
 | Phase 10 P03 | 12 | 2 tasks (TDD RED+GREEN + Task 2) | 7 files |
 | Phase 10 P03 | 12 | 2 tasks | 7 files |
 | Phase 10 P04 | 6 | 2 tasks (Task 1 implementiert + Task 2 Checkpoint auto-genehmigt) | 4 files |
+| Phase 10-aussaatkalender-v1 P05 | 6 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -182,6 +183,9 @@ Recent decisions affecting current work:
 - [Phase 10 P03]: Filter-Chip useEffect-Sync — lazy-initializer returns false on async hook load; useEffect corrects after first data load (per UI-SPEC default-ON rule when meinePflanzenslugs.size > 0)
 - [Phase 10 P03]: klimazone??4 fallback in PflanzenKalenderZeile prevents NaN from propagating to GanttStreifen; Zone-4-Baseline matches zoneOffset() Security Guard
 - [Phase ?]: Phase 10 P04: t() helper extended with vars param; Fruchtfolge check falls back to all beds when plant not yet placed
+- [Phase ?]: WR-03: Direkte UTC-Arithmetik statt DOY-Umweg in getAktuelleKw eliminiert DST-Drift
+- [Phase ?]: WR-04 Engine: Kantenpinning (s<=7 startKw=1; e>=359 endKw=53) normalisiert ISO-Wrap in addWindow-Closure
+- [Phase ?]: WR-04 Komponente: Separates Testmodul GanttStreifen.guard.test.tsx mit Modul-Level-Mock fuer jest.mock()-Hoisting-Kompatibilitaet
 
 ### Roadmap Evolution
 
@@ -217,7 +221,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-11T06:31:04.983Z
-Stopped at: Phase 10 Plan 04 VOLLSTÄNDIG — Checkpoint auto-genehmigt; 10-HUMAN-VERIFY.md erstellt (8 UAT-Schritte ausstehend); Phase 10 Aussaatkalender v1 abgeschlossen
+Last session: 2026-06-11T07:57:56.430Z
+Stopped at: Phase 10 Plan 05 VOLLSTAENDIG — WR-03/WR-04 geschlossen; kalenderEngine DST-fix + Wrap-Normalisierung + GanttStreifen-Guard; alle Tests gruen
 Resume file: None
 Next: /gsd-verify-work 10 für manuelle UAT-Verifikation (CAL-01..CAL-06 auf Gerät), dann nächste Phase
