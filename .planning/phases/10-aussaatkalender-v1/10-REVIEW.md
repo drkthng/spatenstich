@@ -1,8 +1,8 @@
 ---
 phase: 10-aussaatkalender-v1
-reviewed: 2026-06-11T12:00:00Z
+reviewed: 2026-06-11T16:30:00Z
 depth: standard
-files_reviewed: 20
+files_reviewed: 23
 files_reviewed_list:
   - app/app/(app)/index.tsx
   - app/app/(app)/kalender/[slug].tsx
@@ -13,7 +13,9 @@ files_reviewed_list:
   - app/src/components/kalender/GanttStreifen.tsx
   - app/src/components/kalender/KalenderWochenCard.tsx
   - app/src/components/kalender/PflanzenKalenderZeile.tsx
+  - app/src/components/kalender/__tests__/GanttStreifen.guard.test.tsx
   - app/src/components/kalender/__tests__/GanttStreifen.test.tsx
+  - app/src/components/kalender/__tests__/KalenderScreen.test.tsx
   - app/src/components/kalender/__tests__/PflanzenDetail.test.tsx
   - app/src/hooks/__tests__/useKalenderData.test.ts
   - app/src/hooks/useKalenderData.ts
@@ -25,202 +27,152 @@ files_reviewed_list:
   - packages/shared/src/lib/__tests__/kalenderEngine.test.ts
   - packages/shared/src/lib/kalenderEngine.ts
 findings:
-  critical: 1
-  warning: 7
-  info: 5
-  total: 13
+  critical: 0
+  warning: 3
+  info: 9
+  total: 12
 status: issues_found
 ---
 
-# Phase 10: Code Review Report
+# Phase 10: Code Review Report (Re-Review nach Gap-Closure 10-05..10-09)
 
-**Reviewed:** 2026-06-11T12:00:00Z
+**Reviewed:** 2026-06-11T16:30:00Z
 **Depth:** standard
-**Files Reviewed:** 20
+**Files Reviewed:** 23
 **Status:** issues_found
 
 ## Summary
 
-Reviewed the Aussaatkalender v1 implementation: the pure calendar engine in `packages/shared`, the `useKalenderData` hook + `kalenderBeete` geometry helper, two screens (Wochen-View, Pflanzen-Detail), four UI components, and their tests. The engine core (DOY-shift, clamping, Fruchtfolge check) is clean and well-tested, and de.json uses correct UTF-8 umlauts throughout.
+Re-Review nach den Gap-Plänen 10-05 bis 10-09. Jedes Finding des vorherigen Reviews (1 Critical, 7 Warnings, 5 Info) wurde gegen den aktuellen Code verifiziert. Ergebnis: Der Crash (CR-01) und die Kern-Warnings WR-01/02/03/05/06/07 sind nachweislich gefixt und durch neue Tests abgedeckt (Hook-Reihenfolge im Detail-Screen, Center-Konvention in `kalenderBeete.ts`, Beet-Scoping via `findPflanzenInBeet`, injizierbares `now` in `getAktuelleKw`, Chip-Durchreichung mit `userToggled`-Ref, In-Bed-Placement mit `parentBedId`, cancelled-Flag + Null-Reset im Lade-Effekt). IN-01 und IN-04 sind ebenfalls gefixt.
 
-However, the review found one crash-level defect and several correctness problems that the test suite does not catch because the relevant collaborators are mocked:
+**Aber:** Der WR-04-Fix (ISO-Wochen-Wrap) repariert nur die Jahresgrenzen-Inversion durch die KW-Konvertierung — er übersieht, dass `plants.json` zwei Pflanzen mit **echten** Wrap-around-Erntefenstern enthält (Feldsalat `harvestDoy 280→90`, Grünkohl `280→60`). Deren Erntefenster werden weiterhin invertiert erzeugt und verschwinden vollständig aus WochenCard UND Gantt — ganzjährig (WR-08). Zusätzlich bleiben zwei Inkonsistenzen aus den neuen Fixes: Der CAL-06-Check prüft bei unplatzierten Pflanzen ALLE Beete, obwohl der CTA deterministisch ins erste Beet platziert (WR-09), und `findBeeteForPlant` konsumiert den von WR-06 neu geschriebenen `parentBedId` nicht (WR-10). IN-02 (teilweise), IN-03 und IN-05 sind unverändert offen.
 
-1. The Pflanzen-Detail screen violates the Rules of Hooks — the "Pflanze nicht gefunden" guard returns before three hooks, which crashes the screen for unknown slugs (CR-01).
-2. `kalenderBeete.ts` uses a top-left rectangle fallback while the rest of the codebase (Phase 7/9) documents and implements `xM/yM` as bbox **center** — bed membership and Fruchtfolge are wrong for every Claude.ai-imported bed (WR-01).
-3. The CAL-06 Fruchtfolge check on the detail screen never scopes plants to the bed it is iterating over (WR-02).
-4. `getAktuelleKw` has an off-by-one (`Math.ceil`) that reports next week's KW on Sundays (WR-03).
+## Re-Review: Verifikation der vorherigen Findings
 
-## Critical Issues
-
-### CR-01: Rules-of-Hooks violation — Detail-Screen crasht bei unbekanntem Slug statt Banner zu zeigen
-
-**File:** `app/app/(app)/kalender/[slug].tsx:59-68` (early return) vs. `:75`, `:121`, `:127` (hooks after the return)
-**Issue:** The "Plant not found guard (T-10-08)" returns early **before** `React.useMemo` (line 75 `fruchtfolgeGrund`, line 121 `meineBeete`) and `React.useCallback` (line 127 `handleAddToPlan`). On the first render `loading` is `true` (initial state in `useKalenderData`), so the guard does not fire and all 10+ hooks run. When loading flips to `false` and the slug does not match any plant, the same component instance re-renders through the early return with **fewer hooks**, and React throws `Rendered fewer hooks than expected`. The guard that was supposed to handle unknown slugs gracefully instead crashes the screen. The existing test (`PflanzenDetail.test.tsx`) never renders the not-found path, so this is uncovered.
-**Fix:** Move the guard below all hook calls. The memos already null-guard `plant`:
-```tsx
-const fruchtfolgeGrund = React.useMemo(/* ... */);
-const meineBeete = React.useMemo(/* ... */);
-const handleAddToPlan = React.useCallback(/* ... */);
-
-// Guard AFTER all hooks — hook count is now stable across renders
-if (!loading && !plant) {
-  return (
-    <View className="flex-1 bg-[#F9F7F4] dark:bg-[#1C1917]">
-      {/* ... nicht-gefunden banner ... */}
-    </View>
-  );
-}
-```
+| ID | Status | Verifikation gegen aktuellen Code |
+|---|---|---|
+| CR-01 (Rules-of-Hooks-Crash) | **RESOLVED** | `[slug].tsx:127-138` — Guard steht jetzt NACH allen Hooks (useRouter, useLocalSearchParams, usePlants, useKalenderData, 3× useState, 2× useMemo, useCallback). Hook-Anzahl über Renders stabil. Test (f) in `PflanzenDetail.test.tsx:263-283` deckt den Not-found-Pfad ab. |
+| WR-01 (Top-Left statt Center) | **RESOLVED** | `kalenderBeete.ts:37-44` baut das Fallback-Rechteck aus `xM/yM ± halbe Dimension`; Pflanzen-Center ist `{x: xM, y: yM}` (`:81-84`, `:119`). Konsistent mit `useCompanionDetection.getBedPolygon`/`findBedForPlant`. Test-Fixtures auf Center-Konvention umgestellt (`kalenderBeete.test.ts:64-68`). |
+| WR-02 (CAL-06 nicht Beet-scoped) | **RESOLVED** | `[slug].tsx:81-82` nutzt `findPflanzenInBeet(elements, beet)` — die Loop-Variable wird jetzt verwendet, PiP-Scoping in `kalenderBeete.ts:110-122`. Tests (d)+(e) decken In-Bed vs. Anderes-Beet ab. Verwandte Rest-Inkonsistenz → WR-09 (neu). |
+| WR-03 (getAktuelleKw Off-by-one) | **RESOLVED** | `kalenderEngine.ts:118-125` — direkte UTC-ISO-Arithmetik ohne DOY-Umweg, injizierbarer `now`-Parameter. Sonntags-/Montags-Tests (`kalenderEngine.test.ts:157-166`) vorhanden und korrekt (14.06.2026 = So → KW 24). |
+| WR-04 (startKw > endKw) | **PARTIALLY RESOLVED** | Kantenpinning in `kalenderEngine.ts:96-99` + defensiver Guard in `GanttStreifen.tsx:52` sind drin und getestet. Echte Wrap-around-Pflanzendaten bleiben aber kaputt → **WR-08 (neu, aktiv)**. |
+| WR-05 (Filter-Chip wirkungslos) | **RESOLVED** | `kalender/index.tsx:45` reicht `{ nurMeinePflanzen }` an den Hook durch; Screen-seitige Doppelfilterung entfernt; `userToggled`-Ref (`:35`, `:99`) verhindert Effekt-Override nach Opt-out. Tests (a)-(d) in `KalenderScreen.test.tsx`. |
+| WR-06 (Platzierung außerhalb Beet) | **RESOLVED** | `useKalenderData.ts:189-215` platziert am Center des ersten nicht-gelöschten Beets und setzt `provenance.parentBedId`. `nextFreeBedSlot`-Import entfernt. Test verifiziert In-Polygon-Platzierung + parentBedId. Rest-Lücke bei konkaven Freihand-Polygonen → **WR-10 (neu)**. |
+| WR-07 (Race + stale Elements) | **RESOLVED** | `useKalenderData.ts:88-118` — cancelled-Flag, Null-Reset von elements/dimensions bei `activeGardenId = null`. Test vorhanden. Rest: Fehlerpfad lässt Cross-Garden-Daten stehen → IN-07 (neu, Info). |
+| IN-01 (unbenutzter Import) | **RESOLVED** | `getFensterFuerPflanze` ist aus den Imports von `[slug].tsx` entfernt. |
+| IN-02 (hartkodierte Strings) | **PARTIALLY RESOLVED** | `kalender.nichtGefunden` + `kalender.hinzufuegenFehler` in de.json und via `t()` genutzt. Der Hinweistext in `KalenderWochenCard.tsx:75` ist weiterhin hartkodiert → bleibt offen (siehe IN-02 unten). |
+| IN-03 (jest.config Regex) | **OPEN** | Unverändert: `jest.config.ts:15`, `:42`, `:59` nutzen `'^.+\.tsx?$'` (einfacher Backslash), `:79`, `:104`, `:134` korrekt `'\\.'`. |
+| IN-04 (mode! Assertion) | **RESOLVED** | `useKalenderData.ts:180` — expliziter `if (mode !== 'account') throw new Error('account_erforderlich')` vor dem Write, kein `!` mehr. Test verifiziert local-Mode-Reject ohne Write-Aufruf. Rest: Screen unterscheidet die Fehlerursache nicht → IN-11 (neu, Info). |
+| IN-05 (usePlants-Loading) | **OPEN** | Unverändert: `kalender/index.tsx:27` konsumiert `isLoading` von `usePlants` nicht; Loading-Guard (`:57`) hängt nur an `useKalenderData.loading`. |
 
 ## Warnings
 
-### WR-01: Koordinaten-Konvention falsch — `beetToPolygon` baut Top-Left-Rechteck, Repo-Konvention ist bbox-CENTER
+### WR-08: Echte Wrap-around-Erntefenster (Feldsalat, Grünkohl) bleiben invertiert — Ernte verschwindet ganzjährig aus WochenCard UND Gantt
 
-**File:** `app/src/lib/kalenderBeete.ts:26-42` (and plant-center math at `:75-78`)
-**Issue:** The codebase convention is documented and implemented as `xM/yM = bbox center`:
-- `app/src/lib/geometry/bedLayout.ts:3` — "MVP approximation: xM/yM = bbox center"
-- `app/src/stores/editorStore.ts:121-128` — `polygonCommit` stores `bbox.xM/yM` (center, verified by `editorStore.polygon.test.ts:79` "xM/yM = bbox centroid")
-- `app/src/hooks/useCompanionDetection.ts:63-71` (Phase 9, shipped) — bbox fallback builds the rectangle from `xM ± widthM/2`, and `findBedForPlant` uses `{x: plant.xM, y: plant.yM}` directly as the plant center.
-
-`beetToPolygon` instead builds `(xM,yM) → (xM+widthM, yM+heightM)` (top-left), and `findBeeteForPlant` computes the plant center as `xM + widthM/2`. Both contradict Phase 9. The function's own doc comment even says the opposite of what the code does: line 23-24 claims "The 4-corner rectangle is therefore built from center ± half-dimensions" — the code below does not.
-
-Reachability: editor-created beds always carry `provenance.polygonPointsM`, so they take the primary path — but **every imported bed** (`promoteBedDraft`, `draftPromotionRepo.ts:135-139`) has no `polygonPointsM` and hits the wrong fallback. For those beds, the polygon is shifted by `(+w/2, +h/2)`, so "Auf welchem Beet?" and the CAL-06 Fruchtfolge bed-scoping return wrong results, and `kalenderBeete` and `useCompanionDetection` give contradictory answers for the same data.
-**Fix:** Mirror the Phase 9 fallback exactly (or import/reuse `getBedPolygon` from `useCompanionDetection.ts` into a shared module):
+**File:** `packages/shared/src/lib/kalenderEngine.ts:96-99` (Pinning-Logik); Daten: `packages/shared/src/data/plants.json:546-547` (feldsalat, `harvestDoyStart: 280, harvestDoyEnd: 90`), `:604-605` (gruenkohl, `280 → 60`)
+**Issue:** Der WR-04-Fix behandelt nur Inversionen, die `doyToIsoKw` an den Jahresgrenzen erzeugt (`s <= 7` bzw. `e >= 359`). Bei Pflanzen, deren Fenster den Jahreswechsel **per Daten** überspannt (überwinternde Kulturen), ist nach Clamping `s = 280, e = 90` — keine der beiden Pinning-Bedingungen greift, und das Fenster wird mit `startKw ≈ 40 > endKw ≈ 13` gepusht. Downstream: `filterAktiveAktionen` (`kw >= 40 && kw <= 13`) matcht nie → die Ernte erscheint zu KEINER Kalenderwoche in der WochenCard; der defensive Guard in `GanttStreifen.tsx:52` überspringt das Fenster → kein Ernte-Balken im Gantt. Für Feldsalat und Grünkohl ist der Aktionstyp Ernte damit in der gesamten App unsichtbar — genau in den Monaten Okt–März, für die diese Pflanzen im Kleingarten relevant sind. Klimazonen-Offsets ändern daran nichts (Zone 1: `250→60`, Zone 7: `310→120` — immer invertiert). Der Engine-Test `WR-04: jahresende-naher endDoy` (`kalenderEngine.test.ts:210-215`) testet nur `340→365` (nicht-invertierte Eingabe) und kann das nicht fangen.
+**Fix:** In `addWindow` echte Wrap-Fenster (Roh-`start > end` vor dem Clamping) in zwei Segmente splitten statt zu pinnen:
 ```ts
-const halfW = beet.widthM / 2;
-const halfH = beet.heightM / 2;
-return [
-  { x: beet.xM - halfW, y: beet.yM - halfH },
-  { x: beet.xM + halfW, y: beet.yM - halfH },
-  { x: beet.xM + halfW, y: beet.yM + halfH },
-  { x: beet.xM - halfW, y: beet.yM + halfH },
-];
-```
-and use `{ x: pflanze.xM, y: pflanze.yM }` as the plant center, consistent with `findBedForPlant`. Update `kalenderBeete.test.ts` fixtures accordingly (they currently encode the top-left assumption).
-
-### WR-02: CAL-06 Fruchtfolge-Check ist nicht Beet-scoped — warnt bei gleicher Familie irgendwo im Plan
-
-**File:** `app/app/(app)/kalender/[slug].tsx:89-116`
-**Issue:** Inside the `for (const beet of targetBeete)` loop, `otherPflanzenInBeet` (lines 91-97) filters **all** Pflanze elements in the entire plan — the loop variable `beet` is never used in the filter, and no point-in-polygon check against the bed is performed. The comment "Get all other Pflanze elements in this bed" is false. Consequences: (a) the loop body computes the identical result on every iteration (dead loop variable — a clear signal of the logic gap), (b) the warning fires whenever any same-family plant exists anywhere in the plan, even in a completely different bed, violating the CAL-06 spec ("same-family plant already occupies the **target bed**"). The test for this path mocks `pruefeEinfacheFruchtfolge` and so cannot catch it.
-**Fix:** Scope plants to the bed using the same PiP geometry as `findBeeteForPlant`, e.g. export a `findPflanzenInBeet(elements, beet)` helper from `kalenderBeete.ts`:
-```ts
-const otherPflanzenInBeet = findPflanzenInBeet(elements, beet)
-  .filter((e) => getPlantSlug(e) !== plant.slug);
-```
-
-### WR-03: `getAktuelleKw` Off-by-one durch `Math.ceil` — KW eine Woche zu hoch an Sonntagen
-
-**File:** `packages/shared/src/lib/kalenderEngine.ts:105-111`
-**Issue:** `Math.ceil((now - new Date(year,0,0)) / 86400000)` overestimates the DOY by 1 for any time after local midnight: for Jun 11, 12:00 the diff is 162.5 days → `ceil` = 163 (correct DOY is 162). The standard idiom uses `Math.floor`. Feeding `doy+1` into `doyToIsoKw` returns tomorrow's ISO week — wrong whenever "tomorrow" is a Monday, i.e. **every Sunday** the KalenderWochenCard shows next week's actions instead of this week's. DST transitions (CET/CEST) add a further ±1h that `ceil` also absorbs into the off-by-one. The existing test only asserts `1 <= kw <= 53` and cannot catch this.
-**Fix:**
-```ts
-export function getAktuelleKw(): number {
-  const now = new Date();
-  const doy = Math.floor(
-    (now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000,
-  );
-  return Math.min(53, doyToIsoKw(doy));
-}
-```
-(Or better: compute the ISO week directly from `now` with the same UTC arithmetic as `doyToIsoKw`, avoiding the DOY round-trip and DST drift entirely.)
-
-### WR-04: Keine Behandlung von `startKw > endKw` — Fenster verschwinden bzw. Gantt-Balken mit negativer Breite
-
-**File:** `packages/shared/src/lib/kalenderEngine.ts:46-53`, `:86-91`; `app/src/components/kalender/GanttStreifen.tsx:46-50`
-**Issue:** `doyToIsoKw` returns the true ISO week, which wraps at year boundaries: in years where Jan 1 belongs to the previous ISO year (e.g. 2027 → KW 52/53) an early-January DOY yields `startKw = 52/53`; in years where Dec 29-31 belong to next year's KW 1, a late-December DOY yields `endKw = 1`. Either case produces a window with `startKw > endKw`. Early-January DOYs are reachable via the climate-zone shift (Zone 1 offset = −30 days). Downstream:
-- `filterAktiveAktionen` (`kw >= startKw && kw <= endKw`) never matches → the action silently disappears from "Diese Woche".
-- `GanttStreifen.tsx:50` computes `width = (clampedEnd - clampedStart + 1) / 52 * 100` → **negative** width percentage → broken bar rendering.
-
-The `Math.min(53, ...)` clamp ("Fallstrick 4") does not address this, because the wrapped values are within 1..53.
-**Fix:** In `addWindow`, normalize inverted windows after KW conversion, e.g. clamp boundary wraps to the year edges:
-```ts
-let startKw = Math.min(53, doyToIsoKw(s));
-let endKw = Math.min(53, doyToIsoKw(e));
-if (startKw > endKw) {
-  // year-boundary wrap from ISO week numbering: pin to calendar edges
-  if (s <= 7) startKw = 1;
-  if (e >= 359) endKw = 53;
-}
-```
-and add a defensive `if (clampedEnd < clampedStart) return null;` guard in `GanttStreifen`.
-
-### WR-05: Filter-Chip "Nur meine Pflanzen" wirkt nicht auf die WochenCard — Hook filtert immer, Chip-OFF ist wirkungslos
-
-**File:** `app/app/(app)/kalender/index.tsx:26-32`, `:40-44`, `:63-66`; `app/src/hooks/useKalenderData.ts:136-144`
-**Issue:** The screen calls `useKalenderData()` **without** the `nurMeinePflanzen` option. Inside the hook, the default is "filter on when the plan has slugs" (`useFilter = meinePflanzenslugs.size > 0`). So when the user toggles the chip OFF, the screen-level `filteredAktionen` falls back to `wochenAktionen` — which the hook has **already filtered** to "meine Pflanzen". The KalenderWochenCard therefore never shows all-plant actions; the chip only affects the Jahresübersicht list. This contradicts the UI-SPEC Filter-Chip-Kontrakt the file header cites. Additionally, the `useEffect` at lines 40-44 force-re-enables the chip whenever `meinePflanzenslugs.size` changes (e.g. after adding a plant), silently overriding an explicit user opt-out.
-**Fix:** Pass the chip state into the hook and drop the duplicate screen-side action filtering:
-```tsx
-const { wochenAktionen, ... } = useKalenderData({ nurMeinePflanzen });
-```
-For the default-sync, only initialize once (e.g. track a `userToggled` ref and skip the effect after the first manual toggle).
-
-### WR-06: `addPlantToPlan` platziert die Pflanze via `nextFreeBedSlot` außerhalb jedes Beets — CTA-Versprechen wird nicht eingelöst
-
-**File:** `app/src/hooks/useKalenderData.ts:159`; `app/src/lib/draftPromotionRepo.ts:58-80`
-**Issue:** `nextFreeBedSlot` is a bed-stacking layout helper: it returns the next free slot **next to** existing beds (row layout with 50 cm gap), explicitly avoiding overlap with beds. Using it for a 0.3×0.3 plant means the new Pflanze lands in free garden space, never inside a bed. Consequences after pressing "Zu Plan hinzufügen": `findBeeteForPlant` does not find it → "Auf welchem Beet?" still shows "Noch nicht im Plan" despite the success banner; the plant is also invisible to bed-scoped Fruchtfolge/companion logic. The `hasBeetImPlan` guard (Fallstrick 5) gates the CTA on a bed existing, which strongly implies in-bed placement intent — that guard is currently cosmetic.
-**Fix:** Place the plant inside an existing bed, e.g. pick the first non-deleted Beet, compute a free position within its polygon/bbox (reusing PiP), and set `provenance.parentBedId` (the D-03 fast path `findBedForPlant` already consumes). At minimum, document the off-bed placement and adjust the success banner ("im Plan abgelegt — bitte im Editor positionieren").
-
-### WR-07: `useKalenderData.loadData` ohne Cancellation — Race bei Gartenwechsel + stale Elements bei `activeGardenId = null`
-
-**File:** `app/src/hooks/useKalenderData.ts:84-106`
-**Issue:** Two related defects: (a) When `activeGardenId` changes, the previous in-flight `loadData` is not cancelled; if responses resolve out of order, `setElements`/`setDimensions` from the **old** garden overwrite the new garden's data. The codebase already uses the `cancelled` flag pattern for exactly this (`app/app/(app)/index.tsx:28-36`). (b) When `activeGardenId` becomes `null` (logout/garden switch), the early return keeps the previous garden's `elements`/`dimensions` in state — `meinePflanzenslugs`, `hasBeetImPlan` and the WochenCard keep presenting stale data.
-**Fix:**
-```ts
-React.useEffect(() => {
-  let cancelled = false;
-  setLoading(true);
-  if (!activeGardenId) {
-    setElements([]);
-    setDimensions(null);
-    setLoading(false);
+const addWindow = (typ: AktionsTyp, start: number | null, end: number | null): void => {
+  if (start == null || end == null) return;
+  if (start > end) {
+    // Echtes Jahreswechsel-Fenster (z.B. Ernte Okt–März): in zwei Segmente splitten
+    addWindow(typ, start, 365);
+    addWindow(typ, 1, end);
     return;
   }
-  (async () => {
-    try {
-      const [dims, elems] = await Promise.all([...]);
-      if (!cancelled) { setDimensions(dims); setElements(elems); }
-    } finally {
-      if (!cancelled) setLoading(false);
-    }
-  })();
-  return () => { cancelled = true; };
-}, [activeGardenId]);
+  // ... bestehende Clamp- + Pinning-Logik
+};
 ```
+Zusatztest mit Feldsalat-Daten: `getFensterFuerPflanze({ harvestDoyStart: 280, harvestDoyEnd: 90, ... }, 4)` muss zwei Ernte-Fenster liefern, und `filterAktiveAktionen(fenster, 2)` sowie `(fenster, 45)` müssen je eines matchen. Hinweis: `KalenderWochenCard` nutzt `${plant.slug}-${fenster.typ}` als Key (`KalenderWochenCard.tsx:53`) — bei zwei gleichtypigen Segmenten kollidieren die Keys; `startKw` in den Key aufnehmen.
+
+### WR-09: CAL-06-Warnung bei unplatzierter Pflanze prüft ALLE Beete, der CTA platziert aber deterministisch ins ERSTE Beet — falsch-positive Warnung möglich
+
+**File:** `app/app/(app)/kalender/[slug].tsx:74-76` (Fallback `targetBeete` = alle Beete) vs. `app/src/hooks/useKalenderData.ts:189-191` (`elements.find(...)` = erstes Beet)
+**Issue:** Für eine noch nicht platzierte Pflanze iteriert der Fruchtfolge-Check über alle nicht-gelöschten Beete und zeigt die Warnung, sobald irgendein Beet eine gleichfamiliäre Pflanze enthält. Der WR-06-Fix hat aber gleichzeitig festgelegt, dass `addPlantToPlan` immer in das **erste** nicht-gelöschte Beet platziert. Szenario: Beet A (erstes, leer), Beet B (Paprika). Detail-Screen für Tomate zeigt "Fruchtfolge: Solanaceae bereits im Beet (paprika)" — der CTA platziert die Tomate jedoch in Beet A, wo kein Konflikt existiert. Die Warnung benennt ein Beet, das gar nicht das Platzierungsziel ist, und widerspricht der CAL-06-Spezifikation ("same-family plant already occupies the **target bed**"). Der Test (e) deckt nur den Fall "Pflanze bereits platziert" ab; der Unplatziert-Pfad mit mehreren Beeten ist ungetestet.
+**Fix:** Den Fallback auf das tatsächliche Platzierungsziel verengen — dasselbe Beet, das `addPlantToPlan` wählt:
+```tsx
+const targetBeete = myBeete.length > 0
+  ? myBeete
+  : elements.filter((e) => e.elementType === 'Beet' && e.deletedAt === null).slice(0, 1);
+```
+Alternativ die Zielwahl (erstes Beet) als gemeinsamen Helper extrahieren, damit Warnung und Platzierung nie divergieren.
+
+### WR-10: `findBeeteForPlant` konsumiert `provenance.parentBedId` nicht — der von WR-06 geschriebene Fast-Path-Hint ist toter Ballast, und bei konkaven Freihand-Beeten schlägt die Zuordnung trotz korrekter Platzierung fehl
+
+**File:** `app/src/lib/kalenderBeete.ts:61-97`; Schreiber: `app/src/hooks/useKalenderData.ts:209`; Phase-9-Vorbild: `app/src/hooks/useCompanionDetection.ts:84-89`
+**Issue:** Der WR-06-Fix schreibt `provenance.parentBedId` explizit "für den D-03 Fast-Path" (Kommentar `useKalenderData.ts:188`). Der einzige Konsument im Kalender-Kontext — `findBeeteForPlant` — macht aber ausschließlich PiP-Geometrie und ignoriert `parentBedId`, anders als das Phase-9-Vorbild `findBedForPlant` (Fast-Path + PiP-Fallback). Folge: (a) Der geschriebene Hint ist im Kalender wirkungslos. (b) Der Kommentar in `useKalenderData.ts:186-187` ("garantiert innerhalb des Rechteck-Polygons") gilt nur für Bbox-Fallback-Beete — bei Freihand-Beeten mit **konkavem** `polygonPointsM` (z.B. L-Form aus dem Editor) kann das Bbox-Center `xM/yM` außerhalb des Polygons liegen. Dann platziert `addPlantToPlan` die Pflanze außerhalb der Beet-Geometrie, der PiP-Test schlägt fehl, und "Auf welchem Beet?" zeigt nach dem Erfolgsbanner weiterhin "Noch nicht im Plan" — exakt das Symptom, das WR-06 beheben sollte, nur jetzt auf konkave Beete beschränkt. Auch `findPflanzenInBeet` (CAL-06) übersieht solche Pflanzen.
+**Fix:** Fast-Path in `findBeeteForPlant` ergänzen (Mirror von `findBedForPlant`):
+```ts
+for (const pflanze of matchingPflanzen) {
+  const prov = pflanze.provenance as Record<string, unknown> | null;
+  if (prov && typeof prov.parentBedId === 'string') {
+    const beet = beete.find((b) => b.id === prov.parentBedId);
+    if (beet && !seenIds.has(beet.id)) { result.push(beet); seenIds.add(beet.id); continue; }
+  }
+  // ... bestehender PiP-Fallback
+}
+```
+Analog in `findPflanzenInBeet` Pflanzen mit `parentBedId === beet.id` direkt aufnehmen.
 
 ## Info
 
-### IN-01: Unbenutzter Import `getFensterFuerPflanze` im Detail-Screen
+### IN-02 (Rest aus Vorreview): Hartkodierter deutscher UI-String in KalenderWochenCard
 
-**File:** `app/app/(app)/kalender/[slug].tsx:16`
-**Issue:** `getFensterFuerPflanze` is imported from `@spatenstich/shared` but never referenced in the file (the Gantt rendering happens inside `GanttStreifen`, which imports it itself).
-**Fix:** Remove it from the import statement.
+**File:** `app/src/components/kalender/KalenderWochenCard.tsx:74-76`
+**Issue:** `→ Tippe auf eine Pflanze für Details und Gantt-Ansicht` ist weiterhin inline statt in de.json (`kalender.nichtGefunden`/`hinzufuegenFehler` wurden gefixt, dieser String nicht).
+**Fix:** Key `kalender.wochenCardHinweis` in de.json anlegen und via `t()` rendern.
 
-### IN-02: Hartkodierte deutsche UI-Strings umgehen de.json
-
-**File:** `app/app/(app)/kalender/[slug].tsx:64` (`Pflanze "${slug}" nicht gefunden.`), `:136` (`Hinzufügen fehlgeschlagen. Versuche es erneut.`); `app/src/components/kalender/KalenderWochenCard.tsx:74-76` (`→ Tippe auf eine Pflanze für Details und Gantt-Ansicht`)
-**Issue:** All other Phase-10 UI strings live under `kalender.*` in de.json (project convention; de.json is the single i18n source). These three user-facing strings are inlined in components.
-**Fix:** Add keys (e.g. `kalender.nichtGefunden`, `kalender.hinzufuegenFehler`, `kalender.wochenCardHinweis`) to de.json and route them through `t()`.
-
-### IN-03: jest.config.ts — uneinheitlich escapete Transform-Regex `'^.+\.tsx?$'`
+### IN-03 (unverändert offen): jest.config.ts — uneinheitlich escapete Transform-Regex
 
 **File:** `app/jest.config.ts:15`, `:42`, `:59` vs. `:79`, `:104`, `:134`
-**Issue:** In the first three projects the transform key is written `'^.+\.tsx?$'` — in a normal string literal `\.` collapses to `.`, so the effective regex is `^.+.tsx?$` (any character before `tsx?`). The last three projects correctly use `'^.+\\.tsx?$'`. Practically the looser pattern still matches all `.ts/.tsx` files, but the inconsistency invites copy-paste drift.
-**Fix:** Use `'^.+\\.tsx?$'` in all six projects.
+**Issue:** Drei Projekte nutzen `'^.+\.tsx?$'` (kollabiert zu `^.+.tsx?$`), drei nutzen korrekt `'^.+\\.tsx?$'`. Praktisch funktional, aber Copy-Paste-Drift-Risiko.
+**Fix:** Alle sechs auf `'^.+\\.tsx?$'` vereinheitlichen.
 
-### IN-04: `mode!` Non-Null-Assertion in `addPlantToPlan`
+### IN-05 (unverändert offen): Loading-Guard deckt usePlants-Cold-Start nicht ab
 
-**File:** `app/src/hooks/useKalenderData.ts:184`
-**Issue:** `await writePlanElement(mode!, element)` — `mode` can be `null` per the authStore type. The code relies on `assertAccount` inside `writePlanElement` to reject, but the `!` silences the type system instead of expressing the precondition. In local mode the user gets the generic "Hinzufügen fehlgeschlagen" with no hint why.
-**Fix:** Guard explicitly: `if (mode !== 'account') throw new Error('account_erforderlich');` before the write, then pass `mode` without assertion.
+**File:** `app/app/(app)/kalender/index.tsx:27`, `:57`
+**Issue:** `usePlants().isLoading` wird nicht konsumiert; während das Pflanzen-Bundle lädt, rendert der Screen eine leere Jahresübersicht statt des Spinners.
+**Fix:** `const { data: allPlants = [], isLoading: plantsLoading } = usePlants();` und Guard auf `loading || plantsLoading`.
 
-### IN-05: Loading-Guard deckt `usePlants`-Cold-Start nicht ab (Kommentar irreführend)
+### IN-06: GanttStreifen clampt nur das Fenster-Ende auf KW 52 — ein reines KW-53-Fenster wird unsichtbar
 
-**File:** `app/app/(app)/kalender/index.tsx:46-54`
-**Issue:** The comment says "Loading guard (usePlants cold-start)", but `loading` comes from `useKalenderData` and only tracks the plan-element/dimension load. `usePlants().isLoading` is not consumed, so while the plant bundle loads, the screen renders with an empty Jahresübersicht instead of the spinner.
-**Fix:** `const { data: allPlants = [], isLoading: plantsLoading } = usePlants();` and gate on `loading || plantsLoading`.
+**File:** `app/src/components/kalender/GanttStreifen.tsx:47-52`
+**Issue:** `clampedStart = Math.max(1, f.startKw)` clampt nicht nach oben. Ein Fenster mit `startKw = endKw = 53` (Spät-Dezember in einem 53-KW-Jahr) ergibt `clampedStart = 53 > clampedEnd = 52` → der WR-04-Guard überspringt es, statt es auf KW 52 zu zeichnen. Der Kommentar an `TOTAL_KW` ("KW 53 wird auf KW 52 geclampt") verspricht symmetrisches Clamping.
+**Fix:** `const clampedStart = Math.min(TOTAL_KW, Math.max(1, f.startKw));`
+
+### IN-07 (WR-07-Rest): Fehlerpfad beim Gartenwechsel lässt stale Cross-Garden-Daten stehen
+
+**File:** `app/src/hooks/useKalenderData.ts:110-114`
+**Issue:** Wenn nach einem Wechsel von Garten A zu Garten B der Load für B fehlschlägt, bleiben `elements`/`dimensions` von Garten A im State (catch loggt nur). Der Null-Reset greift nur bei `activeGardenId = null`.
+**Fix:** Im catch-Zweig (wenn `!cancelled`) `setElements([])` und `setDimensions(null)` setzen.
+
+### IN-08: Toter Mock `nextFreeBedSlot` im Hook-Test nach WR-06-Fix
+
+**File:** `app/src/hooks/__tests__/useKalenderData.test.ts:64-69`, `:210`
+**Issue:** `useKalenderData` importiert `draftPromotionRepo` seit dem WR-06-Fix nicht mehr; der Modul-Mock samt `mockNextFreeBedSlot`-Reset ist toter Code und suggeriert eine nicht mehr existierende Abhängigkeit.
+**Fix:** Mock-Block und beforeEach-Reset entfernen.
+
+### IN-09: Ungenutzter i18n-Key `kalender.ohneKalenderDaten`
+
+**File:** `packages/shared/src/i18n/de.json:402`
+**Issue:** Der Key wird in keiner Komponente konsumiert (Grep über das Repo: nur Planning-Dokumente referenzieren ihn). Der laut Plan 10-01 vorgesehene Hinweis für Pflanzen ohne Kalender-Verknüpfung ist nirgends verdrahtet.
+**Fix:** Entweder den Hinweis in der Jahresübersicht rendern (Pflanzen ohne DOY-Daten) oder den Key entfernen.
+
+### IN-10: Home-Screen Plan-Load-Effekt ohne cancelled-Flag (inkonsistent zur eigenen Datei)
+
+**File:** `app/app/(app)/index.tsx:38-57`
+**Issue:** Der Session-Effekt (`:28-36`) nutzt das cancelled-Flag-Pattern, der Plan-Load-Effekt direkt darunter nicht — setState nach Unmount/Gartenwechsel mit Out-of-Order-Responses ist möglich. Gleiche Defektklasse wie WR-07, die im Kalender-Hook gefixt wurde.
+**Fix:** Dasselbe cancelled-Flag-Pattern wie in `useKalenderData.ts:88-118` anwenden.
+
+### IN-11 (IN-04-Rest): Detail-Screen verwirft den Fehlercode — local-Mode-User bekommt irreführendes "Versuche es erneut"
+
+**File:** `app/app/(app)/kalender/[slug].tsx:120-122`
+**Issue:** Der IN-04-Fix liefert jetzt unterscheidbare Fehlercodes (`account_erforderlich`, `kein_beet_im_plan`, ...), aber der bare `catch {` im CTA-Handler verwirft sie und zeigt immer `kalender.hinzufuegenFehler` ("Versuche es erneut") — im lokalen Modus hilft Erneut-Versuchen nicht.
+**Fix:** `catch (err)` und für `account_erforderlich` eine eigene Meldung (z.B. `kalender.accountErforderlich` in de.json) anzeigen.
 
 ---
 
-_Reviewed: 2026-06-11T12:00:00Z_
+_Reviewed: 2026-06-11T16:30:00Z_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
