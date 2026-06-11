@@ -139,6 +139,7 @@ export function WebResizeHandle({
   const onMouseDown = React.useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
+      e.preventDefault?.();
       const el = useEditorStore.getState().elements.find((x) => x.id === elementId);
       if (!el || el.deletedAt !== null) return;
       setDrag({

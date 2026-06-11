@@ -251,6 +251,7 @@ export function WebPlanEditor({
   const handleElementMouseDown = React.useCallback(
     (id: string, e: React.MouseEvent) => {
       e.stopPropagation();
+      e.preventDefault?.();
       const el = elements.find((x) => x.id === id);
       if (!el || el.deletedAt !== null) return;
       useEditorStore.getState().setSelection(id);
@@ -281,10 +282,11 @@ export function WebPlanEditor({
     return true;
   });
 
-  // Cursor: crosshair when placing, grab on element hover (CSS via Pressable styling)
+  // Cursor: crosshair when placing, grab on element hover (CSS via Pressable styling).
+  // userSelect: 'none' prevents native browser text-selection during all drag gestures.
   const cursorStyle: React.CSSProperties = placingKind
-    ? { cursor: 'crosshair' }
-    : { cursor: 'default' };
+    ? { cursor: 'crosshair', userSelect: 'none', WebkitUserSelect: 'none' }
+    : { cursor: 'default', userSelect: 'none', WebkitUserSelect: 'none' };
 
   return (
     <View

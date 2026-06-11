@@ -86,6 +86,7 @@ export function WebRotationHandle({
   const onMouseDown = React.useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
+      e.preventDefault?.();
       const currentTarget = e.currentTarget as (SVGElement & { ownerSVGElement?: SVGSVGElement }) | null | undefined;
       const svgEl = currentTarget?.ownerSVGElement ?? null;
       const rect = svgEl
