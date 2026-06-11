@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: "Saison 2026 Ready" — Hot Path
 status: Ready to execute
-stopped_at: "Phase 10 Gap-Closure: Wave 1 (10-05, 10-06) abgeschlossen — Wave 2 (10-07, 10-08) und Wave 3 (10-09) ausstehend"
-last_updated: "2026-06-11T08:04:26.973Z"
+stopped_at: Phase 10 Plan 07 abgeschlossen — Wave 2 Plan 10-08 ausstehend
+last_updated: "2026-06-11T09:13:41.642Z"
 last_activity: 2026-06-11 -- Phase 10 execution started
 progress:
   total_phases: 13
   completed_phases: 12
   total_plans: 63
-  completed_plans: 60
+  completed_plans: 61
   percent: 92
 ---
 
@@ -27,7 +27,7 @@ See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 ## Current Position
 
 Phase: 10 (Aussaatkalender v1 (Gap-Closure)) — EXECUTING
-Plan: 3 of 9
+Plan: 4 of 9
 Next: Phase 10 — Aussaatkalender v1
 Note: Phase 7.5b (Web Editor Polish) remains optional/open.
 Plans: 31/31 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 7/7, Phase 04: ~~4/4 superseded~~, Phase 05: 3/3, Phase 06: 4/4, Phase 06.5: 5/5, Phase 07: 6/6, Phase 07.5a: 1/1, Phase 08: 4/4, Phase 09: 4/4, Phase 09.1: 6/6)
@@ -90,6 +90,7 @@ Progress: [████████████] v1.0 Foundation complete; v1.1 
 | Phase 10 P04 | 6 | 2 tasks (Task 1 implementiert + Task 2 Checkpoint auto-genehmigt) | 4 files |
 | Phase 10-aussaatkalender-v1 P05 | 6 | 2 tasks | 5 files |
 | Phase 10-aussaatkalender-v1 P06 | 6 | 2 tasks | 2 files |
+| Phase 10-aussaatkalender-v1 P07 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -188,6 +189,7 @@ Recent decisions affecting current work:
 - [Phase ?]: WR-04 Engine: Kantenpinning (s<=7 startKw=1; e>=359 endKw=53) normalisiert ISO-Wrap in addWindow-Closure
 - [Phase ?]: WR-04 Komponente: Separates Testmodul GanttStreifen.guard.test.tsx mit Modul-Level-Mock fuer jest.mock()-Hoisting-Kompatibilitaet
 - [Phase ?]: Phase 10 P06: beetToPolygon center fix + findPflanzenInBeet exportiert
+- [Phase ?]: CR-01: Hook-Guard nach handleAddToPlan; WR-02: findPflanzenInBeet beet-scoped Fruchtfolge
 
 ### Roadmap Evolution
 
@@ -223,7 +225,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-11T08:04:26.959Z
-Stopped at: Phase 10 Gap-Closure: Wave 1 (10-05, 10-06) abgeschlossen — Wave 2 (10-07, 10-08) und Wave 3 (10-09) ausstehend
-Resume file: .planning/phases/10-aussaatkalender-v1/10-07-PLAN.md
+Last session: 2026-06-11T09:13:41.625Z
+Stopped at: Phase 10 Plan 07 abgeschlossen — Wave 2 Plan 10-08 ausstehend
+Resume file: .planning/phases/10-aussaatkalender-v1/10-08-PLAN.md
 Next: /gsd-verify-work 10 für manuelle UAT-Verifikation (CAL-01..CAL-06 auf Gerät), dann nächste Phase
