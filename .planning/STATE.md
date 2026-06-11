@@ -204,9 +204,8 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-5 offen (Notizen aus Phase-10-UAT, 2026-06-11):
+4 offen (Notizen aus Phase-10-UAT, 2026-06-11):
 
-- [Bug: Home verlinkt Profil/Einstellungen nicht — Screens verwaist](todos/pending/2026-06-11-home-navigation-profil-settings-fehlt.md)
 - [Bug: erste Rotation springt um ~90°/270°](todos/pending/2026-06-11-rotation-springt-bei-erstem-drehen.md)
 - [Selektiertes Element per Pfeiltasten verschieben](todos/pending/2026-06-11-element-per-pfeiltasten-verschieben.md)
 - [Beet per Klick-Ziehen-Loslassen aufziehen](todos/pending/2026-06-11-beet-per-drag-aufziehen.md)
@@ -221,6 +220,7 @@ Recent decisions affecting current work:
 | 260508-m07 | M07 Pivot: Manual Planning + Claude.ai Bridge — roadmap overhaul | 2026-05-08 | (pending) | - |
 | 260510-r5p | Phase-06 Import-Bug Triple Fix: file-picker + sync-cases + import-items updated_at | 2026-05-11 | a3321e1 | [260510-r5p-phase-06-import-bug-triple-fix-file-pick](.planning/quick/260510-r5p-phase-06-import-bug-triple-fix-file-pick/) |
 | 260610-jtf | Forensik-Sweep: CI-Fixes (supabase.ts, auth-Mock, rotated-resize, storage-Proxy) + Repo-Hygiene + Planning-Konsistenz | 2026-06-10 | dab65a9 | [260610-jtf-forensik-sweep-ci-fixes-repo-hygiene-pla](.planning/quick/260610-jtf-forensik-sweep-ci-fixes-repo-hygiene-pla/) |
+| 260611-jrl | Home-Header: Profil-Icon ergänzt — Profil/Einstellungen wieder erreichbar (UAT-Test-5-Blocker) | 2026-06-11 | da5f42e | [260611-jrl-home-header-profil-icon-erg-nzen-navigat](.planning/quick/260611-jrl-home-header-profil-icon-erg-nzen-navigat/) |
 
 ### Blockers/Concerns
 
