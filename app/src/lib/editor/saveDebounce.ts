@@ -57,6 +57,34 @@ export async function flushAllPendingSaves(
   );
 }
 
+/**
+ * Returns true if at least one debounced autosave timer is pending.
+ * Used by the leave-flush guard to skip the synchronous beforeunload
+ * path when there is nothing to flush.
+ */
+export function hasPendingSaves(): boolean {
+  return timers.size > 0;
+}
+
+/**
+ * Leave-flush wrapper: flushed all pending timers via the existing
+ * flushAllPendingSaves path (writePlanElement → writeWithOutbox LWW).
+ *
+ * Guard: non-account modes have no server-side plan_elements — calling
+ * writePlanElement in those modes is a no-op at best and an error at
+ * worst. The guard lives here (one place) so callers (PlanScreen
+ * unmount / beforeunload) don't duplicate the mode-check logic.
+ *
+ * Same invariant as the editorStore autosave subscription (editorStore.ts:225).
+ */
+export async function flushOnLeave(
+  mode: AuthMode,
+  byId: (id: string) => PlanElementRow | undefined,
+): Promise<void> {
+  if (mode !== 'account') return;
+  return flushAllPendingSaves(mode, byId);
+}
+
 /** Test-only reset — clears all timers and the internal Map. */
 export function _resetEditorSaveTimers(): void {
   for (const t of timers.values()) clearTimeout(t);
