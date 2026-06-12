@@ -12,7 +12,7 @@ Manueller Plan-Editor + strukturierter Import aus Claude.ai: Dirk plant seine Pa
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ Aussaatkalender v1 (CAL-01..CAL-06): Wochen-View + 12-Monats-Gantt, klimazonen-angepasst (PLZ→Zone), Filter „Nur meine Pflanzen", „Zu Plan hinzufügen", beet-scoped Fruchtfolge-Warnung — Phase 10 (v1.1, UAT 8/8, Security 19/19 closed)
 
 ### Active
 
@@ -141,4 +141,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-08 — M07 Pivot (Manual Planning + Claude.ai Bridge, zero In-App AI)*
+*Last updated: 2026-06-12 after Phase 10 (Aussaatkalender v1) — Milestone v1.1 alle Phasen abgeschlossen*

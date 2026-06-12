@@ -4,8 +4,8 @@ milestone: v1.1
 milestone_name: "Saison 2026 Ready" — Hot Path
 status: Milestone complete
 stopped_at: Phase 10 Plan 09 abgeschlossen — WR-05 Filter-Chip geschlossen, Phase 10 vollstaendig
-last_updated: "2026-06-11T12:12:53.766Z"
-last_activity: 2026-06-11
+last_updated: "2026-06-12T09:30:13.667Z"
+last_activity: 2026-06-12
 progress:
   total_phases: 13
   completed_phases: 13
@@ -18,28 +18,28 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-08)
+See: .planning/PROJECT.md (updated 2026-06-12)
 See: docs/specs/M07-claude-ai-bridge.md (M07 Pivot Spec)
 
 **Core value:** Manueller Plan-Editor + strukturierter Import aus Claude.ai (zero In-App AI seit Pivot M07 2026-05-08)
-**Current focus:** Phase 10 — Aussaatkalender v1 (Gap-Closure)
+**Current focus:** Milestone v1.1 abschließen; offener Editor-Bug (Laube/Pflanzen-Platzierung) in Arbeit
 
 ## Current Position
 
-Phase: 10
-Plan: Not started
-Next: Phase 10 — Aussaatkalender v1
+Phase: 10 — Aussaatkalender v1 (completed 2026-06-12)
+Plan: —
+Next: Milestone v1.1 abschließen (/gsd-complete-milestone)
 Note: Phase 7.5b (Web Editor Polish) remains optional/open.
-Plans: 31/31 completed (Phase 01: 3/3, Phase 02: 4/4, Phase 02.5: 4/4, Phase 03: 7/7, Phase 04: ~~4/4 superseded~~, Phase 05: 3/3, Phase 06: 4/4, Phase 06.5: 5/5, Phase 07: 6/6, Phase 07.5a: 1/1, Phase 08: 4/4, Phase 09: 4/4, Phase 09.1: 6/6)
-Last activity: 2026-06-12 - Quick Task 260612-9jb: Autosave Leave-Flush (Unmount/Back + beforeunload)
+Plans: 63/63 completed — alle 13 Phasen des Milestones v1.1 abgeschlossen
+Last activity: 2026-06-12 - Phase 10 complete (UAT 8/8, Security 19/19 closed, Transition)
 
-Progress: [████████████] v1.0 Foundation complete; v1.1 Hot Path: Phase 10 next
+Progress: [████████████████████] 63/63 plans (100%) — Milestone v1.1 complete
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 13
+- Total plans completed: 22
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -238,7 +238,7 @@ Keine offenen Todos (alle Phase-10-UAT-Notizen vom 2026-06-11 abgearbeitet).
 
 ## Session Continuity
 
-Last session: 2026-06-11T09:35:58.792Z
-Stopped at: Phase 10 Plan 09 abgeschlossen — WR-05 Filter-Chip geschlossen, Phase 10 vollstaendig
+Last session: 2026-06-12
+Stopped at: Phase 10 complete (UAT 8/8 + Security verified + Transition), Milestone v1.1 100% — offener Bug: Laube/Pflanzen nicht platzierbar (Regression-Verdacht quick-260611-vk4)
 Resume file: None
-Next: /gsd-verify-work 10 für manuelle UAT-Verifikation (CAL-01..CAL-06 auf Gerät), dann nächste Phase
+Next: Editor-Bug fixen (gsd-quick), dann /gsd-complete-milestone v1.1
