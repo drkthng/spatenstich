@@ -14,6 +14,8 @@ jest.mock('../../gardenPlanRepo', () => ({
 import {
   scheduleSaveElement,
   flushAllPendingSaves,
+  flushOnLeave,
+  hasPendingSaves,
   _resetEditorSaveTimers,
 } from '../saveDebounce';
 import type { PlanElementRow } from '@spatenstich/shared';
@@ -143,6 +145,42 @@ describe('editorSaveDebounce > _resetEditorSaveTimers (test-only)', () => {
     scheduleSaveElement('account', makeEl('e2'));
     _resetEditorSaveTimers();
     jest.advanceTimersByTime(10000);
+    expect(mockWrite).not.toHaveBeenCalled();
+  });
+});
+
+describe('editorSaveDebounce > flushOnLeave / hasPendingSaves', () => {
+  it('hasPendingSaves returns true when timers are pending, false after flush', async () => {
+    scheduleSaveElement('account', makeEl('e1'));
+    expect(hasPendingSaves()).toBe(true);
+    const byId = (id: string) => makeEl(id);
+    await flushOnLeave('account', byId);
+    expect(hasPendingSaves()).toBe(false);
+  });
+
+  it('flushOnLeave in account mode writes all pending ids and cancels timers', async () => {
+    scheduleSaveElement('account', makeEl('e1'));
+    scheduleSaveElement('account', makeEl('e2'));
+    const byId = (id: string) => makeEl(id);
+    await flushOnLeave('account', byId);
+    expect(mockWrite).toHaveBeenCalledTimes(2);
+    const ids = mockWrite.mock.calls.map((c) => c[1].id).sort();
+    expect(ids).toEqual(['e1', 'e2']);
+    // Timers were cancelled — advancing time produces no additional writes.
+    jest.advanceTimersByTime(10000);
+    expect(mockWrite).toHaveBeenCalledTimes(2);
+  });
+
+  it('flushOnLeave in local mode does NOT call writePlanElement', async () => {
+    scheduleSaveElement('account', makeEl('e1'));
+    const byId = (id: string) => makeEl(id);
+    await flushOnLeave('local', byId);
+    expect(mockWrite).not.toHaveBeenCalled();
+  });
+
+  it('flushOnLeave resolves immediately when no timers are pending', async () => {
+    const byId = () => undefined;
+    await expect(flushOnLeave('account', byId)).resolves.toBeUndefined();
     expect(mockWrite).not.toHaveBeenCalled();
   });
 });
