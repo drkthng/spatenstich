@@ -119,6 +119,12 @@ export function WebPlanEditor({
   // Pending drag: captures mousedown coords before the 5px threshold is exceeded (MOUSE_DRAG_THRESHOLD_PX)
   const pendingDragRef = React.useRef<PendingDrag | null>(null);
 
+  // fix(laube-pflanze-platzierung): SVG-Wrapper-Ref für Koordinatenberechnung in handleDivClick.
+  // react-native-svg/web überschreibt onClick in prepare() mit undefined wenn onPress fehlt
+  // (undefined !== null → true → clean.onClick = undefined), daher liegt onClick jetzt am
+  // wrappenden <div>. Der Ref hält das div-Element für getBoundingClientRect() bereit.
+  const svgWrapperRef = React.useRef<HTMLDivElement>(null);
+
   // quick-260611-vk4: Drag-to-create Refs + Vorschau-State.
   // createDragRef hält den laufenden Aufzieh-Vorgang (analog pendingDragRef).
   const createDragRef = React.useRef<CreateDrag | null>(null);
@@ -412,8 +418,13 @@ export function WebPlanEditor({
     };
   }, [scale, gardenId, userId, dimensions.widthM, dimensions.heightM, placingKind, plantMeta, onPlaced]);
 
-  const handleSvgClick = React.useCallback(
-    (e: React.MouseEvent<SVGSVGElement>) => {
+  // fix(laube-pflanze-platzierung): Handler liegt am <div> (testID="web-plan-editor-canvas"),
+  // NICHT mehr am <Svg>. Grund: react-native-svg/web überschreibt onClick in prepare() mit
+  // undefined wenn kein onPress übergeben wird (undefined !== null ist true → clean.onClick = undefined).
+  // onMouseDown wird von prepare() NICHT überschrieben → Beet-Drag-to-create bleibt am <Svg>.
+  // Koordinaten kommen aus svgWrapperRef (identische Position/Größe wie das SVG).
+  const handleDivClick = React.useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
       // quick-260611-vk4: Unterdrücke Klick direkt nach Drag-to-create (justCreatedRef-Flag).
       // Das mouseup des Drag-Endes setzt justCreatedRef — der folgende click soll weder
       // deselecten noch ein zweites Beet über den Klick-Pfad erzeugen.
@@ -424,7 +435,7 @@ export function WebPlanEditor({
       // Der Klick-Pfad bleibt aber als Fallback aktiv (z.B. reiner Klick ohne Drag),
       // sodass ein einzelner Klick im Beet-Modus ein Beet mit Default-Größe platziert.
       if (placingKind) {
-        const rect = (e.currentTarget as unknown as SVGSVGElement).getBoundingClientRect();
+        const rect = svgWrapperRef.current?.getBoundingClientRect() ?? { left: 0, top: 0 };
         const xPx = e.clientX - rect.left;
         const yPx = e.clientY - rect.top;
         const xM = xPx / scale;
@@ -467,6 +478,7 @@ export function WebPlanEditor({
       useEditorStore.getState().setSelection(null);
     },
     [placingKind, plantMeta, scale, gardenId, userId, dimensions.widthM, dimensions.heightM, onPlaced],
+    // svgWrapperRef ist stabil (useRef) → keine Dep nötig
   );
 
   const handleElementMouseDown = React.useCallback(
@@ -540,16 +552,23 @@ export function WebPlanEditor({
       className="flex-1 items-center justify-center"
       testID="web-plan-editor-container"
     >
-      <div style={cursorStyle}>
-      {/* quick-260611-vk4: onClick (Deselect/Klick-Platzierung) + onMouseDown (Drag-to-create) am SVG.
-          Spread-Cast nötig, weil react-native-svg SvgProps onClick nicht deklariert. */}
+      {/* fix(laube-pflanze-platzierung): onClick liegt am <div>, NICHT am <Svg>.
+          react-native-svg/web überschreibt onClick in prepare() mit undefined wenn onPress
+          fehlt (undefined !== null → clean.onClick = props.onPress = undefined).
+          onMouseDown wird von prepare() nicht angefasst → bleibt am <Svg>. */}
+      <div
+        ref={svgWrapperRef}
+        style={cursorStyle}
+        onClick={handleDivClick}
+        data-testid="web-plan-editor-canvas"
+      >
       <Svg
         width={svgWidth}
         height={svgHeight}
         viewBox={`0 0 ${svgWidth} ${svgHeight}`}
         accessibilityLabel={`Interaktiver Gartenplan mit ${visibleElements.length} Elementen`}
         testID="web-plan-editor-svg"
-        {...({ onClick: handleSvgClick, onMouseDown: handleCanvasMouseDown } as any)}
+        {...({ onMouseDown: handleCanvasMouseDown } as any)}
       >
         {/* 1. Background */}
         <Rect x={0} y={0} width={svgWidth} height={svgHeight} fill={PLAN_COLORS.background} />
