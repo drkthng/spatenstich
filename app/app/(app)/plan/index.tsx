@@ -30,6 +30,7 @@ import { useCompanionDetection } from '@/src/hooks/useCompanionDetection';
 import { CompanionToast } from '@/src/components/editor/CompanionToast';
 import { ElementEditorModal } from '@/src/components/editor/ElementEditorModal';
 import de from '@spatenstich/shared/i18n/de';
+import { flushOnLeave, hasPendingSaves } from '@/src/lib/editor/saveDebounce';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
@@ -42,6 +43,35 @@ export default function PlanScreen(): React.JSX.Element {
   const [dimensions, setDimensions] = React.useState<GardenDimensionsRow | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [activeTab, setActiveTab] = React.useState<PaletteTab>('beete');
+
+  // Leave-flush (all platforms): on unmount/Back, flush any pending debounced autosaves.
+  // Mode and elements are read at flush time from store singletons — no stale captures.
+  React.useEffect(() => {
+    return () => {
+      const currentMode = useAuthStore.getState().mode;
+      const byId = (id: string) =>
+        useEditorStore.getState().elements.find((e) => e.id === id);
+      void flushOnLeave(currentMode, byId);
+    };
+  }, []);
+
+  // Web-only: beforeunload guard — flushes pending saves before tab close/reload.
+  // No e.preventDefault()/returnValue — no "Seite verlassen?"-Warnung; LWW Outbox handles idempotency.
+  React.useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const handler = () => {
+      if (hasPendingSaves()) {
+        const currentMode = useAuthStore.getState().mode;
+        const byId = (id: string) =>
+          useEditorStore.getState().elements.find((e) => e.id === id);
+        void flushOnLeave(currentMode, byId);
+      }
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => {
+      window.removeEventListener('beforeunload', handler);
+    };
+  }, []);
 
   // Shared values for drag handoffs (palette long-press + bed-draft drag-out)
   const draggingShared = useSharedValue<{ kind: string; ghostX: number; ghostY: number } | null>(
