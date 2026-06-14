@@ -15,6 +15,7 @@ import { useAuthStore } from '@/src/stores/authStore';
 import { ensureDefaultGardenForUser } from '@/src/lib/inviteCodeRepo';
 import { registerSyncTriggers } from '@/src/lib/sync/SyncTriggers';
 import { getSyncWorker } from '@/src/lib/sync/SyncWorker';
+import { repairNonUuidElementIds } from '@/src/lib/gardenPlanRepo';
 import '../global.css';
 
 Sentry.init({
@@ -88,9 +89,21 @@ function GuardedStack(): React.JSX.Element {
     if (!identity || mode !== 'account' || !activeGardenId) return;
     syncBooted.current = true;
     const unregister = registerSyncTriggers();
-    getSyncWorker().syncAll().catch((e) => {
-      if (__DEV__) console.warn('[layout] initial syncAll failed', e);
-    });
+    // Bug C data repair: re-id legacy non-UUID plan_elements (e.g. 'el-...' beds
+    // drawn before the UUID fix) BEFORE the initial sync, so the repaired rows
+    // enter the outbox and get pushed during syncAll(). Idempotent + account-only.
+    (async () => {
+      try {
+        await repairNonUuidElementIds(mode, activeGardenId);
+      } catch (e) {
+        if (__DEV__) console.warn('[layout] uuid repair failed', e);
+      }
+      try {
+        await getSyncWorker().syncAll();
+      } catch (e) {
+        if (__DEV__) console.warn('[layout] initial syncAll failed', e);
+      }
+    })();
     return () => {
       unregister();
       syncBooted.current = false;

@@ -93,7 +93,11 @@ const DEFAULT_SIZES: Record<string, { widthM: number; heightM: number }> = {
 };
 
 function randomId(): string {
-  return 'el-' + Math.random().toString(36).slice(2, 10);
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  // Non-crypto fallback: timestamp + random suffix (not a true UUID, but unique enough for offline use).
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 function nowIso(): string {
@@ -131,6 +135,13 @@ export function WebPlanEditor({
   // justCreatedRef verhindert, dass das mouseup-Ende eines Drag-to-create
   // sofort das nachfolgende click-Event als Deselect-Klick interpretiert.
   const justCreatedRef = React.useRef(false);
+  // Bug A fix (timing-independent): tracks whether the most recent mousedown landed
+  // on an element (true) or on the empty canvas (false). The click that follows a
+  // mousedown bubbles to the wrapping <div>'s handleDivClick (react-native-svg/web
+  // strips the element <G>'s onClick in prepare()). handleDivClick deselects ONLY when
+  // the pointer went down on the background. No setTimeout — a timer-based reset races
+  // the browser's mousedown→mouseup→click sequence and fires before the click.
+  const pointerDownOnElementRef = React.useRef(false);
   // Vorschau-Rechteck (gestrichelter Rahmen) während des Aufziehens.
   const [createRect, setCreateRect] = React.useState<CreateRect | null>(null);
 
@@ -430,6 +441,13 @@ export function WebPlanEditor({
       // deselecten noch ein zweites Beet über den Klick-Pfad erzeugen.
       if (justCreatedRef.current) return;
 
+      // Bug A fix: if the pointer went down on an element, this bubbled click must
+      // NOT deselect it. Consume the latch and bail before the deselect path.
+      if (pointerDownOnElementRef.current) {
+        pointerDownOnElementRef.current = false;
+        return;
+      }
+
       // If we're in placing mode, drop a new element at the click position.
       // quick-260611-vk4: Für placingKind === 'Beet' wird Drag-to-create bevorzugt (mousedown-Pfad).
       // Der Klick-Pfad bleibt aber als Fallback aktiv (z.B. reiner Klick ohne Drag),
@@ -488,6 +506,9 @@ export function WebPlanEditor({
       const el = elements.find((x) => x.id === id);
       if (!el || el.deletedAt !== null) return;
       useEditorStore.getState().setSelection(id);
+      // Bug A fix: mark that this pointer-down hit an element, so the bubbled click in
+      // handleDivClick keeps the selection instead of deselecting it.
+      pointerDownOnElementRef.current = true;
       // MOUSE_DRAG_THRESHOLD_PX: capture pending drag but do NOT start drag or setGestureActive yet.
       // Only promote to active drag once mousemove exceeds MOUSE_DRAG_THRESHOLD_PX (5px).
       // This leaves the native dblclick event window intact (T-09.1-DBLCLICK-RACE).
@@ -509,6 +530,10 @@ export function WebPlanEditor({
   // getBoundingClientRect() direkt darauf aufgerufen werden kann.
   const handleCanvasMouseDown = React.useCallback(
     (e: React.MouseEvent<SVGSVGElement>) => {
+      // Bug A fix: a mousedown that reaches the canvas (not stopped by an element's
+      // handleElementMouseDown) started on the empty background → the following click
+      // is allowed to deselect. Runs for every tool / no-tool state.
+      pointerDownOnElementRef.current = false;
       if (placingKind !== 'Beet') return;
       // SVG-lokale Koordinaten für den Aufzieh-Startpunkt.
       // Fallback auf left=0/top=0 wenn getBoundingClientRect nicht verfügbar (z.B. Tests).

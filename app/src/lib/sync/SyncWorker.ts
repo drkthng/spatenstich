@@ -31,8 +31,11 @@ import {
   inviteCodeFromDb,
   vereinsregelnToDbRows,
   gardenDimensionsToDb,
+  gardenDimensionsToLocal,
   planElementToDb,
+  planElementToLocal,
   importEntityToDb,
+  importEntityFromDb,
 } from '../mappers/rowMappers';
 
 // Entities, die gepullt werden
@@ -42,6 +45,13 @@ export const PULL_ENTITIES: EntityName[] = [
   'profiles',
   'vereinsregeln',
   'invite_codes',
+  'garden_dimensions',
+  'plan_elements',
+  'imports',
+  'import_items',
+  'bed_drafts',
+  'plant_drafts',
+  'observation_drafts',
 ];
 
 export interface SyncWorkerDeps {
@@ -86,6 +96,10 @@ export class SyncWorker {
     try {
       const entries = await this.storage.listOutboxEntries(50);
       for (const entry of entries) {
+        // Outbox hardening: skip entries that have already reached MAX_ATTEMPTS.
+        // Permanently-failed entries (e.g. 22P02) stay visible in the UI for manual
+        // discard/retry, but are NOT re-attempted on every sync cycle.
+        if (entry.attempts >= MAX_ATTEMPTS) continue;
         await this.pushOne(entry);
       }
     } finally {
@@ -356,9 +370,11 @@ export class SyncWorker {
     const dbRow = gardenDimensionsToDb(row);
     // Stamp updated_by_user_id from session (mapper carries the local value, which may be null on first write).
     (dbRow as Record<string, unknown>).updated_by_user_id = userId;
+    // UNIQUE(garden_id) constraint (migration 014) — upsert on garden_id, not id,
+    // so a second push for the same garden does not violate the unique constraint (Bug B fix).
     const { error } = await this.supabase
       .from('garden_dimensions')
-      .upsert(dbRow as any, { onConflict: 'id' });
+      .upsert(dbRow as any, { onConflict: 'garden_id' });
     if (error) throw error;
   }
 
@@ -503,6 +519,96 @@ export class SyncWorker {
         if (error) throw error;
         const rows = (data ?? []).map(inviteCodeFromDb);
         await this.storage.upsertRowsFromServer('invite_codes', rows);
+        return rows.length;
+      }
+      case 'garden_dimensions': {
+        if (!activeGardenId) return 0;
+        let q = this.supabase
+          .from('garden_dimensions')
+          .select('*')
+          .eq('garden_id', activeGardenId) as any;
+        if (lastPullAt) q = q.gt('updated_at', lastPullAt);
+        const { data, error } = await q;
+        if (error) throw error;
+        const rows = (data ?? []).map(gardenDimensionsToLocal);
+        if (rows.length > 0) await this.storage.upsertRowsFromServer('garden_dimensions', rows);
+        return rows.length;
+      }
+      case 'plan_elements': {
+        if (!activeGardenId) return 0;
+        let q = this.supabase
+          .from('plan_elements')
+          .select('*')
+          .eq('garden_id', activeGardenId) as any;
+        if (lastPullAt) q = q.gt('updated_at', lastPullAt);
+        const { data, error } = await q;
+        if (error) throw error;
+        const rows = (data ?? []).map(planElementToLocal);
+        if (rows.length > 0) await this.storage.upsertRowsFromServer('plan_elements', rows);
+        return rows.length;
+      }
+      case 'imports': {
+        if (!activeGardenId) return 0;
+        let q = this.supabase
+          .from('imports')
+          .select('*')
+          .eq('garden_id', activeGardenId) as any;
+        if (lastPullAt) q = q.gt('updated_at', lastPullAt);
+        const { data, error } = await q;
+        if (error) throw error;
+        const rows = (data ?? []).map((r: Record<string, unknown>) => importEntityFromDb(r, 'imports'));
+        if (rows.length > 0) await this.storage.upsertRowsFromServer('imports', rows as any);
+        return rows.length;
+      }
+      case 'import_items': {
+        if (!activeGardenId) return 0;
+        // import_items is write-once (no updated_at column) — always full-pull for garden
+        const { data, error } = await (this.supabase
+          .from('import_items')
+          .select('*')
+          .eq('garden_id', activeGardenId) as any);
+        if (error) throw error;
+        const rows = (data ?? []).map((r: Record<string, unknown>) => importEntityFromDb(r, 'import_items'));
+        if (rows.length > 0) await this.storage.upsertRowsFromServer('import_items', rows as any);
+        return rows.length;
+      }
+      case 'bed_drafts': {
+        if (!activeGardenId) return 0;
+        let q = this.supabase
+          .from('bed_drafts')
+          .select('*')
+          .eq('garden_id', activeGardenId) as any;
+        if (lastPullAt) q = q.gt('updated_at', lastPullAt);
+        const { data, error } = await q;
+        if (error) throw error;
+        const rows = (data ?? []).map((r: Record<string, unknown>) => importEntityFromDb(r, 'bed_drafts'));
+        if (rows.length > 0) await this.storage.upsertRowsFromServer('bed_drafts', rows as any);
+        return rows.length;
+      }
+      case 'plant_drafts': {
+        if (!activeGardenId) return 0;
+        let q = this.supabase
+          .from('plant_drafts')
+          .select('*')
+          .eq('garden_id', activeGardenId) as any;
+        if (lastPullAt) q = q.gt('updated_at', lastPullAt);
+        const { data, error } = await q;
+        if (error) throw error;
+        const rows = (data ?? []).map((r: Record<string, unknown>) => importEntityFromDb(r, 'plant_drafts'));
+        if (rows.length > 0) await this.storage.upsertRowsFromServer('plant_drafts', rows as any);
+        return rows.length;
+      }
+      case 'observation_drafts': {
+        if (!activeGardenId) return 0;
+        let q = this.supabase
+          .from('observation_drafts')
+          .select('*')
+          .eq('garden_id', activeGardenId) as any;
+        if (lastPullAt) q = q.gt('updated_at', lastPullAt);
+        const { data, error } = await q;
+        if (error) throw error;
+        const rows = (data ?? []).map((r: Record<string, unknown>) => importEntityFromDb(r, 'observation_drafts'));
+        if (rows.length > 0) await this.storage.upsertRowsFromServer('observation_drafts', rows as any);
         return rows.length;
       }
       default:

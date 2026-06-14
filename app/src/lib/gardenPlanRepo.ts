@@ -139,6 +139,124 @@ export async function deleteAllElements(
   scheduleWriteDebounced();
 }
 
+// ── UUID repair (Bug C fix) ────────────────────────────────────────────────
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Returns true when `id` is a valid UUID (any version/variant).
+ * Used by repairNonUuidElementIds to detect legacy `el-` ids created
+ * before Bug C was fixed.
+ */
+export function isValidUuid(id: string): boolean {
+  return UUID_REGEX.test(id);
+}
+
+/**
+ * One-time, idempotent data repair for local plan_elements with non-UUID ids.
+ *
+ * Background: Before Bug C was fixed, editorStore.ts and WebPlanEditor.tsx generated
+ * element ids as `'el-' + Math.random()...` — not valid UUIDs. The Supabase
+ * `plan_elements.id` column is type `uuid`, so every push of such an element
+ * was rejected with 22P02. Old `el-` rows were never persisted on the server,
+ * so no server cleanup is needed.
+ *
+ * Repair steps (garden-scoped):
+ *   1. Load all local plan_elements.
+ *   2. Build an old-id → new-UUID mapping for every element whose id is non-UUID.
+ *   3. For elements that are a bed (elementType !== 'Pflanze'), rewrite their id.
+ *   4. For ALL elements, rewrite provenance.parentBedId references pointing to any old id.
+ *   5. Write each changed element via writeWithOutbox (insert, because old id was
+ *      never on the server) so it enters the sync pipeline.
+ *
+ * The function is safe to call on every app boot — elements with valid UUID ids
+ * are skipped entirely.
+ *
+ * @returns number of elements that were re-identified and re-enqueued.
+ */
+export async function repairNonUuidElementIds(
+  mode: AuthMode,
+  gardenId: string,
+): Promise<number> {
+  if (mode !== 'account') return 0; // local mode has no server — nothing to repair
+  const userId = useAuthStore.getState().userId;
+  if (!userId) return 0;
+
+  const allRows = await storage.getRowsByGarden<PlanElementRow>('plan_elements', gardenId);
+  if (allRows.length === 0) return 0;
+
+  // Build old-id → new-UUID map for every non-UUID element id.
+  const idRemap = new Map<string, string>();
+  for (const row of allRows) {
+    if (!isValidUuid(row.id)) {
+      idRemap.set(row.id, randomId());
+    }
+  }
+
+  if (idRemap.size === 0) return 0; // nothing to repair
+
+  const now = new Date().toISOString();
+  let repaired = 0;
+
+  for (const row of allRows) {
+    const newId = idRemap.get(row.id);
+    const idChanged = newId !== undefined;
+
+    // Rewrite provenance.parentBedId if it points to a remapped id.
+    const prov = (row.provenance ?? {}) as Record<string, unknown>;
+    const oldParentBedId =
+      typeof prov.parentBedId === 'string' ? prov.parentBedId : null;
+    const newParentBedId =
+      oldParentBedId !== null ? (idRemap.get(oldParentBedId) ?? oldParentBedId) : oldParentBedId;
+    const provenanceChanged =
+      oldParentBedId !== null && newParentBedId !== oldParentBedId;
+
+    if (!idChanged && !provenanceChanged) continue;
+
+    const repairedRow: PlanElementRow = {
+      ...row,
+      id: newId ?? row.id,
+      provenance: provenanceChanged
+        ? { ...prov, parentBedId: newParentBedId }
+        : row.provenance,
+      updatedAt: now,
+      updatedByUserId: userId,
+    };
+
+    try {
+      await storage.writeWithOutbox('plan_elements', repairedRow, {
+        entity: 'plan_elements',
+        rowId: repairedRow.id,
+        operation: 'insert', // old el- id was never on the server
+        payload: repairedRow as unknown as Record<string, unknown>,
+      });
+      // When the id changed, soft-delete the stale legacy row locally so the
+      // element does not appear twice on this device. upsertRowFromServer
+      // bypasses the outbox on purpose: the old `el-` id was never on the
+      // server, so a delete-push would only fail with 22P02 (invalid uuid).
+      if (idChanged) {
+        await storage.upsertRowFromServer('plan_elements', {
+          ...row,
+          deletedAt: now,
+          updatedAt: now,
+        });
+      }
+      repaired++;
+    } catch {
+      // Best-effort — log and continue so one bad row does not block others.
+      if (typeof __DEV__ !== 'undefined' && __DEV__) {
+        console.warn('[repairNonUuidElementIds] Failed to re-enqueue element', repairedRow.id);
+      }
+    }
+  }
+
+  if (repaired > 0) {
+    scheduleWriteDebounced();
+  }
+
+  return repaired;
+}
+
 // ── single-row editor writes (Phase 7 Plan 03) ─────────────────────────────
 
 /**

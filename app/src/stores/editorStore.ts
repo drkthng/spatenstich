@@ -54,7 +54,11 @@ function nowIso(): string {
 }
 
 function randomId(): string {
-  return 'el-' + Math.random().toString(36).slice(2, 10);
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  // Non-crypto fallback: timestamp + random suffix (not a true UUID, but unique enough for offline use).
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 export const useEditorStore = create<EditorState>()(
