@@ -44,6 +44,9 @@ const ARROW_STEP_M = 0.1;        // kleine Schrittweite (Pfeil ohne Modifier)
 const ARROW_STEP_SHIFT_M = 0.5;  // große Schrittweite (Shift+Pfeil)
 const ARROW_COMMIT_DEBOUNCE_MS = 400; // Burst-Fenster: nach dem letzten Pfeil bis setGestureActive(false)
 
+// quick-260615-utj: Marquee-Schwellwert (Pixel) — unter Schwellwert = reiner Klick, kein Marquee.
+const MARQUEE_THRESHOLD_PX = 5;
+
 interface DragState {
   id: string;
   startMouseX: number;
@@ -75,6 +78,14 @@ interface CreateRect {
   y: number;
   w: number;
   h: number;
+}
+
+// quick-260615-utj: Marquee/Rubber-Band-Selektions-Zustand.
+interface MarqueeDrag {
+  startClientX: number;
+  startClientY: number;
+  startSvgX: number; // SVG-lokale Koordinate (px)
+  startSvgY: number;
 }
 
 // Default element sizes in meters per kind. Tunable later.
@@ -115,6 +126,8 @@ export function WebPlanEditor({
 }: WebPlanEditorProps): React.JSX.Element {
   const elements = useEditorStore((s) => s.elements);
   const selection = useEditorStore((s) => s.selection);
+  // quick-260615-utj: selectedIds — ?? [] als Fallback für Tests die den alten Mock ohne selectedIds nutzen
+  const selectedIds = useEditorStore((s) => s.selectedIds) ?? [];
   const showGrid = useEditorStore((s) => s.showGrid);
   const activeLayers = useEditorStore((s) => s.activeLayers);
 
@@ -122,6 +135,8 @@ export function WebPlanEditor({
   const [containerSize, setContainerSize] = React.useState({ w: 800, h: 600 });
   // Pending drag: captures mousedown coords before the 5px threshold is exceeded (MOUSE_DRAG_THRESHOLD_PX)
   const pendingDragRef = React.useRef<PendingDrag | null>(null);
+  // quick-260615-utj: Inkrementaler Delta-Tracker für Gruppen-Drag (relative moveSelectedBy-Aufrufe).
+  const lastMoveRef = React.useRef<{ dxM: number; dyM: number }>({ dxM: 0, dyM: 0 });
 
   // fix(laube-pflanze-platzierung): SVG-Wrapper-Ref für Koordinatenberechnung in handleDivClick.
   // react-native-svg/web überschreibt onClick in prepare() mit undefined wenn onPress fehlt
@@ -145,6 +160,13 @@ export function WebPlanEditor({
   // Vorschau-Rechteck (gestrichelter Rahmen) während des Aufziehens.
   const [createRect, setCreateRect] = React.useState<CreateRect | null>(null);
 
+  // quick-260615-utj: Marquee/Rubber-Band-Selektion.
+  const marqueeRef = React.useRef<MarqueeDrag | null>(null);
+  // justMarqueeRef verhindert, dass das mouseup-Ende eines Marquee-Drags
+  // sofort das folgende click-Event als Deselect-Klick interpretiert.
+  const justMarqueeRef = React.useRef(false);
+  const [marqueeRect, setMarqueeRect] = React.useState<CreateRect | null>(null);
+
   // Compute scale (px per meter) to fit garden into available viewport with padding.
   const PADDING = 24;
   const availW = Math.max(200, containerSize.w - PADDING * 2);
@@ -167,17 +189,35 @@ export function WebPlanEditor({
   );
 
   // Keyboard: Delete removes selected; Escape clears selection + tool mode.
+  // quick-260615-utj: Gruppen-Delete bei selectedIds.length > 0 (löscht alle selektierten Elemente).
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
       // Don't hijack typing in inputs
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-      if ((e.key === 'Delete' || e.key === 'Backspace') && selection) {
-        useEditorStore.getState().deleteElement(selection);
-        useEditorStore.getState().setSelection(null);
-        e.preventDefault();
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        const currentSelectedIds = useEditorStore.getState().selectedIds ?? [];
+        if (currentSelectedIds.length > 0) {
+          // Gruppen-Delete: alle selektierten Elemente löschen
+          for (const id of currentSelectedIds) {
+            useEditorStore.getState().deleteElement(id);
+          }
+          // clearSelection leert selectedIds + selection; Fallback auf setSelection(null) für alte Mocks
+          const s = useEditorStore.getState();
+          if (typeof s.clearSelection === 'function') {
+            s.clearSelection();
+          } else {
+            s.setSelection(null);
+          }
+          e.preventDefault();
+        }
       } else if (e.key === 'Escape') {
-        useEditorStore.getState().setSelection(null);
+        const s = useEditorStore.getState();
+        if (typeof s.clearSelection === 'function') {
+          s.clearSelection();
+        } else {
+          s.setSelection(null);
+        }
       }
     };
     window.addEventListener('keydown', onKey);
@@ -216,19 +256,6 @@ export function WebPlanEditor({
       e.preventDefault();
 
       const step = e.shiftKey ? ARROW_STEP_SHIFT_M : ARROW_STEP_M;
-      let newXM = el.xM;
-      let newYM = el.yM;
-
-      if (e.key === 'ArrowLeft') newXM -= step;
-      else if (e.key === 'ArrowRight') newXM += step;
-      else if (e.key === 'ArrowUp') newYM -= step;
-      else if (e.key === 'ArrowDown') newYM += step;
-
-      // Clamping identisch zum Drag-onMove-Handler (xM/yM = Center)
-      const elWidth = el.widthM;
-      const elHeight = el.heightM;
-      newXM = Math.max(elWidth / 2, Math.min(dimensions.widthM - elWidth / 2, newXM));
-      newYM = Math.max(elHeight / 2, Math.min(dimensions.heightM - elHeight / 2, newYM));
 
       // Burst-Gesture-Wrapping: erster Pfeil des Bursts aktiviert gestureActive
       if (!arrowBurstActiveRef.current) {
@@ -236,8 +263,50 @@ export function WebPlanEditor({
         useEditorStore.getState().setGestureActive(true);
       }
 
-      // Element verschieben (läuft im pausierten zundo-Fenster → kein per-Tastendruck-Snapshot)
-      useEditorStore.getState().updateElement(currentSelection, { xM: newXM, yM: newYM });
+      // quick-260615-utj: Gruppen-Move bei mehreren selektierten Elementen
+      const currentSelectedIds = useEditorStore.getState().selectedIds ?? [];
+      if (currentSelectedIds.length > 1) {
+        // Gruppen-Move: alle selektierten Elemente verschieben (mit Clamping-Delta)
+        let dxM = 0;
+        let dyM = 0;
+        if (e.key === 'ArrowLeft') dxM = -step;
+        else if (e.key === 'ArrowRight') dxM = step;
+        else if (e.key === 'ArrowUp') dyM = -step;
+        else if (e.key === 'ArrowDown') dyM = step;
+
+        // Gruppen-Clamping: Delta so beschneiden, dass kein Element die Grenzen verlässt
+        const groupEls = currentSelectedIds
+          .map((id) => currentElements.find((e) => e.id === id && e.deletedAt === null))
+          .filter((e): e is NonNullable<typeof e> => e != null);
+        for (const gEl of groupEls) {
+          const minAllowedX = gEl.widthM / 2 - gEl.xM;
+          const maxAllowedX = dimensions.widthM - gEl.widthM / 2 - gEl.xM;
+          const minAllowedY = gEl.heightM / 2 - gEl.yM;
+          const maxAllowedY = dimensions.heightM - gEl.heightM / 2 - gEl.yM;
+          dxM = Math.max(minAllowedX, Math.min(maxAllowedX, dxM));
+          dyM = Math.max(minAllowedY, Math.min(maxAllowedY, dyM));
+        }
+
+        useEditorStore.getState().moveSelectedBy(dxM, dyM);
+      } else {
+        // Einzel-Move: bestehender Pfad (keine Regression)
+        let newXM = el.xM;
+        let newYM = el.yM;
+
+        if (e.key === 'ArrowLeft') newXM -= step;
+        else if (e.key === 'ArrowRight') newXM += step;
+        else if (e.key === 'ArrowUp') newYM -= step;
+        else if (e.key === 'ArrowDown') newYM += step;
+
+        // Clamping identisch zum Drag-onMove-Handler (xM/yM = Center)
+        const elWidth = el.widthM;
+        const elHeight = el.heightM;
+        newXM = Math.max(elWidth / 2, Math.min(dimensions.widthM - elWidth / 2, newXM));
+        newYM = Math.max(elHeight / 2, Math.min(dimensions.heightM - elHeight / 2, newYM));
+
+        // Element verschieben (läuft im pausierten zundo-Fenster → kein per-Tastendruck-Snapshot)
+        useEditorStore.getState().updateElement(currentSelection, { xM: newXM, yM: newYM });
+      }
 
       // Debounce-Timer zurücksetzen (gleitendes Fenster — ein Burst = ein Snapshot)
       if (arrowDebounceTimerRef.current !== null) {
@@ -269,6 +338,7 @@ export function WebPlanEditor({
   // Drag: window-level mouse move/up so the drag continues even if cursor leaves an
   // element. setGestureActive(true) bypasses the autosave subscription during drag
   // (Pitfall-5); the up handler clears it so save fires once on release.
+  // quick-260615-utj: Gruppen-Drag via moveSelectedBy wenn drag.id in selectedIds und length>1.
   React.useEffect(() => {
     if (!drag) return;
     const elAtStart = elements.find((e) => e.id === drag.id);
@@ -282,18 +352,53 @@ export function WebPlanEditor({
     const onMove = (e: MouseEvent) => {
       const dxM = (e.clientX - drag.startMouseX) / scale;
       const dyM = (e.clientY - drag.startMouseY) / scale;
-      const newXM = Math.max(
-        elWidth / 2,
-        Math.min(dimensions.widthM - elWidth / 2, drag.elStartXM + dxM),
-      );
-      const newYM = Math.max(
-        elHeight / 2,
-        Math.min(dimensions.heightM - elHeight / 2, drag.elStartYM + dyM),
-      );
-      useEditorStore.getState().updateElement(drag.id, { xM: newXM, yM: newYM });
+
+      // quick-260615-utj: Gruppen-Move wenn das gegriffene Element in einer Mehrfach-Selektion ist
+      const currentSelectedIds = useEditorStore.getState().selectedIds ?? [];
+      const isGroupDrag = currentSelectedIds.length > 1 && currentSelectedIds.includes(drag.id);
+
+      if (isGroupDrag) {
+        // Inkrementaler Delta (relativ zum letzten Frame)
+        const prevDxM = lastMoveRef.current.dxM;
+        const prevDyM = lastMoveRef.current.dyM;
+        const incrDxM = dxM - prevDxM;
+        const incrDyM = dyM - prevDyM;
+
+        // Gruppen-Clamping: Delta so beschneiden, dass kein Element die Grenzen verlässt
+        const currentElements = useEditorStore.getState().elements;
+        const groupEls = currentSelectedIds
+          .map((id) => currentElements.find((el) => el.id === id && el.deletedAt === null))
+          .filter((el): el is NonNullable<typeof el> => el != null);
+
+        let clampedDxM = incrDxM;
+        let clampedDyM = incrDyM;
+        for (const gEl of groupEls) {
+          const minAllowedX = gEl.widthM / 2 - gEl.xM;
+          const maxAllowedX = dimensions.widthM - gEl.widthM / 2 - gEl.xM;
+          const minAllowedY = gEl.heightM / 2 - gEl.yM;
+          const maxAllowedY = dimensions.heightM - gEl.heightM / 2 - gEl.yM;
+          clampedDxM = Math.max(minAllowedX, Math.min(maxAllowedX, clampedDxM));
+          clampedDyM = Math.max(minAllowedY, Math.min(maxAllowedY, clampedDyM));
+        }
+
+        useEditorStore.getState().moveSelectedBy(clampedDxM, clampedDyM);
+        lastMoveRef.current = { dxM, dyM };
+      } else {
+        // Einzel-Move: bestehender Pfad (keine Regression)
+        const newXM = Math.max(
+          elWidth / 2,
+          Math.min(dimensions.widthM - elWidth / 2, drag.elStartXM + dxM),
+        );
+        const newYM = Math.max(
+          elHeight / 2,
+          Math.min(dimensions.heightM - elHeight / 2, drag.elStartYM + dyM),
+        );
+        useEditorStore.getState().updateElement(drag.id, { xM: newXM, yM: newYM });
+      }
     };
     const onUp = () => {
       setDrag(null);
+      lastMoveRef.current = { dxM: 0, dyM: 0 };
       useEditorStore.getState().setGestureActive(false);
     };
     window.addEventListener('mousemove', onMove);
@@ -315,6 +420,8 @@ export function WebPlanEditor({
       if (dx >= MOUSE_DRAG_THRESHOLD_PX || dy >= MOUSE_DRAG_THRESHOLD_PX) {
         // Threshold exceeded — promote to active drag
         pendingDragRef.current = null;
+        // quick-260615-utj: lastMoveRef zurücksetzen beim Drag-Start
+        lastMoveRef.current = { dxM: 0, dyM: 0 };
         useEditorStore.getState().setGestureActive(true);
         setDrag({
           id: pending.id,
@@ -429,6 +536,85 @@ export function WebPlanEditor({
     };
   }, [scale, gardenId, userId, dimensions.widthM, dimensions.heightM, placingKind, plantMeta, onPlaced]);
 
+  // quick-260615-utj: Marquee/Rubber-Band-Selektion.
+  // Registriert window-level mousemove/mouseup-Listener analog zu createDrag.
+  // Aktiv wenn marqueeRef.current gesetzt ist (durch handleCanvasMouseDown bei placingKind===null).
+  React.useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      const mq = marqueeRef.current;
+      if (!mq) return;
+      const dx = e.clientX - mq.startClientX;
+      const dy = e.clientY - mq.startClientY;
+      if (Math.abs(dx) >= MARQUEE_THRESHOLD_PX || Math.abs(dy) >= MARQUEE_THRESHOLD_PX) {
+        const x = Math.min(mq.startSvgX, mq.startSvgX + dx);
+        const y = Math.min(mq.startSvgY, mq.startSvgY + dy);
+        setMarqueeRect({ x, y, w: Math.abs(dx), h: Math.abs(dy) });
+      }
+    };
+
+    const onUp = (e: MouseEvent) => {
+      const mq = marqueeRef.current;
+      if (!mq) return;
+      marqueeRef.current = null;
+      setMarqueeRect(null);
+
+      const dx = e.clientX - mq.startClientX;
+      const dy = e.clientY - mq.startClientY;
+      // Unter Schwellwert: reiner Klick — kein Marquee, kein Selektions-Change
+      if (Math.abs(dx) < MARQUEE_THRESHOLD_PX && Math.abs(dy) < MARQUEE_THRESHOLD_PX) {
+        return;
+      }
+
+      // Marquee-Rechteck in Meter umrechnen
+      const mqStartXPx = mq.startSvgX;
+      const mqStartYPx = mq.startSvgY;
+      const mqEndXPx = mqStartXPx + dx;
+      const mqEndYPx = mqStartYPx + dy;
+      const rectLeft = Math.min(mqStartXPx, mqEndXPx) / scale;
+      const rectRight = Math.max(mqStartXPx, mqEndXPx) / scale;
+      const rectTop = Math.min(mqStartYPx, mqEndYPx) / scale;
+      const rectBottom = Math.max(mqStartYPx, mqEndYPx) / scale;
+
+      // AABB-Überschneidungstest: alle sichtbaren Elemente prüfen
+      // Liest direkt aus dem Store (nicht aus closurem visibleElements) für immer aktuellen Stand
+      const currentElements = useEditorStore.getState().elements;
+      const matchingIds = currentElements
+        .filter((el) => {
+          if (el.deletedAt !== null) return false;
+          const elLeft = el.xM - el.widthM / 2;
+          const elRight = el.xM + el.widthM / 2;
+          const elTop = el.yM - el.heightM / 2;
+          const elBottom = el.yM + el.heightM / 2;
+          // Standard-AABB-Overlap: kein Ausschluss-Kriterium trifft zu
+          return elRight > rectLeft && elLeft < rectRight && elBottom > rectTop && elTop < rectBottom;
+        })
+        .map((el) => el.id);
+
+      // setSelectedIds leert selectedIds und setzt selection; Fallback für alte Mocks
+      const s = useEditorStore.getState();
+      if (typeof s.setSelectedIds === 'function') {
+        s.setSelectedIds(matchingIds);
+      } else if (matchingIds.length > 0) {
+        s.setSelection(matchingIds[matchingIds.length - 1]);
+      } else {
+        s.setSelection(null);
+      }
+
+      // justMarqueeRef: verhindert dass der folgende click die frische Selektion deselektiert
+      justMarqueeRef.current = true;
+      setTimeout(() => {
+        justMarqueeRef.current = false;
+      }, 0);
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [scale]);
+
   // fix(laube-pflanze-platzierung): Handler liegt am <div> (testID="web-plan-editor-canvas"),
   // NICHT mehr am <Svg>. Grund: react-native-svg/web überschreibt onClick in prepare() mit
   // undefined wenn kein onPress übergeben wird (undefined !== null ist true → clean.onClick = undefined).
@@ -440,6 +626,12 @@ export function WebPlanEditor({
       // Das mouseup des Drag-Endes setzt justCreatedRef — der folgende click soll weder
       // deselecten noch ein zweites Beet über den Klick-Pfad erzeugen.
       if (justCreatedRef.current) return;
+
+      // quick-260615-utj: Unterdrücke Klick direkt nach Marquee-Aufziehen.
+      if (justMarqueeRef.current) {
+        justMarqueeRef.current = false;
+        return;
+      }
 
       // Bug A fix: if the pointer went down on an element, this bubbled click must
       // NOT deselect it. Consume the latch and bail before the deselect path.
@@ -493,7 +685,13 @@ export function WebPlanEditor({
       // e.target !== e.currentTarget gilt. Element-Klicks rufen bereits e.stopPropagation()
       // in handleElementMouseDown und erreichen diesen Handler nie.
       // Daher: Kein Early-Return mehr — jeder Klick auf die leere Canvas deselectiert.
-      useEditorStore.getState().setSelection(null);
+      // quick-260615-utj: clearSelection leert auch selectedIds; setSelection(null) als Fallback für alte Mocks
+      const storeState = useEditorStore.getState();
+      if (typeof storeState.clearSelection === 'function') {
+        storeState.clearSelection();
+      } else {
+        storeState.setSelection(null);
+      }
     },
     [placingKind, plantMeta, scale, gardenId, userId, dimensions.widthM, dimensions.heightM, onPlaced],
     // svgWrapperRef ist stabil (useRef) → keine Dep nötig
@@ -505,10 +703,34 @@ export function WebPlanEditor({
       e.preventDefault?.();
       const el = elements.find((x) => x.id === id);
       if (!el || el.deletedAt !== null) return;
-      useEditorStore.getState().setSelection(id);
+
       // Bug A fix: mark that this pointer-down hit an element, so the bubbled click in
       // handleDivClick keeps the selection instead of deselecting it.
       pointerDownOnElementRef.current = true;
+
+      // quick-260615-utj: Ctrl/Cmd-Klick → additives Toggle (kein pendingDrag für Modifier-Klick)
+      if (e.ctrlKey || e.metaKey) {
+        const s = useEditorStore.getState();
+        if (typeof s.toggleSelection === 'function') {
+          s.toggleSelection(id);
+        } else {
+          s.setSelection(id); // Fallback für alte Mocks ohne toggleSelection
+        }
+        // Kein pendingDrag — additive Auswahl löst keinen Drag aus
+        return;
+      }
+
+      // Normaler Klick: prüfen ob id bereits in einer Mehrfach-Selektion ist
+      const currentSelectedIds = useEditorStore.getState().selectedIds ?? [];
+      if (currentSelectedIds.length > 1 && currentSelectedIds.includes(id)) {
+        // Element ist Teil einer Gruppe → selectedIds NICHT kollabieren.
+        // pendingDrag wird gesetzt; Drag-Promotion prüft dann selectedIds und löst moveSelectedBy aus.
+        // selection bleibt wie es ist — kein Store-Update nötig.
+      } else {
+        // Normaler Einzel-Select-Pfad
+        useEditorStore.getState().setSelection(id);
+      }
+
       // MOUSE_DRAG_THRESHOLD_PX: capture pending drag but do NOT start drag or setGestureActive yet.
       // Only promote to active drag once mousemove exceeds MOUSE_DRAG_THRESHOLD_PX (5px).
       // This leaves the native dblclick event window intact (T-09.1-DBLCLICK-RACE).
@@ -534,19 +756,30 @@ export function WebPlanEditor({
       // handleElementMouseDown) started on the empty background → the following click
       // is allowed to deselect. Runs for every tool / no-tool state.
       pointerDownOnElementRef.current = false;
-      if (placingKind !== 'Beet') return;
-      // SVG-lokale Koordinaten für den Aufzieh-Startpunkt.
-      // Fallback auf left=0/top=0 wenn getBoundingClientRect nicht verfügbar (z.B. Tests).
+
+      // SVG-lokale Koordinaten (benötigt für createDrag UND marquee)
       const svgDomEl = e.currentTarget as unknown as SVGSVGElement;
       const rect = svgDomEl?.getBoundingClientRect?.() ?? { left: 0, top: 0 };
       const startSvgX = e.clientX - rect.left;
       const startSvgY = e.clientY - rect.top;
-      createDragRef.current = {
-        startClientX: e.clientX,
-        startClientY: e.clientY,
-        startSvgX,
-        startSvgY,
-      };
+
+      if (placingKind === 'Beet') {
+        // Drag-to-create Beet
+        createDragRef.current = {
+          startClientX: e.clientX,
+          startClientY: e.clientY,
+          startSvgX,
+          startSvgY,
+        };
+      } else if (!placingKind) {
+        // quick-260615-utj: Marquee/Rubber-Band-Selektion auf freier Fläche
+        marqueeRef.current = {
+          startClientX: e.clientX,
+          startClientY: e.clientY,
+          startSvgX,
+          startSvgY,
+        };
+      }
     },
     [placingKind],
   );
@@ -642,7 +875,8 @@ export function WebPlanEditor({
           const fill =
             PLAN_COLORS[el.elementType as keyof typeof PLAN_COLORS] ?? PLAN_COLORS.Sonstiges;
           const stroke = darkenColor(fill, 0.25);
-          const selected = el.id === selection;
+          // quick-260615-utj: Multi-Select-Outline — alle selectedIds-Elemente erhalten Rahmen
+          const selected = selectedIds.includes(el.id);
           const prov = (el.provenance ?? {}) as Record<string, unknown>;
           const rotateDegRaw = typeof prov.rotateDeg === 'number' ? prov.rotateDeg : 0;
           const rotateDeg = Number.isFinite(rotateDegRaw) ? rotateDegRaw : 0;
@@ -784,6 +1018,20 @@ export function WebPlanEditor({
             stroke="#0EA5E9"
             strokeWidth={2}
             strokeDasharray="6 3"
+            pointerEvents="none"
+          />
+        )}
+        {/* quick-260615-utj: Marquee/Rubber-Band-Vorschau-Rechteck (gestrichelter Rahmen, andere Farbe) */}
+        {marqueeRect && (
+          <Rect
+            x={marqueeRect.x}
+            y={marqueeRect.y}
+            width={marqueeRect.w}
+            height={marqueeRect.h}
+            fill="rgba(14, 165, 233, 0.08)"
+            stroke="#0EA5E9"
+            strokeWidth={1}
+            strokeDasharray="4 3"
             pointerEvents="none"
           />
         )}

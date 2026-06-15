@@ -2,7 +2,7 @@
 // Testet: Ctrl/Cmd-Klick, Marquee, Gruppen-Drag, Gruppen-Pfeiltasten, Gruppen-Delete, Multi-Outline-Rendering.
 
 import * as React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, act } from '@testing-library/react-native';
 
 const mockSetEditingElementId = jest.fn();
 const mockSetSelection = jest.fn();
@@ -281,8 +281,9 @@ describe('WebPlanEditor > Mehrfach-Selektion (quick-260615-utj)', () => {
 
   /**
    * T-utj-web-06: Drag bei Mehrfach-Selektion ruft moveSelectedBy (nicht updateElement-Einzel).
+   * Verwendet act() um React-State-Updates zwischen den Mausereignissen zu flushen.
    */
-  it('T-utj-web-06: Drag auf Gruppen-Element ruft moveSelectedBy für Gruppen-Move', () => {
+  it('T-utj-web-06: Drag auf Gruppen-Element ruft moveSelectedBy für Gruppen-Move', async () => {
     editorState.elements = [
       makeEl('e-1', { xM: 3, yM: 3 }),
       makeEl('e-2', { xM: 6, yM: 6 }),
@@ -295,7 +296,7 @@ describe('WebPlanEditor > Mehrfach-Selektion (quick-260615-utj)', () => {
     const gs = findElementGs(UNSAFE_getAllByType(View));
     const firstG = gs[0]; // e-1 (id 'e-1' ist in selectedIds)
 
-    // mousedown auf Element (kein Modifier → Single-Select bei Nicht-Gruppe, aber e-1 ist IN der Gruppe)
+    // mousedown auf Element (kein Modifier, aber e-1 ist IN der Gruppe)
     fireEvent(firstG, 'mouseDown', {
       clientX: 100,
       clientY: 100,
@@ -306,22 +307,26 @@ describe('WebPlanEditor > Mehrfach-Selektion (quick-260615-utj)', () => {
       stopPropagation: jest.fn(),
     });
 
-    // mousemove > 5px → Drag-Promotion
-    window.dispatchEvent(new MouseEvent('mousemove', {
-      clientX: 115,
-      clientY: 115,
-      bubbles: true,
-    }));
+    // mousemove > 5px → Drag-Promotion: setDrag() wird aufgerufen (async State-Update)
+    await act(async () => {
+      window.dispatchEvent(new MouseEvent('mousemove', {
+        clientX: 115,
+        clientY: 115,
+        bubbles: true,
+      }));
+    });
 
     // setGestureActive(true) muss aufgerufen worden sein
     expect(mockSetGestureActive).toHaveBeenCalledWith(true);
 
-    // Weiteres mousemove — bewegt die Gruppe
-    window.dispatchEvent(new MouseEvent('mousemove', {
-      clientX: 120,
-      clientY: 120,
-      bubbles: true,
-    }));
+    // Weiteres mousemove — nach act() ist der Drag-Effekt registriert und bewegt die Gruppe
+    await act(async () => {
+      window.dispatchEvent(new MouseEvent('mousemove', {
+        clientX: 120,
+        clientY: 120,
+        bubbles: true,
+      }));
+    });
 
     // moveSelectedBy muss aufgerufen worden sein
     expect(mockMoveSelectedBy).toHaveBeenCalled();
