@@ -31,7 +31,7 @@ Plan: —
 Next: Milestone v1.1 abschließen (/gsd-complete-milestone)
 Note: Phase 7.5b (Web Editor Polish) remains optional/open.
 Plans: 63/63 completed — alle 13 Phasen des Milestones v1.1 abgeschlossen
-Last activity: 2026-06-12 - Phase 10 complete (UAT 8/8, Security 19/19 closed, Transition)
+Last activity: 2026-06-15 - Completed quick task 260615-utj: Mehrfach-Selektion im Web-Plan-Editor
 
 Progress: [████████████████████] 63/63 plans (100%) — Milestone v1.1 complete
 
@@ -222,6 +222,7 @@ Keine offenen Todos (alle Phase-10-UAT-Notizen vom 2026-06-11 abgearbeitet).
 | 260611-ln5 | Feature: Pfeiltasten-Move im Web-Editor (0,1 m / Shift 0,5 m, Burst-Gesture-Wrapping, Fokus-Guards) | 2026-06-11 | 124bd20 | [260611-ln5-feature-selektiertes-element-per-pfeilta](.planning/quick/260611-ln5-feature-selektiertes-element-per-pfeilta/) |
 | 260611-vk4 | Feature: Beet per Drag aufziehen (Drag-to-create) + Deselect bei Klick auf freie Fläche gefixt | 2026-06-11 | 52b5f7e | [260611-vk4-beet-per-drag-aufziehen-au-erdem-wenn-el](.planning/quick/260611-vk4-beet-per-drag-aufziehen-au-erdem-wenn-el/) |
 | 260612-9jb | Autosave-Lücke geschlossen: Leave-Flush (Unmount/Back + beforeunload Web) — pending Debounce-Saves gehen beim Verlassen nicht mehr verloren | 2026-06-12 | c337ab4 | [260612-9jb-automatisches-speichern-bei-beet-ver-nde](.planning/quick/260612-9jb-automatisches-speichern-bei-beet-ver-nde/) |
+| 260615-utj | Mehrfach-Selektion im Web-Plan-Editor — additiv (Strg/Cmd-Klick) + Marquee-Rubber-Band + Gruppen-Move/Pfeiltasten/Delete (766 Tests grün) | 2026-06-15 | 135f4e8 | [260615-utj-mehrfach-selektion-im-web-plan-editor-me](.planning/quick/260615-utj-mehrfach-selektion-im-web-plan-editor-me/) |
 
 ### Blockers/Concerns
 
