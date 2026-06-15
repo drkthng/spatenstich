@@ -22,6 +22,12 @@ export interface EditorState {
 
   // NOT in history (partialize excludes — Pitfall-3)
   selection: string | null;
+  /**
+   * Multi-Select-IDs. Ergänzt `selection` additiv.
+   * Pitfall-3: wie selection NICHT in zundo partialize — kein Undo-Eintrag für Selektion.
+   * setSelection hält selectedIds synchron (Backward-Compat für alle Einzel-Selektion-Aufrufer).
+   */
+  selectedIds: string[];
   viewport: { tx: number; ty: number; scale: number };
   tool: 'select' | 'polygon' | 'placing';
   activeLayers: { infrastructure: boolean; seasonal: boolean };
@@ -37,6 +43,18 @@ export interface EditorState {
   updateElement: (id: string, patch: Partial<PlanElementRow>) => void;
   deleteElement: (id: string) => void;
   setSelection: (id: string | null) => void;
+  /** Additives Toggle: id in selectedIds → entfernen, sonst hinzufügen. selection = letztes Element. */
+  toggleSelection: (id: string) => void;
+  /** Ersetzt selectedIds komplett; selection = letztes Element (oder null wenn leer). */
+  setSelectedIds: (ids: string[]) => void;
+  /** Leert selectedIds und selection. */
+  clearSelection: () => void;
+  /**
+   * Verschiebt JEDES Element in selectedIds (deletedAt===null) um (dxM,dyM) via updateElement.
+   * Kein Clamping im Store (dimensions unbekannt — Clamping liegt im Web-Editor).
+   * Kein eigener setGestureActive-Aufruf — Aufrufer steuert die Gesture-Klammer.
+   */
+  moveSelectedBy: (dxM: number, dyM: number) => void;
   setTool: (tool: EditorState['tool']) => void;
   setGestureActive: (active: boolean) => void;
   setEditingElementId: (editingElementId: string | null) => void;
@@ -66,6 +84,7 @@ export const useEditorStore = create<EditorState>()(
     (set, get) => ({
       elements: [],
       selection: null,
+      selectedIds: [],
       viewport: { tx: 0, ty: 0, scale: 1 },
       tool: 'select',
       activeLayers: { infrastructure: true, seasonal: true },
@@ -92,7 +111,34 @@ export const useEditorStore = create<EditorState>()(
           ),
         })),
 
-      setSelection: (id) => set({ selection: id }),
+      // Backward-Compat: setzt selection UND selectedIds synchron (Ein-Element-Pfad).
+      // Alle bestehenden setSelection-Aufrufer (handleElementMouseDown ohne Modifier,
+      // Drag-to-create, Delete-Reset, native EditorCanvas, Escape) bleiben automatisch korrekt.
+      setSelection: (id) => set({ selection: id, selectedIds: id ? [id] : [] }),
+
+      toggleSelection: (id) => {
+        const { selectedIds } = get();
+        const next = selectedIds.includes(id)
+          ? selectedIds.filter((x) => x !== id)
+          : [...selectedIds, id];
+        set({ selectedIds: next, selection: next[next.length - 1] ?? null });
+      },
+
+      setSelectedIds: (ids) =>
+        set({ selectedIds: ids, selection: ids[ids.length - 1] ?? null }),
+
+      clearSelection: () => set({ selectedIds: [], selection: null }),
+
+      moveSelectedBy: (dxM, dyM) => {
+        const { selectedIds, elements } = get();
+        if (selectedIds.length === 0) return;
+        for (const id of selectedIds) {
+          const el = elements.find((e) => e.id === id);
+          if (!el || el.deletedAt !== null) continue;
+          get().updateElement(id, { xM: el.xM + dxM, yM: el.yM + dyM });
+        }
+      },
+
       setTool: (tool) => set({ tool }),
       setGestureActive: (gestureActive) => set({ gestureActive }),
       setEditingElementId: (editingElementId) => set({ editingElementId }),
@@ -172,11 +218,13 @@ export const useEditorStore = create<EditorState>()(
   temporalApi.setState({
     undo: (steps?: number) => {
       originalUndo(steps);
-      useEditorStore.setState({ selection: null });
+      // Open Q 4: selection + selectedIds leeren (stale-Pointer-Schutz)
+      useEditorStore.setState({ selection: null, selectedIds: [] });
     },
     redo: (steps?: number) => {
       originalRedo(steps);
-      useEditorStore.setState({ selection: null });
+      // Open Q 4: selection + selectedIds leeren (stale-Pointer-Schutz)
+      useEditorStore.setState({ selection: null, selectedIds: [] });
     },
   });
 }
