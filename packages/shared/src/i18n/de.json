@@ -351,6 +351,18 @@
       }
     }
   },
+  "plan": {
+    "new": {
+      "title": "Neuen Garten anlegen",
+      "intro": "Lege die Größe deiner Parzelle fest. Danach kannst du im Editor Beete zeichnen.",
+      "widthLabel": "Breite (m)",
+      "heightLabel": "Höhe (m)",
+      "submit": "Garten anlegen",
+      "error_invalid": "Bitte gültige Maße eingeben (0,5–100 m).",
+      "account_required": "Zum Anlegen eines Gartens wird ein Account benötigt.",
+      "account_required_cta": "Zu den Einstellungen"
+    }
+  },
   "companion": {
     "conflict_single": "⚠ Konflikt: {{plantA}} verträgt sich nicht mit {{plantB}}",
     "conflict_multi": "⚠ Konflikt: {{plantA}} verträgt sich nicht mit {{others}}",
