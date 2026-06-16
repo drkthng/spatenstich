@@ -4,8 +4,8 @@ milestone: v1.1
 milestone_name: "Saison 2026 Ready" — Hot Path
 status: Milestone complete
 stopped_at: Phase 10 Plan 09 abgeschlossen — WR-05 Filter-Chip geschlossen, Phase 10 vollstaendig
-last_updated: "2026-06-12T09:30:13.667Z"
-last_activity: 2026-06-12
+last_updated: "2026-06-16T00:00:00Z"
+last_activity: 2026-06-16
 progress:
   total_phases: 13
   completed_phases: 13
@@ -31,7 +31,7 @@ Plan: —
 Next: Milestone v1.1 abschließen (/gsd-complete-milestone)
 Note: Phase 7.5b (Web Editor Polish) remains optional/open.
 Plans: 63/63 completed — alle 13 Phasen des Milestones v1.1 abgeschlossen
-Last activity: 2026-06-15 - Completed quick task 260615-utj: Mehrfach-Selektion im Web-Plan-Editor
+Last activity: 2026-06-16 - Completed quick task 260616-iuu: Logout erreichbar — Settings-Zahnrad im Home-Header
 
 Progress: [████████████████████] 63/63 plans (100%) — Milestone v1.1 complete
 
@@ -223,6 +223,7 @@ Keine offenen Todos (alle Phase-10-UAT-Notizen vom 2026-06-11 abgearbeitet).
 | 260611-vk4 | Feature: Beet per Drag aufziehen (Drag-to-create) + Deselect bei Klick auf freie Fläche gefixt | 2026-06-11 | 52b5f7e | [260611-vk4-beet-per-drag-aufziehen-au-erdem-wenn-el](.planning/quick/260611-vk4-beet-per-drag-aufziehen-au-erdem-wenn-el/) |
 | 260612-9jb | Autosave-Lücke geschlossen: Leave-Flush (Unmount/Back + beforeunload Web) — pending Debounce-Saves gehen beim Verlassen nicht mehr verloren | 2026-06-12 | c337ab4 | [260612-9jb-automatisches-speichern-bei-beet-ver-nde](.planning/quick/260612-9jb-automatisches-speichern-bei-beet-ver-nde/) |
 | 260615-utj | Mehrfach-Selektion im Web-Plan-Editor — additiv (Strg/Cmd-Klick) + Marquee-Rubber-Band + Gruppen-Move/Pfeiltasten/Delete (766 Tests grün) | 2026-06-15 | 135f4e8 | [260615-utj-mehrfach-selektion-im-web-plan-editor-me](.planning/quick/260615-utj-mehrfach-selektion-im-web-plan-editor-me/) |
+| 260616-iuu | Logout erreichbar — Settings-Zahnrad im Home-Header (beide Render-Branches, beide Modi, 769 Tests grün) | 2026-06-16 | 109b038 | [260616-iuu-logout-option-implementieren-es-gibt-akt](.planning/quick/260616-iuu-logout-option-implementieren-es-gibt-akt/) |
 
 ### Blockers/Concerns
 
@@ -239,7 +240,7 @@ Keine offenen Todos (alle Phase-10-UAT-Notizen vom 2026-06-11 abgearbeitet).
 
 ## Session Continuity
 
-Last session: 2026-06-12
-Stopped at: Phase 10 complete (UAT 8/8 + Security verified + Transition), Milestone v1.1 100% — offener Bug: Laube/Pflanzen nicht platzierbar (Regression-Verdacht quick-260611-vk4)
+Last session: 2026-06-16
+Stopped at: Quick 260616-iuu abgeschlossen — Logout erreichbar (Settings-Zahnrad im Home-Header, 769 Tests grün)
 Resume file: None
-Next: Editor-Bug fixen (gsd-quick), dann /gsd-complete-milestone v1.1
+Next: /gsd-complete-milestone v1.1
