@@ -190,6 +190,18 @@ export default function HomeScreen(): React.JSX.Element {
             {t('import.home.importButton')}
           </Text>
         </Button>
+        {mode === 'account' && (
+          <Button
+            variant="default"
+            onPress={() => router.push('/(app)/plan/new' as any)}
+            className="mt-2 w-full"
+            testID="home-create-garden-button-empty"
+          >
+            <Text className="text-white font-semibold">
+              {t('plan.new.title')}
+            </Text>
+          </Button>
+        )}
         <Button
           variant="outline"
           onPress={() => router.push('/(app)/plan' as any)}

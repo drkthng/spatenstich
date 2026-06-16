@@ -213,6 +213,16 @@ export default function PlanScreen(): React.JSX.Element {
               {t('editor.webFallback.reviewCta')}
             </Text>
           </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push('/(app)/plan/new')}
+            className="mt-3 bg-stone-800 dark:bg-stone-200 py-3 px-6 rounded-lg"
+            testID="web-create-garden-cta"
+          >
+            <Text className="text-base font-medium text-stone-50 dark:text-stone-900">
+              {t('plan.new.title')}
+            </Text>
+          </Pressable>
         </View>
       );
     }
@@ -223,9 +233,19 @@ export default function PlanScreen(): React.JSX.Element {
     return (
       <View className="flex-1 items-center justify-center bg-stone-50 dark:bg-stone-900 px-6">
         <Stack.Screen options={{ headerTitle: t('editor.title') }} />
-        <Text className="text-sm text-stone-500 dark:text-stone-400 text-center">
+        <Text className="text-sm text-stone-500 dark:text-stone-400 text-center mb-4">
           {t('editor.emptyPlan.body')}
         </Text>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push('/(app)/plan/new')}
+          className="bg-stone-900 dark:bg-stone-100 py-3 px-6 rounded-lg"
+          testID="native-create-garden-cta"
+        >
+          <Text className="text-base font-medium text-stone-50 dark:text-stone-900">
+            {t('plan.new.title')}
+          </Text>
+        </Pressable>
       </View>
     );
   }
