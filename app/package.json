@@ -5,7 +5,7 @@
   "main": "./index.js",
   "scripts": {
     "start": "expo start",
-    "web": "expo start --web",
+    "web": "expo start --web --port 8095",
     "ios": "expo start --ios",
     "build": "expo export --platform web",
     "typecheck": "node ../node_modules/typescript/bin/tsc --noEmit",
