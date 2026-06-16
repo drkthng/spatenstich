@@ -228,7 +228,8 @@
   "home": {
     "emptyTitle": "Noch kein Gartenplan",
     "emptySubtitle": "Import-Funktion kommt bald.",
-    "profileButtonLabel": "Profil und Einstellungen"
+    "profileButtonLabel": "Profil und Einstellungen",
+    "settingsButtonLabel": "Einstellungen"
   },
   "editor": {
     "title": "Plan-Editor",
