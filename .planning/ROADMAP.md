@@ -77,7 +77,7 @@
 Plans:
 **Wave 1**
 
-- [ ] 20-01-PLAN.md — Repo-Hygiene und CI: Lint exit 0, Test-Rauschen weg, CI-Env-Wiring, eas-build nur manuell, Doku auf Ist-Stack (Wave 1)
+- [x] 20-01-PLAN.md — Repo-Hygiene und CI: Lint exit 0, Test-Rauschen weg, CI-Env-Wiring, eas-build nur manuell, Doku auf Ist-Stack (Wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -218,7 +218,7 @@ Plans:
 |-------|-------|--------|-----------|
 | 1–7.5a (v1.0) | 34/34 | ✅ Shipped | 2026-05-17 |
 | 8–10 (v1.1) | 23/23 | ✅ Shipped | 2026-09-09 |
-| 20. Fundament, Aufräumen, PWA-Deploy | 0/4 | Not started | - |
+| 20. Fundament, Aufräumen, PWA-Deploy | 0/4 | In Progress|  |
 | 21. Sync und Datenintegrität | 0/6 | Not started | - |
 | 22. Ein Editor für Maus und Touch | 0/5 | Not started | - |
 | 23. Navigation, Onboarding, Auth | 0/5 | Not started | - |
