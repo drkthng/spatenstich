@@ -8,7 +8,8 @@
     "retry": "Erneut versuchen",
     "loading": "Lädt…",
     "disclaimer_body": "Die App gibt Empfehlungen ohne Gewähr. BKleingG-Compliance liegt in der Verantwortung des Nutzers.",
-    "error_network": "Keine Verbindung. Bitte Internetverbindung prüfen."
+    "error_network": "Keine Verbindung. Bitte Internetverbindung prüfen.",
+    "accountRequired": "Dafür brauchst du ein Konto."
   },
   "errors": {
     "network": "Keine Verbindung. Bitte prüfe dein Netz.",

@@ -197,6 +197,7 @@ jest.mock('@/src/stores/editorStore', () => {
   return { useEditorStore };
 });
 
+import de from '@spatenstich/shared/i18n/de';
 import HomeScreen from '../../../app/(app)/index';
 import PlanScreen from '../../../app/(app)/plan/index';
 
@@ -264,5 +265,30 @@ describe('create-garden-entrypoints', () => {
       expect(mockPush).toHaveBeenCalledWith('/(app)/plan/new'),
     );
     unmount();
+  });
+
+  // Plan 20-02 Task 3 (D-04): Home-Buttons duerfen im Lokal-Modus nicht mehr
+  // in eine Exception laufen — sie zeigen stattdessen common.accountRequired.
+  describe('Home Empty-State (Lokal): Plan öffnen / Importieren / Kalender crashfrei', () => {
+    const gatedButtons: Array<[string, string]> = [
+      ['Plan öffnen', 'home-open-plan-button-empty'],
+      ['Importieren', 'home-import-button-empty'],
+      ['Kalender', 'home-kalender-button'],
+    ];
+
+    beforeEach(() => {
+      mockMode = 'local';
+    });
+
+    it.each(gatedButtons)(
+      '5. %s (%s) navigiert im Lokal-Modus NICHT und zeigt den common.accountRequired-Hinweis',
+      async (_label, testId) => {
+        const { findByTestId, findByText } = render(<HomeScreen />);
+        const btn = await findByTestId(testId);
+        fireEvent.press(btn);
+        await findByText(de.common.accountRequired);
+        expect(mockPush).not.toHaveBeenCalled();
+      },
+    );
   });
 });
