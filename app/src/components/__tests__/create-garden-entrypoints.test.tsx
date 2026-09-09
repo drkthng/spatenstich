@@ -58,10 +58,17 @@ jest.mock('@/src/lib/gardenPlanRepo', () => ({
 
 let mockMode = 'account';
 let mockActiveGardenId: string | null = 'g-1';
-jest.mock('@/src/stores/authStore', () => ({
-  useAuthStore: (sel: any) =>
-    sel({ mode: mockMode, activeGardenId: mockActiveGardenId }),
-}));
+// useAuthStore is used both as a React hook (selector call, e.g. in HomeScreen) and
+// as a Zustand store via useAuthStore.getState().mode (imperative call in the
+// unmount-flush effect of app/(app)/plan/index.tsx). Mock it as a function with a
+// .getState method attached (same pattern as useKalenderData.test.ts).
+jest.mock('@/src/stores/authStore', () => {
+  function hookFn(sel: any) {
+    return sel({ mode: mockMode, activeGardenId: mockActiveGardenId });
+  }
+  hookFn.getState = () => ({ mode: mockMode });
+  return { useAuthStore: hookFn };
+});
 
 // --- Editor screen deps --- all the heavy modules that plan/index.tsx imports
 jest.mock('react-native-reanimated', () => {
