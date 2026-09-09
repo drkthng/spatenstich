@@ -5,11 +5,11 @@ milestone_name: Handy-Ready
 current_phase: 20
 current_phase_name: Fundament, Aufräumen, PWA-Deploy
 status: Ready to plan
-stopped_at: Milestone v1.1 archiviert, v2.0 angelegt — nächster Schritt /gsd-plan-phase 20
-last_updated: "2026-09-09T10:53:46.130Z"
+stopped_at: context exhaustion at 75% (2026-09-09)
+last_updated: "2026-09-09T10:53:52.550Z"
 last_activity: 2026-09-09
 last_activity_desc: Milestone v1.1 abgeschlossen und archiviert (`milestones/v1.1-*`), v1.0-Phasenverzeichnisse nach `milestones/v1.0-phases/`, ROADMAP/PROJECT/REQUIREMENTS auf v2.0 umgestellt
-state_head: 80705e68567cfa30d2494b38075ec335d4320d2b
+state_head: d2755cad0b23397ab2e4d92319c8fc306e3930b5
 progress:
   total_phases: 1
   completed_phases: 0
@@ -33,7 +33,7 @@ See: docs/specs/M07-claude-ai-bridge.md (Import-Bridge)
 
 Phase: 20 (Fundament, Aufräumen, PWA-Deploy) — READY TO EXECUTE
 Plan: —
-Status: Ready to plan (`/gsd-plan-phase 20`, WPs 20.1–20.4 aus MASTERPLAN-v2.md Kap. 4)
+Status: Ready to execute — 4 Pläne (Waves 1–4) vom Plan-Checker verifiziert (0 Blocker); Ausführung in frischer Session mit `/gsd-execute-phase 20`
 Last activity: 2026-09-09 — Milestone v1.1 abgeschlossen und archiviert (`milestones/v1.1-*`), v1.0-Phasenverzeichnisse nach `milestones/v1.0-phases/`, ROADMAP/PROJECT/REQUIREMENTS auf v2.0 umgestellt
 
 Progress: [░░░░░░░░░░░░░░░░░░░░] 0/27 plans (0%) — v2.0 Phasen 20–25
@@ -120,13 +120,13 @@ Keine. (`todos/freier-foto-upload.md` gestrichen — Foto-Upload ist seit M07 ou
 
 ## Session Continuity
 
-Last session: 2026-09-09
-Stopped at: Milestone v1.1 archiviert, v2.0 in ROADMAP/PROJECT/REQUIREMENTS angelegt, Tag v1.1
+Last session: 2026-09-09T10:53:52.504Z
+Stopped at: context exhaustion at 75% (2026-09-09)
 Resume file: None
-Next: `/gsd-plan-phase 20` (Masterplan Kap. 4, WP 20.1–20.4), dann `/gsd-execute-phase 20` auf Branch `gsd/phase-20-fundament`
+Next: `/gsd-execute-phase 20` in frischer Session (Branch `gsd/phase-20-fundament-aufr-umen-pwa-deploy` wird von GSD angelegt). Drei Human-Gates darin: Paket-Prüfung sharp/workbox-cli (20-03 T1), Backup M5 vor `supabase db push` (20-02 T6), M1–M3 vor dem Live-Deploy (20-04 T4)
 
 ## Operator Next Steps
 
-1. `/gsd-plan-phase 20` — vier Pläne aus WP 20.1–20.4
-2. Parallel (Dirk): M1–M3 erledigen, damit WP 20.4 deployen kann
-3. `/gsd-execute-phase 20`, Draft-PR, Merge nach master → erster Cloudflare-Deploy
+1. `/gsd-execute-phase 20` (Pläne 20-01…20-04 liegen vor, Waves 1→4 sequenziell)
+2. Parallel (Dirk): M2 (GitHub-Variablen) vor dem ersten CI-Lauf, M5 (Backup) vor 20-02 Task 6, M1 + M3 (Cloudflare, Supabase Site-URL) vor 20-04 Task 5
+3. Draft-PR, Merge nach master → erster Cloudflare-Deploy; danach `/gsd-plan-phase 21`

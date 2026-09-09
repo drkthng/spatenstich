@@ -1,118 +1,63 @@
 {
   "contract": "1.0.0",
   "flavor": "core",
-  "milestone": "v1.1 — \"Saison 2026 Ready\" — Hot Path",
+  "milestone": "v2.0 — Handy-Ready",
   "phases": [
     {
-      "number": "1",
-      "name": "Foundation",
-      "status": "complete"
+      "number": "20",
+      "name": "Fundament, Aufräumen, PWA-Deploy",
+      "status": "in_progress"
     },
     {
-      "number": "2",
-      "name": "Auth & Profile",
-      "status": "complete"
-    },
-    {
-      "number": "2.5",
-      "name": "Shared Garden Model",
-      "status": "complete"
-    },
-    {
-      "number": "3",
-      "name": "Offline & Sync",
-      "status": "complete"
-    },
-    {
-      "number": "5",
-      "name": "AI-Removal + Import-Schema",
-      "status": "complete"
-    },
-    {
-      "number": "6",
-      "name": "Import-Flow + Companion-Prompt",
-      "status": "complete"
-    },
-    {
-      "number": "6.5",
-      "name": "Draft-Sichtung + Promotion",
-      "status": "complete"
-    },
-    {
-      "number": "7",
-      "name": "Plan-Editor (Skia)",
-      "status": "complete"
-    },
-    {
-      "number": "7.5",
-      "name": "a: Web Plan-Editor (SVG)",
-      "status": "complete"
-    },
-    {
-      "number": "7.5",
-      "name": "b: Web Editor Polish",
+      "number": "21",
+      "name": "Sync und Datenintegrität",
       "status": "pending"
     },
     {
-      "number": "8",
-      "name": "Plant-DB Foundation",
-      "status": "complete"
+      "number": "22",
+      "name": "Ein Editor für Maus und Touch",
+      "status": "pending"
     },
     {
-      "number": "9",
-      "name": "Companion-Hinweis",
-      "status": "complete"
+      "number": "23",
+      "name": "Navigation, Onboarding, Auth",
+      "status": "pending"
     },
     {
-      "number": "9.1",
-      "name": "Editor-Element-Bearbeitung",
-      "status": "complete"
+      "number": "24",
+      "name": "Design-System, Copy, Politur",
+      "status": "pending"
     },
     {
-      "number": "10",
-      "name": "Aussaatkalender v1",
-      "status": "complete"
+      "number": "25",
+      "name": "Geräte-Abnahme",
+      "status": "pending"
     },
     {
-      "number": "11",
+      "number": "26",
+      "name": "Wochenaufgaben",
+      "status": "pending"
+    },
+    {
+      "number": "27",
       "name": "Garten-Journal",
       "status": "pending"
     },
     {
-      "number": "12",
-      "name": "Task-Generator",
+      "number": "28",
+      "name": "Saisonwechsel und Fruchtfolge-Memory",
       "status": "pending"
     },
     {
-      "number": "13",
-      "name": "Saatgut-Inventar",
-      "status": "pending"
-    },
-    {
-      "number": "14",
-      "name": "Modernes Design",
-      "status": "pending"
-    },
-    {
-      "number": "15",
-      "name": "Fruchtfolge-Memory",
-      "status": "pending"
-    },
-    {
-      "number": "16",
-      "name": "Vereinsregeln-Aktivierung",
-      "status": "pending"
-    },
-    {
-      "number": "17",
-      "name": "Stale-Imports + Sharing-UX",
+      "number": "29",
+      "name": "SDK-Angleichung und optionales Android-APK",
       "status": "pending"
     }
   ],
   "next": {
-    "command": "/gsd:discuss-phase",
-    "label": "Discuss the first phase",
-    "reason": "Project initialized — plan your first phase"
+    "command": "/gsd:progress",
+    "label": "Show progress",
+    "reason": "Unsure of state — showing progress"
   },
-  "updated_at": "2026-09-09T09:52:15.010Z"
+  "updated_at": "2026-09-09T10:53:46.201Z"
 }
