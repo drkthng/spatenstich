@@ -1,15 +1,19 @@
 ---
 gsd_state_version: 1.0
 milestone: v2.0
-milestone_name: "Handy-Ready"
+milestone_name: Handy-Ready
+current_phase: 20
+current_phase_name: Fundament, Aufräumen, PWA-Deploy
 status: Ready to plan
 stopped_at: Milestone v1.1 archiviert, v2.0 angelegt — nächster Schritt /gsd-plan-phase 20
-last_updated: "2026-09-09T12:00:00Z"
+last_updated: "2026-09-09T10:53:46.130Z"
 last_activity: 2026-09-09
+last_activity_desc: Milestone v1.1 abgeschlossen und archiviert (`milestones/v1.1-*`), v1.0-Phasenverzeichnisse nach `milestones/v1.0-phases/`, ROADMAP/PROJECT/REQUIREMENTS auf v2.0 umgestellt
+state_head: 80705e68567cfa30d2494b38075ec335d4320d2b
 progress:
-  total_phases: 6
+  total_phases: 1
   completed_phases: 0
-  total_plans: 27
+  total_plans: 4
   completed_plans: 0
   percent: 0
 ---
@@ -27,7 +31,7 @@ See: docs/specs/M07-claude-ai-bridge.md (Import-Bridge)
 
 ## Current Position
 
-Phase: 20 — Fundament, Aufräumen, PWA-Deploy (nicht gestartet)
+Phase: 20 (Fundament, Aufräumen, PWA-Deploy) — READY TO EXECUTE
 Plan: —
 Status: Ready to plan (`/gsd-plan-phase 20`, WPs 20.1–20.4 aus MASTERPLAN-v2.md Kap. 4)
 Last activity: 2026-09-09 — Milestone v1.1 abgeschlossen und archiviert (`milestones/v1.1-*`), v1.0-Phasenverzeichnisse nach `milestones/v1.0-phases/`, ROADMAP/PROJECT/REQUIREMENTS auf v2.0 umgestellt

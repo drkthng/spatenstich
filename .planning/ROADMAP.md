@@ -66,17 +66,31 @@
 **Requirements**: DEPLOY-01..DEPLOY-07
 **Masterplan**: Kap. 4 → WP 20.1 (Repo-Hygiene + CI), 20.2 (Dead Code + Migration 020), 20.3 (PWA-Shell mit Teilen-Ziel), 20.4 (Deploy + Keep-alive)
 **Success Criteria**:
+
 1. `pnpm -r run lint` exit 0; CI-Workflow mit `EXPO_PUBLIC_*`-Vars grün
 2. Foto-Pipeline, Feature-Flags, GPS-Opt-in, `expo-share-intent` entfernt; Migration 020 live (Buckets nur wenn leer)
 3. Lighthouse „installable"; Chrome „App installieren" auf beiden Handys; Flugmodus-Start zeigt letzten Plan
 4. Claude-App → Teilen → „Spatenstich" → Import-Vorschau (Datei und Text)
 5. Push auf master → Deploy < 10 min; Keep-alive-Workflow läuft
+
 **Plans**: 4 (je ein WP)
 Plans:
+**Wave 1**
+
 - [ ] 20-01-PLAN.md — Repo-Hygiene und CI: Lint exit 0, Test-Rauschen weg, CI-Env-Wiring, eas-build nur manuell, Doku auf Ist-Stack (Wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 20-02-PLAN.md — Dead Code raus, FEATURES-Konstante, Lokal-Modus crashfrei, Migration 020 mit Backup-Checkpoint (Wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 20-03-PLAN.md — PWA-Shell: Manifest, Icons, HTML-Template, Service Worker, Teilen-Ziel, Install-Banner, Cache-Header (Wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 20-04-PLAN.md — Deploy nach Cloudflare Pages, Supabase-Keep-alive, Backup-Skript, README-Anleitungen, Geraete-Abnahme (Wave 4)
+
 **UI hint**: yes (Install-Banner, Import-Einstieg)
 
 ### Phase 21: Sync und Datenintegrität
@@ -86,12 +100,14 @@ Plans:
 **Requirements**: SYNC2-01..SYNC2-09
 **Masterplan**: WP 21.1 (Migration 021/022), 21.2 (SyncWorker), 21.3 (Editor-Persistenz), 21.4 (Realtime + UI-Invalidierung), 21.5 (Konto/Garten/Bootstrap), 21.6 (Vereinsregeln-Reparatur, D-05)
 **Success Criteria**:
+
 1. Gerät B legt Beet offline an, A war zwischenzeitlich online → Beet erscheint bei A nach B's Sync
 2. Beide ändern dasselbe Element offline; die spätere Bearbeitung gewinnt unabhängig von der Sync-Reihenfolge; Verlierer bekommt Toast
 3. Editor öffnen erzeugt 0 Outbox-Einträge; Undo nach Anlegen löscht auch auf Gerät B
 4. Partner-Änderung sichtbar < 5 s (Realtime) bzw. < 60 s (Polling)
 5. PLZ/Klimazone überleben Reload und sind für beide gleich; Logout hinterlässt keine fremden Daten
 6. Vereinsregeln speichern im Konto-Modus ohne 22P02 (Flag an im Dev-Build)
+
 **Plans**: 6
 **UI hint**: minimal (Toasts, Speicherstatus)
 
@@ -102,11 +118,13 @@ Plans:
 **Requirements**: EDIT2-01..EDIT2-10
 **Masterplan**: WP 22.1 (Helfer), 22.2 (Interaction-Controller), 22.3 (Renderer + Pointer-Adapter), 22.4 (Feature-Port + Chrome), 22.5 (Performance)
 **Success Criteria**:
+
 1. ≥ 40 Controller-Tests ohne DOM grün
 2. Auf Android-Chrome: Tap-Select, Drag, Pinch-Zoom, Handles, Long-Press/Doppel-Tipp-Modal, Polygon, Platzieren mit Ghost + Abstands-Ring
 3. Desktop: Maus + Tastatur (Entf, Esc, Pfeile, Ctrl+Z/Y, Marquee) wie heute
 4. `EditorCanvas.tsx`, `WebPlanEditor.tsx` & Co. gelöscht; `@shopify/react-native-skia` raus; Bundle < 4,5 MB
 5. 200 Elemente flüssig (Remote-Debugging-Trace < 16 ms/Frame Median)
+
 **Plans**: 5
 **UI hint**: yes (mobile Werkzeugleiste, Palette als Bottom-Sheet)
 
@@ -117,11 +135,13 @@ Plans:
 **Requirements**: NAV-01..NAV-07
 **Masterplan**: WP 23.1 (Tabs + Header), 23.2 („Heute"), 23.3 (Onboarding + Beitritt), 23.4 (Auth-Härtung), 23.5 (Garten und Konto)
 **Success Criteria**:
+
 1. Tabs Heute · Plan · Kalender · Mehr; jede Route ≤ 2 Taps; kein Screen ohne Titel; keine Doppel-Header
 2. „Heute" zeigt ohne weiteren Tap Wochenaktionen, Plan-Vorschau, nächsten Schritt
 3. Registrierung mit Einladungscode → 3 Onboarding-Screens → gemeinsamer Plan in < 3 min
 4. Passwort-Reset per Code in der installierten App; Tastatur verdeckt nie einen Button
 5. Kein roher Exception-Text im UI
+
 **Plans**: 5
 **UI hint**: yes
 
@@ -132,12 +152,14 @@ Plans:
 **Requirements**: DESIGN-01..DESIGN-07
 **Masterplan**: WP 24.1 (Tokens/Fonts/Text), 24.2 (Icons/Illustrationen/Canvas), 24.3 (Copy + i18n), 24.4 (Kalender), 24.5 (Import-UX, Rechtliches, Speicherstatus), 24.6 (Barrierefreiheit)
 **Success Criteria**:
+
 1. Keine Hex-Literale außerhalb `tokens.ts`/`colors.ts`; keine `dark:`-Klassen; Nunito/Caveat sichtbar
 2. Nur lucide-Icons; drei Illustrationen; Canvas-Stil nach Kap. 3.4
 3. Alle Strings in `de.json`; Verbotsliste-Test (Jargon, ASCII-Umlaute, Phase-Leaks) grün
 4. Kalender: Heute-Marker, Abschnitte, Suche, Klimazonen-Name, Enum-Labels
 5. Import per Teilen < 20 s, per Einfügen < 30 s; Datenschutz/Impressum/Version vorhanden
 6. Alle icon-only-Buttons benannt, Tasten ≥ 48 dp, Kontrast AA
+
 **Plans**: 6
 **UI hint**: yes
 
