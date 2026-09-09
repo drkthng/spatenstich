@@ -72,6 +72,11 @@
 4. Claude-App → Teilen → „Spatenstich" → Import-Vorschau (Datei und Text)
 5. Push auf master → Deploy < 10 min; Keep-alive-Workflow läuft
 **Plans**: 4 (je ein WP)
+Plans:
+- [ ] 20-01-PLAN.md — Repo-Hygiene und CI: Lint exit 0, Test-Rauschen weg, CI-Env-Wiring, eas-build nur manuell, Doku auf Ist-Stack (Wave 1)
+- [ ] 20-02-PLAN.md — Dead Code raus, FEATURES-Konstante, Lokal-Modus crashfrei, Migration 020 mit Backup-Checkpoint (Wave 2)
+- [ ] 20-03-PLAN.md — PWA-Shell: Manifest, Icons, HTML-Template, Service Worker, Teilen-Ziel, Install-Banner, Cache-Header (Wave 3)
+- [ ] 20-04-PLAN.md — Deploy nach Cloudflare Pages, Supabase-Keep-alive, Backup-Skript, README-Anleitungen, Geraete-Abnahme (Wave 4)
 **UI hint**: yes (Install-Banner, Import-Einstieg)
 
 ### Phase 21: Sync und Datenintegrität
