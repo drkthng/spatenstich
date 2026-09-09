@@ -4,7 +4,7 @@
 // Rendered in app/(app)/_layout.tsx headerRight — visible on all authenticated routes.
 
 import * as React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSyncStatus, type SyncStatusValue } from '../hooks/useSyncStatus';
 import de from '@spatenstich/shared/i18n/de';

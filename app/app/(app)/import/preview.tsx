@@ -14,7 +14,6 @@ import { useImportStore } from '@/src/stores/importStore';
 import { saveImport } from '@/src/lib/importRepo';
 import { useAuthStore } from '@/src/stores/authStore';
 import de from '@spatenstich/shared/i18n/de';
-import type { ImportPayload } from '@spatenstich/shared';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;

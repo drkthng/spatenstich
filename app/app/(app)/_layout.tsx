@@ -18,7 +18,7 @@ function AppLayoutInner() {
     const file = shareIntent.files[0];
     router.push({ pathname: '/(app)/import', params: { fileUri: file.path } } as any);
     resetShareIntent(); // CRITICAL: prevent re-navigation loop (Pitfall 2 from RESEARCH)
-  }, [hasShareIntent, shareIntent]);
+  }, [hasShareIntent, shareIntent, resetShareIntent, router]);
 
   return (
     <Stack

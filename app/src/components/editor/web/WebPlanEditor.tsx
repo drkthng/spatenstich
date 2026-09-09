@@ -9,7 +9,7 @@
 
 import * as React from 'react';
 import { View } from 'react-native';
-import Svg, { Rect, Line, Circle, Text as SvgText, G, Polygon } from 'react-native-svg';
+import Svg, { Rect, Line, Text as SvgText, G, Polygon } from 'react-native-svg';
 import type { GardenDimensionsRow, PlanElementRow } from '@spatenstich/shared';
 import type { PlantMeta } from './WebPaletteBar';
 import { useEditorStore } from '@/src/stores/editorStore';

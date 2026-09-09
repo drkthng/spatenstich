@@ -1,7 +1,9 @@
 name: EAS Build (iOS + Web) — main only
+# D-01: kein nativer Build in v2.0 — dieser Workflow laeuft nur noch manuell
+# (workflow_dispatch), bis der native Build nach Phase 29 wieder automatisch
+# an push gebunden wird.
 on:
-  push:
-    branches: [master, main]
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest

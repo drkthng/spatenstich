@@ -5,11 +5,7 @@
 import * as React from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { PLAN_COLORS } from '@/src/lib/colors';
-import de from '@spatenstich/shared/i18n/de';
 import plantsBundle from '@spatenstich/shared/data/plants';
-
-const t = (key: string): string =>
-  key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
 
 export type PaletteTab = 'beete' | 'pflanzen' | 'infrastruktur';
 

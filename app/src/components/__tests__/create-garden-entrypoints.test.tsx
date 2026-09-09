@@ -58,10 +58,17 @@ jest.mock('@/src/lib/gardenPlanRepo', () => ({
 
 let mockMode = 'account';
 let mockActiveGardenId: string | null = 'g-1';
-jest.mock('@/src/stores/authStore', () => ({
-  useAuthStore: (sel: any) =>
-    sel({ mode: mockMode, activeGardenId: mockActiveGardenId }),
-}));
+// useAuthStore is used both as a React hook (selector call, e.g. in HomeScreen) and
+// as a Zustand store via useAuthStore.getState().mode (imperative call in the
+// unmount-flush effect of app/(app)/plan/index.tsx). Mock it as a function with a
+// .getState method attached (same pattern as useKalenderData.test.ts).
+jest.mock('@/src/stores/authStore', () => {
+  function hookFn(sel: any) {
+    return sel({ mode: mockMode, activeGardenId: mockActiveGardenId });
+  }
+  hookFn.getState = () => ({ mode: mockMode });
+  return { useAuthStore: hookFn };
+});
 
 // --- Editor screen deps --- all the heavy modules that plan/index.tsx imports
 jest.mock('react-native-reanimated', () => {
@@ -194,12 +201,24 @@ import HomeScreen from '../../../app/(app)/index';
 import PlanScreen from '../../../app/(app)/plan/index';
 
 describe('create-garden-entrypoints', () => {
+  let consoleErrorSpy: jest.SpyInstance;
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockMode = 'account';
     mockActiveGardenId = 'g-1';
     mockLoadDimensions.mockResolvedValue(null);
     mockLoadAcceptedElements.mockResolvedValue([]);
+    // useAuthStore.getState() is used imperatively in app/(app)/plan/index.tsx; a
+    // useAuthStore mock that is a bare selector function (no .getState) throws
+    // "useAuthStore.getState is not a function" there, which the surrounding
+    // try/catch swallows into a console.error/console.warn call — silent test noise.
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+    consoleErrorSpy.mockRestore();
   });
 
   it('1. Home Empty-State (Account, loadDimensions=null): home-create-garden-button-empty navigiert zu /(app)/plan/new', async () => {
@@ -221,7 +240,7 @@ describe('create-garden-entrypoints', () => {
 
   it('3. Editor Web ohne Dims: web-create-garden-cta → /(app)/plan/new; web-empty-review-cta weiterhin vorhanden', async () => {
     Object.defineProperty(Platform, 'OS', { value: 'web', configurable: true });
-    const { findByTestId } = render(<PlanScreen />);
+    const { findByTestId, unmount } = render(<PlanScreen />);
     const ctaBtn = await findByTestId('web-create-garden-cta');
     fireEvent.press(ctaBtn);
     await waitFor(() =>
@@ -230,15 +249,20 @@ describe('create-garden-entrypoints', () => {
     // Regression: Import-CTA bleibt erhalten
     const reviewCta = await findByTestId('web-empty-review-cta');
     expect(reviewCta).toBeTruthy();
+    // PlanScreen's unmount-flush effect reads useAuthStore.getState().mode (line 50) —
+    // unmounting here (rather than relying on RTL's deferred auto-cleanup) makes the
+    // getState()-shaped mock requirement observable inside this test's own body.
+    unmount();
   });
 
   it('4. Editor Native ohne Dims: native-create-garden-cta → /(app)/plan/new', async () => {
     Object.defineProperty(Platform, 'OS', { value: 'ios', configurable: true });
-    const { findByTestId } = render(<PlanScreen />);
+    const { findByTestId, unmount } = render(<PlanScreen />);
     const ctaBtn = await findByTestId('native-create-garden-cta');
     fireEvent.press(ctaBtn);
     await waitFor(() =>
       expect(mockPush).toHaveBeenCalledWith('/(app)/plan/new'),
     );
+    unmount();
   });
 });

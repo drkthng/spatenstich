@@ -1,4 +1,9 @@
-# Monorepo — pnpm >= 10, Expo SDK 55 requires hoisted nodeLinker for RN native builds.
+# Monorepo — pnpm >= 10. Ist-Stack (v2.0): Expo SDK 53.0.27 / RN 0.76.7 / React 18.3.1 /
+# expo-router 4.0.22 (D-13: kein Upgrade in Phase 20). Web-first PWA, nativer Build
+# deaktiviert bis Phase 29 (D-01) — hoisted nodeLinker bleibt trotzdem noetig, weil das
+# Web-Export-Toolchain (Metro) sowie ein paar SDK-55-Vorgriffs-Module hoisted resolution
+# erwarten (siehe RESEARCH.md/PATTERNS.md Phase 20). SDK-55-Upgrade fuer native Builds
+# folgt in Phase 29.
 packages:
   - 'app'
   - 'packages/*'

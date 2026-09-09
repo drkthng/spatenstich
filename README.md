@@ -2,7 +2,9 @@
 
 > Persönlicher digitaler Kleingarten-Assistent für deutsche Kleingärtner.
 
-**Status:** MVP in Entwicklung · Saison 2026 · Phase 1 abgeschlossen ✓
+**Status:** MVP in Entwicklung · Saison 2026 · Milestone v2.0 (Phase 20: Fundament, Aufräumen, PWA-Deploy)
+
+**v2.0 ist Web-first:** Spatenstich läuft als installierbare PWA in Chrome (Android-Handy + Desktop-Browser). Ein nativer Build (iOS/Android-Store) ist für v2.0 bewusst deaktiviert und kommt erst wieder ab Phase 29.
 
 ---
 

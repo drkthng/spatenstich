@@ -11,8 +11,7 @@
 // DSN env is present (mirrors Plan 01-03's Sentry.init gating).
 import * as React from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Link } from 'expo-router';
+import { useRouter, Link } from 'expo-router';
 import * as Sentry from '@sentry/react-native';
 import de from '@spatenstich/shared/i18n/de';
 import { Button } from '@/src/components/ui/button';
