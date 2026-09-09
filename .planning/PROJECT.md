@@ -2,126 +2,111 @@
 
 ## What This Is
 
-Persönlicher digitaler Kleingarten-Assistent für deutsche Kleingärtner. Die App ermöglicht manuelle Gartenplanung mit interaktivem 2D-Plan-Editor und kombiniert jahreszyklische Aussaat-/Pflanzplanung. Optional: KI-gestützte Analyse über externes Claude.ai-Projekt (Dirks Max-Abo), dessen strukturierte JSON-Ergebnisse per Import-Bridge in die App fließen. MVP für **2 Nutzer (Dirk + Frau) im Shared Garden Model** — beide bearbeiten unabhängig über eigene Accounts/Geräte (iPhone + Desktop-Browser) denselben Kleingarten. **Die App selbst macht null ausgehende KI-API-Aufrufe.**
+Persönlicher digitaler Kleingarten-Assistent für deutsche Kleingärtner. Die App ermöglicht manuelle Gartenplanung mit interaktivem 2D-Plan-Editor und kombiniert jahreszyklische Aussaat-/Pflanzplanung. Optional: KI-gestützte Analyse über externes Claude.ai-Projekt (Dirks Max-Abo), dessen strukturierte JSON-Ergebnisse per Import-Bridge in die App fließen. MVP für **2 Nutzer (Dirk + Partnerin) im Shared Garden Model** — beide bearbeiten unabhängig über eigene Accounts/Geräte (**Android-Handys + Desktop-Browser**) denselben Kleingarten. **Die App selbst macht null ausgehende KI-API-Aufrufe.** Ausgeliefert wird sie als installierbare Web-App (PWA) auf Cloudflare Pages mit Supabase Free — ohne laufende Kosten.
 
 ## Core Value
 
 Manueller Plan-Editor + strukturierter Import aus Claude.ai: Dirk plant seine Parzelle digital — per Hand oder beschleunigt durch KI-Analyse im externen Claude.ai-Projekt. Die App ist der planbare Kleingarten-Assistent, den Paare gemeinsam pflegen können.
 
+## Current State (nach v1.1, Stand 2026-09-09)
+
+- Codebasis: 18.881 Zeilen TS/TSX (ohne Tests), 864 Tests grün, Typecheck grün, Web-Export 6,2 MB. Expo 53.0.27 mit React Native 0.76.7 / React 18.3.1 / expo-router 4 (SDK-Mix; Angleichung in Phase 29).
+- Funktional vorhanden: Auth, Shared Garden mit Einladungscode, Offline-Speicher + Outbox, Import-Bridge, Draft-Sichtung, Web-Editor (Maus), Pflanzen-DB, Companion-Hinweis, Aussaatkalender.
+- **Nie nativ auf einem Handy gelaufen.** Web-Editor ohne Touch, Sync-Semantik serverseitig fehlerhaft, kein Onboarding, keine Tabs, kein Design-System. Vollständige Diagnose: `MASTERPLAN-v2.md` Kap. 1.
+- Betrieb: Supabase `vitrqkzxkiqvadqfzrcx` (Frankfurt), Migrationen 001–019 live, Repo public auf GitHub (AGPL-3.0), noch kein Web-Deploy.
+
+## Next Milestone Goals (v2.0 „Handy-Ready", Phasen 20–25, Ziel Ende Oktober 2026)
+
+Siehe `MASTERPLAN-v2.md`. Kurz: PWA auf beiden Android-Handys mit Teilen-Import aus der Claude-App; korrekter 2-Personen-Sync mit Realtime; ein Pointer-Event-Editor für Finger und Maus; Tabs + 3-Schritt-Onboarding + Passwort-Reset; Design-System „Papier & Erde"; Abnahme auf beiden Handys. Danach v2.1 „Saison 2027" (Wochenaufgaben, Journal, Fruchtfolge-Memory, SDK-Angleichung).
+
 ## Requirements
 
 ### Validated
 
-- ✓ Aussaatkalender v1 (CAL-01..CAL-06): Wochen-View + 12-Monats-Gantt, klimazonen-angepasst (PLZ→Zone), Filter „Nur meine Pflanzen", „Zu Plan hinzufügen", beet-scoped Fruchtfolge-Warnung — Phase 10 (v1.1, UAT 8/8, Security 19/19 closed)
+- ✓ Monorepo, StorageAdapter (SQLite/IndexedDB), Supabase-Schema mit RLS, CI — v1.0
+- ✓ Account-Auth (E-Mail/Passwort), persistente Session, PLZ→Klimazone-Lookup, Archetyp-Auswahl — v1.0 (PLZ-Persistenz im Account-Modus defekt → v2.0 SYNC2-05)
+- ✓ Shared Garden: `gardens` + `garden_members`, Member-RLS, 6-stelliger Invite-Code per SECURITY-DEFINER-RPC — v1.0
+- ✓ Offline-Outbox mit Delta-Pull, LWW-Guard-Trigger, Sync-Status-Badge — v1.0 (Semantik fehlerhaft → v2.0 SYNC2-01/02)
+- ✓ Import-Schema `spatenstich-import.v1`, Companion-Prompt, Paste-/Datei-Import, Preview mit Konfidenz, Draft-Tabellen — v1.0
+- ✓ Draft-Sichtung + Promotion zu `plan_elements` mit Provenance, Stale-Filter — v1.0
+- ✓ Web-Plan-Editor (SVG, Maus): Select, Multi-Select, Drag, Drag-to-create, Resize, Rotate, Properties, Z-Order, Undo/Redo, Layer, Grid, Autosave — v1.0/v1.1
+- ✓ Pflanzen-DB (90 Pflanzen, 38 Companion-Paare), `usePlants`, Edge Function `seed-plants` — v1.1
+- ✓ Companion-Hinweis beim Pflanzen-Setzen (Konflikt/Companion-Toast, persistentes Dreieck) — v1.1
+- ✓ Aussaatkalender v1 (CAL-01..CAL-06): Wochen-View, 12-Monats-Gantt, Klimazonen-Offset, „Nur meine Pflanzen", „Zu Plan hinzufügen", beet-scoped Fruchtfolge-Warnung — v1.1 (UAT 8/8 Desktop)
 
-### Active
+### Active (v2.0 — Details und IDs in `REQUIREMENTS.md`)
 
-**M07 — Manual Planning + Claude.ai Bridge (Pivot 2026-05-08)**
-- [ ] Alle In-App-AI-Clients entfernt (Claude Vision, Pl@ntNet, Env-Vars, Screens, Tests)
-- [ ] App macht null ausgehende KI-API-Aufrufe (nur Supabase + Expo Update Channel)
-- [ ] JSON-Schema `spatenstich-import.v1` definiert (JSON Schema draft 2020-12)
-- [ ] Claude.ai-Projekt-System-Prompt für "Spatenstich Garden"-Projekt
-- [ ] Import-Screen: Share-Intent + Paste-Fallback → Preview → selektive Übernahme als Drafts
-- [ ] Drafts als Building Blocks im Plan-Editor ("Letzte Importe"-Tray)
-
-**M2 – Interaktiver 2D-Plan-Editor**
-- [ ] Canvas mit Maß-Gitter (1×1 m, ein-/ausblendbar)
-- [ ] Element-Palette: Beete, Pflanzen, Infrastruktur
-- [ ] Drag & Drop, Rotation, Skalierung von Elementen
-- [ ] Beet-Zeichnen per Polygon-Tool
-- [ ] Pflanzenabstand-Hinweise bei Platzierung
-- [ ] Layer: Infrastruktur (fix) und Jahresplan (saison-spezifisch)
-- [ ] Auto-Save alle 5 Sekunden + manuelles Speichern
-- [ ] Performance: 60 fps bis 200 Elemente
-
-**M3 – Saatgut-Inventar (manuell)**
-- [ ] Listen-Modus: Texteingabe mit Autocomplete gegen Sorten-DB
-- [ ] Sorten-DB mit 100–150 häufigen Kleingartenpflanzen (initial manuell/KI-erstellt)
-- [ ] Freitext-Eintrag für Sorten, die nicht in DB sind
-- [ ] Sorten-Datenmodell: art, kategorie, aussaat, pflanzung, ernte, standort, abstand, klimazonenAnpassung, mischkultur, fruchtfolgeKategorie
-
-**M4 – Pflanz-/Aussaatkalender aus Inventar**
-- [ ] Zeitachse (12 Monate, scrollbar) mit Aufgaben-Karten pro Sorte
-- [ ] Berücksichtigt: Klimazone (PLZ-basiert, 7 Zonen), Archetyp, Inventar, Plan
-- [ ] Platzierungsvorschläge pro Sorte auf Basis freier Beet-Flächen + Standortanforderung
-- [ ] User bestätigt/ändert Vorschlag → Pflanze landet im Plan, Aufgabe wird aktiv
-
-**M5 – Profil & Standort**
-- [ ] PLZ → Klimazone-Zuordnung (7 Zonen, statische Lookup-Tabelle)
-- [ ] Archetyp-Auswahl (6 Typen)
-- [ ] Option "lokal nutzen" ohne Account (spätere Sync-Option)
-
-**M6 – Shared Garden (Pivot 2026-04-21)**
-- [ ] `gardens`-Entity mit Owner + `garden_members`-Assoziation
-- [ ] RLS-Policies auf Member-Check umgestellt
-- [ ] Beide User sehen identischen Plan nach Sync
-- [ ] LWW-Konfliktauflösung bei gleichzeitigen Edits
-
-**Onboarding**
-- [ ] In < 5 Minuten von Installation zu erstem nutzbaren Plan
-- [ ] Flow: Account (oder lokal) → PLZ → Archetyp → Garten erstellen oder beitreten → manueller Plan-Editor
+- [ ] DEPLOY: CI grün, Legacy entfernt, PWA installierbar mit Teilen-Ziel, Cloudflare-Pages-Deploy, Supabase-Keep-alive, Offline-Start
+- [ ] SYNC2: `server_updated_at`-Cursor, echtes LWW nach Bearbeitungszeit, Hydration ohne Writes, Realtime + Polling, Logout-Cleanup, PLZ am Garten, Outbox-Härtung, Soft-Delete-Propagation, Vereinsregeln-Reparatur
+- [ ] EDIT2: ein Pointer-Event-Editor (Controller + SVG-Renderer) für Touch und Maus mit Zoom/Pan, Polygon, Maßen, Abstands-Ring; Skia entfernt
+- [ ] NAV: Tabs Heute/Plan/Kalender/Mehr, „Heute"-Screen, 3-Schritt-Onboarding, Beitritt per Code bei Registrierung, Passwort-Reset per Code, Safe-Areas + Tastatur
+- [ ] DESIGN: Tokens „Papier & Erde", Nunito/Caveat, lucide + Illustrationen, alle Strings in `de.json` ohne Jargon, Kalender-Politur, Import-UX, Datenschutz/Impressum, Barrierefreiheit
+- [ ] UAT: 23 Prüfpunkte auf beiden Android-Handys + Desktop, Tag v2.0.0
 
 ### Out of Scope
 
-- Social features, Community, Chat — nicht Teil des Shared-Garden-Scopes
-- Marktplatz für Samentausch — außerhalb Kern-Use-Case
-- **In-App KI-API-Aufrufe jeglicher Art** — kein Claude Vision, kein Pl@ntNet, kein Replicate, kein Gemini. Alle KI-Analyse läuft extern im Claude.ai-Projekt (Pivot M07 2026-05-08)
-- **Foto-Analyse in der App** — weder für Gartenerfassung noch für Samentüten-Scan. Fotos werden nur im Claude.ai-Projekt analysiert.
-- **Vereinsregeln PDF-Upload + Extraktion** — Code existiert (Phase 02), per Feature-Flag ausgeblendet; reaktiviert in Phase 10 (v1.1) ohne Claude-API (manuelle Eingabe)
-- **Vereinsregeln-Checkliste + Editor-Warnings** — v1.1 Phase 10
-- **BKleingG 1/3-Nutzgartenpflicht-Warnung** — v1.1 Phase 10
-- ~~**Fotorealistisches Beet-Preview (AI-Bildvorschau)**~~ — gestrichen (keine In-App AI)
-- S1 Pflegeerinnerungen — v1.1
-- S2 Unkraut-Check per Foto — gestrichen (keine In-App AI)
-- S4 Fruchtfolge-Assistent — v1.1 (MVP: nur einfache Warnung)
-- S5 Mischkultur-Check beim Platzieren — v1.1
-- C1–C8 (Schädlingsdiagnose, Ernte-Tagebuch, Wetter, Bewässerung, Sprach-Notizen, Satzungs-DB, PDF-Export, Mehr-als-2-Personen-Gärten) — v2+
-- AT/CH-Lokalisierung — nach MVP
-- Barcode/EAN-Scan Samentüten — v1.1
-- Two-way Sync Spatenstich ↔ Claude.ai — evtl. M09
-- Automatische Re-Analyse bei Foto-Update — out of scope
-- Multi-User Import Sharing — out of scope
-- Web/Desktop Spatenstich Client — out of scope
+- **In-App KI-API-Aufrufe jeglicher Art** — Pivot M07 2026-05-08; KI nur im externen Claude.ai-Projekt
+- **Foto-Analyse in der App** — Fotos nur im Claude.ai-Projekt; Journal-Fotos (v2.1) sind reine Ablage ohne Analyse
+- **Nativer Build in v2.0** — D-01; Android-APK optional in Phase 29 (kostenlos per EAS Free + Sideload)
+- **iPhone/iOS** — beide Nutzer haben Android (2026-09-09); PWA liefe dort auch, nur ohne Teilen-Menü; nativ bräuchte Apple Developer Program
+- **Heimserver/VPS-Betrieb** — D-02; Cloudflare Pages + Supabase Free reicht, Fallback dokumentiert (Masterplan Kap. 3.1.3)
+- **Expo Go** — nicht lauffähig (SDK-Mix, Share-Intent-Modul)
+- **Lokal-Modus-Vollausbau** — D-04: Code bleibt, unsichtbar bis Backlog-Phase „Lokal-Modus vollständig"
+- **Vereinsregeln-Aktivierung** — D-05: Code bleibt, Reparatur in WP 21.6, Aktivierung als Backlog 7 (alte Phase 16); PDF-Extraktion dauerhaft gestrichen
+- Saatgut-Inventar, Frost-Warnung, Plan-Export, iCal, Companion-Score, Dark-Mode — Backlog (`BACKLOG.md`, Masterplan Kap. 4.4)
+- Social features, Marktplatz, AT/CH-Lokalisierung, 3D/AR, Mehr-als-2-Personen-Gärten — v2+ oder nie
 
 ## Context
 
-- **Primäre Nutzer:** Dirk (Produktowner) + Frau — **Shared Garden Model seit Pivot 2026-04-21**. Beide arbeiten unabhängig über eigene Accounts/Geräte am selben Kleingarten.
-- **Regulatorischer Kontext (Post-MVP):** BKleingG verpflichtet zu mind. 1/3 Nutzgartenfläche. Im MVP nicht adressiert — Phase 10 (v1.1) reaktiviert Vereinsregeln-Infrastruktur.
-- **KI-Strategie (Pivot M07 2026-05-08):** Null In-App KI-API-Aufrufe. Keine Anthropic SDK, kein Pl@ntNet, kein Replicate in der App. KI-Analyse erfolgt extern im Claude.ai "Spatenstich Garden"-Projekt auf Dirks Max-Abo. Ergebnisse fließen als strukturiertes JSON (`spatenstich-import.v1`) per Share-Intent oder Paste in die App.
-- **Geo-Scope MVP:** Deutschland. 7 Klimazonen via PLZ-Lookup.
-- **Open-Source-Kern:** Lizenz AGPL-3.0.
-- **Inspirations-Apps:** GrowVeg/GardenPlanner (Plan-Editor-Referenz), Vera (DE UX). Stil: gezeichnet, warm, nicht-klinisch.
+- **Primäre Nutzer:** Dirk (Product Owner) + Partnerin — Shared Garden Model seit 2026-04-21. Beide Android-Handys (Chrome) + Desktop-Browser. Partnerin nutzt für die Claude.ai-Bridge einen eigenen kostenlosen Claude-Account mit kopiertem Projekt (D-14).
+- **Distribution (D-01/D-02):** PWA auf Cloudflare Pages (Free), Supabase Free mit Keep-alive-Cron (GitHub Actions + 24/7-PC). 0 € laufend. Nächtliches `pg_dump`-Backup vom 24/7-PC (Masterplan Kap. 7.4).
+- **KI-Strategie (M07):** Null In-App-KI. Claude.ai-Projekt „Spatenstich Garden" emittiert `spatenstich-import.v1`; Import per Teilen-Menü (Web Share Target, Android), Zwischenablage oder Datei.
+- **Regulatorischer Kontext:** BKleingG 1/3-Nutzgartenpflicht, Vereinsregeln — Aktivierung nach v2.1.
+- **Geo-Scope:** Deutschland, 7 Klimazonen via PLZ; Klimazone gehört zum Garten (D-10).
+- **Open-Source-Kern:** AGPL-3.0, Repo public.
+- **Inspirations-Apps:** GrowVeg/GardenPlanner (Editor), Vera (DE UX), Fryd (Markt-Benchmark). Stil: gezeichnet, warm, nicht-klinisch → Design-System „Papier & Erde" (Masterplan Kap. 3.4).
 
 ## Constraints
 
-- **Tech Stack:** Expo (React Native) mit Web-Export — eine Codebase für iOS, Android, Desktop-Browser
-- **Backend:** Supabase (Frankfurt, EU) — Postgres + Auth + Storage + Edge Functions. DSGVO-konform.
-- **Keine In-App AI:** Zero outbound AI calls. Kein Anthropic SDK, kein Pl@ntNet, kein Replicate. Import-Bridge für Claude.ai-Ergebnisse ist der einzige KI-Weg.
-- **Offline:** App startet und zeigt letzten Plan ohne Netz; Import-Queue offline. Sync erfordert Verbindung.
-- **Plan-Rendering:** SVG-basiert (react-native-svg / natives SVG im Web). Bei > 50 Elementen: Upgrade auf @shopify/react-native-skia erwogen.
-- **Lokale Persistenz:** expo-sqlite (strukturierte Daten) + expo-file-system. Sync-Layer: eigene simple Operation-Log-Queue, Last-Write-Wins.
-- **Datenschutz:** Fotos bleiben auf dem Gerät des Users oder im Claude.ai-Chat. Spatenstich importiert Analyse, nicht Bilder. DSGVO-konform (EU-Hosting).
-- **Monorepo:** pnpm workspaces mit `app/`, `supabase/` (Migrations + Edge Functions), `packages/shared`.
-- **Timeline:** MVP-Ziel Ende Juni 2026. Harte Deadline: Saison 2026 muss nutzbar sein.
+- **Tech Stack:** Expo (React Native) mit Web-Export, aktuell Expo 53.0.27 / RN 0.76.7 / React 18.3.1 / expo-router 4 — web-first, nativer Build deaktiviert bis Phase 29. Ziel-Browser Chrome auf Android (D-15).
+- **Backend:** Supabase Frankfurt (Postgres + Auth + Realtime + Storage). RLS immer Member-Check. Migrationen append-only, 3-Gate-Push.
+- **Keine In-App AI:** Zero outbound AI calls. Erlaubte externe Dienste: Supabase, Sentry (EU), später Open-Meteo.
+- **Offline:** App-Shell + letzter Plan starten ohne Netz (Service Worker + IndexedDB). Sync erfordert Verbindung.
+- **Plan-Rendering:** react-native-svg (Web-DOM), ein `PlanEditor` mit Pointer-Events; Skia entfernt (D-03).
+- **Lokale Persistenz:** IndexedDB (Web) / expo-sqlite (nativ) hinter `StorageAdapter`; Outbox + LWW nach Client-Bearbeitungszeit, Pull-Cursor `server_updated_at` (D-07).
+- **Datenschutz:** Fotos bleiben auf dem Gerät oder im Claude.ai-Chat; EU-Hosting; Impressum/Datenschutz in der App (Phase 24).
+- **Monorepo:** pnpm workspaces `app/`, `supabase/`, `packages/shared`. UI-Strings nur in `de.json`, UTF-8-Umlaute.
+- **Timeline:** v2.0 bis Ende Oktober 2026, v2.1 bis Ende Februar 2027 (Vorkultur-Start Saison 2027).
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Expo (React Native) statt PWA oder Native | Eine Codebase iOS/Android/Web; native Kamera-Zugriff; TypeScript-Präferenz | — Pending |
-| Supabase (Frankfurt) als Backend | Postgres + Auth + Storage out-of-box; EU-Hosting; Open-Source-kompatibel | — Pending |
-| **Null In-App KI-API-Aufrufe (Pivot M07)** | Claude Vision + Pl@ntNet pay-per-call out of scope für v1 Economics. KI-Analyse extern im Claude.ai-Projekt auf Dirks Max-Abo. | **Pivot 2026-05-08** |
-| **Claude.ai Bridge statt In-App AI** | One-way Import: Claude.ai emittiert `spatenstich-import.v1` JSON → App importiert strukturierte Daten. Kein API-Key, keine Token-Kosten. | **Pivot 2026-05-08** |
-| **Manueller Plan-Editor als Default** | Import ist Power-User-Accelerator, nicht required workflow. App muss komplett ohne Claude.ai nutzbar sein. | **Pivot 2026-05-08** |
-| ~~Claude API für Foto-Analyse (server-seitig)~~ | ~~Beste Vision-Qualität~~ — **SUPERSEDED by Pivot M07** | **Superseded 2026-05-08** |
-| ~~Pl@ntNet als Pflanzenbestimmungs-API~~ | ~~Spezialisiert, kostenlos~~ — **SUPERSEDED by Pivot M07** | **Superseded 2026-05-08** |
-| ~~Foto-Analyse ist Kern-Feature~~ | ~~Differenzierender USP~~ — **SUPERSEDED: Manueller Editor ist Kern, Import ist Beschleuniger** | **Superseded 2026-05-08** |
-| AGPL-3.0 Lizenz | Schützt vor proprietären Clones | — Pending |
-| 2-User Shared Garden (Dirk + Frau) | Nutzungsrealität: Paar bewirtschaftet gemeinsam | **Pivot 2026-04-21** |
-| Vereinsregeln + BKleingG → v1.1 Phase 10 | Nicht differenzierend für Saison 2026; Code aus Phase 02 bleibt, Flag aus | **Pivot 2026-04-21** |
-| ~~Fotorealistisches Beet-Preview → v1.1~~ | **DROPPED** — keine In-App AI mehr, Gemini-Preview gestrichen | **Dropped 2026-05-08** |
-| "Lokal nutzen" ohne Account erlaubt | Niedrigere Einstiegshürde | — Pending |
-| Feature-Flags von Anfang an | Schnelle Experimente ohne Deploy | — Pending |
+| Expo (React Native) statt PWA-only oder Native | Eine Codebase; TypeScript | ⚠️ Revisit: web-first bewährt, nativ nie gebaut; Stack bleibt, Auslieferung als PWA |
+| Supabase (Frankfurt) als Backend | Postgres + Auth + RLS, EU | ✓ Good |
+| Null In-App KI-API-Aufrufe (Pivot M07) | Kosten, Datenschutz | ✓ Good |
+| Claude.ai Bridge statt In-App AI | One-way JSON-Import | ✓ Good (Teilen-Menü auf Android macht den Weg kurz) |
+| Manueller Plan-Editor als Default | Import ist Beschleuniger | ✓ Good |
+| 2-User Shared Garden | Nutzungsrealität | ✓ Good |
+| AGPL-3.0 | Schutz vor proprietären Clones | ✓ Good |
+| Skia-Editor für iPhone (Phase 7) | 60 fps @ 200 Elemente | ✗ Verworfen: nie auf Gerät gelaufen, Handles/Palette unverdrahtet → D-03 |
+| Custom Outbox-Sync mit LWW (Phase 3) | Einfach für 2 Nutzer | ⚠️ Revisit: Trigger-Semantik falsch → D-07 |
+| Feature-Flags über Supabase-Tabelle | Schnelle Experimente | ✗ Nie benutzt → Compile-Time-Konstante (WP 20.2) |
+| **D-01 PWA statt nativ** (2026-09-09) | 0 €, Android-Chrome liefert Teilen/Push/Speicher | — Pending (v2.0) |
+| **D-02 Cloudflare Pages + Supabase Free** | 0 €, SPA-Fallback, Keep-alive | — Pending |
+| **D-03 Ein Pointer-Event-Editor, Skia raus** | Maus + Touch + Stift, testbar ohne DOM | — Pending |
+| **D-04 Lokal-Modus bleibt, unsichtbar** | User-Wunsch; Vollausbau später | — Pending |
+| **D-05 Vereinsregeln bleiben, Reparatur + Flag** | User-Wunsch; 1 Tag Reparatur | — Pending |
+| **D-06 Foto-/Flag-/GPS-Reste löschen** | M07 zu Ende führen | — Pending |
+| **D-07 Client-`updated_at` = LWW, `server_updated_at` = Cursor, Realtime** | behebt S1/S2/S4 | — Pending |
+| **D-08 Vier Tabs, Editor Vollbild** | Daily-Use-Frage auf Tab 1 | — Pending |
+| **D-09 Onboarding 3 Schritte, Invite bei Registrierung** | < 5 min | — Pending |
+| **D-10 PLZ/Klimazone am Garten** | beide teilen die Zone | — Pending |
+| **D-11 „Papier & Erde", light-only, Nunito + Caveat** | Tokens zuerst | — Pending |
+| **D-12 Passwort-Reset per Code** | funktioniert in Browser und App | — Pending |
+| **D-13 SDK-Angleichung erst Phase 29** | erst nutzbar, dann sauber | — Pending |
+| **D-14 Partnerin: eigener Free-Claude-Account** | ToS-konform, kostenneutral | — Pending |
+| **D-15 Ziel-Browser Chrome/Android, kein iOS** | beide Android | — Pending |
 
 ## Evolution
 
@@ -140,5 +125,12 @@ This document evolves at phase transitions and milestone boundaries.
 3. Audit Out of Scope — reasons still valid?
 4. Update Context with current state
 
+<details>
+<summary>Archiv: Requirements-Übersicht vor v2 (M07/M2–M6-Blöcke, Stand 2026-06-12)</summary>
+
+Die früheren Active-Blöcke M07 (Manual Planning + Claude.ai Bridge), M2 (Plan-Editor), M3 (Saatgut-Inventar), M4 (Kalender), M5 (Profil), M6 (Shared Garden) und „Onboarding" sind in `milestones/v1.1-REQUIREMENTS.md` (Traceability) und `milestones/v1.1-ROADMAP.md` (Phasen-Details) archiviert. M3 bleibt Backlog; alles andere ist entweder validiert (oben) oder in den v2.0-Requirements neu gefasst.
+
+</details>
+
 ---
-*Last updated: 2026-06-12 after Phase 10 (Aussaatkalender v1) — Milestone v1.1 alle Phasen abgeschlossen*
+*Last updated: 2026-09-09 after v1.1 milestone — v2.0 „Handy-Ready" angelegt (Masterplan v2)*

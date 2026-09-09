@@ -1,11 +1,8 @@
 ---
-slug: import-uebernehmen-noop
-status: resolved
-trigger: "Ausgewählte übernehmen" Button im Import-Screen führt zurück zur Import-Hauptseite (mit "Aus claude.ai importieren"-Button), statt die ausgewählten Items zu übernehmen. Vorausgehender Schritt: "JSON-Datei öffnen" funktioniert, Daten werden korrekt geladen und angezeigt. Erst beim Klick auf "Ausgewählte übernehmen" passiert das Fehlverhalten.
-created: 2026-05-12T11:02:44Z
-updated: 2026-05-12T16:31:24Z
-resolved_at: 2026-05-12T16:31:24Z
-resolved_by: Phase 6.5 (Draft-Sichtung + Promotion) — Plans 01–05
+audit_acknowledged:
+  milestone: v1.1
+  at: 2026-09-09
+  status: unknown
 ---
 
 # Debug Session: import-uebernehmen-noop
@@ -15,10 +12,12 @@ resolved_by: Phase 6.5 (Draft-Sichtung + Promotion) — Plans 01–05
 **Status:** RESOLVED via Phase 6.5 (Draft-Sichtung + Promotion).
 
 **Root cause (two-part):**
+
 1. **Visible half:** `app/app/(app)/import/preview.tsx:62` redirected to `/(app)` (Home empty-state) after successful import. Users saw their drafts vanish into "Noch kein Gartenplan" with no path forward.
 2. **Hidden half:** No promotion mechanic existed from `bed_drafts`/`plant_drafts`/`observation_drafts` to `plan_elements` — even if the user had reached a Sichtungs-Screen, the resulting accepted drafts would never have rendered on Home because Home reads from `plan_elements`, not from `*_drafts`.
 
 **Fix:**
+
 - Phase 6.5 Plan 01 (Wave-0): test scaffold for the 7 new files (39 todo behaviours).
 - Phase 6.5 Plan 02: Migration `20260512000017_plan_elements_provenance.sql` — adds `imported_from` (uuid FK → `import_items`) + `provenance` (jsonb), drops legacy `ai_result_id`. PlanElementRow type + rowMappers updated.
 - Phase 6.5 Plan 03: `draftPromotionRepo` — `promoteBedDraft` / `promotePlantDraft` / `promoteObservationDraft` / `dismissDraft` with idempotency on `importedFrom`.
@@ -26,6 +25,7 @@ resolved_by: Phase 6.5 (Draft-Sichtung + Promotion) — Plans 01–05
 - **Phase 6.5 Plan 05 (this resolution):** preview.tsx one-line change `'/(app)' as any` → `'/(app)/import/review' as any` (commit `ad170c9`); Migration 017 pushed to Supabase project `vitrqkzxkiqvadqfzrcx`.
 
 **Verification commits:**
+
 - `97a6b15` test(06.5-05): add failing preview-navigation test (RED)
 - `ad170c9` feat(06.5-05): wire preview confirm redirect to /(app)/import/review (GREEN)
 - Migration 017 confirmed via `supabase migration list --linked`: `20260512000017 | 20260512000017 | 2026-05-12 00:00:17`
@@ -103,6 +103,7 @@ resolved_by: Phase 6.5 (Draft-Sichtung + Promotion) — Plans 01–05
 **Es liegt kein funktionaler Bug vor. `saveImport` läuft erfolgreich durch und persistiert alle Drafts in IndexedDB. Anschließend navigiert `router.replace('/(app)')` zur Home-Route, die im aktuellen Zustand (keine promoted `plan_elements`) den Empty-State mit "Aus Claude.ai importieren"-Button zeigt. Der User interpretiert das als "zurück zur Import-Hauptseite ohne Import".**
 
 Drei verkettete UX-Lücken:
+
 1. Kein Erfolgs-Feedback (Toast/Banner) nach `saveImport` — der vorgesehene i18n-Key `import.successBanner` wird nicht verwendet.
 2. Home-Screen rendert nur promoted `plan_elements`, NICHT die persistierten Drafts. Es gibt keinen Hinweis auf den Editor / die Draft-Übersicht.
 3. Navigation `router.replace('/(app)')` führt direkt in den Empty-State zurück, der zufällig genau wie der Einstiegspunkt aussieht.
@@ -116,15 +117,18 @@ Drei verkettete UX-Lücken:
 Drei Optionen — von minimal bis vollständig:
 
 **A — Minimal: Erfolgs-Feedback** (~10 Zeilen, kein neuer Screen)
+
 - In `preview.tsx` `handleConfirm`: Vor `router.replace` einen Erfolgs-Indikator setzen (entweder URL-Param `?imported={count}` oder Zustand-State).
 - Home-Screen liest Param und zeigt `InlineBanner` mit `t('import.successBanner', {count})`.
 
 **B — Sinnvoll: Draft-Übersicht auf Home** (~30 Zeilen)
+
 - Zusätzlich zu A: Home-Screen lädt per `loadPendingDrafts(activeGardenId)` die Anzahl pending Drafts.
 - Empty-State zeigt zusätzliche Zeile: "X Importe wartend — zum Editor übernehmen".
 - Optional: Button "Importe sichten" navigiert in (noch zu bauenden) Draft-Editor.
 
 **C — Vollständig: Draft → plan_elements Promotion** (~Phase 7 Scope)
+
 - Draft-Editor-Screen für Sichtung pro Beet/Pflanze.
 - "In Plan übernehmen" promoted Drafts zu echten `plan_elements`.
 - Ist laut Phase-06-Plan vermutlich für Phase 7 / Plan 06-04 vorgesehen.

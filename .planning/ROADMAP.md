@@ -1,355 +1,221 @@
 # Roadmap: Kleingarten-App (Spatenstich)
 
-> **Pivot 2026-05-17 (User Decision):** Desktop ist primärer Use Case, nicht mobile-first. Phase 7.5 (Web SVG Editor) eingefügt. **Saison-2026-Hot-Path** umgestellt: Plant-DB + Companion-Hinweis + Aussaatkalender vorgezogen, Saatgut-Inventar zurückgestellt. Begründung in `.planning/roadmap-proposal-2026-05-17.md`.
+> **Quelle der Wahrheit für v2.x:** `.planning/MASTERPLAN-v2.md` (2026-09-08/09). Die Phasen 20–29 hier sind die Kurzform der dortigen Kapitel 4.1–4.2; Arbeitspakete, Akzeptanzkriterien, Datei-Referenzen und SQL stehen nur dort. Bei Widersprüchen gilt der Masterplan.
 
-> **Pivot 2026-05-08 (M07):** Kompletter Wegfall von In-App-AI-Calls (Claude Vision, Pl@ntNet). Ersetzt durch manuellen Garten-Plan-Editor + One-Way-Bridge aus externem Claude.ai-Projekt (Dirks Max-Abo). App macht null ausgehende KI-API-Aufrufe.
+> **Pivot 2026-09-09 (v2):** Beide Nutzer haben Android-Handys. Auslieferung als installierbare Web-App (PWA, Chrome) statt nativem Build; ein Pointer-Event-SVG-Editor statt Skia; Sync-Kern neu (Client-`updated_at` als LWW-Wahrheit, `server_updated_at` als Pull-Cursor, Realtime). Entscheidungen D-01..D-15 im Masterplan Kap. 2.
 
-> **Pivot 2026-04-21:** MVP-Scope fokussiert auf 2-User Shared Garden (Dirk + Frau). Vereinsregeln-Features per Feature-Flag aus bis v1.3.
+## Milestones
 
-## Overview
-
-**v1.0 Foundation (abgeschlossen):** Tech-Fundament, Auth, Shared Garden, Sync, Import-Pipeline, Plan-Editor auf iPhone + Web.
-
-**v1.1 "Saison 2026 Ready"** (Mai–Juli 2026): Plant-DB + Companion-Warnung + Aussaatkalender — die drei Phasen die die App **diese Saison täglich nutzbar** machen.
-
-**v1.2 "Saison-Tools"** (August–September 2026): Journal, Task-Generator, Saatgut-Inventar — Tooling fürs Tagesgeschäft während der Saison.
-
-**v1.3 "Modern + Mehrjährig"** (Winter 2026/27): Design-Polish, Fruchtfolge-Memory, Vereinsregeln-Aktivierung — Vorbereitung für Saison 2027.
+- ✅ **v1.0 Foundation** — Phasen 1–7.5a (shipped 2026-05-17) — Archiv: `milestones/v1.1-ROADMAP.md` (enthält v1.0-Details), Phasen-Verzeichnisse in `milestones/v1.0-phases/`
+- ✅ **v1.1 Saison 2026 Ready** — Phasen 8–10 (shipped 2026-09-09) — Archiv: `milestones/v1.1-ROADMAP.md`, `milestones/v1.1-REQUIREMENTS.md`, `milestones/v1.1-phases/`, `milestones/v1.1-quick/`
+- 🚧 **v2.0 Handy-Ready** — Phasen 20–25 (in Arbeit, Ziel Ende Oktober 2026)
+- 📋 **v2.1 Saison 2027** — Phasen 26–29 (geplant, Dezember 2026 – Februar 2027)
 
 ## Phases
 
-### v1.0 Foundation (abgeschlossen)
+<details>
+<summary>✅ v1.0 Foundation (Phasen 1–7.5a) — SHIPPED 2026-05-17</summary>
 
-- [x] **Phase 1: Foundation** — Monorepo, StorageAdapter, Supabase + RLS, pgmq, feature flags, EAS CI (2026-04-17)
-- [x] **Phase 2: Auth & Profile** — Account/local mode, PLZ/Klimazone, Archetyp. Vereinsregeln-Code flagged off bis v1.3 (2026-04-20)
-- [x] **Phase 2.5: Shared Garden Model** — gardens + garden_members, Member-RLS, Invite-Code-Flow (2026-04-23)
-- [x] **Phase 3: Offline & Sync** — Outbox + 2-User-LWW, Photo-Queue. uploadPending()-Wiring via SyncTriggers.ts (reconnect + foreground syncAll) bestätigt geschlossen (2026-06-10)
-- [x] ~~**Phase 4: Garten-Erfassung (M1)**~~ — **SUPERSEDED durch Pivot M07** (2026-05-08)
-- [x] **Phase 5: AI-Removal + Import-Schema** — Alle AI-Clients entfernt, `spatenstich-import.v1` Schema (2026-05-09)
-- [x] **Phase 6: Import-Flow + Companion-Prompt** — Claude.ai-Prompt, Share-Intent, Preview, Draft-Tables (2026-05-09)
-- [x] **Phase 6.5: Draft-Sichtung + Promotion** — Sichtungs-Screen, Promotion-Repo, Migration 017 live (2026-05-12)
-- [x] **Phase 7: Plan-Editor (Skia)** — iPhone-Editor mit Drag/Polygon/Layer/Undo/Save, Migration 018 live (2026-05-13)
-- [x] **Phase 7.5a: Web Plan-Editor (SVG)** — Desktop-Editor mit Drag/Delete/Add, parallel zum Skia (2026-05-17)
+- [x] Phase 1: Foundation — Monorepo, StorageAdapter, Supabase + RLS, CI (2026-04-17)
+- [x] Phase 2: Auth & Profile — Account/lokal, PLZ/Klimazone, Archetyp; Vereinsregeln-Code hinter Flag (2026-04-20)
+- [x] Phase 2.5: Shared Garden Model — gardens + garden_members, Member-RLS, Invite-Code (2026-04-23)
+- [x] Phase 3: Offline & Sync — Outbox + 2-User-LWW (2026-06-10; Cross-Device-UAT übersprungen, siehe v2.0 Phase 21)
+- [x] ~~Phase 4: Garten-Erfassung per Claude Vision~~ — SUPERSEDED durch Pivot M07
+- [x] Phase 5: AI-Removal + Import-Schema `spatenstich-import.v1` (2026-05-09)
+- [x] Phase 6: Import-Flow + Companion-Prompt (2026-05-09)
+- [x] Phase 6.5: Draft-Sichtung + Promotion, Migration 017 (2026-05-12)
+- [x] Phase 7: Plan-Editor (Skia, nativ) + Drafts-Tray, Migration 018 (2026-05-13; nie auf Gerät verifiziert, wird in v2.0 Phase 22 ersetzt)
+- [x] Phase 7.5a: Web Plan-Editor (SVG, Maus) (2026-05-17)
 
-### v1.1 "Saison 2026 Ready" — Hot Path
+</details>
 
-- [ ] **Phase 7.5b: Web Editor Polish** — Polygon-Zeichnen + Drafts-Tray + Pflanzenabstand-Ring im Web *(optional, parallel)*
-- [x] **Phase 8: Plant-DB Foundation** — 90 Pflanzen + 38 Companion-Paare + Edge Function seed (2026-05-17)
-- [x] **Phase 9: Companion-Hinweis** — Roter/grüner Banner beim Pflanzen-Setzen wenn Nachbarn schlecht/gut zusammenpassen (2026-05-29)
-- [x] **Phase 9.1: Editor-Element-Bearbeitung** *(INSERTED)* — Resize/Rotate per Doppelklick, Properties (Name etc.), Z-Order für überlappende Elemente (completed 2026-05-29)
-- [x] **Phase 10: Aussaatkalender v1** — "Diese Woche" Wochenview + Gantt-Detail pro Pflanze, klimazonen-angepasst (completed 2026-06-11)
+<details>
+<summary>✅ v1.1 Saison 2026 Ready (Phasen 8–10) — SHIPPED 2026-09-09</summary>
 
-### v1.2 "Saison-Tools" — August–September 2026
+- [x] Phase 8: Plant-DB Foundation — 90 Pflanzen, 38 Companion-Paare, Migration 019 (2026-05-17)
+- [x] Phase 9: Companion-Hinweis — Konflikt/Companion-Toast in beiden Editoren (2026-05-29)
+- [x] Phase 9.1: Editor-Element-Bearbeitung — Resize/Rotate/Properties/Z-Order (2026-05-29)
+- [x] Phase 10: Aussaatkalender v1 — Wochen-View, Gantt, Klimazone, Fruchtfolge-Warnung (2026-06-12, UAT 8/8)
+- Phase 7.5b (Web Editor Polish) — nicht gestartet, absorbiert durch v2.0 Phase 22
+- Quick-Tasks 260418–260616 — archiviert in `milestones/v1.1-quick/`
 
-- [ ] **Phase 11: Garten-Journal** — Beobachtungen, Ernten, optional Fotos pro Beet/Pflanze
-- [ ] **Phase 12: Task-Generator** — Auto-Wochenliste aus Aussaatkalender + Klimazone
-- [ ] **Phase 13: Saatgut-Inventar** — Welche Tüten hast du, wann abgelaufen, Keimfähigkeit *(war v1.0 Phase 8)*
+</details>
 
-### v1.3 "Modern + Mehrjährig" — Winter 2026/27
+### 🚧 v2.0 Handy-Ready (Phasen 20–25, ~33 Entwicklertage)
 
-- [ ] **Phase 14: Modernes Design** — Visueller Schliff, Animations, Branding
-- [ ] **Phase 15: Fruchtfolge-Memory** — "Was war letztes Jahr auf Beet 3?" — Familien-Konflikt-Warnung
-- [ ] **Phase 16: Vereinsregeln-Aktivierung** — Feature-Flag on, manuelle Regeleingabe, BKleingG-Warnung *(war v1.1 Phase 10)*
-- [ ] **Phase 17: Stale-Imports + Sharing-UX** — Aufräumen, Polish
+- [ ] **Phase 20: Fundament, Aufräumen, PWA-Deploy** — CI grün, Legacy raus, Manifest mit Teilen-Ziel, Service Worker, Icon, Cloudflare Pages, Keep-alive
+- [ ] **Phase 21: Sync und Datenintegrität** — server_updated_at-Cursor, echtes LWW, Hydration-Fix, Realtime, Logout-Cleanup, PLZ am Garten, Vereinsregeln-Reparatur
+- [ ] **Phase 22: Ein Editor für Maus und Touch** — Interaction-Controller, SVG-Renderer, Pointer-Adapter, Zoom/Pan, Polygon, Maße, Skia raus
+- [ ] **Phase 23: Navigation, Onboarding, Auth** — Tabs, „Heute", 3-Schritt-Onboarding, Beitritt per Code, Passwort-Reset, Safe-Areas
+- [ ] **Phase 24: Design-System, Copy, Politur** — Tokens, Nunito/Caveat, lucide, Illustrationen, de.json ohne Jargon, Kalender-Politur, Datenschutz
+- [ ] **Phase 25: Geräte-Abnahme** — 23 Prüfpunkte auf beiden Android-Handys + Desktop, Fix-Budget, Tag v2.0.0
+
+### 📋 v2.1 Saison 2027 (Phasen 26–29, ~18 Entwicklertage)
+
+- [ ] **Phase 26: Wochenaufgaben** — Task-Generator aus Plan + Kalender, done/snooze, optional Web Push
+- [ ] **Phase 27: Garten-Journal** — Schnellnotizen pro Beet/Pflanze, optional Foto, Import-Beobachtungen
+- [ ] **Phase 28: Saisonwechsel und Fruchtfolge-Memory** — season-Feld, Archivierung, 3-Jahres-Regel
+- [ ] **Phase 29: SDK-Angleichung und optionales Android-APK** — aktuelles Expo-SDK, expo-doctor grün; APK nur auf Wunsch
 
 ## Phase Details
 
-### Phase 1: Foundation
+### Phase 20: Fundament, Aufräumen, PWA-Deploy
 
-**Goal**: Monorepo compiles, tests pass in CI, Supabase schema live with RLS.
-**Status**: ✅ Complete 2026-04-17. Details siehe archivierter Eintrag.
-
-### Phase 2: Auth & Profile (Vereinsregeln-Code flagged off)
-
-**Goal**: Auth + PLZ/Klimazone + Archetyp + lokaler Modus.
-**Status**: ✅ Code Complete 2026-04-20. Vereinsregeln-Subscope flagged off bis Phase 16.
-
-### Phase 2.5: Shared Garden Model
-
-**Goal**: 2-User Shared Garden mit Invite-Code-Flow + Member-RLS.
-**Status**: ✅ Code Complete 2026-04-23. Human-Verify deferred.
-
-### Phase 3: Offline & Sync (2-User Shared State)
-
-**Goal**: Offline-First, Outbox-Sync, 2-User-LWW.
-**Status**: ✅ Code Complete 2026-06-10. 7/7 Plans: uploadPending()-Wiring-Lücke bestätigt geschlossen — `app/src/lib/sync/SyncTriggers.ts` ruft `syncAll()` beim NetInfo-Reconnect (Zeile 50) und AppState-Foreground (Zeile 59) auf, registriert via `registerSyncTriggers()`. Wiring war vorhanden aber im ROADMAP als offen markiert.
-
-### Phase 5: AI-Removal + Import-Schema
-
-**Goal**: Zero AI calls. `spatenstich-import.v1` JSON Schema.
-**Status**: ✅ Complete 2026-05-09.
-
-### Phase 6: Import-Flow + Companion-Prompt
-
-**Goal**: Claude.ai Companion-Prompt, Share-Intent, Preview-Screen, Draft-Tables.
-**Status**: ✅ Code Complete 2026-05-09. DB push (Migration 016) live.
-
-### Phase 6.5: Draft-Sichtung + Promotion
-
-**Goal**: Drafts annehmen/verwerfen/editieren; Promotion zu `plan_elements`.
-**Status**: ✅ Complete 2026-05-12. Migration 017 live auf Supabase Frankfurt.
-
-### Phase 7: Plan-Editor (Skia, iPhone)
-
-**Goal**: Skia-Canvas mit Drag, Polygon, Layer, Undo (20), Save (5s debounce). 60fps@200 Elemente.
-**Status**: ✅ Code Complete 2026-05-13. Migration 018 (`plan_elements.layer`) live. Manual smoke (60fps + crash recovery) deferred zu User-iPhone-Session.
-
-### Phase 7.5a: Web Plan-Editor (SVG)
-
-**Goal**: Web-natives interaktives SVG-Editor — Drag/Move, Click-to-Select, Del löscht, Klick-zu-Platzieren via Palette, Undo/Redo, Layer/Grid Toggle, Save.
-**Depends on**: Phase 7 (shared editorStore + repos)
-**Requirements**: (lifted from Phase 7) EDIT-03 (drag&drop), EDIT-04 (rotate via separate iter), EDIT-08 (layer), EDIT-09 (autosave), EDIT-11 (undo/redo)
-**Status**: ✅ Code Complete 2026-05-17. SVG via react-native-svg, Mouse-Events (kein Skia/WASM auf Web), shared `editorStore` (Zustand+zundo).
-**Was geliefert wurde**:
-
-  - `WebPlanEditor.tsx` (SVG + Mouse-Drag + Click-to-Select + Del-Key)
-  - `WebPaletteBar.tsx` (3 Tabs + Click-to-Place)
-  - `WebEditorToolbar.tsx` (Save/Undo/Redo/Layer/Grid/Delete + 3-State Layer Cycle)
-
-**Was offen ist** → Phase 7.5b:
-
-  - Polygon-Zeichnen auf Web (Multi-Click + "Beet abschließen")
-  - Drafts-Tray (heute über Sichtungs-Screen mit Auto-Layout — funktioniert, aber Drag-in-Plan wäre schöner)
-  - Pflanzenabstand-Ring beim Pflanze-Setzen
-
----
-
-## v1.1 Hot Path
-
-### Phase 7.5b: Web Editor Polish *(optional, parallel zu Phase 8/9)*
-
-**Goal**: Feature-Parity zwischen Web-Editor und Skia-iPhone-Editor wo es Sinn macht.
-**Depends on**: Phase 7.5a
-**Scope**:
-
-  - Polygon-Zeichnen (Click-Corners + "Beet abschließen" Button + dashed live-line)
-  - Drafts-Tray als Bottom-Sheet auch im Web (mit Click-to-Promote, kein Drag)
-  - Pflanzenabstand-Ring (Ghost-Circle) beim Hover über Pflanze
-
+**Goal**: Repo sauber, CI grün, PWA live unter `https://spatenstich.pages.dev`, aus der Claude-App per Teilen importierbar, Supabase bleibt wach.
+**Depends on**: —
+**Requirements**: DEPLOY-01..DEPLOY-07
+**Masterplan**: Kap. 4 → WP 20.1 (Repo-Hygiene + CI), 20.2 (Dead Code + Migration 020), 20.3 (PWA-Shell mit Teilen-Ziel), 20.4 (Deploy + Keep-alive)
 **Success Criteria**:
+1. `pnpm -r run lint` exit 0; CI-Workflow mit `EXPO_PUBLIC_*`-Vars grün
+2. Foto-Pipeline, Feature-Flags, GPS-Opt-in, `expo-share-intent` entfernt; Migration 020 live (Buckets nur wenn leer)
+3. Lighthouse „installable"; Chrome „App installieren" auf beiden Handys; Flugmodus-Start zeigt letzten Plan
+4. Claude-App → Teilen → „Spatenstich" → Import-Vorschau (Datei und Text)
+5. Push auf master → Deploy < 10 min; Keep-alive-Workflow läuft
+**Plans**: 4 (je ein WP)
+**UI hint**: yes (Install-Banner, Import-Einstieg)
 
-  1. User kann Polygon-Beete im Web zeichnen, identisch zur Skia-Erfahrung auf iPhone
-  2. Drafts-Tray im Web zeigt offene Importe; Click "Annehmen" promoted via existierendem `promoteBedDraft`
-  3. Pflanzenabstand-Hinweis sichtbar wenn man eine Pflanze setzt und Nachbar zu nah ist
+### Phase 21: Sync und Datenintegrität
 
-**Plans**: TBD (vermutlich 2-3 Plans)
+**Goal**: Zwei Personen bearbeiten denselben Garten auf drei Geräten, jede Änderung landet in Sekunden beim anderen, keine stillen Verluste.
+**Depends on**: Phase 20 (WP 20.2)
+**Requirements**: SYNC2-01..SYNC2-09
+**Masterplan**: WP 21.1 (Migration 021/022), 21.2 (SyncWorker), 21.3 (Editor-Persistenz), 21.4 (Realtime + UI-Invalidierung), 21.5 (Konto/Garten/Bootstrap), 21.6 (Vereinsregeln-Reparatur, D-05)
+**Success Criteria**:
+1. Gerät B legt Beet offline an, A war zwischenzeitlich online → Beet erscheint bei A nach B's Sync
+2. Beide ändern dasselbe Element offline; die spätere Bearbeitung gewinnt unabhängig von der Sync-Reihenfolge; Verlierer bekommt Toast
+3. Editor öffnen erzeugt 0 Outbox-Einträge; Undo nach Anlegen löscht auch auf Gerät B
+4. Partner-Änderung sichtbar < 5 s (Realtime) bzw. < 60 s (Polling)
+5. PLZ/Klimazone überleben Reload und sind für beide gleich; Logout hinterlässt keine fremden Daten
+6. Vereinsregeln speichern im Konto-Modus ohne 22P02 (Flag an im Dev-Build)
+**Plans**: 6
+**UI hint**: minimal (Toasts, Speicherstatus)
+
+### Phase 22: Ein Editor für Maus und Touch
+
+**Goal**: Ein `PlanEditor`, der auf dem Handy mit dem Finger und am Desktop mit der Maus alles kann, was der Web-Editor heute kann, plus Zoom/Pan, Polygon, Maßangaben, Abstands-Ring. Skia-Editor und Web-Sonderkomponenten gelöscht.
+**Depends on**: Phase 21 (WP 21.3)
+**Requirements**: EDIT2-01..EDIT2-10
+**Masterplan**: WP 22.1 (Helfer), 22.2 (Interaction-Controller), 22.3 (Renderer + Pointer-Adapter), 22.4 (Feature-Port + Chrome), 22.5 (Performance)
+**Success Criteria**:
+1. ≥ 40 Controller-Tests ohne DOM grün
+2. Auf Android-Chrome: Tap-Select, Drag, Pinch-Zoom, Handles, Long-Press/Doppel-Tipp-Modal, Polygon, Platzieren mit Ghost + Abstands-Ring
+3. Desktop: Maus + Tastatur (Entf, Esc, Pfeile, Ctrl+Z/Y, Marquee) wie heute
+4. `EditorCanvas.tsx`, `WebPlanEditor.tsx` & Co. gelöscht; `@shopify/react-native-skia` raus; Bundle < 4,5 MB
+5. 200 Elemente flüssig (Remote-Debugging-Trace < 16 ms/Frame Median)
+**Plans**: 5
+**UI hint**: yes (mobile Werkzeugleiste, Palette als Bottom-Sheet)
+
+### Phase 23: Navigation, Onboarding, Auth
+
+**Goal**: Partnerin installiert die App, registriert sich mit Code, sieht in unter drei Minuten den gemeinsamen Plan.
+**Depends on**: Phase 21 (WP 21.5), Phase 22 (WP 22.3); parallel zu 22.4/22.5 möglich
+**Requirements**: NAV-01..NAV-07
+**Masterplan**: WP 23.1 (Tabs + Header), 23.2 („Heute"), 23.3 (Onboarding + Beitritt), 23.4 (Auth-Härtung), 23.5 (Garten und Konto)
+**Success Criteria**:
+1. Tabs Heute · Plan · Kalender · Mehr; jede Route ≤ 2 Taps; kein Screen ohne Titel; keine Doppel-Header
+2. „Heute" zeigt ohne weiteren Tap Wochenaktionen, Plan-Vorschau, nächsten Schritt
+3. Registrierung mit Einladungscode → 3 Onboarding-Screens → gemeinsamer Plan in < 3 min
+4. Passwort-Reset per Code in der installierten App; Tastatur verdeckt nie einen Button
+5. Kein roher Exception-Text im UI
+**Plans**: 5
 **UI hint**: yes
 
-### Phase 8: Plant-DB Foundation
+### Phase 24: Design-System, Copy, Politur
 
-**Goal**: Eine zentrale, deutschsprachige Pflanzen-Datenbank mit allen Infos die Phase 9 + 10 brauchen — Mindestabstand, Sonnenbedarf, Aussaat-Fenster, Familie, Companions.
-**Depends on**: Phase 1 (Schema-Foundation)
-**Requirements**: SEED-02 (Sorten-DB; aus old Phase 8 portiert), neue PLANT-DB-* Requirements werden in `/gsd-discuss-phase` ausgearbeitet
-**Success Criteria** (what must be TRUE):
-
-  1. `plants`-Tabelle in Supabase mit ≥80 Pflanzen (Schwerpunkt deutsche Kleingarten-Realität: Tomaten, Bohnen, Möhren, Salate, Kohl-Arten, Kürbis, Beeren, Kräuter)
-  2. Pro Pflanze: ID, Deutscher Name, Botanischer Name, Familie, MinAbstandCm, Sonnenbedarf, Wasserbedarf, KlimazoneMin/Max, AussaatFreilandWochen, AussaatVorkulturWochen, PflanzenWochen, TagebisErnte, Companions[], Inkompatibel[]
-  3. `plant_companions`-Tabelle (M:N) mit `relationship: 'companion' | 'incompatible'`
-  4. Migration 019 erstellt + seeded
-  5. `usePlants()` Hook lädt + cacht lokal (expo-sqlite oder JSON-Bundle)
-  6. Datenquellen dokumentiert (Gardeneus MIT, garden-planner MIT, Gartenplaner als Inspiration, eigene Recherche)
-
-**Plans:** 4 plans
-
-Plans:
-
-- [x] 08-01-PLAN.md — Wave 0 test scaffold ✅ (2026-05-17) — 10 new files + 2 config mods + lockfile; 42 it.todo entries pin PLANT-DB-01/02/03/04/06/07/08/09; `pnpm --filter @spatenstich/shared exec jest plants` → 16 todo / 16 total; gartenplaner literal three-walled out (schema enum + smoke-test + LICENSES.md)
-- [ ] 08-02-PLAN.md — Wave 1 schema + types + validator (Migration 019 + filled validator with cross-ref checks + filled pgTAP RLS test + 9 PLANT-DB-* in REQUIREMENTS.md)
-- [ ] 08-03-PLAN.md — Wave 2 data curation (100-120 real plant entries + 30+ companion pairs + filled smoke tests, license-hygiene PLANT-DB-09 enforced)
-- [ ] 08-04-PLAN.md — Wave 3 Edge Function + repo + hook + Migration 019 push + manual seed deploy (autonomous 3-gate push + Docker deploy + curl invoke)
-
-**UI hint**: no *(reine Daten-Phase, UI in Phase 9 + 10)*
-
-### Phase 9: Companion-Hinweis
-
-**Goal**: Beim Setzen einer Pflanze auf ein Beet (oder einer existierenden Pflanze in dasselbe Beet) sofort visuell sehen: passt das zusammen?
-**Depends on**: Phase 7, Phase 7.5a, Phase 8
-**Requirements**: SC-1 (Detection), SC-2 (roter Banner), SC-3 (grüner Banner), SC-4 (nicht-blockierend), SC-5 (persistente Markierung), SC-6 (plant_companions)
-**Success Criteria** (what must be TRUE):
-
-  1. Beim Setzen einer Pflanze in ein Beet (Web + iPhone): Detection läuft gegen alle anderen Pflanzen in demselben Beet-Polygon
-  2. **Roter Banner** bei Konflikt: *"⚠ Konflikt: Tomate verträgt sich nicht mit Fenchel"* (i18n)
-  3. **Grüner Banner** bei Companion: *"✓ Gute Nachbarschaft: Tomate + Basilikum"*
-  4. Beide Banner sind nicht-blockierend (Dirk darf trotzdem platzieren — er kennt seinen Garten besser)
-  5. Persistente Markierung: rotes Dreieck-Icon an Pflanzen mit aktivem Konflikt (visible auch nach Banner-Dismiss)
-  6. Adjacency-Logik via Phase 8 `plant_companions`-Tabelle
-
-**Plans:** 4 plans
-
-Plans:
-
-- [x] 09-01-PLAN.md — Foundation: PiP utility, InlineBanner variant extension, i18n keys
-- [x] 09-02-PLAN.md — Core: useCompanionDetection hook + plantSlug write path
-- [x] 09-03-PLAN.md — UI: CompanionToast floating toast component
-- [x] 09-04-PLAN.md — Integration: Canvas overlays (Skia + SVG) + wiring into editor screen
-
+**Goal**: Die App sieht aus wie ein warmes Gartenheft („Papier & Erde"), spricht die Sprache der beiden und ist auf 375 px angenehm.
+**Depends on**: Phase 23
+**Requirements**: DESIGN-01..DESIGN-07
+**Masterplan**: WP 24.1 (Tokens/Fonts/Text), 24.2 (Icons/Illustrationen/Canvas), 24.3 (Copy + i18n), 24.4 (Kalender), 24.5 (Import-UX, Rechtliches, Speicherstatus), 24.6 (Barrierefreiheit)
+**Success Criteria**:
+1. Keine Hex-Literale außerhalb `tokens.ts`/`colors.ts`; keine `dark:`-Klassen; Nunito/Caveat sichtbar
+2. Nur lucide-Icons; drei Illustrationen; Canvas-Stil nach Kap. 3.4
+3. Alle Strings in `de.json`; Verbotsliste-Test (Jargon, ASCII-Umlaute, Phase-Leaks) grün
+4. Kalender: Heute-Marker, Abschnitte, Suche, Klimazonen-Name, Enum-Labels
+5. Import per Teilen < 20 s, per Einfügen < 30 s; Datenschutz/Impressum/Version vorhanden
+6. Alle icon-only-Buttons benannt, Tasten ≥ 48 dp, Kontrast AA
+**Plans**: 6
 **UI hint**: yes
 
-### Phase 09.1: Editor-Element-Bearbeitung (INSERTED)
+### Phase 25: Geräte-Abnahme
 
-**Goal:** Vollständige Element-Bearbeitung im Plan-Editor — Resize-Handles (Eck-4-Punkt), Rotations-Handle (15°-Snap mit Shift-Bypass auf Web), Properties-Modal mit Name/Breite/Höhe/Rotation/Notiz/Pflanzdatum/Akzentfarbe und Photoshop-Style Z-Order-Buttons. Konsistent auf Web (Doppelklick öffnet Modal) und Mobile (Long-Press öffnet Modal).
-**Requirements**: D-01..D-24 (siehe 09.1-CONTEXT.md)
-**Depends on:** Phase 9
-**Plans:** 6/6 plans complete
+**Goal**: Beide Android-Handys + Desktop laufen den UAT-Katalog (Masterplan Kap. 6, 23 Punkte) durch; alles Gefundene ist gefixt; Tag v2.0.0.
+**Depends on**: Phasen 20–24
+**Requirements**: UAT-01, UAT-02
+**Plans**: 1 Abnahme + `/gsd-quick` pro Befund (Budget 2 Tage)
+**UI hint**: no
 
-Plans:
+### Phase 26: Wochenaufgaben
 
-- [x] 09.1-00-test-scaffold-helper-modules-PLAN.md — Wave 0: Test-Stubs + Picker-Installs + 4 Helper-Module
-- [x] 09.1-01-store-layer-PLAN.md — Wave 1: editorStore.editingElementId + zundo pause/resume + zOrder/rotationSnap algorithms
-- [x] 09.1-02-modal-trigger-PLAN.md — Wave 2: ElementEditorModal + Doppelklick (Web) + LongPress (Skia) + hitTest.ts GREEN + Mount in plan/index.tsx
-- [x] 09.1-03-canvas-handles-PLAN.md — Wave 3: ResizeHandle/RotationHandle für Skia + Web (4+1 Komponenten)
-- [x] 09.1-04-render-pipeline-PLAN.md — Wave 3: sortByZOrder + Rotation-Transform in beiden Renderern
-- [x] 09.1-05-i18n-verification-PLAN.md — Wave 3: editor.elementEditor.* keys + Mapper round-trip + HUMAN-VERIFY
+**Goal**: Aus Kalender + Plan generierte Aufgaben mit done/snooze pro Person, für beide sichtbar, wiederkehrend (Gießen nach Wasserbedarf); „Heute" zeigt Aufgaben. Optional Web Push (Chrome Android).
+**Depends on**: Phase 25
+**Requirements**: TASK-01..TASK-05 (in v2.1-REQUIREMENTS zu definieren)
+**Plans**: TBD (~4)
 
-### Phase 10: Aussaatkalender v1
+### Phase 27: Garten-Journal
 
-**Goal**: "Was sollte ich diese Woche im Garten tun?" — eine Wochen-Übersicht + Gantt-Detail pro Pflanze, gefiltert nach Klimazone und den Pflanzen in deinem Plan.
-**Depends on**: Phase 2 (Klimazone), Phase 7+7.5 (Plan-Elemente), Phase 8 (Plant-DB)
-**Requirements**: CAL-01..CAL-06 (aus alter Phase 9 übernommen)
-**Success Criteria** (what must be TRUE):
+**Goal**: Schnellnotizen pro Beet/Pflanze/Garten (Text, Datum, Art), optional 1 Foto (Supabase Storage `journal`, EU, RLS Member-Check); Import-Beobachtungen werden Journal-Einträge.
+**Depends on**: Phase 26
+**Requirements**: JOURNAL-01..JOURNAL-04
+**Plans**: TBD (~3)
 
-  1. **Wochen-View** (Home-Card oder eigener Tab): aktuelle Kalenderwoche zeigt Aktionen "diese Woche aussäen / pflanzen / ernten" — pro Aktion: Pflanze + Methode (Freiland/Vorkultur/Frühbeet)
-  2. **Jahres-Gantt** (Pflanzen-Detail-View): pro Pflanze ein horizontaler Streifen über 12 Monate mit farbig markierten Phasen (Vorkultur/Direktsaat/Pflanzen/Ernte)
-  3. Klimazonen-Anpassung: Pflanze "Tomate" zeigt in Klimazone 7a andere Aussaat-Wochen als in 8a
-  4. Filter "Nur meine Pflanzen" zeigt nur Pflanzen die im aktuellen Plan stehen
-  5. Frost-Daten statisch pro Klimazone (last frost / first frost als ISO-Datum-Tabelle)
-  6. Klick auf Pflanze in Wochen-View → Detail-View mit Gantt + Phase-8-Pflanzen-Infos + "Auf welchem Beet?"
+### Phase 28: Saisonwechsel und Fruchtfolge-Memory
 
-**Markt-Evidenz (Recherche 2026-06-11)**: Kalender-Automation aus Pflanzendaten = verifiziertes Top-Demand-Signal (HortusFox #511/#502/#509); GrowVegs frostgenaue Pflanzliste = meistgelobtes Feature des Marktführers; Fryd-Gründungs-These ist exakt diese Wochen-Frage. → Kalender MUSS sich aus Plan + Plant-DB selbst befüllen (kein manuelles Eintragen).
-**Implementierungs-Vorbilder**: Gardeneus `dates.ts` (frostrelative Fenster, MIT — lokal vorhanden) für die Logik; PyQt-Gartenplaner für die UX (2-Wochen-Raster × 3 Methoden Freiland/Vorkultur/Frühbeet, eingefrorene Pflanzen-Spalte) — nur Idee, kein Code/Daten (keine Lizenz). Details: `.planning/research/2026-06-10-ref-apps-feature-synthesis.md`.
+**Goal**: `plan_elements.season`, „Neue Saison starten" archiviert Vorjahrespflanzen, Fruchtfolge-Warnung mit 3-Jahres-Regel pro Beet, „Was war letztes Jahr auf Beet 3?".
+**Depends on**: Phase 27
+**Requirements**: SEASON-01..SEASON-04
+**Plans**: TBD (~3)
 
-**Plans:** 9/9 plans complete
-Plans:
-**Wave 1**
+### Phase 29: SDK-Angleichung und optionales Android-APK
 
-- [x] 10-01-PLAN.md — Kalender-Engine (DOY→KW, Klimazonenoffset, Fruchtfolge-Check) + i18n kalender.* + Test-Scaffold (CAL-02/03/06)
+**Goal**: Aktuelles stabiles Expo-SDK, `expo-doctor` grün, Tests + Web-Export grün. Danach nur auf Wunsch des Users: natives Android-APK per EAS Free + Sideload (Masterplan Kap. 4.2, D-01/M9).
+**Depends on**: Phase 28
+**Requirements**: SDK-01..SDK-03
+**Plans**: TBD (~2)
 
-**Wave 2** *(blocked on Wave 1 completion)*
+## Mapping alter Phasen (v1.2/v1.3-Planung, absorbiert)
 
-- [x] 10-02-PLAN.md — useKalenderData Hook (lädt Plan-Elemente via Repo) + findBeeteForPlant + addPlantToPlan (CAL-04/05)
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
-- [x] 10-03-PLAN.md — Gantt/Legende/Wochen-Card Komponenten + Wochen-View Screen + Home-Button (CAL-01/03)
-
-**Wave 4** *(blocked on Wave 3 completion)*
-
-- [x] 10-04-PLAN.md — Pflanzen-Detail [slug] Screen + Fruchtfolge-Warnung + Human-Verify (CAL-05/06)
-
-**Gap-Closure (aus 10-VERIFICATION.md + 10-REVIEW.md — 3 Blocker + 7 Warnings)**
-
-*Gap-Wave 1 (Engine + Geometrie, parallel)*
-
-- [x] 10-05-PLAN.md — kalenderEngine: getAktuelleKw Math.floor (WR-03) + ISO-Wochen-Wrap (WR-04) + GanttStreifen Breiten-Guard (CAL-01/02)
-- [x] 10-06-PLAN.md — kalenderBeete: bbox-CENTER-Konvention (WR-01) + neuer findPflanzenInBeet-Helper (CAL-04/06)
-
-*Gap-Wave 2 (Screen + Hook, parallel, blocked on 10-06)*
-
-- [x] 10-07-PLAN.md — Detail-Screen [slug]: Rules-of-Hooks-Crash (CR-01) + beet-scoped Fruchtfolge (WR-02) + de.json-Strings (CAL-01/05/06)
-- [x] 10-08-PLAN.md — useKalenderData: In-Bed-Placement (WR-06) + cancelled-Flag/Reset (WR-07) + mode-Guard (CAL-04/05)
-
-*Gap-Wave 3 (Wochen-View, blocked on 10-08)*
-
-- [x] 10-09-PLAN.md — Wochen-View: Filter-Chip wirkt auf WochenCard (WR-05) + kein useEffect-Override (CAL-01/04)
-
-**UI hint**: yes
-
----
-
-## v1.2 Saison-Tools (August–September 2026)
-
-> **Empfehlung aus Marktrecherche 2026-06-11:** Phase 12 (Task-Generator) eng an Phase 10 koppeln oder direkt danach ziehen — wiederkehrende, pflanzen-verknüpfte Aufgaben sind die zwei stärksten verifizierten Nachfrage-Signale des gesamten Marktes (HortusFox #9: 22👍, #281: 14 Reaktionen) und beantworten dieselbe User-Frage wie der Kalender.
-
-### Phase 11: Garten-Journal
-
-**Goal**: Freitext-Beobachtungen, Ernten, optional Fotos pro Beet/Pflanze/Garten.
-**Inspiration**: HortusFox `PlantLogModel` (paginiert, audit-log, plant-FK) + `PlantPhotoModel` (thumb/original/label/author) + Health-States (10 Zustände). Markt-Signal: Fryd v9.0 (06/2026) macht Foto-Journal zum Headline-Feature; XDA-Langzeitbericht: leichtgewichtige Quick-Notes schlagen Hochglanz.
-**Plans**: TBD
-
-### Phase 12: Task-Generator
-
-**Goal**: Auto-generierte Wochenliste aus Phase-10-Kalender (z.B. "Diese Woche fällig: Tomaten ausgeizen, Erbsen säen") + Klimazone-spezifisch.
-**Inspiration**: Gardeneus `task-generator.ts` (deterministisch aus Plantings × Frost-Daten, Dedupe über (plantingId, taskType)); HortusFox Task-Schema (recurring_time, recurring_scope, done) + M:N plant_tasks_ref.
-**Markt-Evidenz**: ✅ verifiziert stärkste Nachfrage-Kategorie überhaupt (siehe `.planning/research/2026-06-11-marktrecherche-feature-ranking.md` A.1+A.2). Pflanzen-Verknüpfung der Tasks ist Pflicht, nicht optional.
-**Plans**: TBD
-
-### Phase 13: Saatgut-Inventar *(was v1.0 Phase 8)*
-
-**Goal**: Welche Tüten hast du, wann abgelaufen, Keimfähigkeit.
-**Depends on**: Phase 8 (Plant-DB für Autocomplete)
-**Requirements**: SEED-02..SEED-06 (aus original Phase 8 übernommen, jetzt auf Phase 8 Plant-DB aufbauend)
-**Plans**: TBD
-
----
-
-## v1.3 Modern + Mehrjährig (Winter 2026/27)
-
-### Phase 14: Modernes Design
-
-**Goal**: Polish, Animations, professional branding. Schick aussehen.
-**Plans**: TBD
-
-### Phase 15: Fruchtfolge-Memory
-
-**Goal**: "Was war letztes Jahr auf Beet 3?" — mehrjähriges Pflanzen-History-Tracking + Familien-Konflikt-Warnung.
-**Inspiration**: Gardeneus `plant-families.ts` (18 Familien, `checkRotationConflict()` 3-Jahres-Regel, MIT — lokal vorhanden, ~20 Zeilen). Markt-Evidenz: Fruchtfolge ist Teil der GrowVeg-Sieger-Trias und Fryd-Paid-Lob (Vor-/Nachkultur). Voraussetzung klären: Pflanz-Historie (season-Feld an plan_elements oder deletedAt-Auswertung).
-**Plans**: TBD
-
-### Phase 16: Vereinsregeln-Aktivierung *(was v1.1 Phase 10)*
-
-**Goal**: Die in Phase 02 implementierte Vereinsregeln-Schicht aktivieren. Feature-Flag on, manuelle Regeleingabe, Editor-Warnings, BKleingG 1/3-Warnung.
-**Depends on**: Phase 2 (Code), Phase 7 + 7.5 (Editor-Hook)
-**Requirements**: RULES-02, RULES-03, RULES-04, RULES-05
-**Plans**: TBD
-
-### Phase 17: Stale-Imports + Sharing-UX
-
-**Goal**: Aufräumen alte Drafts, Mehr-Garden-Vorbereitung, Polish-Iteration.
-**Plans**: TBD
-
----
+| Alt | Neu |
+|---|---|
+| 7.5b Web Editor Polish | Phase 22 |
+| 11 Garten-Journal | Phase 27 |
+| 12 Task-Generator | Phase 26 |
+| 13 Saatgut-Inventar | Backlog (BACKLOG.md, nach v2.1) |
+| 14 Modernes Design | Phase 24 |
+| 15 Fruchtfolge-Memory | Phase 28 |
+| 16 Vereinsregeln-Aktivierung | Backlog 7 (nach WP 21.6: Flag an, Regel-Editor polieren, BKleingG-1/3-Check) |
+| 17 Stale-Imports + Sharing-UX | Phase 22 (Drafts-Tray) + Phase 23 (WP 23.5) |
 
 ## Progress
 
 | Phase | Plans | Status | Completed |
 |-------|-------|--------|-----------|
-| 1. Foundation | 3/3 | ✅ Complete | 2026-04-17 |
-| 2. Auth & Profile | 4/4 | ✅ Code Complete | 2026-04-20 |
-| 2.5. Shared Garden Model | 4/4 | ✅ Code Complete | 2026-04-23 |
-| 3. Offline & Sync | 7/7 | ✅ Code Complete | 2026-06-10 |
-| ~~4. Garten-Erfassung (M1)~~ | 4/4 | **SUPERSEDED** (M07) | - |
-| 5. AI-Removal + Import-Schema | 3/3 | ✅ Complete | 2026-05-09 |
-| 6. Import-Flow + Companion-Prompt | 4/4 | ✅ Code Complete | 2026-05-09 |
-| 6.5. Draft-Sichtung + Promotion | 5/5 | ✅ Complete | 2026-05-12 |
-| 7. Plan-Editor (Skia) | 6/6 | ✅ Code Complete | 2026-05-13 |
-| 7.5a. Web Plan-Editor (SVG) | 1/1 | ✅ Code Complete | 2026-05-17 |
-| **--- v1.1 Saison 2026 Ready ---** | | | |
-| 7.5b. Web Editor Polish | 0/TBD | Not started (optional) | - |
-| 8. Plant-DB Foundation | 4/4 | ✅ Complete | 2026-05-17 |
-| 9. Companion-Hinweis | 4/4 | ✅ Complete | 2026-05-29 |
-| 10. Aussaatkalender v1 | 9/9 | Complete    | 2026-06-12 |
-| **--- v1.2 Saison-Tools ---** | | | |
-| 11. Garten-Journal | 0/TBD | Not started | - |
-| 12. Task-Generator | 0/TBD | Not started | - |
-| 13. Saatgut-Inventar | 0/TBD | Not started | - |
-| **--- v1.3 Modern + Mehrjährig ---** | | | |
-| 14. Modernes Design | 0/TBD | Not started | - |
-| 15. Fruchtfolge-Memory | 0/TBD | Not started | - |
-| 16. Vereinsregeln-Aktivierung | 0/TBD | Not started | - |
-| 17. Stale-Imports + Sharing-UX | 0/TBD | Not started | - |
+| 1–7.5a (v1.0) | 34/34 | ✅ Shipped | 2026-05-17 |
+| 8–10 (v1.1) | 23/23 | ✅ Shipped | 2026-09-09 |
+| 20. Fundament, Aufräumen, PWA-Deploy | 0/4 | Not started | - |
+| 21. Sync und Datenintegrität | 0/6 | Not started | - |
+| 22. Ein Editor für Maus und Touch | 0/5 | Not started | - |
+| 23. Navigation, Onboarding, Auth | 0/5 | Not started | - |
+| 24. Design-System, Copy, Politur | 0/6 | Not started | - |
+| 25. Geräte-Abnahme | 0/1 | Not started | - |
+| 26. Wochenaufgaben | 0/TBD | Planned (v2.1) | - |
+| 27. Garten-Journal | 0/TBD | Planned (v2.1) | - |
+| 28. Saisonwechsel + Fruchtfolge | 0/TBD | Planned (v2.1) | - |
+| 29. SDK-Angleichung + APK | 0/TBD | Planned (v2.1) | - |
+
+## Backlog
+
+Siehe `.planning/BACKLOG.md` (999.x) und Masterplan Kap. 4.4 (Frost-Warnung, Plan-Export, JSON-Export, iCal, Companion-Score, Saatgut-Inventar, Vereinsregeln-Aktivierung, Dark-Mode, iOS, Lokal-Modus vollständig).
 
 ---
 
 ## Roadmap Evolution (Decisions Log)
 
-- **2026-06-11**: Feature-Sweep abgeschlossen (Marktrecherche + 4 Referenz-App-Analysen). Roadmap-Reihenfolge bestätigt; Phase 10/11/12/15 mit Markt-Evidenz + Implementierungs-Vorbildern angereichert; 11 neue Backlog-Items (999.2–999.12). Empfehlung notiert: Phase 12 eng an Phase 10 koppeln. Quellen: `.planning/research/2026-06-11-marktrecherche-feature-ranking.md` + `2026-06-10-ref-apps-feature-synthesis.md`.
-- **2026-06-10**: Forensik-Sweep quick-260610-jtf: CI grün (640/640), rotated-resize fertig, Phase 3+9 Status mit Code-Realität abgeglichen.
-- **2026-05-17**: Major re-prioritization nach User-Feedback "Desktop primär + Saison 2026 nutzbar". Plant-DB + Companion-Hinweis + Aussaatkalender vorgezogen (neue Phase 8-10). Saatgut-Inventar zurück zu v1.2 (Phase 13). Vereinsregeln zu v1.3 (Phase 16). Web-SVG-Editor als Phase 7.5a eingefügt nach Skia-Web-Crash auf Frau's Browser. Begründungsdokument: `.planning/roadmap-proposal-2026-05-17.md`.
-- **2026-05-13**: Migration 018 live. Phase 7 strukturell complete.
-- **2026-05-12**: Phase 6.5 (Draft-Sichtung) inserted nach Debug-Session `import-uebernehmen-noop`. Schloss die Lücke zwischen Phase 6 (Drafts speichern) und Phase 7 (Plan rendern).
-- **2026-05-08 (Pivot M07)**: Kompletter Wegfall aller In-App-AI-Calls. Phase 4 SUPERSEDED. Phasen 5+6+6.5 ersetzen das alte Vision-Capture-Flow.
-- **2026-04-21 (Pivot)**: 2-User Shared Garden Model. Vereinsregeln eingefroren bis Post-MVP.
+- **2026-09-09 (v2-Pivot)**: Fünf Audits (Datenschicht/Sync, UX/Design, Editor, Distribution, Build-Health) → `MASTERPLAN-v2.md`. Milestone v1.1 abgeschlossen und archiviert; v1.0-Phasenverzeichnisse nach `milestones/v1.0-phases/`. Alte Phasen 11–17 absorbiert (Tabelle oben). Beide Nutzer Android → PWA statt nativ. Lokal-Modus und Vereinsregeln bleiben (D-04/D-05).
+- **2026-06-11**: Feature-Sweep (Marktrecherche + 4 Referenz-App-Analysen), Backlog 999.2–999.12.
+- **2026-05-17**: Desktop primär + Saison-2026-Hot-Path (Phasen 8–10 vorgezogen).
+- **2026-05-08 (Pivot M07)**: Null In-App-AI, Claude.ai-Bridge.
+- **2026-04-21 (Pivot)**: 2-User Shared Garden.
 
 ---
 
-*Last updated: 2026-06-11 — Feature-Sweep: Markt-Evidenz eingearbeitet, Backlog erweitert*
+*Last updated: 2026-09-09 — Milestone v1.1 abgeschlossen, v2.0 „Handy-Ready" angelegt (Masterplan v2)*

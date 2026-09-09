@@ -1,0 +1,18 @@
+# Archived Quick Tasks
+
+- [260418-q01-fix-react-native-web-ci](260418-q01-fix-react-native-web-ci/260418-q01-SUMMARY.md)
+- [260421-v43-roadmap-pivot](260421-v43-roadmap-pivot/260421-v43-SUMMARY.md)
+- [260430-web-rebuild-checkpoint](260430-web-rebuild-checkpoint/SUMMARY.md)
+- [260510-r5p-phase-06-import-bug-triple-fix-file-pick](260510-r5p-phase-06-import-bug-triple-fix-file-pick/260510-r5p-SUMMARY.md)
+- [260610-jtf-forensik-sweep-ci-fixes-repo-hygiene-pla](260610-jtf-forensik-sweep-ci-fixes-repo-hygiene-pla/260610-jtf-SUMMARY.md)
+- [260611-jrl-home-header-profil-icon-erg-nzen-navigat](260611-jrl-home-header-profil-icon-erg-nzen-navigat/260611-jrl-SUMMARY.md)
+- [260611-jzl-editor-bug-erste-rotation-springt-um-90-](260611-jzl-editor-bug-erste-rotation-springt-um-90-/260611-jzl-SUMMARY.md)
+- [260611-kpl-web-editor-text-selektion-beim-rotieren-](260611-kpl-web-editor-text-selektion-beim-rotieren-/260611-kpl-SUMMARY.md)
+- [260611-l5y-persistenz-bug-element-positionen-im-bee](260611-l5y-persistenz-bug-element-positionen-im-bee/260611-l5y-SUMMARY.md)
+- [260611-ln5-feature-selektiertes-element-per-pfeilta](260611-ln5-feature-selektiertes-element-per-pfeilta/260611-ln5-SUMMARY.md)
+- [260611-usp-beet-per-klick-ziehen-loslassen-aufziehe](260611-usp-beet-per-klick-ziehen-loslassen-aufziehe/260611-usp-beet-per-klick-ziehen-loslassen-aufziehe-SUMMARY.md)
+- [260611-vk4-beet-per-drag-aufziehen-au-erdem-wenn-el](260611-vk4-beet-per-drag-aufziehen-au-erdem-wenn-el/260611-vk4-SUMMARY.md)
+- [260612-9jb-automatisches-speichern-bei-beet-ver-nde](260612-9jb-automatisches-speichern-bei-beet-ver-nde/260612-9jb-SUMMARY.md)
+- [260615-utj-mehrfach-selektion-im-web-plan-editor-me](260615-utj-mehrfach-selektion-im-web-plan-editor-me/260615-utj-SUMMARY.md)
+- [260616-iuu-logout-option-implementieren-es-gibt-akt](260616-iuu-logout-option-implementieren-es-gibt-akt/260616-iuu-SUMMARY.md)
+- [260616-mh4-manuellen-garten-anlegen-weg-ergaenzen-w](260616-mh4-manuellen-garten-anlegen-weg-ergaenzen-w/260616-mh4-SUMMARY.md)
