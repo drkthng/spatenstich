@@ -4,6 +4,10 @@
 --        existieren pro Tabelle und aa_* ist alphabetisch erster BEFORE-UPDATE-Trigger.
 -- Voraussetzung: Migration 013 applied.
 -- Kein role-switch nötig: pg_trigger-Catalog-Queries laufen als Superuser.
+--
+-- Phase 20 Plan 02 Task 4: ai_jobs/ai_results (Migration 015, M07-Pivot) und
+-- photo_queue (Migration 020) aus dem Array entfernt — alle drei Tabellen
+-- existieren nicht mehr.
 BEGIN;
 
   do $$ declare
@@ -13,7 +17,7 @@ BEGIN;
     cnt_zz    int;
     first_name text;
   begin
-    FOREACH tbl IN ARRAY ARRAY['gardens','vereinsregeln','ai_jobs','ai_results','profiles','photo_queue']
+    FOREACH tbl IN ARRAY ARRAY['gardens','vereinsregeln','profiles']
     LOOP
       -- Prüfe: aa_lww_guard_<tbl> existiert
       SELECT count(*) INTO cnt_aa FROM pg_trigger
@@ -58,7 +62,7 @@ BEGIN;
       END IF;
     END LOOP;
 
-    RAISE NOTICE 'trigger_ordering_ok: aa_/mm_/zz_ Konvention auf 6 Tabellen verifiziert';
+    RAISE NOTICE 'trigger_ordering_ok: aa_/mm_/zz_ Konvention auf 3 Tabellen verifiziert';
   end $$;
 
 ROLLBACK;

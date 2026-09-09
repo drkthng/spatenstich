@@ -7,7 +7,11 @@
 --   3. Member can INSERT into plan_elements for their garden
 --   4. Member can SELECT from plan_elements for their garden
 --   5. Non-member cannot access rows from another garden
---   6. Budget query: COUNT ai_jobs for a garden_id today returns correct count
+--
+-- Phase 20 Plan 02 Task 4: Test 6 (Budget-Query COUNT ai_jobs) entfernt —
+-- ai_jobs wurde bereits mit Migration 20260509000015_remove_ai_tables.sql
+-- gedroppt (M07-Pivot); die Assertion referenzierte eine nicht mehr
+-- existierende Tabelle.
 
 -- ======================================================================
 -- SETUP: Create test users and garden (runs as postgres superuser)
@@ -140,39 +144,11 @@ BEGIN
 END $$;
 
 -- ======================================================================
--- TEST 6: Budget query — COUNT ai_jobs for a garden_id today returns correct count
--- ======================================================================
-RESET ROLE;
-
--- Insert 3 ai_jobs for the test garden (as superuser, since ai_jobs INSERT may be RPC-only)
-INSERT INTO public.ai_jobs (id, created_by_user_id, garden_id, job_type, payload, status, created_at)
-VALUES
-  (gen_random_uuid(), current_setting('test.user_a')::uuid, current_setting('test.garden_id')::uuid,
-   'photo_analysis', '{"test": true}'::jsonb, 'done', now()),
-  (gen_random_uuid(), current_setting('test.user_a')::uuid, current_setting('test.garden_id')::uuid,
-   'photo_analysis', '{"test": true}'::jsonb, 'done', now()),
-  (gen_random_uuid(), current_setting('test.user_a')::uuid, current_setting('test.garden_id')::uuid,
-   'photo_analysis', '{"test": true}'::jsonb, 'queued', now());
-
-DO $$ DECLARE cnt int;
-BEGIN
-  SELECT count(*) INTO cnt FROM public.ai_jobs
-  WHERE garden_id = current_setting('test.garden_id')::uuid
-    AND created_at >= date_trunc('day', now());
-  IF cnt < 3 THEN
-    RAISE EXCEPTION 'TEST 6 FAILED: expected at least 3 ai_jobs today for garden (got %)', cnt;
-  END IF;
-  RAISE NOTICE 'TEST 6 PASSED: budget query COUNT ai_jobs today = %', cnt;
-END $$;
-
--- ======================================================================
 -- CLEANUP
 -- ======================================================================
 RESET ROLE;
 DELETE FROM public.plan_elements WHERE garden_id = current_setting('test.garden_id')::uuid;
 DELETE FROM public.garden_dimensions WHERE garden_id = current_setting('test.garden_id')::uuid;
-DELETE FROM public.ai_jobs WHERE garden_id = current_setting('test.garden_id')::uuid
-  AND (payload->>'test')::boolean = true;
 DELETE FROM public.garden_members WHERE garden_id = current_setting('test.garden_id')::uuid;
 DELETE FROM public.gardens WHERE id = current_setting('test.garden_id')::uuid;
 DELETE FROM public.profiles WHERE id IN (

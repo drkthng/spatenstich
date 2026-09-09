@@ -1,6 +1,8 @@
 -- Phase 2.5 RLS Member-Check Test — Plan 02.5-01-04 (stub) / Plan 02.5-02 (green)
 -- Ausführung: supabase db query -f supabase/tests/rls_member_check.sql --linked
--- Erwartet nach Migration 003: 4× NOTICE 'RLS ok: user B sieht 0 Zeilen von garden A' (gardens, garden_members, vereinsregeln, ai_jobs)
+-- Erwartet nach Migration 003: 3× NOTICE 'RLS ok: user B sieht 0 Zeilen von garden A' (gardens, garden_members, vereinsregeln)
+-- Phase 20 Plan 02 Task 4: ai_jobs-Check entfernt (Migration 015, M07-Pivot —
+-- Tabelle existiert nicht mehr).
 -- Voraussetzung: Migration 003 angewendet (gardens + garden_members + garden_id auf vereinsregeln/ai_jobs/ai_results).
 --
 -- Pattern: rls_phase2.sql — BEGIN/ROLLBACK mit set_config + SET LOCAL ROLE authenticated.
@@ -53,10 +55,5 @@ BEGIN;
     select count(*) into cnt from public.vereinsregeln where garden_id = ga_id;
     if cnt <> 0 then raise exception 'RLS breach (vereinsregeln): user B sees % rows of garden A', cnt; end if;
     raise notice 'RLS ok (vereinsregeln): user B sieht 0 Zeilen von garden A';
-
-    -- ai_jobs isolation
-    select count(*) into cnt from public.ai_jobs where garden_id = ga_id;
-    if cnt <> 0 then raise exception 'RLS breach (ai_jobs): user B sees % rows of garden A', cnt; end if;
-    raise notice 'RLS ok (ai_jobs): user B sieht 0 Zeilen von garden A';
   end $$;
 ROLLBACK;
