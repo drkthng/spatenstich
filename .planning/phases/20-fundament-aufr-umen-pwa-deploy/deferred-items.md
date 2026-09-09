@@ -44,3 +44,31 @@ per the scope-boundary rule.
 grep across the whole package is required later, address in a phase that also revisits
 the CrossPlatform*.tsx lazy-loading strategy (e.g. Phase 22 per Anhang A, which already
 touches `reanimated-color-picker`).
+
+## Task 3: residual worker-leak warning outside the reconnect-tests scope
+
+Task 3's two `<verify>` commands (both scoped to `create-garden-entrypoints` and
+`--testPathPattern=reconnect-`) pass cleanly after the fix (useAuthStore.getState mock +
+IndexedDbAdapter connection teardown in both `reconnect-2user.integration.test.ts` and
+`reconnect-30s.integration.test.ts`). However, `pnpm --filter app exec jest --ci` across
+the FULL 6-project suite still prints:
+
+> A worker process has failed to exit gracefully and has been force exited. This is
+> likely caused by tests leaking due to improper teardown. Try running with
+> --detectOpenHandles to find leaks.
+
+after this fix (confirmed on a fresh run, exit 0, 777/777 tests still passing). Running
+`pnpm --filter app exec jest --ci --detectOpenHandles` (no path filter, full suite)
+was attempted to localize the remaining source but the run did not terminate within a
+generous timeout (multiple minutes with zero output, vs. ~100s for the same suite
+without `--detectOpenHandles`) — itself suggestive of a real handle somewhere in a
+project outside this plan's scope, most likely `node src/storage/__tests__/
+SqliteAdapter.rows.test.ts` (real `sql.js` WASM) or the `photos` project's
+`exifStrip.test.ts` (both take 15-45s per run and are NOT in this plan's
+`files_modified`; `photos` is scheduled for full removal in Plan 20-02 per D-06).
+
+**Verdict:** Task 3's own acceptance criteria (both `<verify>` commands, scoped
+specifically to the files this task touches) are satisfied. The residual full-suite
+warning originates from a different, out-of-scope test project and is left for
+Plan 20-02 (which deletes the `photos` project entirely) or a future investigation to
+resolve if it persists after that removal.

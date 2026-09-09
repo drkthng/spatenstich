@@ -37,8 +37,27 @@ jest.mock('@react-native-community/netinfo', () => ({
 import { IndexedDbAdapter } from '../../../storage/IndexedDbAdapter';
 import type { StorageAdapter } from '@spatenstich/shared';
 
+// Each IndexedDbAdapter opens an underlying `idb` connection via openDB() that is
+// never closed by the adapter itself (no public close() method). Left open across
+// many tests, fake-indexeddb's connections/listeners accumulate and can keep the
+// Jest worker from exiting cleanly (--detectOpenHandles territory). Track every
+// adapter created via createDeviceStorage() and close its connection in afterEach.
+const createdAdapters: IndexedDbAdapter[] = [];
+
 function createDeviceStorage(name: string): StorageAdapter {
-  return new IndexedDbAdapter(name) as StorageAdapter;
+  const adapter = new IndexedDbAdapter(name);
+  createdAdapters.push(adapter);
+  return adapter as StorageAdapter;
+}
+
+async function closeCreatedAdapters(): Promise<void> {
+  while (createdAdapters.length > 0) {
+    const adapter = createdAdapters.pop()!;
+    // dbPromise is `private` at compile time only — reach through at runtime to
+    // close the underlying idb connection (no public close() API exists).
+    const db = await (adapter as unknown as { dbPromise: Promise<{ close: () => void }> }).dbPromise;
+    db.close();
+  }
 }
 
 // ── Supabase Shim (shared server state) ────────────────────────────────────────
@@ -169,9 +188,10 @@ function gardenRow(overrides?: Partial<GardenRow>): GardenRow {
 // ── Test Suite ────────────────────────────────────────────────────────────────
 
 describe('SC-5: 2-User Reconnect 30s-Window (Class-API)', () => {
-  afterEach(() => {
+  afterEach(async () => {
     syncEvents._reset();
     jest.clearAllMocks();
+    await closeCreatedAdapters();
   });
 
   // SC-5: binnen 30s bedeutet: sobald Gerät B pullAll() aufruft, sieht es die Änderung.
