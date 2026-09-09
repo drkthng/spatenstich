@@ -219,6 +219,13 @@ Siehe `user_setup` in `20-01-PLAN.md` fuer die genauen Schritte (GitHub → Repo
 - Backstop-Wahrheit "CI-Workflow laeuft auf dem Phasen-PR gruen durch" ist NICHT in diesem Ausfuehrungslauf verifizierbar (kein PR, kein Actions-Run von hier aus) — als `human_judgment: true` in `coverage:` (D5) markiert; erste echte gruene CI-Bestaetigung folgt nach M2 (GitHub-Variablen) und dem PR-Erstellen.
 - Zwei dokumentierte Restposten (siehe Deviations) sind fuer Plan 20-02 relevant: das `photos`-Projekt wird dort komplett entfernt, was den verbleibenden Worker-Leak in der Gesamtsuite moeglicherweise mit aufraeumt.
 
+## Self-Check: PASSED
+
+- All 20 key-files (10 spot-checked + all frontmatter key-files) verified present with `[ -f ]`.
+- All 7 commit hashes (3f3cf93, 5d49871, 3e456f1, f1e17b3, 758965f, 5b95ac4, 9b1870c) verified present via `git log --oneline --all`.
+- All plan-level `<verification>` commands re-run and green: `pnpm -r run typecheck` (exit 0), `pnpm -r run lint` (exit 0, 62 warnings/0 errors), `pnpm --filter app exec jest --ci` (777/777), `pnpm --filter @spatenstich/shared exec jest --ci` (87/87).
+- All 4 tasks' own `<acceptance_criteria>`/`<verify>` commands re-run and green (see Task Commits + Coverage above), except the backstop truth (D5, CI-on-PR) which is explicitly non-automatable from this worktree and flagged `human_judgment: true`.
+
 ---
 *Phase: 20-fundament-aufr-umen-pwa-deploy*
 *Completed: 2026-09-09*
