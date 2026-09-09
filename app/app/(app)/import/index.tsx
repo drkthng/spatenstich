@@ -26,6 +26,25 @@ export default function ImportEntryScreen(): React.JSX.Element {
   const [errors, setErrors] = React.useState<string[] | null>(null);
   const [loading, setLoading] = React.useState(false);
 
+  const handleValidate = React.useCallback((input: string) => {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(input);
+    } catch {
+      setErrors([t('import.errorJsonSyntax')]);
+      return;
+    }
+    // T-06-08: validatePayload validates before any navigation or state update
+    const result = validatePayload(parsed);
+    if (result.ok) {
+      setErrors(null);
+      useImportStore.getState().setPayload(result.payload);
+      router.push('/(app)/import/preview' as any);
+    } else {
+      setErrors(result.errors);
+    }
+  }, [router]);
+
   // Handle incoming file URI from share-intent (T-06-09: same validation path as paste)
   React.useEffect(() => {
     if (!fileUri) return;
@@ -43,26 +62,7 @@ export default function ImportEntryScreen(): React.JSX.Element {
         setLoading(false);
       }
     })();
-  }, [fileUri]);
-
-  const handleValidate = (input: string) => {
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(input);
-    } catch {
-      setErrors([t('import.errorJsonSyntax')]);
-      return;
-    }
-    // T-06-08: validatePayload validates before any navigation or state update
-    const result = validatePayload(parsed);
-    if (result.ok) {
-      setErrors(null);
-      useImportStore.getState().setPayload(result.payload);
-      router.push('/(app)/import/preview' as any);
-    } else {
-      setErrors(result.errors);
-    }
-  };
+  }, [fileUri, handleValidate]);
 
   const handleFilePicker = async () => {
     const result = await DocumentPicker.getDocumentAsync({

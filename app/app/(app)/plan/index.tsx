@@ -22,7 +22,6 @@ import { EditorCanvas } from '@/src/components/editor/EditorCanvas';
 import { EditorToolbar } from '@/src/components/editor/EditorToolbar';
 import { ElementPalette, type PaletteTab } from '@/src/components/editor/ElementPalette';
 import { DraftsTrayBottomSheet } from '@/src/components/editor/DraftsTrayBottomSheet';
-import { GardenPlanView } from '@/src/components/GardenPlanView';
 import { WebPlanEditor } from '@/src/components/editor/web/WebPlanEditor';
 import { WebPaletteBar, type PlantMeta } from '@/src/components/editor/web/WebPaletteBar';
 import { WebEditorToolbar } from '@/src/components/editor/web/WebEditorToolbar';
