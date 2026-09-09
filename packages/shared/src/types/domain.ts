@@ -57,7 +57,8 @@ export interface InviteCode {
 }
 
 // ── Vereinsregeln (Phase 2 — unchanged, but now garden-scoped in DB; types bleiben) ──
-export type VereinsregelSource = 'pdf_extraction' | 'checklist' | 'manual';
+// Der PDF-Extraktions-Quellwert wurde entfernt (Plan 20-02 D-05): der PDF-Upload-Pfad existiert nicht mehr.
+export type VereinsregelSource = 'checklist' | 'manual';
 
 export interface VereinsRegel {
   id: string;

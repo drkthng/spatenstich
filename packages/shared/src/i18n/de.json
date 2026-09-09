@@ -82,13 +82,6 @@
         "save": "Übernehmen",
         "cancel": "Abbrechen"
       }
-    },
-    "upload": {
-      "loading_title": "Regeln werden extrahiert…",
-      "loading_sub": "Das kann 10–30 Sekunden dauern.",
-      "error_timeout": "Extraktion fehlgeschlagen. Bitte versuche es erneut oder wähle die Checkliste.",
-      "retry": "Erneut versuchen",
-      "local_disabled": "PDF-Upload erfordert einen Account. Mit einem Account kannst du auch deine Daten sichern."
     }
   },
   "settings": {
