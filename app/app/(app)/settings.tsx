@@ -171,20 +171,6 @@ export default function SettingsScreen(): React.JSX.Element | null {
           </Text>
         </Button>
 
-        <Link href="/(app)/settings/privacy" asChild>
-          <Pressable
-            className="py-3 border-b border-stone-200 dark:border-stone-800 flex-row items-center justify-between"
-            accessibilityRole="button"
-            accessibilityLabel="Datenschutz"
-            testID="settings-privacy-link"
-          >
-            <Text className="text-base text-stone-700 dark:text-stone-200 font-semibold">
-              Datenschutz
-            </Text>
-            <Text className="text-stone-400">›</Text>
-          </Pressable>
-        </Link>
-
         <Link href="/(app)/settings/sync" asChild>
           <Pressable
             className="py-3 border-b border-stone-200 dark:border-stone-800 flex-row items-center justify-between"
