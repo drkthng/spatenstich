@@ -38,27 +38,39 @@ DROP POLICY IF EXISTS "feature_flags_service_update"       ON public.feature_fla
 DROP TABLE IF EXISTS public.feature_flags CASCADE;
 
 -- ──────────────────────────────────────────────────────────────
--- Section 3 — Storage-Buckets photos / vereinsregeln, nur wenn leer
--- (RESEARCH Open Question 2: Bucket-Inhalt aus dieser Umgebung nicht
--- verifizierbar — Zaehlpruefung entscheidet zur Push-Zeit live).
--- Policies und Bucket-Zeile immer im selben Block, damit keine
--- verwaisten Policies zurueckbleiben (T-20-02-02).
+-- Section 3 — Storage-Buckets photos / vereinsregeln: nur beobachten,
+-- NICHT loeschen (Korrektur beim echten Push gegen die Live-DB am
+-- 2026-09-12, Plan 20-02 Task 7 / Deviation Rule 1+3).
+--
+-- Urspruenglicher Plan: Bucket-Zeile + Policies im selben DO-Block
+-- entfernen, wenn storage.objects fuer den Bucket leer ist (T-20-02-02:
+-- nie Policy ohne Bucket oder umgekehrt). Beim echten Gate-3-Push gegen
+-- vitrqkzxkiqvadqfzrcx schlug `DELETE FROM storage.buckets ...` mit
+-- SQLSTATE 42501 fehl: "Direct deletion from storage tables is not
+-- allowed. Use the Storage API instead." — eine Plattform-Absicherung,
+-- die zum Zeitpunkt der Planung (Masterplan Anhang C.1) nicht bekannt
+-- war. Die Migration lief in Supabase's impliziter Transaktion; der
+-- Fehlschlag hat die gesamte Migration atomar zurueckgerollt (verifiziert
+-- per Direktabfrage nach dem fehlgeschlagenen Push — kein Objekt wurde
+-- geloescht, kein Teilzustand entstand).
+--
+-- Fix: Da eine SQL-DELETE auf storage.buckets grundsaetzlich nicht mehr
+-- moeglich ist, wuerde ein Policy-Drop ohne Bucket-Drop exakt die von
+-- T-20-02-02 verbotene Teil-Entfernung erzeugen. Diese Sektion bleibt
+-- daher rein informativ: nur die Zaehlpruefung + RAISE NOTICE, keine
+-- DROP POLICY / DELETE-Anweisung mehr. Beide Buckets bleiben mit ihren
+-- bestehenden Policies unangetastet stehen — deckungsgleich mit der im
+-- Plan bereits vorgesehenen "nicht leer"-Fallback-Disposition
+-- (T-20-02-04, "accept"), jetzt fuer beide Faelle. Tatsaechliche
+-- Bucket-Entfernung ist ein offener manueller Punkt ueber die Storage
+-- API/das Dashboard (nicht Teil dieser Migration).
 -- ──────────────────────────────────────────────────────────────
 DO $$
 DECLARE
   v_photos_count int;
 BEGIN
   SELECT count(*) INTO v_photos_count FROM storage.objects WHERE bucket_id = 'photos';
-  IF v_photos_count = 0 THEN
-    DROP POLICY IF EXISTS "photos_garden_member_read"   ON storage.objects;
-    DROP POLICY IF EXISTS "photos_garden_member_insert" ON storage.objects;
-    DROP POLICY IF EXISTS "photos_garden_member_update" ON storage.objects;
-    DROP POLICY IF EXISTS "photos_garden_member_delete" ON storage.objects;
-    DELETE FROM storage.buckets WHERE id = 'photos';
-    RAISE NOTICE 'cleanup_legacy: bucket photos leer — Bucket + Policies entfernt';
-  ELSE
-    RAISE NOTICE 'cleanup_legacy: bucket photos enthaelt % Objekt(e) — NICHT entfernt, manueller Aufraeumpunkt', v_photos_count;
-  END IF;
+  RAISE NOTICE 'cleanup_legacy: bucket photos enthaelt % Objekt(e) — Bucket+Policies bleiben stehen (SQL-DELETE auf storage.buckets von der Plattform verboten, manueller Aufraeumpunkt ueber Storage API)', v_photos_count;
 END $$;
 
 DO $$
@@ -66,13 +78,7 @@ DECLARE
   v_vereinsregeln_count int;
 BEGIN
   SELECT count(*) INTO v_vereinsregeln_count FROM storage.objects WHERE bucket_id = 'vereinsregeln';
-  IF v_vereinsregeln_count = 0 THEN
-    DROP POLICY IF EXISTS "vereinsregeln_storage_own" ON storage.objects;
-    DELETE FROM storage.buckets WHERE id = 'vereinsregeln';
-    RAISE NOTICE 'cleanup_legacy: bucket vereinsregeln leer — Bucket + Policy entfernt';
-  ELSE
-    RAISE NOTICE 'cleanup_legacy: bucket vereinsregeln enthaelt % Objekt(e) — NICHT entfernt, manueller Aufraeumpunkt', v_vereinsregeln_count;
-  END IF;
+  RAISE NOTICE 'cleanup_legacy: bucket vereinsregeln enthaelt % Objekt(e) — Bucket+Policy bleiben stehen (SQL-DELETE auf storage.buckets von der Plattform verboten, manueller Aufraeumpunkt ueber Storage API)', v_vereinsregeln_count;
 END $$;
 
 -- ──────────────────────────────────────────────────────────────
