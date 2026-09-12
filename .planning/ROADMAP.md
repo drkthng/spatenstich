@@ -81,7 +81,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 20-02-PLAN.md — Dead Code raus, FEATURES-Konstante, Lokal-Modus crashfrei, Migration 020 mit Backup-Checkpoint (Wave 2)
+- [x] 20-02-PLAN.md — Dead Code raus, FEATURES-Konstante, Lokal-Modus crashfrei, Migration 020 mit Backup-Checkpoint (Wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 

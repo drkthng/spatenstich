@@ -5,16 +5,16 @@ milestone_name: Handy-Ready
 current_phase: 20
 current_phase_name: Fundament, Aufräumen, PWA-Deploy
 status: executing
-stopped_at: context exhaustion at 75% (2026-09-09)
-last_updated: "2026-09-09T11:17:17.959Z"
+stopped_at: Completed 20-02-PLAN.md (Migration 020 live gepusht)
+last_updated: "2026-09-12T20:07:29.020Z"
 last_activity: 2026-09-09
 last_activity_desc: Phase 20 execution started
-state_head: 2652d7ccd042714c31ec071c4d20a60ee3582c7b
+state_head: 6a9df919ec624f0a578089786527c96726814a38
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 4
-  completed_plans: 0
+  completed_plans: 2
   percent: 0
 ---
 
@@ -32,11 +32,11 @@ See: docs/specs/M07-claude-ai-bridge.md (Import-Bridge)
 ## Current Position
 
 Phase: 20 (Fundament, Aufräumen, PWA-Deploy) — EXECUTING
-Plan: 1 of 4
-Status: Executing Phase 20
+Plan: 2 of 4
+Status: Ready to execute
 Last activity: 2026-09-09 — Phase 20 execution started
 
-Progress: [░░░░░░░░░░░░░░░░░░░░] 0/27 plans (0%) — v2.0 Phasen 20–25
+Progress: [░░░░░░░░░░░░░░░░░░░░] 0/27 plans ([░░░░░░░░░░] 0%) — v2.0 Phasen 20–25
 
 ## Performance Metrics
 
@@ -54,6 +54,11 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0/27 pl
 | 25 | 0/1 | - | - |
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 20-fundament-aufr-umen-pwa-deploy P02 | 35 min | 7 tasks | 41 files |
 
 ## Accumulated Context
 
@@ -68,6 +73,7 @@ Für v2.0 verbindlich:
 - **[2026-09-09 D-07]**: Client-`updated_at` ist LWW-Wahrheit, `server_updated_at` ist Pull-Cursor; Realtime + Polling.
 - **[2026-09-09 D-12]**: Passwort-Reset per 6-stelligem Code; E-Mail-Bestätigung wird im Dashboard deaktiviert (manueller Schritt M4).
 - Repo-Konventionen bleiben: TDD RED→GREEN-Commits, 3-Gate-Supabase-Push, UTF-8-Umlaute in `de.json`, Draft-PRs, ein Branch pro Phase (`gsd/phase-NN-slug`).
+- [Phase 20]: Task 5/6: User waehlte Option A (sofort bereinigen) und bestaetigte das Backup nach Passwort-Reset — R9-Backup-Pflicht erfuellt; Migration 020 danach erfolgreich live gepusht
 
 ### Deferred Items
 
@@ -120,8 +126,8 @@ Keine. (`todos/freier-foto-upload.md` gestrichen — Foto-Upload ist seit M07 ou
 
 ## Session Continuity
 
-Last session: 2026-09-09T10:53:52.504Z
-Stopped at: context exhaustion at 75% (2026-09-09)
+Last session: 2026-09-12T20:07:28.978Z
+Stopped at: Completed 20-02-PLAN.md (Migration 020 live gepusht)
 Resume file: None
 Next: `/gsd-execute-phase 20` in frischer Session (Branch `gsd/phase-20-fundament-aufr-umen-pwa-deploy` wird von GSD angelegt). Drei Human-Gates darin: Paket-Prüfung sharp/workbox-cli (20-03 T1), Backup M5 vor `supabase db push` (20-02 T6), M1–M3 vor dem Live-Deploy (20-04 T4)
 
