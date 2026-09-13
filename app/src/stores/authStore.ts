@@ -15,9 +15,16 @@ export interface AuthState {
   mode: AuthMode;
   userId: string | null;
   activeGardenId: string | null;
+  // Phase 20 Plan 03 (DEPLOY-04): Ziel-Route, wenn ein Web-Share-Target-Aufruf
+  // (POST /share-target → /import?from=share) eintrifft, während niemand
+  // angemeldet ist. Nach erfolgreichem Login navigiert die App dorthin zurück
+  // (siehe app/app/_layout.tsx GuardedStack).
+  pendingRoute: string | null;
   setAccountMode: (userId: string) => void;
   setLocalMode: (uuid: string) => void;
   setActiveGarden: (gardenId: string | null) => void;
+  setPendingRoute: (route: string | null) => void;
+  clearPendingRoute: () => void;
   clearAuth: () => void;
 }
 
@@ -27,28 +34,35 @@ export const useAuthStore = create<AuthState>()(
       mode: null,
       userId: null,
       activeGardenId: null,
+      pendingRoute: null,
       setAccountMode: (userId) => set({ mode: 'account', userId }),
       setLocalMode: (uuid) =>
         set({ mode: 'local', userId: uuid, activeGardenId: null }),
       setActiveGarden: (gardenId) => set({ activeGardenId: gardenId }),
+      setPendingRoute: (route) => set({ pendingRoute: route }),
+      clearPendingRoute: () => set({ pendingRoute: null }),
       clearAuth: () => set({ mode: null, userId: null, activeGardenId: null }),
     }),
     {
       name: 'spatenstich-auth',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 1,
+      version: 2,
       // v0 → v1: persisted blobs from Phase 2 did not store `activeGardenId`.
-      // Rehydrate them with `activeGardenId: null` so post-rehydrate reads
-      // never return `undefined` (TypeScript contract: string | null).
+      // v1 → v2 (Plan 20-03): `pendingRoute` is new — default it to null for
+      // any persisted state older than v2. Existing branches stay untouched.
       migrate: (persistedState: unknown, version: number) => {
+        let state = persistedState;
         if (
           version === 0 &&
-          typeof persistedState === 'object' &&
-          persistedState !== null
+          typeof state === 'object' &&
+          state !== null
         ) {
-          return { ...persistedState, activeGardenId: null };
+          state = { ...state, activeGardenId: null };
         }
-        return persistedState;
+        if (version < 2 && typeof state === 'object' && state !== null) {
+          state = { ...state, pendingRoute: null };
+        }
+        return state;
       },
     }
   )

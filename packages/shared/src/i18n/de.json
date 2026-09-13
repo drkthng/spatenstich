@@ -183,6 +183,11 @@
     "saveError": "Speichern fehlgeschlagen. Versuche es erneut.",
     "saving": "Wird gespeichert …",
     "noPayload": "Kein Import-Payload vorhanden.",
+    "share": {
+      "loading": "Geteilten Inhalt wird gelesen …",
+      "empty": "Kein geteilter Inhalt gefunden. Bitte erneut aus der Claude-App teilen.",
+      "error": "Geteilter Inhalt konnte nicht gelesen werden. Bitte erneut versuchen."
+    },
     "sections": {
       "beds": "Beete",
       "plants": "Pflanzen",

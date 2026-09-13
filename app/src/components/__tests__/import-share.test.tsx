@@ -9,9 +9,14 @@ import de from '@spatenstich/shared/i18n/de';
 import minimalPayload from '../../../../schemas/examples/minimal.json';
 
 const mockPush = jest.fn();
+// Stable object reference across renders — ImportEntryScreen's handleValidate
+// useCallback depends on `router`; a router recreated on every render would
+// make handleValidate (and effects depending on it) re-fire in an infinite
+// loop under test, unlike the real expo-router which returns a stable object.
+const mockRouter = { push: mockPush, replace: jest.fn(), back: jest.fn() };
 let mockSearchParams: { from?: string } = {};
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: mockPush, replace: jest.fn(), back: jest.fn() }),
+  useRouter: () => mockRouter,
   useLocalSearchParams: () => mockSearchParams,
   Stack: { Screen: () => null },
 }));

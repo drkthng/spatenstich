@@ -24,10 +24,6 @@ workbox.setConfig({ modulePathPrefix: '/workbox-v7.4.1/' });
 const { precacheAndRoute, createHandlerBoundToURL } = workbox.precaching;
 const { registerRoute, NavigationRoute } = workbox.routing;
 
-// Fundament dieser Scheibe: Precache + Navigation-Route + SKIP_WAITING-Message-
-// Listener. Der Teilen-Handler (POST /share-target) kommt in Task 3 dazu — die
-// Navigation-Route nimmt /share-target hier bereits aus der denylist aus, damit
-// Task 3 den Pfad ohne Aenderung an dieser Route ergaenzen kann.
 precacheAndRoute(self.__WB_MANIFEST);
 
 registerRoute(
@@ -42,4 +38,60 @@ self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+});
+
+// ── Web Share Target (Phase 20 Plan 03 Task 3, DEPLOY-04) ──────────────────
+// manifest.json share_target -> Chrome POSTet geteilte Inhalte (z.B. aus der
+// Claude-App) hierher. Diese Konstanten sind der Vertrag mit
+// app/src/lib/shareInbox.ts — dieselbe Datenbank/Store/Schluessel auf beiden
+// Seiten. Der Worker verwendet die ROHE IndexedDB-API (kein `idb`-Import;
+// dieser Quellcode wird nicht durch Metro gebuendelt, siehe Kommentar oben).
+const SHARE_DB_NAME = 'spatenstich-share';
+const SHARE_STORE_NAME = 'inbox';
+const SHARE_KEY = 'latest';
+const SHARE_DB_VERSION = 1;
+
+function putShareInboxEntry(entry) {
+  return new Promise((resolve, reject) => {
+    const openReq = indexedDB.open(SHARE_DB_NAME, SHARE_DB_VERSION);
+    openReq.onupgradeneeded = () => {
+      const db = openReq.result;
+      if (!db.objectStoreNames.contains(SHARE_STORE_NAME)) {
+        db.createObjectStore(SHARE_STORE_NAME);
+      }
+    };
+    openReq.onsuccess = () => {
+      const db = openReq.result;
+      const tx = db.transaction(SHARE_STORE_NAME, 'readwrite');
+      tx.objectStore(SHARE_STORE_NAME).put(entry, SHARE_KEY);
+      tx.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+      tx.onerror = () => {
+        db.close();
+        reject(tx.error);
+      };
+    };
+    openReq.onerror = () => reject(openReq.error);
+  });
+}
+
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  if (event.request.method !== 'POST' || url.pathname !== '/share-target') {
+    return; // alle anderen Anfragen unveraendert durchlassen
+  }
+  event.respondWith(
+    (async () => {
+      const formData = await event.request.formData();
+      const file = formData.get('file');
+      const text =
+        file && typeof file.text === 'function'
+          ? await file.text()
+          : String(formData.get('text') || '');
+      await putShareInboxEntry({ text, receivedAt: Date.now() });
+      return Response.redirect('/import?from=share', 303);
+    })()
+  );
 });
