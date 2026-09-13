@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "Spatenstich",
+  "short_name": "Spatenstich",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "lang": "de",
+  "background_color": "#F6F1E7",
+  "theme_color": "#4A7C59",
+  "description": "Persönlicher digitaler Kleingarten-Assistent — Plan-Editor und Import aus Claude.ai.",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon-512-mono.png", "sizes": "512x512", "type": "image/png", "purpose": "monochrome" }
+  ]
+}

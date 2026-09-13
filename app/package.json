@@ -8,6 +8,7 @@
     "web": "expo start --web --port 8095",
     "ios": "expo start --ios",
     "build": "expo export --platform web",
+    "build:web": "node ../scripts/copy-workbox-runtime.mjs && expo export --platform web && node ../scripts/inject-html-head.mjs && workbox injectManifest workbox-config.js",
     "typecheck": "node ../node_modules/typescript/bin/tsc --noEmit",
     "lint": "expo lint",
     "test": "jest --passWithNoTests"
@@ -64,9 +65,11 @@
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
     "react-test-renderer": "18.3.1",
+    "sharp": "0.35.4",
     "tailwindcss": "^3.4.19",
     "ts-jest": "29.1.2",
     "ts-node": "10.9.2",
-    "typescript": "5.8.3"
+    "typescript": "5.8.3",
+    "workbox-cli": "7.4.1"
   }
 }

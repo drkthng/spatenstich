@@ -39,6 +39,28 @@ function SplashController(): null {
   return null;
 }
 
+// Service-Worker-Registrierung — Phase 20 Plan 03 Task 2 (DEPLOY-03, T-20-03-01).
+// Nur bei Plattform web, vorhandenem Service-Worker-Container und https
+// registrieren (auf http — lokaler Dev-Server — registriert sich absichtlich
+// nichts, RESEARCH key_link). Der Update-Hinweis (SKIP_WAITING) kommt in Task 4.
+function ServiceWorkerController(): null {
+  React.useEffect(() => {
+    if (
+      Platform.OS !== 'web' ||
+      typeof navigator === 'undefined' ||
+      !('serviceWorker' in navigator) ||
+      typeof location === 'undefined' ||
+      location.protocol !== 'https:'
+    ) {
+      return;
+    }
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      if (__DEV__) console.warn('[layout] service worker registration failed', err);
+    });
+  }, []);
+  return null;
+}
+
 function GuardedStack(): React.JSX.Element {
   const { identity, isLoading } = useAuth();
   const segments = useSegments();
@@ -117,6 +139,7 @@ function RootLayoutInner(): React.JSX.Element {
   return (
     <>
       <SplashController />
+      <ServiceWorkerController />
       <GuardedStack />
     </>
   );
