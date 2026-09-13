@@ -5,16 +5,16 @@ milestone_name: Handy-Ready
 current_phase: 20
 current_phase_name: Fundament, Aufräumen, PWA-Deploy
 status: executing
-stopped_at: Completed 20-02-PLAN.md (Migration 020 live gepusht)
-last_updated: "2026-09-12T20:07:29.020Z"
+stopped_at: Completed 20-03-PLAN.md (PWA-Shell, Web Share Target, Install/Update-Lifecycle)
+last_updated: "2026-09-13T16:32:55.285Z"
 last_activity: 2026-09-09
 last_activity_desc: Phase 20 execution started
-state_head: 6a9df919ec624f0a578089786527c96726814a38
+state_head: 04dbe1e50b59b18a1114690db305cddaac0d0878
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -32,7 +32,7 @@ See: docs/specs/M07-claude-ai-bridge.md (Import-Bridge)
 ## Current Position
 
 Phase: 20 (Fundament, Aufräumen, PWA-Deploy) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-09-09 — Phase 20 execution started
 
@@ -59,6 +59,7 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0/27 pl
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 20-fundament-aufr-umen-pwa-deploy P02 | 35 min | 7 tasks | 41 files |
+| Phase 20 P03 | 55 min | 4 tasks | 37 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,8 @@ Für v2.0 verbindlich:
 - **[2026-09-09 D-12]**: Passwort-Reset per 6-stelligem Code; E-Mail-Bestätigung wird im Dashboard deaktiviert (manueller Schritt M4).
 - Repo-Konventionen bleiben: TDD RED→GREEN-Commits, 3-Gate-Supabase-Push, UTF-8-Umlaute in `de.json`, Draft-PRs, ein Branch pro Phase (`gsd/phase-NN-slug`).
 - [Phase 20]: Task 5/6: User waehlte Option A (sofort bereinigen) und bestaetigte das Backup nach Passwort-Reset — R9-Backup-Pflicht erfuellt; Migration 020 danach erfolgreich live gepusht
+- [Phase 20]: 20-03: injectManifest bundles keine ES-Module-Importe (Quellcode-verifiziert) - klassischer Worker + importScripts() gegen lokal gehostete workbox-sw-Runtime statt CDN oder Modul-Worker
+- [Phase 20]: 20-03: PwaControllers.tsx (ServiceWorkerController/InstallPromptController/StorageController) aus _layout.tsx ausgelagert - testbare Seam fuer die tdd=true-Anforderung von Task 4
 
 ### Deferred Items
 
@@ -126,8 +129,8 @@ Keine. (`todos/freier-foto-upload.md` gestrichen — Foto-Upload ist seit M07 ou
 
 ## Session Continuity
 
-Last session: 2026-09-12T20:07:28.978Z
-Stopped at: Completed 20-02-PLAN.md (Migration 020 live gepusht)
+Last session: 2026-09-13T16:32:55.237Z
+Stopped at: Completed 20-03-PLAN.md (PWA-Shell, Web Share Target, Install/Update-Lifecycle)
 Resume file: None
 Next: `/gsd-execute-phase 20` in frischer Session (Branch `gsd/phase-20-fundament-aufr-umen-pwa-deploy` wird von GSD angelegt). Drei Human-Gates darin: Paket-Prüfung sharp/workbox-cli (20-03 T1), Backup M5 vor `supabase db push` (20-02 T6), M1–M3 vor dem Live-Deploy (20-04 T4)
 

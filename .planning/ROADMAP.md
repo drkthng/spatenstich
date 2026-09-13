@@ -85,7 +85,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 20-03-PLAN.md — PWA-Shell: Manifest, Icons, HTML-Template, Service Worker, Teilen-Ziel, Install-Banner, Cache-Header (Wave 3)
+- [x] 20-03-PLAN.md — PWA-Shell: Manifest, Icons, HTML-Template, Service Worker, Teilen-Ziel, Install-Banner, Cache-Header (Wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
