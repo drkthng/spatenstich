@@ -29,6 +29,11 @@ Kein nativer Build in v2.0 (D-01) — `eas-build.yml` laeuft nur noch manuell
 SDK-Mixes ist Ist-Stand (D-13: kein Upgrade in Phase 20 ausser den in Masterplan
 Anhang A genannten Entfernungen/Ergaenzungen):
 
+**Betrieb (Phase 20.4):** Deploy-Ziel ist **Cloudflare Pages** (`spatenstich.pages.dev`,
+Direct Upload aus GitHub Actions bei jedem Push auf `master`); Hosting/Backend bleibt
+Supabase Free (Frankfurt), wach gehalten durch einen GitHub-Zeitplan alle drei Tage plus
+einen taeglichen Task-Scheduler-Ping vom 24/7-PC (Keep-alive).
+
 ## Ist-Stack (installiert, `app/package.json`)
 | Library / Tool | Ist-Version | Quelle |
 |---|---|---|
