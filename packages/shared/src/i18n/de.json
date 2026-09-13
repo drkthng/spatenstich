@@ -426,5 +426,12 @@
       "sonnenbedarf": "Sonnenbedarf: {value}",
       "familie": "Familie: {family}"
     }
+  },
+  "pwa": {
+    "installBanner": "Spatenstich als App installieren",
+    "installAction": "Installieren",
+    "updateAvailable": "Neue Version verfügbar",
+    "updateAction": "Neu laden",
+    "storageWarning": "Der Speicher ist zu über 80 % belegt. Räume Speicherplatz frei, damit Spatenstich weiter offline funktioniert."
   }
 }

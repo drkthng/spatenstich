@@ -9,12 +9,19 @@
 //   3. (siehe settings-install-banner.test.tsx) Installations-Banner im
 //      Standalone-Modus NICHT sichtbar.
 import * as React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import de from '@spatenstich/shared/i18n/de';
 
 const mockHasPendingSaves = jest.fn().mockReturnValue(false);
 jest.mock('@/src/lib/editor/saveDebounce', () => ({
   hasPendingSaves: () => mockHasPendingSaves(),
+}));
+
+// StorageController (same module) uses useAuth() from @/src/lib/auth, which
+// imports ./supabase — that throws at import time without real env vars.
+// Not exercised by these tests (ServiceWorkerController only); mock it out.
+jest.mock('@/src/lib/auth', () => ({
+  useAuth: () => ({ identity: null }),
 }));
 
 import { ServiceWorkerController } from '../pwa/PwaControllers';
@@ -57,9 +64,11 @@ describe('ServiceWorkerController — Update-Hinweis (DEPLOY-03/04)', () => {
     );
 
     // simuliere 'updatefound' -> installing-worker wird 'statechange'-beobachtet
-    fakeRegistration.dispatchEvent(new Event('updatefound'));
-    fakeInstalling.state = 'installed';
-    fakeInstalling.dispatchEvent(new Event('statechange'));
+    act(() => {
+      fakeRegistration.dispatchEvent(new Event('updatefound'));
+      fakeInstalling.state = 'installed';
+      fakeInstalling.dispatchEvent(new Event('statechange'));
+    });
 
     await findByText(de.pwa.updateAvailable);
   });
@@ -69,9 +78,11 @@ describe('ServiceWorkerController — Update-Hinweis (DEPLOY-03/04)', () => {
     await waitFor(() =>
       expect(fakeServiceWorkerContainer.register).toHaveBeenCalledWith('/sw.js'),
     );
-    fakeRegistration.dispatchEvent(new Event('updatefound'));
-    fakeInstalling.state = 'installed';
-    fakeInstalling.dispatchEvent(new Event('statechange'));
+    act(() => {
+      fakeRegistration.dispatchEvent(new Event('updatefound'));
+      fakeInstalling.state = 'installed';
+      fakeInstalling.dispatchEvent(new Event('statechange'));
+    });
 
     const actionText = await findByText(de.pwa.updateAction);
 

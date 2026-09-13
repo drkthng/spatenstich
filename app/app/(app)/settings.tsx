@@ -10,13 +10,14 @@
 // and useAuth().signOut() we call Sentry.setUser(null) ONLY when the
 // DSN env is present (mirrors Plan 01-03's Sentry.init gating).
 import * as React from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { View, Text, ScrollView, Pressable, Platform } from 'react-native';
 import { useRouter, Link } from 'expo-router';
 import * as Sentry from '@sentry/react-native';
 import de from '@spatenstich/shared/i18n/de';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
+import { InlineBanner } from '@/src/components/InlineBanner';
 import { useAuth } from '@/src/lib/auth';
 import { useAuthStore } from '@/src/stores/authStore';
 import { supabase } from '@/src/lib/supabase';
@@ -28,7 +29,37 @@ const t = (key: string): string =>
 export default function SettingsScreen(): React.JSX.Element | null {
   const router = useRouter();
   const mode = useAuthStore((s) => s.mode);
+  const installPromptEvent = useAuthStore((s) => s.installPromptEvent);
+  const clearInstallPrompt = useAuthStore((s) => s.clearInstallPrompt);
   const { signOut } = useAuth();
+
+  // Installations-Banner (Phase 20 Plan 03 Task 4, DEPLOY-04) — "Spatenstich
+  // als App installieren", vorerst hier unter den Einstellungen ("Heute" kommt
+  // in Phase 23). Ausblenden, sobald der Anzeigemodus standalone meldet.
+  const [isStandalone, setIsStandalone] = React.useState(false);
+  React.useEffect(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined' || !window.matchMedia) {
+      return;
+    }
+    setIsStandalone(window.matchMedia('(display-mode: standalone)').matches);
+  }, []);
+
+  const showInstallBanner = Platform.OS === 'web' && !!installPromptEvent && !isStandalone;
+
+  const handleInstall = React.useCallback(async () => {
+    const promptEvent = installPromptEvent as
+      | { prompt: () => void; userChoice?: Promise<unknown> }
+      | null;
+    if (!promptEvent?.prompt) return;
+    promptEvent.prompt();
+    try {
+      await promptEvent.userChoice;
+    } catch {
+      // Nutzer hat abgelehnt oder das Ereignis liefert kein userChoice — beides ok.
+    } finally {
+      clearInstallPrompt();
+    }
+  }, [installPromptEvent, clearInstallPrompt]);
 
   // Account mode — email readout + logout confirmation
   const [email, setEmail] = React.useState<string | null>(null);
@@ -138,6 +169,16 @@ export default function SettingsScreen(): React.JSX.Element | null {
           Konto
         </Text>
 
+        {showInstallBanner ? (
+          <InlineBanner
+            message={t('pwa.installBanner')}
+            actionLabel={t('pwa.installAction')}
+            onAction={handleInstall}
+            variant="success"
+            testID="pwa-install-banner"
+          />
+        ) : null}
+
         {email ? (
           <View className="gap-1">
             <Text className="text-xs uppercase text-stone-500">E-Mail</Text>
@@ -239,6 +280,17 @@ export default function SettingsScreen(): React.JSX.Element | null {
       <Text className="text-2xl font-semibold text-stone-900 dark:text-stone-100">
         Account erstellen
       </Text>
+
+      {showInstallBanner ? (
+        <InlineBanner
+          message={t('pwa.installBanner')}
+          actionLabel={t('pwa.installAction')}
+          onAction={handleInstall}
+          variant="success"
+          testID="pwa-install-banner"
+        />
+      ) : null}
+
       <Text className="text-sm text-stone-600 dark:text-stone-300">
         Übertrage deine Daten (PLZ, Archetyp, Vereinsregeln) in einen Account,
         damit sie auf anderen Geräten verfügbar sind.

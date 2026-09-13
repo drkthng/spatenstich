@@ -20,11 +20,18 @@ export interface AuthState {
   // angemeldet ist. Nach erfolgreichem Login navigiert die App dorthin zurück
   // (siehe app/app/_layout.tsx GuardedStack).
   pendingRoute: string | null;
+  // Phase 20 Plan 03 Task 4 (DEPLOY-04): das abgefangene beforeinstallprompt-
+  // Ereignis. Kein Standard-DOM-Typ (BeforeInstallPromptEvent) — als unknown
+  // geführt. NICHT persistiert (partialize unten): ein Browser-Event-Objekt
+  // ist nicht serialisierbar.
+  installPromptEvent: unknown | null;
   setAccountMode: (userId: string) => void;
   setLocalMode: (uuid: string) => void;
   setActiveGarden: (gardenId: string | null) => void;
   setPendingRoute: (route: string | null) => void;
   clearPendingRoute: () => void;
+  setInstallPrompt: (event: unknown | null) => void;
+  clearInstallPrompt: () => void;
   clearAuth: () => void;
 }
 
@@ -35,21 +42,28 @@ export const useAuthStore = create<AuthState>()(
       userId: null,
       activeGardenId: null,
       pendingRoute: null,
+      installPromptEvent: null,
       setAccountMode: (userId) => set({ mode: 'account', userId }),
       setLocalMode: (uuid) =>
         set({ mode: 'local', userId: uuid, activeGardenId: null }),
       setActiveGarden: (gardenId) => set({ activeGardenId: gardenId }),
       setPendingRoute: (route) => set({ pendingRoute: route }),
       clearPendingRoute: () => set({ pendingRoute: null }),
+      setInstallPrompt: (event) => set({ installPromptEvent: event }),
+      clearInstallPrompt: () => set({ installPromptEvent: null }),
       clearAuth: () => set({ mode: null, userId: null, activeGardenId: null }),
     }),
     {
       name: 'spatenstich-auth',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 2,
+      version: 3,
       // v0 → v1: persisted blobs from Phase 2 did not store `activeGardenId`.
-      // v1 → v2 (Plan 20-03): `pendingRoute` is new — default it to null for
-      // any persisted state older than v2. Existing branches stay untouched.
+      // v1 → v2 (Plan 20-03 Task 3): `pendingRoute` is new — default it to
+      // null for any persisted state older than v2.
+      // v2 → v3 (Plan 20-03 Task 4): `installPromptEvent` is new — always
+      // null on rehydrate (see partialize: it is never written to storage in
+      // the first place, so this branch is symmetry/documentation rather
+      // than a real backfill need). Existing branches stay untouched.
       migrate: (persistedState: unknown, version: number) => {
         let state = persistedState;
         if (
@@ -62,8 +76,19 @@ export const useAuthStore = create<AuthState>()(
         if (version < 2 && typeof state === 'object' && state !== null) {
           state = { ...state, pendingRoute: null };
         }
+        if (version < 3 && typeof state === 'object' && state !== null) {
+          state = { ...state, installPromptEvent: null };
+        }
         return state;
       },
+      // installPromptEvent ist ein Browser-Event-Objekt — nicht serialisierbar
+      // und session-lokal. Nur die vier persistierbaren Daten-Felder schreiben.
+      partialize: (state) => ({
+        mode: state.mode,
+        userId: state.userId,
+        activeGardenId: state.activeGardenId,
+        pendingRoute: state.pendingRoute,
+      }),
     }
   )
 );

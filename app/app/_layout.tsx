@@ -16,6 +16,11 @@ import { ensureDefaultGardenForUser } from '@/src/lib/inviteCodeRepo';
 import { registerSyncTriggers } from '@/src/lib/sync/SyncTriggers';
 import { getSyncWorker } from '@/src/lib/sync/SyncWorker';
 import { repairNonUuidElementIds } from '@/src/lib/gardenPlanRepo';
+import {
+  ServiceWorkerController,
+  InstallPromptController,
+  StorageController,
+} from '@/src/components/pwa/PwaControllers';
 import '../global.css';
 
 Sentry.init({
@@ -36,28 +41,6 @@ function SplashController(): null {
       SplashScreen.hideAsync().catch(() => {});
     }
   }, [isLoading]);
-  return null;
-}
-
-// Service-Worker-Registrierung — Phase 20 Plan 03 Task 2 (DEPLOY-03, T-20-03-01).
-// Nur bei Plattform web, vorhandenem Service-Worker-Container und https
-// registrieren (auf http — lokaler Dev-Server — registriert sich absichtlich
-// nichts, RESEARCH key_link). Der Update-Hinweis (SKIP_WAITING) kommt in Task 4.
-function ServiceWorkerController(): null {
-  React.useEffect(() => {
-    if (
-      Platform.OS !== 'web' ||
-      typeof navigator === 'undefined' ||
-      !('serviceWorker' in navigator) ||
-      typeof location === 'undefined' ||
-      location.protocol !== 'https:'
-    ) {
-      return;
-    }
-    navigator.serviceWorker.register('/sw.js').catch((err) => {
-      if (__DEV__) console.warn('[layout] service worker registration failed', err);
-    });
-  }, []);
   return null;
 }
 
@@ -161,6 +144,8 @@ function RootLayoutInner(): React.JSX.Element {
     <>
       <SplashController />
       <ServiceWorkerController />
+      <InstallPromptController />
+      <StorageController />
       <GuardedStack />
     </>
   );

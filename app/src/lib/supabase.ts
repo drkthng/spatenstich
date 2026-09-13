@@ -20,6 +20,10 @@ export const supabase = createClient<Database>(url, anonKey, {
     storage: Platform.OS !== 'web' ? new LargeSecureStore() : undefined,
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,
+    // Phase 20 Plan 03 Task 4: auf Web Auth-Redirect-Fragmente (z.B. Passwort-
+    // Reset-Links) aus der URL lesen. Die Fragment-Auswertung erledigt die
+    // Supabase-Client-Bibliothek intern (T-20-03-05, accepted — kein Fragment-
+    // Parsing in eigenem Code).
+    detectSessionInUrl: Platform.OS === 'web',
   },
 });
