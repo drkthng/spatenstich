@@ -14,6 +14,7 @@ import { Button } from '@/src/components/ui/button';
 import { ImportErrorState } from '@/src/components/ImportErrorState';
 import { useImportStore } from '@/src/stores/importStore';
 import { validatePayload } from '@/src/lib/importValidator';
+import * as shareInbox from '@/src/lib/shareInbox';
 import de from '@spatenstich/shared/i18n/de';
 
 const t = (key: string): string =>
@@ -22,9 +23,30 @@ const t = (key: string): string =>
 export default function ImportEntryScreen(): React.JSX.Element {
   const router = useRouter();
   const { fileUri } = useLocalSearchParams<{ fileUri?: string }>();
+  const { from } = useLocalSearchParams<{ from?: string }>();
   const [pasteValue, setPasteValue] = React.useState('');
   const [errors, setErrors] = React.useState<string[] | null>(null);
   const [loading, setLoading] = React.useState(false);
+  const [shareLoading, setShareLoading] = React.useState(false);
+
+  const handleValidate = React.useCallback((input: string) => {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(input);
+    } catch {
+      setErrors([t('import.errorJsonSyntax')]);
+      return;
+    }
+    // T-06-08: validatePayload validates before any navigation or state update
+    const result = validatePayload(parsed);
+    if (result.ok) {
+      setErrors(null);
+      useImportStore.getState().setPayload(result.payload);
+      router.push('/(app)/import/preview' as any);
+    } else {
+      setErrors(result.errors);
+    }
+  }, [router]);
 
   // Handle incoming file URI from share-intent (T-06-09: same validation path as paste)
   React.useEffect(() => {
@@ -43,26 +65,32 @@ export default function ImportEntryScreen(): React.JSX.Element {
         setLoading(false);
       }
     })();
-  }, [fileUri]);
+  }, [fileUri, handleValidate]);
 
-  const handleValidate = (input: string) => {
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(input);
-    } catch {
-      setErrors([t('import.errorJsonSyntax')]);
-      return;
-    }
-    // T-06-08: validatePayload validates before any navigation or state update
-    const result = validatePayload(parsed);
-    if (result.ok) {
-      setErrors(null);
-      useImportStore.getState().setPayload(result.payload);
-      router.push('/(app)/import/preview' as any);
-    } else {
-      setErrors(result.errors);
-    }
-  };
+  // Web Share Target (T-20-03-02, ASVS V5): Teilen aus einer beliebigen App
+  // (z.B. Claude.ai) landet über den Service Worker in der IndexedDB-Inbox
+  // (app/sw-src.js) und leitet auf /import?from=share weiter. Der geteilte
+  // Inhalt durchläuft EXAKT dieselbe handleValidate()-Funktion wie der
+  // Einfüge- und der Dateiweg — kein Sonderpfad, keine Übernahme ohne Prüfung.
+  React.useEffect(() => {
+    if (from !== 'share') return;
+    (async () => {
+      setShareLoading(true);
+      try {
+        const entry = await shareInbox.readAndClear();
+        if (!entry || !entry.text) {
+          setErrors([t('import.share.empty')]);
+          return;
+        }
+        setPasteValue(entry.text);
+        handleValidate(entry.text);
+      } catch {
+        setErrors([t('import.share.error')]);
+      } finally {
+        setShareLoading(false);
+      }
+    })();
+  }, [from, handleValidate]);
 
   const handleFilePicker = async () => {
     const result = await DocumentPicker.getDocumentAsync({
@@ -94,6 +122,15 @@ export default function ImportEntryScreen(): React.JSX.Element {
         <Text className="text-base text-stone-600 dark:text-stone-400 text-center">
           JSON-Datei teilen oder einfügen
         </Text>
+
+        {shareLoading && (
+          <Text
+            className="text-sm text-stone-500 dark:text-stone-400 text-center"
+            testID="import-share-loading"
+          >
+            {t('import.share.loading')}
+          </Text>
+        )}
 
         <TextInput
           multiline

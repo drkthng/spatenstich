@@ -119,6 +119,26 @@ describe('SyncWorker.push()', () => {
   });
 });
 
+describe('SyncWorker.push() — FEATURES.vereinsregeln Gate (Plan 20-02 D-05)', () => {
+  beforeEach(() => {
+    syncEvents._reset();
+    jest.clearAllMocks();
+  });
+
+  it('macht bei FEATURES.vereinsregeln=false keinen Push-Versuch fuer die Entitaet vereinsregeln und raeumt den Outbox-Eintrag trotzdem auf', async () => {
+    await storage.writeWithOutbox('vereinsregeln', {
+      id: 'vr-1', createdAt: 'now', updatedAt: 'now', updatedByUserId: 'user-a',
+      deletedAt: null, gardenId: 'garden-a', rules: {},
+    } as any, { entity: 'vereinsregeln', rowId: 'vr-1', operation: 'update', payload: { id: 'vr-1', gardenId: 'garden-a', rules: {} } });
+
+    const worker = makeWorker();
+    await worker.push();
+
+    expect(supabaseMock.from).not.toHaveBeenCalledWith('vereinsregeln');
+    expect(await storage.listOutboxEntries()).toHaveLength(0);
+  });
+});
+
 describe('SyncWorker.pull / pullAll / syncAll', () => {
   beforeEach(() => {
     syncEvents._reset();

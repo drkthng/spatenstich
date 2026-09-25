@@ -39,10 +39,6 @@ describe('de.json', () => {
     expect(de['profile']?.['bkleingg']?.['no_plan']).toBeTruthy();
   });
 
-  it('rules.upload.loading_title exists', () => {
-    expect(de['rules']?.['upload']?.['loading_title']).toBeTruthy();
-  });
-
   it('auth.register.submit === "Konto erstellen"', () => {
     expect(de['auth']?.['register']?.['submit']).toBe('Konto erstellen');
   });

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Spatenstich App-Icon — Line-Art aus Spaten und Keimblatt.
+  Erde (#5B4636) auf Papier (#F6F1E7). Quadratisches viewBox 0 0 512 512.
+  Das gesamte Motiv (Spaten + Keimblatt) liegt innerhalb der inneren 80%
+  (Sicherheitsrand 51.2px je Seite, Motiv-Box 409.6px), damit die
+  maskable-Variante (kreisförmiger Ausschnitt) nichts abschneidet.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect x="0" y="0" width="512" height="512" fill="#F6F1E7" />
+
+  <!-- Keimblatt (seedling): Stiel + zwei Keimblätter, unten links im Motiv -->
+  <g stroke="#5B4636" stroke-width="10" stroke-linecap="round" fill="none">
+    <path d="M 176 360 C 176 320 176 300 176 288" />
+    <path d="M 176 300 C 150 288 130 262 128 228" />
+    <path d="M 176 292 C 202 280 222 254 224 220" />
+  </g>
+  <path d="M 128 228 C 132 250 150 270 176 278 C 172 254 156 234 128 228 Z" fill="#5B4636" />
+  <path d="M 224 220 C 220 244 200 266 176 272 C 180 246 198 226 224 220 Z" fill="#5B4636" />
+
+  <!-- Spaten (spade): Griff, Stiel, Blatt — rechts im Motiv -->
+  <g fill="none" stroke="#5B4636" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Grifföffnung (D-Griff) -->
+    <path d="M 300 108 C 300 92 316 80 336 80 C 356 80 372 92 372 108" stroke-width="14" />
+    <!-- Stiel -->
+    <path d="M 336 108 L 336 300" stroke-width="14" />
+  </g>
+  <!-- Spatenblatt -->
+  <path
+    d="M 296 300
+       L 376 300
+       C 376 340 366 372 336 396
+       C 306 372 296 340 296 300 Z"
+    fill="#5B4636"
+  />
+
+  <!-- Bodenlinie verbindet beide Motive -->
+  <path d="M 120 360 L 392 360" stroke="#5B4636" stroke-width="10" stroke-linecap="round" />
+</svg>

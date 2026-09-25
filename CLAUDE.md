@@ -23,7 +23,26 @@ Persönlicher digitaler Kleingarten-Assistent für deutsche Kleingärtner. Die A
 <!-- GSD:stack-start source:research/STACK.md -->
 ## Technology Stack
 
-## Recommended Stack
+**v2.0 (aktuell, Phase 20+):** Web-first PWA (Android Chrome + Desktop-Browser).
+Kein nativer Build in v2.0 (D-01) — `eas-build.yml` laeuft nur noch manuell
+(`workflow_dispatch`) bis Phase 29. Die tatsaechlich installierte Version dieses
+SDK-Mixes ist Ist-Stand (D-13: kein Upgrade in Phase 20 ausser den in Masterplan
+Anhang A genannten Entfernungen/Ergaenzungen):
+
+**Betrieb (Phase 20.4):** Deploy-Ziel ist **Cloudflare Pages** (`spatenstich.pages.dev`,
+Direct Upload aus GitHub Actions bei jedem Push auf `master`); Hosting/Backend bleibt
+Supabase Free (Frankfurt), wach gehalten durch einen GitHub-Zeitplan alle drei Tage plus
+einen taeglichen Task-Scheduler-Ping vom 24/7-PC (Keep-alive).
+
+## Ist-Stack (installiert, `app/package.json`)
+| Library / Tool | Ist-Version | Quelle |
+|---|---|---|
+| Expo SDK | 53.0.27 | `app/package.json` / `node_modules/expo/package.json` |
+| React Native | 0.76.7 | `app/package.json` / `node_modules/react-native/package.json` |
+| React | 18.3.1 | `app/package.json` / `node_modules/react/package.json` |
+| Expo Router | 4.0.22 | `app/package.json` / `node_modules/expo-router/package.json` |
+
+## Recommended Stack (Zielzustand ab Phase 29 — SDK-Upgrade, siehe MASTERPLAN-v2.md)
 | Library / Tool | Version | Purpose | Confidence |
 |---|---|---|---|
 | Expo SDK | 55 (stable Feb 2026) | Universal app framework, web export | HIGH |

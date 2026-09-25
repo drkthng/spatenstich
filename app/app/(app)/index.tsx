@@ -14,6 +14,7 @@ import { supabase } from '@/src/lib/supabase';
 import { loadAcceptedElements, loadDimensions } from '@/src/lib/gardenPlanRepo';
 import { GardenPlanView } from '@/src/components/GardenPlanView';
 import { Button } from '@/src/components/ui/button';
+import { InlineBanner } from '@/src/components/InlineBanner';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
@@ -57,6 +58,18 @@ export default function HomeScreen(): React.JSX.Element {
   const [elements, setElements] = React.useState<PlanElementRow[]>([]);
   const [dimensions, setDimensions] = React.useState<GardenDimensionsRow | null>(null);
   const [loading, setLoading] = React.useState(true);
+  // Plan 20-02 Task 3 (D-04): Lokal-Modus hat nie einen activeGardenId (D-13),
+  // daher werden diese drei Buttons nur im leeren Zustand erreicht. Statt zu
+  // navigieren (und dort in eine Exception zu laufen) zeigen sie den Hinweis.
+  const [showAccountRequiredHint, setShowAccountRequiredHint] = React.useState(false);
+
+  const handleGatedNav = React.useCallback((route: string) => {
+    if (mode === 'local') {
+      setShowAccountRequiredHint(true);
+      return;
+    }
+    router.push(route as any);
+  }, [mode, router]);
 
   React.useEffect(() => {
     if (mode !== 'account') return;
@@ -182,7 +195,7 @@ export default function HomeScreen(): React.JSX.Element {
         </Text>
         <Button
           variant="default"
-          onPress={() => router.push('/(app)/import' as any)}
+          onPress={() => handleGatedNav('/(app)/import')}
           className="mt-4 w-full"
           testID="home-import-button-empty"
         >
@@ -204,7 +217,7 @@ export default function HomeScreen(): React.JSX.Element {
         )}
         <Button
           variant="outline"
-          onPress={() => router.push('/(app)/plan' as any)}
+          onPress={() => handleGatedNav('/(app)/plan')}
           className="mt-2 w-full"
           testID="home-open-plan-button-empty"
         >
@@ -214,7 +227,7 @@ export default function HomeScreen(): React.JSX.Element {
         </Button>
         <Button
           variant="outline"
-          onPress={() => router.push('/(app)/kalender' as any)}
+          onPress={() => handleGatedNav('/(app)/kalender')}
           className="mt-2 w-full"
           testID="home-kalender-button"
         >
@@ -222,6 +235,14 @@ export default function HomeScreen(): React.JSX.Element {
             {t('kalender.title')}
           </Text>
         </Button>
+        {showAccountRequiredHint ? (
+          <InlineBanner
+            message={t('common.accountRequired')}
+            variant="warning"
+            onDismiss={() => setShowAccountRequiredHint(false)}
+            testID="home-account-required-hint"
+          />
+        ) : null}
       </View>
     </View>
   );

@@ -8,7 +8,8 @@
     "retry": "Erneut versuchen",
     "loading": "Lädt…",
     "disclaimer_body": "Die App gibt Empfehlungen ohne Gewähr. BKleingG-Compliance liegt in der Verantwortung des Nutzers.",
-    "error_network": "Keine Verbindung. Bitte Internetverbindung prüfen."
+    "error_network": "Keine Verbindung. Bitte Internetverbindung prüfen.",
+    "accountRequired": "Dafür brauchst du ein Konto."
   },
   "errors": {
     "network": "Keine Verbindung. Bitte prüfe dein Netz.",
@@ -82,13 +83,6 @@
         "save": "Übernehmen",
         "cancel": "Abbrechen"
       }
-    },
-    "upload": {
-      "loading_title": "Regeln werden extrahiert…",
-      "loading_sub": "Das kann 10–30 Sekunden dauern.",
-      "error_timeout": "Extraktion fehlgeschlagen. Bitte versuche es erneut oder wähle die Checkliste.",
-      "retry": "Erneut versuchen",
-      "local_disabled": "PDF-Upload erfordert einen Account. Mit einem Account kannst du auch deine Daten sichern."
     }
   },
   "settings": {
@@ -189,6 +183,11 @@
     "saveError": "Speichern fehlgeschlagen. Versuche es erneut.",
     "saving": "Wird gespeichert …",
     "noPayload": "Kein Import-Payload vorhanden.",
+    "share": {
+      "loading": "Geteilten Inhalt wird gelesen …",
+      "empty": "Kein geteilter Inhalt gefunden. Bitte erneut aus der Claude-App teilen.",
+      "error": "Geteilter Inhalt konnte nicht gelesen werden. Bitte erneut versuchen."
+    },
     "sections": {
       "beds": "Beete",
       "plants": "Pflanzen",
@@ -427,5 +426,12 @@
       "sonnenbedarf": "Sonnenbedarf: {value}",
       "familie": "Familie: {family}"
     }
+  },
+  "pwa": {
+    "installBanner": "Spatenstich als App installieren",
+    "installAction": "Installieren",
+    "updateAvailable": "Neue Version verfügbar",
+    "updateAction": "Neu laden",
+    "storageWarning": "Der Speicher ist zu über 80 % belegt. Räume Speicherplatz frei, damit Spatenstich weiter offline funktioniert."
   }
 }

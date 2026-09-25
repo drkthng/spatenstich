@@ -3,22 +3,18 @@ const config: ExpoConfig = {
   name: 'Spatenstich',
   slug: 'spatenstich',
   version: '0.1.0',
-  orientation: 'portrait',
+  orientation: 'default',
   scheme: 'spatenstich',
-  userInterfaceStyle: 'automatic',
+  userInterfaceStyle: 'light',
+  icon: './public/icons/icon-512.png',
+  splash: {
+    backgroundColor: '#F6F1E7',
+  },
   ios: { bundleIdentifier: 'de.spatenstich.app', supportsTablet: true },
   web: {
     bundler: 'metro',
     output: 'single',
-    headers: [
-      {
-        source: '/(.*)',
-        headers: [
-          { key: 'Cross-Origin-Embedder-Policy', value: 'credentialless' },
-          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-        ],
-      },
-    ],
+    favicon: './public/icons/favicon-32.png',
   },
   plugins: [
     'expo-router',
@@ -28,16 +24,6 @@ const config: ExpoConfig = {
         organization: process.env.SENTRY_ORG ?? 'spatenstich',
         project: 'spatenstich-app',
         url: 'https://sentry.io/',
-      },
-    ],
-    [
-      'expo-share-intent',
-      {
-        iosActivationRules: {
-          NSExtensionActivationSupportsFileWithMaxCount: 1,
-        },
-        iosShareExtensionName: 'SpatenstichShareExtension',
-        androidIntentFilters: ['application/json'],
       },
     ],
   ],

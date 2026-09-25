@@ -48,8 +48,10 @@ export function EditorCanvas({ dimensions, conflictElementIds = new Set() }: Pro
 
   // Initial scale: fit garden to viewport with 5% padding (UI-SPEC §Layout & Responsive Rules).
   // Placeholder values — true viewport size injected by Wave 4 plan/index.tsx via useWindowDimensions.
-  // For now, use 50 px/m baseline.
-  const initialScale = React.useMemo(() => 50, [dimensions]);
+  // For now, use 50 px/m baseline. Constant — no memo needed (there is no `dimensions`-derived
+  // computation here yet; keeping a useMemo with a fake dependency only produced an
+  // exhaustive-deps false positive).
+  const initialScale = 50;
 
   const tx = useSharedValue(0);
   const ty = useSharedValue(0);

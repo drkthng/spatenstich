@@ -37,6 +37,14 @@ describe('authStore', () => {
     expect(state.userId).toBeNull();
   });
 
+  it('pendingRoute: initial state is null; setPendingRoute/clearPendingRoute round-trip (Plan 20-03, DEPLOY-04)', () => {
+    expect(useAuthStore.getState().pendingRoute).toBeNull();
+    useAuthStore.getState().setPendingRoute('/(app)/import?from=share');
+    expect(useAuthStore.getState().pendingRoute).toBe('/(app)/import?from=share');
+    useAuthStore.getState().clearPendingRoute();
+    expect(useAuthStore.getState().pendingRoute).toBeNull();
+  });
+
   it('persist middleware writes to AsyncStorage under name "spatenstich-auth"', async () => {
     useAuthStore.getState().setAccountMode('persist-test');
     // Zustand persist is async — poll briefly.

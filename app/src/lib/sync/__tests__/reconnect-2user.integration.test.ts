@@ -82,6 +82,16 @@ describe('2-user reconnect (I-4 / SC-5) — Klassen-API', () => {
     jest.clearAllMocks();
   });
 
+  // sharedStorage (imported above) is the app-wide IndexedDbAdapter singleton
+  // ('spatenstich-db') — its underlying `idb` connection is opened lazily on first
+  // use and never closed by the adapter itself (no public close() API). Left open
+  // for the lifetime of this test file, it can keep the Jest worker from exiting
+  // cleanly. Close it once after all tests in this file have run.
+  afterAll(async () => {
+    const db = await (sharedStorage as unknown as { dbPromise: Promise<{ close: () => void }> }).dbPromise;
+    db.close();
+  });
+
   it('Device A offline-edit, reconnect, Device B pull → sieht Änderung (< 3s)', async () => {
     const shim = createSupabaseShim();
     const sentryMock = {

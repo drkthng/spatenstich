@@ -13,21 +13,6 @@ const OUTBOX_STORE = 'sync_outbox';
 const STATE_STORE = 'sync_state';
 const SCHEMA_VERSION_KEY = '__schema_version__';
 
-const ROW_ENTITIES: EntityName[] = [
-  'gardens',
-  'garden_members',
-  'profiles',
-  'vereinsregeln',
-  'invite_codes',
-  'garden_dimensions',
-  'plan_elements',
-  'imports',
-  'import_items',
-  'bed_drafts',
-  'plant_drafts',
-  'observation_drafts',
-];
-
 // Which entities have a garden_id field (in camelCase JS objects)?
 // gardens is special: id == garden_id (self-reference).
 const GARDEN_ID_COLUMN: Record<EntityName, string | null> = {

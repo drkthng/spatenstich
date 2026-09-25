@@ -1,5 +1,4 @@
--- Seed: Setzt example_flag als globalen Flag (user_id NULL) auf false.
--- FOUND-04 Akzeptanzprobe: useFlag('example_flag') muss initial false liefern.
-insert into public.feature_flags(user_id, flag_key, enabled)
-values (null, 'example_flag', false)
-on conflict (user_id, flag_key) do nothing;
+-- Phase 20 Plan 02 (D-06): der einzige Seed-Block (feature_flags/example_flag)
+-- wurde entfernt — die Tabelle faellt mit Migration 020 weg (FEATURES ist jetzt
+-- eine Compile-Time-Konstante in packages/shared, keine Supabase-Query mehr).
+-- Aktuell keine Seeds noetig.

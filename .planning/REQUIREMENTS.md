@@ -8,13 +8,13 @@
 
 ### Fundament, Aufräumen, PWA-Deploy (Phase 20)
 
-- [ ] **DEPLOY-01**: `pnpm -r run lint` exit 0; CI-Workflow setzt `EXPO_PUBLIC_SUPABASE_URL`/`_ANON_KEY` und ist auf PRs grün; Test-Rauschen (`useAuthStore.getState`-Mock, Worker-Leak) beseitigt; `CLAUDE.md`/README auf Ist-Stack korrigiert
-- [ ] **DEPLOY-02**: Foto-Pipeline, `captureStore`, GPS-Opt-in, Feature-Flag-Hook, `expo-share-intent` und 5 Dependencies entfernt; Vereinsregeln-UI und -Push hinter `FEATURES.vereinsregeln = false`; Lokal-Modus-Code unangetastet, Home-Buttons darin crashfrei; Migration 020 (photo_queue, enqueue_photo_analysis, feature_flags, profiles.plz/klimazone/archetype, transfer_ownership-Fix, Buckets nur wenn leer) live
-- [ ] **DEPLOY-03**: PWA installierbar — `manifest.json` (standalone, Icons any/maskable/monochrome), HTML-Template `lang="de"`, Service Worker (Workbox injectManifest, Update-Toast, kein Auto-Skip bei ungesicherten Änderungen), `_headers`; Lighthouse „installable" grün; Chrome „App installieren" auf beiden Handys
-- [ ] **DEPLOY-04**: Web Share Target — Teilen aus der Claude-App (`.json`-Datei oder Text) öffnet direkt die Import-Vorschau; Install-Prompt-Banner; `navigator.storage.persist()` nach Login
+- [x] **DEPLOY-01**: `pnpm -r run lint` exit 0; CI-Workflow setzt `EXPO_PUBLIC_SUPABASE_URL`/`_ANON_KEY` und ist auf PRs grün; Test-Rauschen (`useAuthStore.getState`-Mock, Worker-Leak) beseitigt; `CLAUDE.md`/README auf Ist-Stack korrigiert
+- [x] **DEPLOY-02**: Foto-Pipeline, `captureStore`, GPS-Opt-in, Feature-Flag-Hook, `expo-share-intent` und 5 Dependencies entfernt; Vereinsregeln-UI und -Push hinter `FEATURES.vereinsregeln = false`; Lokal-Modus-Code unangetastet, Home-Buttons darin crashfrei; Migration 020 (photo_queue, enqueue_photo_analysis, feature_flags, profiles.plz/klimazone/archetype, transfer_ownership-Fix, Buckets nur wenn leer) live
+- [x] **DEPLOY-03**: PWA installierbar — `manifest.json` (standalone, Icons any/maskable/monochrome), HTML-Template `lang="de"`, Service Worker (Workbox injectManifest, Update-Toast, kein Auto-Skip bei ungesicherten Änderungen), `_headers`; Lighthouse „installable" grün; Chrome „App installieren" auf beiden Handys
+- [x] **DEPLOY-04**: Web Share Target — Teilen aus der Claude-App (`.json`-Datei oder Text) öffnet direkt die Import-Vorschau; Install-Prompt-Banner; `navigator.storage.persist()` nach Login
 - [ ] **DEPLOY-05**: `deploy-web.yml` deployt master nach Cloudflare Pages (`spatenstich.pages.dev`) in < 10 min, inkl. Secret-Scan; `eas-build.yml` nur noch `workflow_dispatch`
 - [ ] **DEPLOY-06**: Supabase-Keep-alive per GitHub-Cron (alle 3 Tage) + Task-Scheduler-Skript für den 24/7-PC; Backup-Skript `scripts/backup-supabase.ps1`
-- [ ] **DEPLOY-07**: Zweiter Start im Flugmodus zeigt App-Shell mit letztem Plan (Offline-Start)
+- [x] **DEPLOY-07**: Zweiter Start im Flugmodus zeigt App-Shell mit letztem Plan (Offline-Start)
 
 ### Sync und Datenintegrität (Phase 21)
 

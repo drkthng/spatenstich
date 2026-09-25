@@ -4,7 +4,7 @@ import * as React from 'react';
 import { View, Text, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import de from '@spatenstich/shared/i18n/de';
-import { ARCHETYPES, type Archetype } from '@spatenstich/shared';
+import { ARCHETYPES, FEATURES, type Archetype } from '@spatenstich/shared';
 import { InlineBanner } from '@/src/components/InlineBanner';
 import { TrafficLightBadge } from '@/src/components/TrafficLightBadge';
 import { Card, CardContent } from '@/src/components/ui/card';
@@ -96,35 +96,39 @@ export default function ProfileOverviewScreen(): React.JSX.Element {
         )}
       </View>
 
-      <Separator />
+      {FEATURES.vereinsregeln ? (
+        <>
+          <Separator />
 
-      {/* Section 3 — Vereinsregeln (Route gehört zu Plan 02-04) */}
-      <View className="gap-2">
-        <Text className="text-xs font-semibold uppercase text-stone-500">Vereinsregeln</Text>
-        {vereinsregeln.length === 0 ? (
-          <InlineBanner
-            message={t('profile.banner.rules_missing')}
-            actionLabel="Regeln einrichten"
-            onAction={() => router.push('/(app)/profile/vereinsregeln' as any)}
-            testID="profile-banner-rules"
-          />
-        ) : (
-          <Card>
-            <CardContent className="p-4 pt-4 flex-row items-center justify-between">
-              <Text className="text-base text-stone-900 dark:text-stone-100">
-                {vereinsregeln.length} Regel{vereinsregeln.length === 1 ? '' : 'n'} hinterlegt
-              </Text>
-              <Text
-                accessibilityRole="link"
-                onPress={() => router.push('/(app)/profile/vereinsregeln' as any)}
-                className="text-sm text-[#4A7C59] dark:text-[#6BAA7E] min-h-[44px] py-3"
-              >
-                Bearbeiten
-              </Text>
-            </CardContent>
-          </Card>
-        )}
-      </View>
+          {/* Section 3 — Vereinsregeln (hinter FEATURES.vereinsregeln, D-05) */}
+          <View className="gap-2">
+            <Text className="text-xs font-semibold uppercase text-stone-500">Vereinsregeln</Text>
+            {vereinsregeln.length === 0 ? (
+              <InlineBanner
+                message={t('profile.banner.rules_missing')}
+                actionLabel="Regeln einrichten"
+                onAction={() => router.push('/(app)/profile/vereinsregeln' as any)}
+                testID="profile-banner-rules"
+              />
+            ) : (
+              <Card>
+                <CardContent className="p-4 pt-4 flex-row items-center justify-between">
+                  <Text className="text-base text-stone-900 dark:text-stone-100">
+                    {vereinsregeln.length} Regel{vereinsregeln.length === 1 ? '' : 'n'} hinterlegt
+                  </Text>
+                  <Text
+                    accessibilityRole="link"
+                    onPress={() => router.push('/(app)/profile/vereinsregeln' as any)}
+                    className="text-sm text-[#4A7C59] dark:text-[#6BAA7E] min-h-[44px] py-3"
+                  >
+                    Bearbeiten
+                  </Text>
+                </CardContent>
+              </Card>
+            )}
+          </View>
+        </>
+      ) : null}
 
       <Separator />
 

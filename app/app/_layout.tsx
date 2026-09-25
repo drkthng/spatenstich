@@ -16,6 +16,11 @@ import { ensureDefaultGardenForUser } from '@/src/lib/inviteCodeRepo';
 import { registerSyncTriggers } from '@/src/lib/sync/SyncTriggers';
 import { getSyncWorker } from '@/src/lib/sync/SyncWorker';
 import { repairNonUuidElementIds } from '@/src/lib/gardenPlanRepo';
+import {
+  ServiceWorkerController,
+  InstallPromptController,
+  StorageController,
+} from '@/src/components/pwa/PwaControllers';
 import '../global.css';
 
 Sentry.init({
@@ -47,6 +52,9 @@ function GuardedStack(): React.JSX.Element {
   const mode = useAuthStore((s) => s.mode);
   const activeGardenId = useAuthStore((s) => s.activeGardenId);
   const setActiveGarden = useAuthStore((s) => s.setActiveGarden);
+  const pendingRoute = useAuthStore((s) => s.pendingRoute);
+  const setPendingRoute = useAuthStore((s) => s.setPendingRoute);
+  const clearPendingRoute = useAuthStore((s) => s.clearPendingRoute);
 
   // Auth guard — imperative replace to avoid "navigate before mount" on web
   React.useEffect(() => {
@@ -56,11 +64,29 @@ function GuardedStack(): React.JSX.Element {
     const inAppGroup = segments[0] === '(app)';
 
     if (identity === null && !inAuthGroup) {
+      // Web Share Target (DEPLOY-04): ein POST /share-target trifft ein,
+      // während niemand angemeldet ist — die Zielroute (/import?from=share)
+      // merken, bevor sie durch den Auth-Redirect verworfen wird. Nach dem
+      // Login navigiert der else-Zweig unten dorthin zurück.
+      if (
+        Platform.OS === 'web' &&
+        typeof window !== 'undefined' &&
+        window.location.pathname.includes('/import') &&
+        window.location.search.includes('from=share')
+      ) {
+        setPendingRoute(`${window.location.pathname}${window.location.search}`);
+      }
       router.replace('/(auth)');
     } else if (identity !== null && !inAppGroup) {
-      router.replace('/(app)');
+      if (pendingRoute) {
+        const target = pendingRoute;
+        clearPendingRoute();
+        router.replace(target as any);
+      } else {
+        router.replace('/(app)');
+      }
     }
-  }, [identity, isLoading, segments, router]);
+  }, [identity, isLoading, segments, router, pendingRoute, setPendingRoute, clearPendingRoute]);
 
   // Garden default resolution — ensure account-mode users have a garden
   const gardenInFlight = React.useRef(false);
@@ -117,6 +143,9 @@ function RootLayoutInner(): React.JSX.Element {
   return (
     <>
       <SplashController />
+      <ServiceWorkerController />
+      <InstallPromptController />
+      <StorageController />
       <GuardedStack />
     </>
   );

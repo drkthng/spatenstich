@@ -6,22 +6,16 @@ import { ConflictError } from '../errors';
 import { useAuthStore } from '../../stores/authStore';
 import { syncEvents } from './events';
 import { nextBackoffMs, MAX_ATTEMPTS } from './backoff';
+import { FEATURES } from '@spatenstich/shared';
 import type {
   EntityName,
   OutboxEntry,
   StorageAdapter,
   GardenRow,
-  GardenMemberRow,
   ProfileRow,
   VereinsregelnRow,
-  InviteCodeRow,
   GardenDimensionsRow,
   PlanElementRow,
-  ImportRow,
-  ImportItemRow,
-  BedDraftRow,
-  PlantDraftRow,
-  ObservationDraftRow,
 } from '@spatenstich/shared';
 import {
   gardenFromDb,
@@ -243,7 +237,12 @@ export class SyncWorker {
     switch (entry.entity) {
       case 'gardens':           return this.pushGarden(entry);
       case 'profiles':          return this.pushProfile(entry);
-      case 'vereinsregeln':     return this.pushVereinsregeln(entry);
+      case 'vereinsregeln':
+        // Plan 20-02 (D-05): kein Push-Versuch mehr, solange FEATURES.vereinsregeln
+        // aus ist — resolved als No-Op, damit der Outbox-Eintrag aufgeraeumt wird
+        // statt bei jedem Sync-Lauf einen 22P02-Fehler zu produzieren.
+        if (!FEATURES.vereinsregeln) return;
+        return this.pushVereinsregeln(entry);
       case 'garden_members':    return this.pushGardenMember(entry);
       case 'invite_codes':      return this.pushInviteCode(entry);
       case 'garden_dimensions': return this.pushGardenDimensions(entry);
