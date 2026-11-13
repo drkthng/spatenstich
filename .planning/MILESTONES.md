@@ -1,5 +1,16 @@
 # Milestones
 
+## v2.0 Handy-Ready (Shipped: 2026-09-29, vorzeitig geschlossen 2026-11-13)
+
+**Phases completed:** 1 von 6 (Phase 20), 4 Pläne (20-04 ohne Geräte-Abnahme)
+**Delivered:** Repo-Hygiene und grüne CI, Legacy entfernt (Foto-Pipeline, Feature-Flags, GPS-Opt-in, Migration 020), PWA-Shell mit Teilen-Ziel und Service Worker, Deploy nach Cloudflare Pages (`spatenstich.pages.dev`), Supabase-Keep-alive, Backup-Skript.
+**Nicht ausgeliefert:** Phasen 21–25 (Sync, ein Editor für Maus und Touch, Navigation/Onboarding/Auth, Design-System, Geräte-Abnahme) wurden nie begonnen und sind in v3.0 „Garten mit KI" aufgegangen. Die geplanten v2.1-Phasen 26–29 entfallen als eigener Milestone: Wochenaufgaben sind Teil von v3.0, Journal, Saisonwechsel und SDK-Angleichung sind Backlog.
+**Grund für den vorzeitigen Schluss:** Pivot vom 2026-11-13 — In-App-KI mit eigenem API-Schlüssel, neue Design-Richtung „Feldführer", Editor zuerst.
+**Offen übernommen:** Geräte-Abnahme von Phase 20 (Installation auf beiden Handys, Teilen-Menü, Offline-Start) → v3.0 UAT. Supabase-Projekt seit Anfang Oktober 2026 nicht erreichbar → v3.0 Sync-Phase.
+**Archiv:** `milestones/v2.0-ROADMAP.md`, `milestones/v2.0-REQUIREMENTS.md`, `milestones/v2.0-phases/`; Detail-Spezifikation weiterhin `MASTERPLAN-v2.md`.
+
+---
+
 ## v1.1 Saison 2026 Ready (Shipped: 2026-09-09)
 
 **Phases completed:** 4 phases (8, 9, 9.1, 10), 23 plans, 30 tasks

@@ -1,20 +1,15 @@
 ---
-gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Handy-Ready
-current_phase: 20
-current_phase_name: Fundament, Aufräumen, PWA-Deploy
-status: executing
-stopped_at: Completed 20-03-PLAN.md (PWA-Shell, Web Share Target, Install/Update-Lifecycle)
-last_updated: "2026-09-13T16:32:55.285Z"
-last_activity: 2026-09-09
-last_activity_desc: Phase 20 execution started
-state_head: 04dbe1e50b59b18a1114690db305cddaac0d0878
+gsd_state_version: "1.0"
+milestone: v3.0
+milestone_name: Garten mit KI
+status: planning
+last_updated: "2026-11-13T21:53:41.969Z"
+last_activity: 2026-11-13
 progress:
-  total_phases: 1
+  total_phases: 0
   completed_phases: 0
-  total_plans: 4
-  completed_plans: 3
+  total_plans: 0
+  completed_plans: 0
   percent: 0
 ---
 
@@ -22,21 +17,20 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-09-09)
-See: .planning/MASTERPLAN-v2.md (Quelle der Wahrheit für v2.0/v2.1 — Diagnose, Entscheidungen D-01..D-15, Arbeitspakete, UAT, Runbook)
-See: docs/specs/M07-claude-ai-bridge.md (Import-Bridge)
+See: .planning/PROJECT.md (updated 2026-11-13)
+See: .planning/sketches/MANIFEST.md (Design-Richtung „Feldführer", Sketch 001)
+See: .planning/MASTERPLAN-v2.md (Detail-Spezifikation für Sync WP 21.x, Editor-Mechanik WP 22.x, Navigation/Onboarding/Auth WP 23.x; Kap. 3.4 Design und die Entscheidungen gegen In-App-KI sind ersetzt)
+See: docs/specs/M07-claude-ai-bridge.md (Import-Bridge, bleibt als zweiter Weg)
 
-**Core value:** Manueller Plan-Editor + strukturierter Import aus Claude.ai (zero In-App AI seit Pivot M07 2026-05-08)
-**Current focus:** Phase 20 — Fundament, Aufräumen, PWA-Deploy
+**Core value:** Ein Gartenplan, den beide gemeinsam exakt pflegen können, und eine App, die daraus sagt, was heute zu tun ist (In-App-KI über eigenen API-Schlüssel seit Pivot 2026-11-13)
+**Current focus:** Milestone v3.0 „Garten mit KI" — Anforderungen definieren
 
 ## Current Position
 
-Phase: 20 (Fundament, Aufräumen, PWA-Deploy) — EXECUTING
-Plan: 3 of 4
-Status: Ready to execute
-Last activity: 2026-09-09 — Phase 20 execution started
-
-Progress: [░░░░░░░░░░░░░░░░░░░░] 0/27 plans ([░░░░░░░░░░] 0%) — v2.0 Phasen 20–25
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-11-13 — Milestone v3.0 started
 
 ## Performance Metrics
 

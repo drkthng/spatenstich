@@ -1,12 +1,12 @@
 {
   "contract": "1.0.0",
   "flavor": "core",
-  "milestone": "v2.0 — Handy-Ready",
+  "milestone": "v3.0",
   "phases": [
     {
       "number": "20",
       "name": "Fundament, Aufräumen, PWA-Deploy",
-      "status": "in_progress"
+      "status": "pending"
     },
     {
       "number": "21",
@@ -55,9 +55,9 @@
     }
   ],
   "next": {
-    "command": "/gsd:progress --next",
-    "label": "Advance to the next step",
-    "reason": "Phase 20 of 1 · 0% · executing"
+    "command": "/gsd-discuss-phase",
+    "label": "Discuss the first phase",
+    "reason": "Project initialized — plan your first phase"
   },
-  "updated_at": "2026-09-13T16:32:32.279Z"
+  "updated_at": "2026-11-13T21:53:41.988Z"
 }
