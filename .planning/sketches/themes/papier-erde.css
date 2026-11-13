@@ -1,0 +1,15 @@
+/* A — Papier & Erde: the Masterplan v2 spec (section 3.4). Warm garden notebook. */
+:root[data-dir="a"] {
+  --bg:#F6F1E7; --surface:#EDE5D6; --surface-2:#E8DEC9; --ink:#5B4636; --ink-muted:#8B7355;
+  --line:rgba(91,70,54,.25); --primary:#4A7C59; --on-primary:#FFFFFF; --accent:#C4956A;
+  --danger:#C2452D; --warn:#D9A441; --select:#2F6F8F;
+  --font-display:'Caveat',cursive; --font-body:'Nunito',system-ui,sans-serif; --font-num:'Nunito',system-ui,sans-serif;
+  --h1:48px; --h1-w:700; --h1-ls:0; --h2:27px; --h2-w:700; --edt:26px; --brand:32px;
+  --bw:1.5px; --r-s:12px; --r-m:16px; --r-l:20px; --r-chip:999px; --r-check:8px;
+  --plan-outer:#F6F1E7; --plan-bg:#F6F1E7; --plan-grid:rgba(190,178,160,.55); --plan-border:#8B7355; --plan-dash:6 3;
+  --el-beet:#C4956A; --el-hochbeet:#B5835A; --el-rasen:#8DB580; --el-weg:#D4C5A9; --el-laube:#A0785A;
+  --el-kompost:#7A6148; --el-wasser:#7EB5C4; --el-baum:#6B9B5E;
+  --el-fill-op:.75; --el-stroke:rgba(91,70,54,.7); --el-sw:1.5px; --el-rx:6;
+  --lbl:#3F2F23; --lbl-font:'Caveat',cursive; --lbl-px:18; --lbl-w:700; --lbl-halo:rgba(246,241,231,.75);
+  --h-fill:#FFFFFF; --h-rx:3; --sel-dash:4 2;
+}

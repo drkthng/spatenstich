@@ -1,0 +1,18 @@
+/* C — Instrument: dark precision tool. Technical drawing, mono numerals, one accent. */
+:root[data-dir="c"] {
+  --bg:#0E1512; --surface:#151E1A; --surface-2:#1B2721; --ink:#E6EFE8; --ink-muted:#8FA398;
+  --line:#2A3A33; --primary:#C6F25B; --on-primary:#0E1512; --accent:#C6F25B;
+  --danger:#FF7A66; --warn:#F2C94C; --select:#C6F25B;
+  --font-display:'IBM Plex Sans',system-ui,sans-serif; --font-body:'IBM Plex Sans',system-ui,sans-serif; --font-num:'IBM Plex Mono',ui-monospace,monospace;
+  --h1:30px; --h1-w:600; --h1-ls:-.01em; --h2:15px; --h2-w:600; --edt:16px; --brand:19px;
+  --bw:1px; --r-s:6px; --r-m:8px; --r-l:10px; --r-chip:6px; --r-check:5px;
+  --hover:rgba(198,242,91,.10); --scrim:rgba(0,0,0,.6);
+  --plan-outer:#0B110E; --plan-bg:#0E1512; --plan-grid:rgba(198,242,91,.09); --plan-border:#4A6055; --plan-bw:1.25px;
+  --el-beet:#E2A66B; --el-hochbeet:#F0C48A; --el-rasen:#5FA06A; --el-weg:#8FA398; --el-laube:#C58B6B;
+  --el-kompost:#A08462; --el-wasser:#5CC8E0; --el-baum:#7FD08A;
+  --el-fill-op:.16; --el-stroke:#8FA398; --el-sw:1.25px; --el-rx:1;
+  --lbl:#D6E4DA; --lbl-font:'IBM Plex Mono',ui-monospace,monospace; --lbl-px:10.5; --lbl-w:500; --lbl-tt:uppercase; --lbl-ls:.04em;
+  --lbl-halo:rgba(14,21,18,.85);
+  --h-fill:#0E1512; --h-rx:1; --sel-dash:none;
+  --hatch:block; --hatch-ink:rgba(226,166,107,.22); --north:block; --grid-sw:2;
+}

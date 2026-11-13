@@ -1,0 +1,20 @@
+/* D — Samentüte: seed-packet poster. Flat colour fields, big confident type. */
+:root[data-dir="d"] {
+  --bg:#F3E9D2; --surface:#FFFDF6; --surface-2:#F2B705; --ink:#1B1B1B; --ink-muted:#57524A;
+  --line:#1B1B1B; --primary:#E4572E; --on-primary:#FFFDF6; --accent:#F2B705;
+  --danger:#B3261E; --warn:#8A6A00; --select:#1B1B1B;
+  --font-display:'Bricolage Grotesque',system-ui,sans-serif; --font-body:'DM Sans',system-ui,sans-serif; --font-num:'DM Sans',system-ui,sans-serif;
+  --h1:76px; --h1-w:800; --h1-ls:-.045em; --h2:22px; --h2-w:800; --edt:21px; --brand:28px;
+  --bw:2.5px; --r-s:6px; --r-m:6px; --r-l:8px; --r-chip:6px; --r-check:4px;
+  --status-bg:#E4572E; --status-ink:#FFFDF6; --hd-bg:#E4572E; --hd-ink:#FFFDF6; --hd-muted:rgba(255,253,246,.88);
+  --bar-bg:#1B1B1B; --bar-ink:#F3E9D2; --bar-muted:rgba(243,233,210,.7);
+  --tab-bg:#1B1B1B; --tab-ink:rgba(243,233,210,.65); --tab-on:#F2B705;
+  --nav-bg:#1B1B1B; --nav-ink:#F3E9D2; --nav-muted:rgba(243,233,210,.7); --nav-on-bg:#F2B705; --nav-on:#1B1B1B;
+  --plan-outer:#F3E9D2; --plan-bg:#FFFDF6; --plan-grid:rgba(27,27,27,.07); --plan-border:#1B1B1B; --plan-bw:3px;
+  --el-beet:#E4572E; --el-hochbeet:#F2B705; --el-rasen:#7BB661; --el-weg:#E3D3AE; --el-laube:#2B59C3;
+  --el-kompost:#8A5A36; --el-wasser:#5BC0EB; --el-baum:#2E6F40;
+  --el-fill-op:1; --el-stroke:#1B1B1B; --el-sw:2.5px; --el-rx:0;
+  --lbl:#1B1B1B; --lbl-font:'Bricolage Grotesque',system-ui,sans-serif; --lbl-px:11.5; --lbl-w:800; --lbl-tt:uppercase; --lbl-ls:.02em;
+  --lbl-halo:#FFFDF6;
+  --h-fill:#F2B705; --h-rx:7; --sel-dash:none;
+}

@@ -1,0 +1,16 @@
+/* B — Feldführer: printed botanical field guide. Serif, ink, hairlines. */
+:root[data-dir="b"] {
+  --bg:#FBF8F1; --surface:#FBF8F1; --surface-2:#F3EEE2; --ink:#1F2A22; --ink-muted:#676B60;
+  --line:rgba(31,42,34,.32); --primary:#2F4B3A; --on-primary:#FBF8F1; --accent:#B4532A;
+  --danger:#9E2B1E; --warn:#8A6A1C; --select:#B4532A;
+  --font-display:'Fraunces',Georgia,serif; --font-body:'Newsreader',Georgia,serif; --font-num:'Newsreader',Georgia,serif;
+  --h1:62px; --h1-w:300; --h1-ls:-.02em; --h2:22px; --h2-w:500; --edt:21px; --brand:27px;
+  --bw:1px; --r-s:0px; --r-m:0px; --r-l:0px; --r-chip:0px; --r-check:50%;
+  --plan-outer:#FBF8F1; --plan-bg:#FBF8F1; --plan-grid:rgba(31,42,34,.10); --plan-border:#1F2A22; --plan-bw:1.5px;
+  --el-beet:#C9A27A; --el-hochbeet:#B98C62; --el-rasen:#A9C29A; --el-weg:#D9CDB4; --el-laube:#B08D74;
+  --el-kompost:#8C775F; --el-wasser:#9CC3CF; --el-baum:#86A97C;
+  --el-fill-op:.4; --el-stroke:#1F2A22; --el-sw:.9px; --el-rx:0;
+  --lbl:#1F2A22; --lbl-font:'Fraunces',Georgia,serif; --lbl-px:13.5; --lbl-w:500; --lbl-halo:rgba(251,248,241,.8);
+  --h-fill:#FBF8F1; --h-rx:0; --sel-dash:none;
+  --hatch:block; --hatch-ink:rgba(31,42,34,.22); --north:block; --grid-sw:1.5;
+}

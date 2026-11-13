@@ -1,0 +1,16 @@
+/* E — Ruhig: calm minimal. White, one green, soft shapes. */
+:root[data-dir="e"] {
+  --bg:#F5F7F4; --surface:#FFFFFF; --surface-2:#EAF3EC; --ink:#1C2420; --ink-muted:#6E7A73;
+  --line:#E2E7E3; --primary:#2F7D4F; --on-primary:#FFFFFF; --accent:#2F7D4F;
+  --danger:#C0392B; --warn:#B7791F; --select:#2F7D4F;
+  --font-display:'Manrope',system-ui,sans-serif; --font-body:'Manrope',system-ui,sans-serif; --font-num:'Manrope',system-ui,sans-serif;
+  --h1:32px; --h1-w:700; --h1-ls:-.02em; --h2:17px; --h2-w:700; --edt:17px; --brand:20px;
+  --bw:1px; --r-s:14px; --r-m:18px; --r-l:24px; --r-chip:999px; --r-check:50%;
+  --shadow:0 1px 2px rgba(20,40,30,.05),0 6px 18px rgba(20,40,30,.06);
+  --plan-outer:#F5F7F4; --plan-bg:#FFFFFF; --plan-grid:rgba(28,36,32,.05); --plan-border:#D5DBD6; --plan-bw:1.5px;
+  --el-beet:#E9D3BD; --el-hochbeet:#E3C6A8; --el-rasen:#D5E8CF; --el-weg:#EEE9DD; --el-laube:#D9CFC6;
+  --el-kompost:#CDBFAF; --el-wasser:#CFE6EE; --el-baum:#BFDDB9;
+  --el-fill-op:1; --el-stroke:none; --el-sw:0px; --el-rx:12;
+  --lbl:#47524C; --lbl-font:'Manrope',system-ui,sans-serif; --lbl-px:12; --lbl-w:600;
+  --h-fill:#FFFFFF; --h-rx:7; --sel-dash:none;
+}

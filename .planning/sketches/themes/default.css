@@ -1,0 +1,15 @@
+/* Shared, direction-independent scale. Each direction file below overrides the
+   visual vocabulary, scoped by :root[data-dir="x"] so all five can be loaded at
+   once and switched without a reload. */
+:root {
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-6: 24px; --space-8: 32px;
+  --icon-sw: 1.75;
+  --hover: rgba(127,127,127,.14);
+  --scrim: rgba(20,20,15,.45);
+  --shadow: none;
+  --plan-bw: 2px; --plan-dash: none; --sel-dash: 5 3;
+  --grid-sw: 2; --hatch: none; --north: none;
+  --lbl-halo: none; --lbl-tt: none; --lbl-ls: 0;
+  --edt: 19px; --brand: 24px;
+}
