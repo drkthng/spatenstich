@@ -1,5 +1,6 @@
 // Auth-Wahl — first screen for unidentified users (AUTH-05).
 // Pattern: 02-UI-SPEC.md §"Auth-Wahl Screen". NFR-07: collapsible Haftungsausschluss in-screen.
+import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -18,14 +19,14 @@ export default function AuthChoiceScreen(): React.JSX.Element {
 
   return (
     <ScrollView
-      className="flex-1 bg-stone-50 dark:bg-stone-900"
+      className="flex-1 bg-bg"
       contentContainerClassName="flex-grow items-center justify-center p-6"
     >
       <View className="w-full max-w-md items-center">
-        <Text className="text-3xl font-semibold text-stone-900 dark:text-stone-100">
+        <Text className="text-3xl font-display font-semibold text-ink">
           Spatenstich
         </Text>
-        <Text className="text-sm text-stone-500 mt-2 mb-8 text-center">
+        <Text className="text-sm text-ink-muted mt-2 mb-8 text-center">
           {t('auth.choice.tagline')}
         </Text>
 
@@ -60,17 +61,17 @@ export default function AuthChoiceScreen(): React.JSX.Element {
           onPress={() => setDisclaimerOpen((v) => !v)}
           className="flex-row items-center mt-8 min-h-[44px] px-2 active:opacity-80"
         >
-          <Text className="text-sm text-stone-600 dark:text-stone-300">
+          <Text className="text-sm text-ink-muted">
             {t('auth.choice.disclaimer_label')}
           </Text>
           {disclaimerOpen ? (
-            <ChevronUp size={16} color="#78716C" />
+            <ChevronUp size={16} color={tokens.color.inkMuted} />
           ) : (
-            <ChevronDown size={16} color="#78716C" />
+            <ChevronDown size={16} color={tokens.color.inkMuted} />
           )}
         </Pressable>
         {disclaimerOpen ? (
-          <Text className="text-xs text-stone-500 mt-2 px-2 text-center">
+          <Text className="text-xs text-ink-muted mt-2 px-2 text-center">
             {t('common.disclaimer_body')}
           </Text>
         ) : null}

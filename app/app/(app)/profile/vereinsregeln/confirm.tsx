@@ -160,7 +160,7 @@ export default function VereinsregelnConfirmScreen(): React.JSX.Element {
   }, [rules, mode, userId, router]);
 
   return (
-    <View className="flex-1 bg-stone-50 dark:bg-stone-900">
+    <View className="flex-1 bg-bg">
       <ScrollView
         onScroll={onScroll}
         scrollEventThrottle={32}
@@ -168,14 +168,14 @@ export default function VereinsregelnConfirmScreen(): React.JSX.Element {
       >
         {/* BKleingG group — ALWAYS first (D-08, RULES-04) */}
         <View className="gap-2">
-          <Text className="text-xs font-semibold uppercase text-stone-500">
+          <Text className="text-xs font-semibold uppercase text-ink-muted">
             {t('rules.confirm.bkleingg_group')}
           </Text>
           {bkleingGRules.map((r, idx) => (
             <View
               key={r.id}
               onLayout={idx === bkleingGRules.length - 1 ? onLastBkLayout : undefined}
-              className="bg-stone-200 dark:bg-stone-800 rounded-lg"
+              className="bg-surface-2 rounded-lg"
             >
               <VereinsregelRow rule={r} testID={`bk-row-${r.id}`} />
             </View>
@@ -184,12 +184,12 @@ export default function VereinsregelnConfirmScreen(): React.JSX.Element {
 
         {/* User rules group */}
         <View className="gap-2 mt-4">
-          <Text className="text-xs font-semibold uppercase text-stone-500">
+          <Text className="text-xs font-semibold uppercase text-ink-muted">
             {t('rules.confirm.user_group')}
           </Text>
           {userRules.length === 0 ? (
-            <View className="p-4 gap-3 bg-stone-200 dark:bg-stone-800 rounded-lg">
-              <Text className="text-sm text-stone-700 dark:text-stone-200">
+            <View className="p-4 gap-3 bg-surface-2 rounded-lg">
+              <Text className="text-sm text-ink">
                 {t('rules.confirm.empty')}
               </Text>
               <Button
@@ -199,7 +199,7 @@ export default function VereinsregelnConfirmScreen(): React.JSX.Element {
                 }
                 testID="vereinsregeln-confirm-empty-cta"
               >
-                <Text className="text-stone-900 dark:text-stone-100 font-semibold">
+                <Text className="text-ink font-semibold">
                   {t('rules.confirm.empty_cta')}
                 </Text>
               </Button>
@@ -208,11 +208,11 @@ export default function VereinsregelnConfirmScreen(): React.JSX.Element {
             userRules.map((r) => (
               <View
                 key={r.id}
-                className="bg-white dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700"
+                className="bg-bg rounded-lg border border-line"
               >
                 {editingId === r.id ? (
                   <View className="p-3 gap-2" testID={`user-row-${r.id}-edit`}>
-                    <Text className="text-xs text-stone-500">
+                    <Text className="text-xs text-ink-muted">
                       {t('rules.confirm.edit.titel_label')}
                     </Text>
                     <Input
@@ -223,7 +223,7 @@ export default function VereinsregelnConfirmScreen(): React.JSX.Element {
                     />
                     <View className="flex-row gap-2">
                       <View className="flex-1">
-                        <Text className="text-xs text-stone-500">
+                        <Text className="text-xs text-ink-muted">
                           {t('rules.confirm.edit.wert_label')}
                         </Text>
                         <Input
@@ -235,7 +235,7 @@ export default function VereinsregelnConfirmScreen(): React.JSX.Element {
                         />
                       </View>
                       <View className="flex-1">
-                        <Text className="text-xs text-stone-500">
+                        <Text className="text-xs text-ink-muted">
                           {t('rules.confirm.edit.einheit_label')}
                         </Text>
                         <Input
@@ -253,7 +253,7 @@ export default function VereinsregelnConfirmScreen(): React.JSX.Element {
                         testID={`user-row-${r.id}-edit-cancel`}
                         className="flex-1"
                       >
-                        <Text className="text-stone-900 dark:text-stone-100">
+                        <Text className="text-ink">
                           {t('rules.confirm.edit.cancel')}
                         </Text>
                       </Button>
@@ -263,7 +263,7 @@ export default function VereinsregelnConfirmScreen(): React.JSX.Element {
                         testID={`user-row-${r.id}-edit-save`}
                         className="flex-1"
                       >
-                        <Text className="text-white font-semibold">
+                        <Text className="text-on-primary font-semibold">
                           {t('rules.confirm.edit.save')}
                         </Text>
                       </Button>
@@ -284,11 +284,11 @@ export default function VereinsregelnConfirmScreen(): React.JSX.Element {
         </View>
       </ScrollView>
 
-      <View className="p-4 border-t border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900">
+      <View className="p-4 border-t border-line bg-bg">
         {saveError ? (
           <Text
             accessibilityLiveRegion="polite"
-            className="text-sm text-red-600 dark:text-red-400 mb-2"
+            className="text-sm text-danger mb-2"
             testID="vereinsregeln-confirm-error"
           >
             {saveError}
@@ -299,7 +299,7 @@ export default function VereinsregelnConfirmScreen(): React.JSX.Element {
           disabled={!scrolledPastBKleingG || saving}
           testID="vereinsregeln-confirm-save"
         >
-          <Text className="text-white font-semibold">
+          <Text className="text-on-primary font-semibold">
             {saving ? t('common.loading') : t('rules.confirm.submit')}
           </Text>
         </Button>

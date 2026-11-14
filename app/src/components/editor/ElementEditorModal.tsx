@@ -6,6 +6,7 @@
 // Security: maxLength on note delegated to ElementEditorMoreFields (T-09.1-DOS-NOTE).
 // Pattern S5: ESC keydown listener with INPUT/TEXTAREA guard (T-09.1-MODAL-ESC).
 
+import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { View, Text, Modal, ScrollView, Platform, TextInput } from 'react-native';
 import type { PlanElementRow } from '@spatenstich/shared';
@@ -124,13 +125,13 @@ export function ElementEditorModal({
   // Layout: centered on Web, bottom-sheet on Mobile (D-16 discretion)
   const containerClassName =
     Platform.OS === 'web'
-      ? 'w-11/12 max-w-md bg-stone-100 dark:bg-stone-800 rounded-lg p-6'
-      : 'w-full self-end mb-0 bg-stone-100 dark:bg-stone-800 rounded-t-2xl p-6';
+      ? 'w-11/12 max-w-md bg-surface-2 rounded-lg p-6'
+      : 'w-full self-end mb-0 bg-surface-2 rounded-t-2xl p-6';
 
   const overlayClassName =
     Platform.OS === 'web'
-      ? 'flex-1 items-center justify-center bg-black/30'
-      : 'flex-1 justify-end bg-black/30';
+      ? 'flex-1 items-center justify-center bg-ink/30'
+      : 'flex-1 justify-end bg-ink/30';
 
   return (
     <Modal
@@ -141,7 +142,7 @@ export function ElementEditorModal({
     >
       <View className={overlayClassName}>
         <View testID="element-editor-modal" className={containerClassName}>
-          <Text className="text-lg font-semibold text-stone-700 dark:text-stone-200 mb-4">
+          <Text className="text-lg font-display font-semibold text-ink mb-4">
             {t('editor.elementEditor.title')}
           </Text>
 
@@ -150,22 +151,22 @@ export function ElementEditorModal({
             <View className="gap-3">
               {/* Name / Bezeichnung — form field is "name" in UI, maps to dedicated `label` column (D-21) */}
               <View>
-                <Text className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+                <Text className="text-xs text-ink-muted mb-1">
                   {t('editor.elementEditor.name')}
                 </Text>
                 <TextInput
                   testID="kern-name"
                   value={labelField}
                   onChangeText={setLabelField}
-                  className="border border-stone-300 dark:border-stone-600 rounded-md p-2 min-h-[44px] text-stone-800 dark:text-stone-200 bg-stone-50 dark:bg-stone-700"
-                  placeholderTextColor="#a8a29e"
+                  className="border border-line rounded-md p-2 min-h-[44px] text-ink bg-bg"
+                  placeholderTextColor={tokens.color.inkMuted}
                   placeholder={t('editor.elementEditor.name')}
                 />
               </View>
 
               {/* Breite */}
               <View>
-                <Text className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+                <Text className="text-xs text-ink-muted mb-1">
                   {t('editor.elementEditor.width')}
                 </Text>
                 <TextInput
@@ -173,15 +174,15 @@ export function ElementEditorModal({
                   value={widthCm}
                   onChangeText={setWidthCm}
                   keyboardType="numeric"
-                  className="border border-stone-300 dark:border-stone-600 rounded-md p-2 min-h-[44px] text-stone-800 dark:text-stone-200 bg-stone-50 dark:bg-stone-700"
-                  placeholderTextColor="#a8a29e"
+                  className="border border-line rounded-md p-2 min-h-[44px] text-ink bg-bg"
+                  placeholderTextColor={tokens.color.inkMuted}
                   placeholder="100"
                 />
               </View>
 
               {/* Höhe */}
               <View>
-                <Text className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+                <Text className="text-xs text-ink-muted mb-1">
                   {t('editor.elementEditor.height')}
                 </Text>
                 <TextInput
@@ -189,15 +190,15 @@ export function ElementEditorModal({
                   value={heightCm}
                   onChangeText={setHeightCm}
                   keyboardType="numeric"
-                  className="border border-stone-300 dark:border-stone-600 rounded-md p-2 min-h-[44px] text-stone-800 dark:text-stone-200 bg-stone-50 dark:bg-stone-700"
-                  placeholderTextColor="#a8a29e"
+                  className="border border-line rounded-md p-2 min-h-[44px] text-ink bg-bg"
+                  placeholderTextColor={tokens.color.inkMuted}
                   placeholder="100"
                 />
               </View>
 
               {/* Rotation */}
               <View>
-                <Text className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+                <Text className="text-xs text-ink-muted mb-1">
                   {t('editor.elementEditor.rotation')}
                 </Text>
                 <TextInput
@@ -205,15 +206,15 @@ export function ElementEditorModal({
                   value={rotationDeg}
                   onChangeText={setRotationDeg}
                   keyboardType="numeric"
-                  className="border border-stone-300 dark:border-stone-600 rounded-md p-2 min-h-[44px] text-stone-800 dark:text-stone-200 bg-stone-50 dark:bg-stone-700"
-                  placeholderTextColor="#a8a29e"
+                  className="border border-line rounded-md p-2 min-h-[44px] text-ink bg-bg"
+                  placeholderTextColor={tokens.color.inkMuted}
                   placeholder="0"
                 />
               </View>
 
               {/* Z-Order Buttons (D-12) */}
               <View>
-                <Text className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+                <Text className="text-xs text-ink-muted mb-1">
                   {t('editor.elementEditor.zOrder')}
                 </Text>
                 <ZOrderButtons elementId={element.id} />
@@ -240,7 +241,7 @@ export function ElementEditorModal({
               testID="element-editor-delete"
               onPress={handleDelete}
             >
-              <Text className="text-white font-semibold">{t('editor.elementEditor.delete')}</Text>
+              <Text className="text-on-primary font-semibold">{t('editor.elementEditor.delete')}</Text>
             </Button>
             <View className="flex-row gap-2">
               <Button
@@ -248,7 +249,7 @@ export function ElementEditorModal({
                 testID="element-editor-cancel"
                 onPress={handleCancel}
               >
-                <Text className="text-stone-700 dark:text-stone-200">
+                <Text className="text-ink">
                   {t('editor.elementEditor.cancel')}
                 </Text>
               </Button>
@@ -257,7 +258,7 @@ export function ElementEditorModal({
                 testID="element-editor-save"
                 onPress={handleSave}
               >
-                <Text className="text-white font-semibold">{t('editor.elementEditor.save')}</Text>
+                <Text className="text-on-primary font-semibold">{t('editor.elementEditor.save')}</Text>
               </Button>
             </View>
           </View>

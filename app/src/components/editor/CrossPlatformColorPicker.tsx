@@ -4,6 +4,7 @@
 // Security V5 (T-09.1-XSS-COLOR): Hex regex validates ALL color inputs before write to provenance.
 // ASVS V5.1.3.
 
+import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { Platform, View, Modal, Pressable, Text } from 'react-native';
 
@@ -34,16 +35,16 @@ export function CrossPlatformColorPicker({
       <input
         type="color"
         data-testid={testID}
-        value={value ?? '#000000'}
+        value={value ?? tokens.color.ink}
         onChange={(e) => safeOnChange(e.currentTarget.value)}
         style={{
-          border: '1px solid #d6d3d1',
+          border: `1px solid ${tokens.color.line}`,
           borderRadius: 6,
           padding: 4,
           height: 44,
           width: '100%',
           cursor: 'pointer',
-          backgroundColor: '#fafaf9',
+          backgroundColor: tokens.color.bg,
           boxSizing: 'border-box',
         }}
       />
@@ -68,7 +69,7 @@ export function CrossPlatformColorPicker({
           flexDirection: 'row',
           alignItems: 'center',
           borderWidth: 1,
-          borderColor: '#d6d3d1',
+          borderColor: tokens.color.line,
           borderRadius: 6,
           padding: 8,
           minHeight: 44,
@@ -80,12 +81,12 @@ export function CrossPlatformColorPicker({
             width: 28,
             height: 28,
             borderRadius: 4,
-            backgroundColor: value ?? '#000000',
+            backgroundColor: value ?? tokens.color.ink,
             borderWidth: 1,
-            borderColor: '#a8a29e',
+            borderColor: tokens.color.inkMuted,
           }}
         />
-        <Text style={{ fontSize: 13, color: '#78716c' }}>{value ?? '#000000'}</Text>
+        <Text style={{ fontSize: 13, color: tokens.color.inkMuted }}>{value ?? tokens.color.ink}</Text>
       </Pressable>
 
       {/* Color picker modal (Mobile) */}
@@ -106,7 +107,7 @@ export function CrossPlatformColorPicker({
           >
             <View
               style={{
-                backgroundColor: '#fafaf9',
+                backgroundColor: tokens.color.bg,
                 borderRadius: 12,
                 padding: 20,
                 width: '90%',
@@ -114,7 +115,7 @@ export function CrossPlatformColorPicker({
               }}
             >
               <ColorPicker
-                value={value ?? '#000000'}
+                value={value ?? tokens.color.ink}
                 onComplete={({ hex }: { hex: string }) => {
                   safeOnChange(hex);
                   setShowPicker(false);
@@ -125,12 +126,12 @@ export function CrossPlatformColorPicker({
                 style={{
                   marginTop: 12,
                   padding: 12,
-                  backgroundColor: '#44403c',
+                  backgroundColor: tokens.color.ink,
                   borderRadius: 8,
                   alignItems: 'center',
                 }}
               >
-                <Text style={{ color: '#fff', fontWeight: '600' }}>Schließen</Text>
+                <Text style={{ color: tokens.color.onPrimary, fontWeight: '600' }}>Schließen</Text>
               </Pressable>
             </View>
           </View>

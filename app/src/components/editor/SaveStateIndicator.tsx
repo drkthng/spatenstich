@@ -1,6 +1,7 @@
 // Phase 7 Plan 04: Tri-state save UI (UI-SPEC §SaveStateIndicator).
 // Driven by parent state (EditorToolbar) — this component is presentation-only.
 
+import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { View, Text } from 'react-native';
 import { Save, Loader2, Check, AlertCircle } from 'lucide-react-native';
@@ -36,10 +37,10 @@ export function SaveStateIndicator({ state }: Props): React.JSX.Element {
     } as const
   )[state];
   const colorByState: Record<SaveState, string> = {
-    idle: '#78716C',
-    saving: '#4A7C59',
-    saved: '#4A7C59',
-    error: '#DC2626',
+    idle: tokens.color.inkMuted,
+    saving: tokens.color.primary,
+    saved: tokens.color.primary,
+    error: tokens.color.danger,
   };
   return (
     <View

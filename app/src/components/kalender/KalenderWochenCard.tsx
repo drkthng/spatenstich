@@ -28,13 +28,13 @@ export function KalenderWochenCard({
   const year = new Date().getFullYear();
 
   return (
-    <View className="bg-stone-200 dark:bg-stone-800 rounded-xl p-4">
+    <View className="bg-surface-2 rounded-xl p-4">
       {/* Card header: "Diese Woche" title + KW label */}
       <View className="flex-row justify-between items-center mb-3">
-        <Text className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+        <Text className="text-xl font-display font-semibold text-ink">
           {t('kalender.dieseWoche')}
         </Text>
-        <Text className="text-xs text-stone-400">
+        <Text className="text-xs text-ink-muted">
           {t('kalender.kwLabel')
             .replace('{kw}', String(aktuelleKw))
             .replace('{year}', String(year))}
@@ -43,7 +43,7 @@ export function KalenderWochenCard({
 
       {/* Aktionsliste */}
       {aktionen.length === 0 ? (
-        <Text className="text-sm text-stone-500 dark:text-stone-400">
+        <Text className="text-sm text-ink-muted">
           {t('kalender.keineAktionenDieseWoche')}
         </Text>
       ) : (
@@ -61,17 +61,17 @@ export function KalenderWochenCard({
                 className="border-transparent"
                 style={{ backgroundColor: FARBEN[fenster.typ] }}
               >
-                <Text className="text-xs text-white font-medium">
+                <Text className="text-xs text-on-primary font-medium">
                   {t(`kalender.legende.${fenster.typ.toLowerCase()}`)}
                 </Text>
               </Badge>
-              <Text className="text-sm text-stone-800 dark:text-stone-100 flex-1">
+              <Text className="text-sm text-ink flex-1">
                 {plant.nameDe}
               </Text>
             </Pressable>
           ))}
           {/* Hint text when at least one action exists */}
-          <Text className="text-xs text-stone-400 mt-2">
+          <Text className="text-xs text-ink-muted mt-2">
             → Tippe auf eine Pflanze für Details und Gantt-Ansicht
           </Text>
         </>

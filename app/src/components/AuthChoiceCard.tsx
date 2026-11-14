@@ -1,6 +1,7 @@
 // AuthChoiceCard — large tappable card for Auth-Wahl screen.
 // UI-SPEC §"Component Contract" + §"Interaction Contract".
 // Phase 2-02-01.
+import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { Pressable, View, Text } from 'react-native';
 import type { LucideIcon } from 'lucide-react-native';
@@ -28,19 +29,19 @@ export function AuthChoiceCard({
       accessibilityLabel={title}
       testID={testID}
       className={cn(
-        'min-h-[120px] bg-stone-200 dark:bg-stone-800 rounded-2xl p-6 active:opacity-80'
+        'min-h-[120px] bg-surface-2 rounded-2xl p-6 active:opacity-80'
       )}
     >
       <View className="flex-row items-start gap-4">
         <View className="w-16 h-16 items-center justify-center">
-          <Icon size={64} color="#4A7C59" />
+          <Icon size={64} color={tokens.color.primary} />
         </View>
         <View className="flex-1">
-          <Text className="text-xl font-semibold text-stone-900 dark:text-stone-100">
+          <Text className="text-xl font-display font-semibold text-ink">
             {title}
           </Text>
           <Text
-            className="text-sm text-stone-600 dark:text-stone-300 mt-1"
+            className="text-sm text-ink-muted mt-1"
             numberOfLines={2}
           >
             {description}

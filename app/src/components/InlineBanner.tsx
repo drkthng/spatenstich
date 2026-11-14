@@ -2,6 +2,7 @@
 // 4px left border, icon + message + action link + dismiss X.
 // Supports warning (amber), error (red), success (green) variants.
 // Phase 2-02-01, extended Phase 9-01.
+import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { View, Pressable, Text } from 'react-native';
 import { AlertCircle, AlertTriangle, CheckCircle, X } from 'lucide-react-native';
@@ -18,21 +19,21 @@ export interface InlineBannerProps {
 
 const VARIANT_STYLES = {
   warning: {
-    border: 'border-amber-500',
-    bg: 'bg-amber-50 dark:bg-amber-950',
-    iconColor: '#D97706',
+    border: 'border-warn',
+    bg: 'bg-warn-soft',
+    iconColor: tokens.color.warn,
     Icon: AlertCircle,
   },
   error: {
-    border: 'border-red-600',
-    bg: 'bg-red-50 dark:bg-red-950',
-    iconColor: '#DC2626',
+    border: 'border-danger',
+    bg: 'bg-danger-soft',
+    iconColor: tokens.color.danger,
     Icon: AlertTriangle,
   },
   success: {
-    border: 'border-green-600',
-    bg: 'bg-green-100 dark:bg-green-950',
-    iconColor: '#16A34A',
+    border: 'border-primary',
+    bg: 'bg-ok-soft',
+    iconColor: tokens.color.primary,
     Icon: CheckCircle,
   },
 } as const;
@@ -65,9 +66,9 @@ export function InlineBanner({
     >
       <vs.Icon size={16} color={vs.iconColor} />
       <View className="flex-1 ml-2">
-        <Text className="text-sm text-stone-800 dark:text-stone-100">{message}</Text>
+        <Text className="text-sm text-ink">{message}</Text>
         {actionLabel ? (
-          <Text className="text-sm font-semibold text-[#4A7C59] dark:text-[#6BAA7E] mt-1">
+          <Text className="text-sm font-semibold text-primary mt-1">
             {actionLabel}
           </Text>
         ) : null}
@@ -80,7 +81,7 @@ export function InlineBanner({
           className="min-h-[44px] min-w-[44px] items-center justify-center"
           hitSlop={8}
         >
-          <X size={16} color="#78716C" />
+          <X size={16} color={tokens.color.inkMuted} />
         </Pressable>
       ) : null}
     </View>

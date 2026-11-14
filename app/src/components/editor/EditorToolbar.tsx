@@ -95,7 +95,7 @@ export function EditorToolbar({ onBack, onSaveError }: Props): React.JSX.Element
 
   return (
     <View
-      className="flex-row items-center px-4 h-14 bg-stone-100 dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700"
+      className="flex-row items-center px-4 h-14 bg-surface-2 border-b border-line"
       testID="editor-toolbar"
     >
       <Pressable
@@ -129,7 +129,7 @@ export function EditorToolbar({ onBack, onSaveError }: Props): React.JSX.Element
       <Pressable
         testID="editor-grid-toggle-button"
         onPress={() => useEditorStore.getState().toggleGrid()}
-        className={`p-2.5 ${showGrid ? 'bg-stone-200 dark:bg-stone-700 rounded-md' : ''}`}
+        className={`p-2.5 ${showGrid ? 'bg-surface-2 rounded-md' : ''}`}
       >
         <Grid3x3 size={20} color="#44403C" />
       </Pressable>
@@ -153,7 +153,7 @@ export function EditorToolbar({ onBack, onSaveError }: Props): React.JSX.Element
             .getState()
             .setTool(tool === 'polygon' ? 'select' : 'polygon')
         }
-        className={`p-2.5 ${tool === 'polygon' ? 'bg-[#4A7C59] rounded-md' : ''}`}
+        className={`p-2.5 ${tool === 'polygon' ? 'bg-primary rounded-md' : ''}`}
       >
         <Pencil size={20} color={tool === 'polygon' ? '#fff' : '#44403C'} />
       </Pressable>
@@ -181,7 +181,7 @@ export function EditorToolbar({ onBack, onSaveError }: Props): React.JSX.Element
               .polygonCommit(`Beet ${elementsCount + 1}`, gardenId, userId);
           }}
           style={{ opacity: polygonCanFinish ? 1 : 0.4 }}
-          className="p-2.5 bg-[#4A7C59] rounded-md"
+          className="p-2.5 bg-primary rounded-md"
         >
           <Check size={20} color="#fff" />
         </Pressable>

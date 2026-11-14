@@ -37,18 +37,18 @@ export function BedPickerModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <View className="flex-1 items-center justify-center bg-black/30">
+      <View className="flex-1 items-center justify-center bg-ink/30">
         <View
           testID="bed-picker-modal"
-          className="w-11/12 max-w-md bg-stone-100 dark:bg-stone-800 rounded-lg p-6"
+          className="w-11/12 max-w-md bg-surface-2 rounded-lg p-6"
         >
-          <Text className="text-lg font-semibold text-stone-700 dark:text-stone-200 mb-4">
+          <Text className="text-lg font-display font-semibold text-ink mb-4">
             {t('editor.tray.applyPlantModalTitle')}
           </Text>
 
           {empty ? (
             <Text
-              className="text-sm text-stone-500 dark:text-stone-400 mb-6"
+              className="text-sm text-ink-muted mb-6"
               testID="bed-picker-empty"
             >
               {t('editor.tray.applyPlantModalEmpty')}
@@ -62,18 +62,18 @@ export function BedPickerModal({
                   onPress={() => setSelected(b.id)}
                   className={`mb-2 rounded-md ${
                     selected === b.id
-                      ? 'border-2 border-[#4A7C59]'
-                      : 'border border-stone-200 dark:border-stone-700'
+                      ? 'border-2 border-primary'
+                      : 'border border-line'
                   }`}
                 >
                   <Card>
                     <CardHeader>
-                      <Text className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+                      <Text className="text-sm font-semibold text-ink">
                         {b.label && b.label.length > 0 ? b.label : b.elementType}
                       </Text>
                     </CardHeader>
                     <CardContent>
-                      <Text className="text-xs text-stone-500 dark:text-stone-400">
+                      <Text className="text-xs text-ink-muted">
                         {b.widthM.toFixed(2)} × {b.heightM.toFixed(2)} m
                       </Text>
                     </CardContent>
@@ -90,7 +90,7 @@ export function BedPickerModal({
               testID="bed-picker-cancel"
               className="mr-2"
             >
-              <Text className="text-stone-700 dark:text-stone-200">
+              <Text className="text-ink">
                 {t('editor.tray.applyPlantCancel')}
               </Text>
             </Button>
@@ -100,7 +100,7 @@ export function BedPickerModal({
               disabled={!selected}
               testID="bed-picker-confirm"
             >
-              <Text className="text-white font-semibold">{t('editor.tray.applyPlantConfirm')}</Text>
+              <Text className="text-on-primary font-semibold">{t('editor.tray.applyPlantConfirm')}</Text>
             </Button>
           </View>
         </View>

@@ -44,10 +44,10 @@ export default function LoginScreen(): React.JSX.Element {
 
   return (
     <ScrollView
-      className="flex-1 bg-stone-50 dark:bg-stone-900"
+      className="flex-1 bg-bg"
       contentContainerClassName="flex-grow p-6 gap-4"
     >
-      <Text className="text-2xl font-semibold text-stone-900 dark:text-stone-100 mb-2">
+      <Text className="text-2xl font-display font-semibold text-ink mb-2">
         {t('auth.login.submit')}
       </Text>
 
@@ -82,14 +82,14 @@ export default function LoginScreen(): React.JSX.Element {
       {error ? (
         <Text
           accessibilityLiveRegion="polite"
-          className="text-sm text-red-600 dark:text-red-400"
+          className="text-sm text-danger"
         >
           {error}
         </Text>
       ) : null}
 
       <Button onPress={onSubmit} disabled={loading || !email || !password} testID="login-submit">
-        <Text className="text-white font-semibold">
+        <Text className="text-on-primary font-semibold">
           {loading ? t('common.loading') : t('auth.login.submit')}
         </Text>
       </Button>
@@ -98,7 +98,7 @@ export default function LoginScreen(): React.JSX.Element {
         <Text
           accessibilityRole="link"
           onPress={() => router.replace('/(auth)/register')}
-          className="text-sm text-[#4A7C59] dark:text-[#6BAA7E] min-h-[44px] py-3"
+          className="text-sm text-primary min-h-[44px] py-3"
         >
           Noch kein Konto? Jetzt erstellen
         </Text>

@@ -3,6 +3,7 @@
 // T-09.1-PROVENANCE-LOSS mitigation: always { ...prev, zOrder: newZ }.
 // Imports bringToFront/bringForward/sendBackward/sendToBack from zOrder.ts (pure algorithms).
 
+import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { View, Pressable } from 'react-native';
 import { ChevronsUp, ChevronUp, ChevronDown, ChevronsDown } from 'lucide-react-native';
@@ -33,34 +34,34 @@ export function ZOrderButtons({ elementId }: ZOrderButtonsProps): React.JSX.Elem
       <Pressable
         testID="zorder-front"
         onPress={() => apply(bringToFront)}
-        className="p-2 rounded-md border border-stone-300 dark:border-stone-600"
+        className="p-2 rounded-md border border-line"
         accessibilityLabel="Ganz nach vorne"
       >
-        <ChevronsUp size={18} color="#44403C" />
+        <ChevronsUp size={18} color={tokens.color.ink} />
       </Pressable>
       <Pressable
         testID="zorder-forward"
         onPress={() => apply(bringForward)}
-        className="p-2 rounded-md border border-stone-300 dark:border-stone-600"
+        className="p-2 rounded-md border border-line"
         accessibilityLabel="Eine Ebene vor"
       >
-        <ChevronUp size={18} color="#44403C" />
+        <ChevronUp size={18} color={tokens.color.ink} />
       </Pressable>
       <Pressable
         testID="zorder-backward"
         onPress={() => apply(sendBackward)}
-        className="p-2 rounded-md border border-stone-300 dark:border-stone-600"
+        className="p-2 rounded-md border border-line"
         accessibilityLabel="Eine Ebene zurück"
       >
-        <ChevronDown size={18} color="#44403C" />
+        <ChevronDown size={18} color={tokens.color.ink} />
       </Pressable>
       <Pressable
         testID="zorder-back"
         onPress={() => apply(sendToBack)}
-        className="p-2 rounded-md border border-stone-300 dark:border-stone-600"
+        className="p-2 rounded-md border border-line"
         accessibilityLabel="Ganz nach hinten"
       >
-        <ChevronsDown size={18} color="#44403C" />
+        <ChevronsDown size={18} color={tokens.color.ink} />
       </Pressable>
     </View>
   );

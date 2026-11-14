@@ -2,6 +2,7 @@
 // CAL-01: renders one positioned View bar per KalenderFenster, colored per Aktionstyp.
 // NO SVG — pure View-based absolute positioning with percent values.
 // Reusable: height prop allows Miniatur (8px in PflanzenKalenderZeile) vs. full (20px in Detail).
+import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { View } from 'react-native';
 import type { PlantRow, AktionsTyp } from '@spatenstich/shared';
@@ -19,10 +20,10 @@ const TOTAL_KW = 52;
  * Exported so KalenderWochenCard kann die gleiche Map importieren.
  */
 export const FARBEN: Record<AktionsTyp, string> = {
-  Vorkultur: '#A78BFA',
-  Direktsaat: '#34D399',
-  Auspflanzen: '#60A5FA',
-  Ernte: '#FB923C',
+  Vorkultur: tokens.gantt.Vorkultur,
+  Direktsaat: tokens.gantt.Direktsaat,
+  Auspflanzen: tokens.gantt.Auspflanzen,
+  Ernte: tokens.gantt.Ernte,
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -40,7 +41,7 @@ export function GanttStreifen({
 
   return (
     <View
-      style={{ flexDirection: 'row', height, backgroundColor: '#E5E7EB', borderRadius: 4 }}
+      style={{ flexDirection: 'row', height, backgroundColor: tokens.color.surface2, borderRadius: 4 }}
       accessibilityLabel={`Gantt-Diagramm für ${plant.nameDe}`}
     >
       {fenster.map((f, i) => {

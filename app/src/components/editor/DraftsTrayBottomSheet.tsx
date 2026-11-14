@@ -137,10 +137,10 @@ export function DraftsTrayBottomSheet({
         <Pressable
           testID="drafts-tray-chip"
           onPress={() => setExpanded(true)}
-          className="px-3 py-2 rounded-full bg-stone-50 dark:bg-stone-900 border border-[#4A7C59]"
+          className="px-3 py-2 rounded-full bg-bg border border-primary"
           accessibilityLabel={t('editor.tray.title')}
         >
-          <Text className="text-xs font-semibold text-stone-700 dark:text-stone-200">
+          <Text className="text-xs font-semibold text-ink">
             {t('editor.trayChip', { count: totalAll })}
           </Text>
         </Pressable>
@@ -152,7 +152,7 @@ export function DraftsTrayBottomSheet({
   return (
     <View
       testID="drafts-tray-expanded"
-      className="absolute left-0 right-0 bottom-0 bg-stone-50 dark:bg-stone-900 border-t border-stone-200 dark:border-stone-700"
+      className="absolute left-0 right-0 bottom-0 bg-bg border-t border-line"
       style={{ maxHeight: '50%' }}
     >
       <Pressable
@@ -161,8 +161,8 @@ export function DraftsTrayBottomSheet({
         className="items-center py-3"
         accessibilityLabel={t('editor.tray.title')}
       >
-        <View className="w-10 h-1 rounded-full bg-stone-300 dark:bg-stone-600" />
-        <Text className="mt-2 text-lg font-semibold text-stone-700 dark:text-stone-200">
+        <View className="w-10 h-1 rounded-full bg-surface-2" />
+        <Text className="mt-2 text-lg font-display font-semibold text-ink">
           {t('editor.tray.title')}
         </Text>
       </Pressable>
@@ -170,7 +170,7 @@ export function DraftsTrayBottomSheet({
       <View className="flex-row px-4 pb-2" testID="drafts-tray-filters">
         {(['all', 'fresh', 'stale'] as FilterMode[]).map((f) => {
           const isActive = filter === f;
-          const activeBg = f === 'stale' ? 'bg-[#D97706]' : 'bg-[#4A7C59]';
+          const activeBg = f === 'stale' ? 'bg-[#D97706]' : 'bg-primary';
           const label =
             f === 'all'
               ? t('editor.tray.filterAll')
@@ -183,12 +183,12 @@ export function DraftsTrayBottomSheet({
               testID={`drafts-tray-filter-${f}`}
               onPress={() => setFilter(f)}
               className={`mr-2 px-3 py-1.5 rounded-full ${
-                isActive ? activeBg : 'bg-stone-200 dark:bg-stone-700'
+                isActive ? activeBg : 'bg-surface-2'
               }`}
             >
               <Text
                 className={`text-xs font-semibold ${
-                  isActive ? 'text-white' : 'text-stone-700 dark:text-stone-200'
+                  isActive ? 'text-on-primary' : 'text-ink'
                 }`}
               >
                 {label}
@@ -202,7 +202,7 @@ export function DraftsTrayBottomSheet({
         {totalFiltered === 0 ? (
           <Text
             testID="drafts-tray-empty"
-            className="text-sm text-stone-500 dark:text-stone-400 py-4 text-center"
+            className="text-sm text-ink-muted py-4 text-center"
           >
             {t('editor.tray.empty')}
           </Text>
@@ -210,7 +210,7 @@ export function DraftsTrayBottomSheet({
           <>
             {fBeds.length > 0 && (
               <View className="mb-3">
-                <Text className="text-sm font-semibold mb-2 text-stone-700 dark:text-stone-200">
+                <Text className="text-sm font-semibold mb-2 text-ink">
                   {t('editor.palette.tabBeete')} ({fBeds.length})
                 </Text>
                 {fBeds.map((d) => (
@@ -237,7 +237,7 @@ export function DraftsTrayBottomSheet({
 
             {fPlants.length > 0 && (
               <View className="mb-3">
-                <Text className="text-sm font-semibold mb-2 text-stone-700 dark:text-stone-200">
+                <Text className="text-sm font-semibold mb-2 text-ink">
                   {t('editor.palette.tabPflanzen')} ({fPlants.length})
                 </Text>
                 {fPlants.map((d) => (
@@ -264,7 +264,7 @@ export function DraftsTrayBottomSheet({
 
             {fObs.length > 0 && (
               <View className="mb-3">
-                <Text className="text-sm font-semibold mb-2 text-stone-700 dark:text-stone-200">
+                <Text className="text-sm font-semibold mb-2 text-ink">
                   {t('import.sections.observations') ?? 'Beobachtungen'} ({fObs.length})
                 </Text>
                 {fObs.map((d) => (

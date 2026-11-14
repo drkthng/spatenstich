@@ -4,6 +4,7 @@
 // D-13: compliance section always shown but grayed (opacity-50) — future version placeholder.
 // Pitfall 1: payload read from importStore (Zustand), NOT navigation params.
 // Confirm: calls saveImport(mode, gardenId, payload, selected), then resets store + goes Home.
+import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
@@ -68,9 +69,9 @@ export default function ImportPreviewScreen(): React.JSX.Element {
 
   if (!payload) {
     return (
-      <View className="flex-1 items-center justify-center bg-stone-50 dark:bg-stone-900">
+      <View className="flex-1 items-center justify-center bg-bg">
         <Stack.Screen options={{ headerTitle: t('import.preview.title') }} />
-        <Text className="text-stone-500">{t('import.noPayload')}</Text>
+        <Text className="text-ink-muted">{t('import.noPayload')}</Text>
       </View>
     );
   }
@@ -82,18 +83,18 @@ export default function ImportPreviewScreen(): React.JSX.Element {
   const selectedCount = selected.size;
 
   return (
-    <View className="flex-1 bg-stone-50 dark:bg-stone-900">
+    <View className="flex-1 bg-bg">
       <Stack.Screen options={{ headerTitle: t('import.preview.title') }} />
       <ScrollView contentContainerClassName="p-4 pb-32">
         {/* Source info */}
-        <Text className="text-sm text-stone-400 mb-4">
+        <Text className="text-sm text-ink-muted mb-4">
           {t('import.preview.source')} · {new Date(payload.capture.timestamp).toLocaleDateString('de-DE')}
         </Text>
 
         {/* Section: Beete */}
         {beds.length > 0 && (
           <View className="mb-6">
-            <Text className="text-base font-semibold text-stone-700 dark:text-stone-300 mb-2">
+            <Text className="text-base font-semibold text-ink mb-2">
               {t('import.sections.beds')} ({beds.length})
             </Text>
             {beds.map((bed) => (
@@ -108,7 +109,7 @@ export default function ImportPreviewScreen(): React.JSX.Element {
                 onToggle={handleToggle}
                 details={
                   bed.approxDimensions ? (
-                    <Text className="text-sm text-stone-500">
+                    <Text className="text-sm text-ink-muted">
                       {(bed.approxDimensions.lengthCm / 100).toFixed(1)} × {(bed.approxDimensions.widthCm / 100).toFixed(1)} m
                     </Text>
                   ) : null
@@ -122,7 +123,7 @@ export default function ImportPreviewScreen(): React.JSX.Element {
         {/* Section: Pflanzen */}
         {plants.length > 0 && (
           <View className="mb-6">
-            <Text className="text-base font-semibold text-stone-700 dark:text-stone-300 mb-2">
+            <Text className="text-base font-semibold text-ink mb-2">
               {t('import.sections.plants')} ({plants.length})
             </Text>
             {plants.map((plant) => (
@@ -136,7 +137,7 @@ export default function ImportPreviewScreen(): React.JSX.Element {
                 isSelected={selected.has(plant.localId)}
                 onToggle={handleToggle}
                 details={
-                  <Text className="text-sm text-stone-500">
+                  <Text className="text-sm text-ink-muted">
                     {plant.scientificName ? `${plant.scientificName} · ` : ''}{plant.stageEstimate ?? ''}
                   </Text>
                 }
@@ -149,7 +150,7 @@ export default function ImportPreviewScreen(): React.JSX.Element {
         {/* Section: Beobachtungen */}
         {observations.length > 0 && (
           <View className="mb-6">
-            <Text className="text-base font-semibold text-stone-700 dark:text-stone-300 mb-2">
+            <Text className="text-base font-semibold text-ink mb-2">
               {t('import.sections.observations')} ({observations.length})
             </Text>
             {observations.map((obs) => (
@@ -164,7 +165,7 @@ export default function ImportPreviewScreen(): React.JSX.Element {
                 onToggle={handleToggle}
                 details={
                   obs.suggestedActions?.length ? (
-                    <Text className="text-sm text-stone-500">
+                    <Text className="text-sm text-ink-muted">
                       {obs.suggestedActions.join(', ')}
                     </Text>
                   ) : null
@@ -178,10 +179,10 @@ export default function ImportPreviewScreen(): React.JSX.Element {
         {/* Section: Regelprüfung — grayed out per D-13 */}
         {hasCompliance && (
           <View className="mb-6 opacity-50">
-            <Text className="text-base font-semibold text-stone-700 dark:text-stone-300 mb-2">
+            <Text className="text-base font-semibold text-ink mb-2">
               {t('import.sections.compliance')}
             </Text>
-            <Text className="text-sm text-stone-400 italic">
+            <Text className="text-sm text-ink-muted italic">
               {t('import.sections.complianceHint')}
             </Text>
           </View>
@@ -190,10 +191,10 @@ export default function ImportPreviewScreen(): React.JSX.Element {
         {/* Section: Freitext-Notizen */}
         {(payload as any).freeFormNotes && (
           <View className="mb-6">
-            <Text className="text-base font-semibold text-stone-700 dark:text-stone-300 mb-2">
+            <Text className="text-base font-semibold text-ink mb-2">
               {t('import.sections.notes')}
             </Text>
-            <Text className="text-sm text-stone-600 dark:text-stone-400">
+            <Text className="text-sm text-ink-muted">
               {(payload as any).freeFormNotes}
             </Text>
           </View>
@@ -201,7 +202,7 @@ export default function ImportPreviewScreen(): React.JSX.Element {
       </ScrollView>
 
       {/* Sticky footer with confirm + cancel buttons */}
-      <View className="absolute bottom-0 left-0 right-0 p-4 bg-stone-50 dark:bg-stone-900 border-t border-stone-200 dark:border-stone-700">
+      <View className="absolute bottom-0 left-0 right-0 p-4 bg-bg border-t border-line">
         {saveError && (
           <InlineBanner message={saveError} variant="warning" testID="save-error-banner" />
         )}
@@ -212,8 +213,8 @@ export default function ImportPreviewScreen(): React.JSX.Element {
           className="mb-2"
           testID="import-confirm-button"
         >
-          {saving ? <ActivityIndicator size="small" color="#fff" /> : null}
-          <Text className="text-white font-semibold">
+          {saving ? <ActivityIndicator size="small" color={tokens.color.onPrimary} /> : null}
+          <Text className="text-on-primary font-semibold">
             {saving ? t('import.saving') : t('import.confirmButton')}
           </Text>
         </Button>
@@ -222,7 +223,7 @@ export default function ImportPreviewScreen(): React.JSX.Element {
           variant="outline"
           testID="import-cancel-button"
         >
-          <Text className="font-semibold text-stone-700 dark:text-stone-200">
+          <Text className="font-semibold text-ink">
             {t('import.cancelButton')}
           </Text>
         </Button>

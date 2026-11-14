@@ -71,7 +71,7 @@ export function ElementPalette({
         : INFRASTRUKTUR_KINDS;
 
   return (
-    <View className="bg-stone-100 dark:bg-stone-800 border-t border-stone-200 dark:border-stone-700">
+    <View className="bg-surface-2 border-t border-line">
       <View className="flex-row" testID="palette-tabs">
         {(['beete', 'pflanzen', 'infrastruktur'] as PaletteTab[]).map((tab) => (
           <Pressable
@@ -79,10 +79,10 @@ export function ElementPalette({
             testID={`palette-tab-${tab}`}
             onPress={() => onTabChange(tab)}
             className={`flex-1 items-center py-2 ${
-              activeTab === tab ? 'border-b-2 border-[#4A7C59]' : ''
+              activeTab === tab ? 'border-b-2 border-primary' : ''
             }`}
           >
-            <Text className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+            <Text className="text-sm font-semibold text-ink">
               {t(
                 `editor.palette.tab${tab[0].toUpperCase()}${tab.slice(1)}`,
               )}
@@ -98,7 +98,7 @@ export function ElementPalette({
       >
         {activeTab === 'pflanzen' && !hasAnyBed ? (
           <Text
-            className="text-sm text-stone-700 dark:text-stone-300 px-2"
+            className="text-sm text-ink px-2"
             testID="palette-empty-plants"
           >
             {t('editor.palette.emptyPlants')}

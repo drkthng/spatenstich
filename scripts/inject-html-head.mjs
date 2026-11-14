@@ -27,7 +27,7 @@ function main() {
 
   const hasManifestLink = /<link[^>]*rel="manifest"[^>]*>/.test(html);
   const hasGermanLang = /<html[^>]*lang="de"[^>]*>/.test(html);
-  const hasThemeColor = /<meta[^>]*name="theme-color"[^>]*content="#4A7C59"[^>]*>/.test(html);
+  const hasThemeColor = /<meta[^>]*name="theme-color"[^>]*content="#2F4B3A"[^>]*>/.test(html);
   const hasFaviconLink = /<link[^>]*rel="icon"[^>]*href="\/icons\/favicon-32\.png"[^>]*>/.test(html);
 
   if (hasManifestLink && hasGermanLang && hasThemeColor && hasFaviconLink) {
@@ -45,7 +45,7 @@ function main() {
 
   const missingHeadTags = [];
   if (!hasManifestLink) missingHeadTags.push('<link rel="manifest" href="/manifest.json">');
-  if (!hasThemeColor) missingHeadTags.push('<meta name="theme-color" content="#4A7C59">');
+  if (!hasThemeColor) missingHeadTags.push('<meta name="theme-color" content="#2F4B3A">');
   if (!hasFaviconLink) missingHeadTags.push('<link rel="icon" href="/icons/favicon-32.png">');
 
   if (missingHeadTags.length > 0) {

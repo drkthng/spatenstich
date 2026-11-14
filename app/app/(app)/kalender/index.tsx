@@ -56,9 +56,9 @@ export default function KalenderScreen(): React.JSX.Element {
   // Loading guard
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#F9F7F4] dark:bg-[#1C1917]">
+      <View className="flex-1 items-center justify-center bg-bg">
         <Stack.Screen options={{ headerTitle: t('kalender.title') }} />
-        <Text className="text-stone-500">...</Text>
+        <Text className="text-ink-muted">...</Text>
       </View>
     );
   }
@@ -76,7 +76,7 @@ export default function KalenderScreen(): React.JSX.Element {
   const showEmptyPlanState = nurMeinePflanzen && meinePflanzenslugs.size === 0;
 
   return (
-    <View className="flex-1 bg-[#F9F7F4] dark:bg-[#1C1917]">
+    <View className="flex-1 bg-bg">
       <Stack.Screen options={{ headerTitle: t('kalender.title') }} />
 
       <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, gap: 16 }}>
@@ -103,15 +103,15 @@ export default function KalenderScreen(): React.JSX.Element {
             accessibilityState={{ checked: nurMeinePflanzen }}
             className={
               nurMeinePflanzen
-                ? 'bg-[#4A7C59] rounded-full px-3 py-1'
-                : 'border border-stone-300 dark:border-stone-700 rounded-full px-3 py-1'
+                ? 'bg-primary rounded-full px-3 py-1'
+                : 'border border-line rounded-full px-3 py-1'
             }
           >
             <Text
               className={
                 nurMeinePflanzen
-                  ? 'text-xs text-white font-semibold'
-                  : 'text-xs text-stone-700 dark:text-stone-300'
+                  ? 'text-xs text-on-primary font-semibold'
+                  : 'text-xs text-ink'
               }
             >
               {t('kalender.filterMeinePflanzen')}
@@ -127,17 +127,17 @@ export default function KalenderScreen(): React.JSX.Element {
         />
 
         {/* Jahresübersicht Abschnitts-Titel */}
-        <Text className="text-sm font-semibold text-stone-600 dark:text-stone-400">
+        <Text className="text-sm font-semibold text-ink-muted">
           {t('kalender.jahresuebersicht')}
         </Text>
 
         {/* Empty state: filter active, 0 slugs in plan */}
         {showEmptyPlanState ? (
           <View className="gap-3">
-            <Text className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+            <Text className="text-sm font-semibold text-ink">
               {t('kalender.keinePflanzenImPlan')}
             </Text>
-            <Text className="text-sm text-stone-500 dark:text-stone-400">
+            <Text className="text-sm text-ink-muted">
               {t('kalender.keinePflanzenImPlanBody')}
             </Text>
             <Button
@@ -145,7 +145,7 @@ export default function KalenderScreen(): React.JSX.Element {
               onPress={() => router.push('/(app)/plan' as any)}
               className="self-start"
             >
-              <Text className="font-semibold text-stone-700 dark:text-stone-200">
+              <Text className="font-semibold text-ink">
                 {t('kalender.planOeffnen')}
               </Text>
             </Button>

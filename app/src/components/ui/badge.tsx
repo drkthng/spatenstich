@@ -16,20 +16,20 @@ export interface BadgeProps extends ViewProps {
 
 const variantClasses: Record<BadgeVariant, { root: string; text: string }> = {
   default: {
-    root: 'bg-[#4A7C59] dark:bg-[#6BAA7E] border-transparent',
-    text: 'text-white',
+    root: 'bg-primary border-transparent',
+    text: 'text-on-primary',
   },
   secondary: {
-    root: 'bg-stone-200 dark:bg-stone-800 border-stone-300 dark:border-stone-700',
-    text: 'text-stone-900 dark:text-stone-100',
+    root: 'bg-surface-2 border-line',
+    text: 'text-ink',
   },
   outline: {
-    root: 'bg-transparent border-stone-300 dark:border-stone-700',
-    text: 'text-stone-900 dark:text-stone-100',
+    root: 'bg-transparent border-line',
+    text: 'text-ink',
   },
   destructive: {
-    root: 'bg-red-600 dark:bg-red-500 border-transparent',
-    text: 'text-white',
+    root: 'bg-danger border-transparent',
+    text: 'text-on-primary',
   },
 };
 

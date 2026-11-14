@@ -65,22 +65,22 @@ export default function NewGardenScreen(): React.JSX.Element {
 
   return (
     <ScrollView
-      className="flex-1 bg-stone-50 dark:bg-stone-900"
+      className="flex-1 bg-bg"
       contentContainerClassName="flex-grow p-6 gap-4"
     >
       <Stack.Screen options={{ headerTitle: t('plan.new.title') }} />
 
-      <Text className="text-2xl font-semibold text-stone-900 dark:text-stone-100 mb-2">
+      <Text className="text-2xl font-display font-semibold text-ink mb-2">
         {t('plan.new.title')}
       </Text>
-      <Text className="text-sm text-stone-600 dark:text-stone-300 mb-2">
+      <Text className="text-sm text-ink-muted mb-2">
         {t('plan.new.intro')}
       </Text>
 
       {/* Lokal-Modus-Hinweis */}
       {isLocalMode ? (
         <View testID="account-required-hint">
-          <Text className="text-sm text-amber-700 dark:text-amber-400 mb-2">
+          <Text className="text-sm text-warn mb-2">
             {t('plan.new.account_required')}
           </Text>
           <Button
@@ -88,7 +88,7 @@ export default function NewGardenScreen(): React.JSX.Element {
             onPress={() => router.push('/(app)/settings' as any)}
             testID="account-required-settings-cta"
           >
-            <Text className="font-semibold text-stone-700 dark:text-stone-200">
+            <Text className="font-semibold text-ink">
               {t('plan.new.account_required_cta')}
             </Text>
           </Button>
@@ -127,7 +127,7 @@ export default function NewGardenScreen(): React.JSX.Element {
         <Text
           testID="garden-dims-error"
           accessibilityLiveRegion="polite"
-          className="text-sm text-red-600 dark:text-red-400"
+          className="text-sm text-danger"
         >
           {t('plan.new.error_invalid')}
         </Text>
@@ -138,7 +138,7 @@ export default function NewGardenScreen(): React.JSX.Element {
         disabled={saving}
         testID="create-garden-submit"
       >
-        <Text className="text-white font-semibold">
+        <Text className="text-on-primary font-semibold">
           {saving ? t('common.loading') : t('plan.new.submit')}
         </Text>
       </Button>

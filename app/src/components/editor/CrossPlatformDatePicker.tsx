@@ -3,6 +3,7 @@
 // of @react-native-community/datetimepicker to avoid Metro web bundle breakage.
 // Pitfall: NEVER import datetimepicker at module top — Metro web bundle breaks.
 
+import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { Platform, View } from 'react-native';
 
@@ -28,12 +29,12 @@ export function CrossPlatformDatePicker({
         value={value ?? ''}
         onChange={(e) => onChange(e.currentTarget.value || null)}
         style={{
-          border: '1px solid #d6d3d1',
+          border: `1px solid ${tokens.color.line}`,
           borderRadius: 6,
           padding: '6px 8px',
           fontSize: 14,
-          color: '#292524',
-          backgroundColor: '#fafaf9',
+          color: tokens.color.ink,
+          backgroundColor: tokens.color.bg,
           minHeight: 44,
           width: '100%',
           boxSizing: 'border-box',
@@ -68,7 +69,7 @@ export function CrossPlatformDatePicker({
       <View
         style={{
           borderWidth: 1,
-          borderColor: '#d6d3d1',
+          borderColor: tokens.color.line,
           borderRadius: 6,
           padding: 8,
           minHeight: 44,

@@ -24,7 +24,7 @@ jest.mock('@/src/lib/supabase', () => ({
   },
 }));
 
-// react-native-svg — stub so GardenPlanView renders in jsdom
+// react-native-svg — stub so SVG-based components render in jsdom
 jest.mock('react-native-svg', () => {
   const React = require('react');
   const noop = (props: any) => React.createElement('svg-element', props, props.children);
@@ -151,8 +151,8 @@ jest.mock('@/src/components/editor/CompanionToast', () => ({
 jest.mock('@/src/components/editor/ElementEditorModal', () => ({
   ElementEditorModal: () => null,
 }));
-jest.mock('@/src/components/GardenPlanView', () => ({
-  GardenPlanView: () => null,
+jest.mock('@/src/components/plan/PlanEditor', () => ({
+  PlanEditor: () => null,
 }));
 jest.mock('@/src/hooks/useCompanionDetection', () => ({
   useCompanionDetection: () => ({

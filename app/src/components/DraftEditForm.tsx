@@ -96,10 +96,10 @@ export function DraftEditForm({
       )}
       <View className="flex-row gap-2 mt-2">
         <Button onPress={handleSave} variant="default" disabled={!canSave} testID="draft-edit-save">
-          <Text className="text-white font-semibold">{t('import.review.editForm.save')}</Text>
+          <Text className="text-on-primary font-semibold">{t('import.review.editForm.save')}</Text>
         </Button>
         <Button onPress={onCancel} variant="outline" testID="draft-edit-cancel">
-          <Text className="font-semibold text-stone-700 dark:text-stone-200">
+          <Text className="font-semibold text-ink">
             {t('import.review.editForm.cancel')}
           </Text>
         </Button>

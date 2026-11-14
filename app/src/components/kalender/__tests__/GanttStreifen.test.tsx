@@ -93,9 +93,9 @@ describe('GanttStreifen', () => {
 
   it('each bar has a backgroundColor matching the FARBEN map for its Aktionstyp', () => {
     const EXPECTED_COLORS: Record<string, string> = {
-      Vorkultur: '#A78BFA',
-      Auspflanzen: '#60A5FA',
-      Ernte: '#FB923C',
+      Vorkultur: '#8A6A1C',
+      Auspflanzen: '#2F4B3A',
+      Ernte: '#B4532A',
     };
     const { getAllByTestId } = render(
       <GanttStreifen plant={MOCK_PLANT} klimazone={4} />

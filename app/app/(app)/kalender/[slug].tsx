@@ -128,7 +128,7 @@ export default function PflanzenDetailScreen(): React.JSX.Element {
   // The useMemos above null-guard plant internally, so they run safely when plant === undefined.
   if (!loading && !plant) {
     return (
-      <View className="flex-1 bg-[#F9F7F4] dark:bg-[#1C1917]">
+      <View className="flex-1 bg-bg">
         <Stack.Screen options={{ headerTitle: slug ?? '' }} />
         <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, gap: 16 }}>
           <InlineBanner variant="warning" message={t('kalender.nichtGefunden', { slug: slug ?? '' })} />
@@ -138,7 +138,7 @@ export default function PflanzenDetailScreen(): React.JSX.Element {
   }
 
   return (
-    <View className="flex-1 bg-[#F9F7F4] dark:bg-[#1C1917]">
+    <View className="flex-1 bg-bg">
       <Stack.Screen options={{ headerTitle: plant?.nameDe ?? slug ?? '' }} />
       <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, gap: 16 }}>
         {/* PLZ/klimazone warning (non-blocking) */}
@@ -158,7 +158,7 @@ export default function PflanzenDetailScreen(): React.JSX.Element {
             {/* Month labels */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
               {MONATE.map((m) => (
-                <Text key={m} className="text-xs text-stone-400">{m}</Text>
+                <Text key={m} className="text-xs text-ink-muted">{m}</Text>
               ))}
             </View>
             <View style={{ marginTop: 8 }}>
@@ -170,15 +170,15 @@ export default function PflanzenDetailScreen(): React.JSX.Element {
         {/* SECTION 2: Phase-8 plant infos */}
         {plant ? (
           <View style={{ gap: 4 }}>
-            <Text className="text-sm text-stone-700 dark:text-stone-200">
+            <Text className="text-sm text-ink">
               {plant.minSpacingCm != null
                 ? t('kalender.detail.mindestabstand', { cm: plant.minSpacingCm })
                 : t('kalender.detail.mindestabstand', { cm: '–' })}
             </Text>
-            <Text className="text-sm text-stone-700 dark:text-stone-200">
+            <Text className="text-sm text-ink">
               {t('kalender.detail.sonnenbedarf', { value: plant.sunRequirement })}
             </Text>
-            <Text className="text-sm text-stone-700 dark:text-stone-200">
+            <Text className="text-sm text-ink">
               {t('kalender.detail.familie', { family: plant.family })}
             </Text>
             {/* CAL-06: Fruchtfolge warning */}
@@ -191,19 +191,19 @@ export default function PflanzenDetailScreen(): React.JSX.Element {
         {/* SECTION 3: Auf welchem Beet? + CTA */}
         {plant ? (
           <View style={{ gap: 8 }}>
-            <Text className="text-sm font-semibold text-stone-600 dark:text-stone-300">
+            <Text className="text-sm font-semibold text-ink-muted">
               {t('kalender.aufWelchemBeet')}
             </Text>
 
             {/* Bed list */}
             {meineBeete.length > 0 ? (
               meineBeete.map((beet) => (
-                <Text key={beet.id} className="text-sm text-stone-700 dark:text-stone-200">
+                <Text key={beet.id} className="text-sm text-ink">
                   • {beet.label ?? `Beet ${beet.id.slice(0, 6)}`}
                 </Text>
               ))
             ) : (
-              <Text className="text-sm text-stone-500 dark:text-stone-400">
+              <Text className="text-sm text-ink-muted">
                 {t('kalender.nochNichtImPlan')}
               </Text>
             )}
@@ -226,13 +226,13 @@ export default function PflanzenDetailScreen(): React.JSX.Element {
             {hasBeetImPlan ? (
               <Button
                 variant="default"
-                className="bg-[#4A7C59] mt-2"
+                className="bg-primary mt-2"
                 disabled={addLoading}
                 onPress={handleAddToPlan}
                 accessibilityLabel={`${plant.nameDe} zu Plan hinzufügen`}
                 testID="detail-add-to-plan-button"
               >
-                <Text className="text-white font-semibold">
+                <Text className="text-on-primary font-semibold">
                   {t('kalender.zuPlanHinzufuegen')}
                 </Text>
               </Button>
@@ -249,7 +249,7 @@ export default function PflanzenDetailScreen(): React.JSX.Element {
               className="mt-2"
               onPress={() => router.push('/(app)/plan' as any)}
             >
-              <Text className="font-semibold text-stone-700 dark:text-stone-200">
+              <Text className="font-semibold text-ink">
                 {t('kalender.planOeffnen')}
               </Text>
             </Button>

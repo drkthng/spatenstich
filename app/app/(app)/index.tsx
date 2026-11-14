@@ -3,6 +3,7 @@
 // Phase 6 Plan 06-03: "Aus Claude.ai importieren" Button in Empty State + Plan View.
 // Quick 260611-jrl: Profil-Icon in beiden Render-Branches ergänzt.
 // Quick 260616-iuu: Zahnrad-Icon (Settings) in beiden Render-Branches ergänzt.
+import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -12,7 +13,8 @@ import type { GardenDimensionsRow, PlanElementRow } from '@spatenstich/shared';
 import { useAuthStore } from '@/src/stores/authStore';
 import { supabase } from '@/src/lib/supabase';
 import { loadAcceptedElements, loadDimensions } from '@/src/lib/gardenPlanRepo';
-import { GardenPlanView } from '@/src/components/GardenPlanView';
+import { PlanEditor } from '@/src/components/plan/PlanEditor';
+import { usePlanVersion } from '@/src/lib/editor/planRefresh';
 import { Button } from '@/src/components/ui/button';
 import { InlineBanner } from '@/src/components/InlineBanner';
 
@@ -29,7 +31,7 @@ function ProfileButton(): React.JSX.Element {
       testID="home-profile-button"
       className="min-w-[44px] min-h-[44px] items-center justify-center"
     >
-      <User size={24} color="#78716C" />
+      <User size={24} color={tokens.color.inkMuted} />
     </Pressable>
   );
 }
@@ -44,7 +46,7 @@ function SettingsButton(): React.JSX.Element {
       testID="home-settings-button"
       className="min-w-[44px] min-h-[44px] items-center justify-center"
     >
-      <Settings size={24} color="#78716C" />
+      <Settings size={24} color={tokens.color.inkMuted} />
     </Pressable>
   );
 }
@@ -53,6 +55,7 @@ export default function HomeScreen(): React.JSX.Element {
   const mode = useAuthStore((s) => s.mode);
   const activeGardenId = useAuthStore((s) => s.activeGardenId);
   const router = useRouter();
+  const planVersion = usePlanVersion();
 
   const [userEmail, setUserEmail] = React.useState<string | null>(null);
   const [elements, setElements] = React.useState<PlanElementRow[]>([]);
@@ -100,12 +103,12 @@ export default function HomeScreen(): React.JSX.Element {
         setLoading(false);
       }
     })();
-  }, [activeGardenId]);
+  }, [activeGardenId, planVersion]);
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#F9F7F4] dark:bg-[#1C1917]">
-        <Text className="text-stone-500">...</Text>
+      <View className="flex-1 items-center justify-center bg-bg">
+        <Text className="text-ink-muted">...</Text>
       </View>
     );
   }
@@ -119,14 +122,14 @@ export default function HomeScreen(): React.JSX.Element {
   // Has plan: show inline plan view
   if (elements.length > 0 && dimensions) {
     return (
-      <View className="flex-1 bg-[#F9F7F4] dark:bg-[#1C1917]">
+      <View className="flex-1 bg-bg">
         <ScrollView
           className="flex-1"
           contentContainerStyle={{ padding: 16, alignItems: 'center' }}
         >
           <View className="self-stretch flex-row items-center justify-between mb-2">
             {statusLabel ? (
-              <Text className="text-xs text-stone-400" testID="home-auth-status">{statusLabel}</Text>
+              <Text className="text-xs text-ink-muted" testID="home-auth-status">{statusLabel}</Text>
             ) : (
               <View />
             )}
@@ -135,19 +138,23 @@ export default function HomeScreen(): React.JSX.Element {
               <ProfileButton />
             </View>
           </View>
-          <GardenPlanView
-            dimensions={dimensions}
-            elements={elements}
-            showGrid={true}
-            testID="home-garden-plan"
-          />
+          {/* Still picture of the plan in the same drawing style as the editor. */}
+          <View className="self-stretch h-[300px] border border-line">
+            <PlanEditor
+              mode="readOnly"
+              interactive={false}
+              dimensions={dimensions}
+              elements={elements}
+              testID="home-garden-plan"
+            />
+          </View>
           <Button
             variant="outline"
             onPress={() => router.push('/(app)/import' as any)}
             className="mt-4 w-full"
             testID="home-import-button-plan"
           >
-            <Text className="font-semibold text-stone-700 dark:text-stone-200">
+            <Text className="font-semibold text-ink">
               {t('import.home.importButton')}
             </Text>
           </Button>
@@ -157,7 +164,7 @@ export default function HomeScreen(): React.JSX.Element {
             className="mt-2 w-full"
             testID="home-open-plan-button"
           >
-            <Text className="text-white font-semibold">
+            <Text className="text-on-primary font-semibold">
               {t('editor.home.openPlan')}
             </Text>
           </Button>
@@ -167,7 +174,7 @@ export default function HomeScreen(): React.JSX.Element {
             className="mt-2 w-full"
             testID="home-kalender-button"
           >
-            <Text className="font-semibold text-stone-700 dark:text-stone-200">
+            <Text className="font-semibold text-ink">
               {t('kalender.title')}
             </Text>
           </Button>
@@ -178,19 +185,19 @@ export default function HomeScreen(): React.JSX.Element {
 
   // Empty state: no plan yet
   return (
-    <View className="flex-1 items-center justify-center bg-[#F9F7F4] dark:bg-[#1C1917] px-6">
+    <View className="flex-1 items-center justify-center bg-bg px-6">
       <View className="absolute top-4 right-4 flex-row items-center gap-3">
         {statusLabel ? (
-          <Text className="text-xs text-stone-400" testID="home-auth-status">{statusLabel}</Text>
+          <Text className="text-xs text-ink-muted" testID="home-auth-status">{statusLabel}</Text>
         ) : null}
         <SettingsButton />
         <ProfileButton />
       </View>
       <View className="flex-1 items-center justify-center p-6">
-        <Text className="text-lg font-semibold text-stone-700 dark:text-stone-200 mb-2">
+        <Text className="text-lg font-display font-semibold text-ink mb-2">
           {t('import.home.emptyHeading')}
         </Text>
-        <Text className="text-sm text-stone-500 dark:text-stone-400 text-center mb-2">
+        <Text className="text-sm text-ink-muted text-center mb-2">
           {t('import.home.emptyBody')}
         </Text>
         <Button
@@ -199,7 +206,7 @@ export default function HomeScreen(): React.JSX.Element {
           className="mt-4 w-full"
           testID="home-import-button-empty"
         >
-          <Text className="text-white font-semibold">
+          <Text className="text-on-primary font-semibold">
             {t('import.home.importButton')}
           </Text>
         </Button>
@@ -210,7 +217,7 @@ export default function HomeScreen(): React.JSX.Element {
             className="mt-2 w-full"
             testID="home-create-garden-button-empty"
           >
-            <Text className="text-white font-semibold">
+            <Text className="text-on-primary font-semibold">
               {t('plan.new.title')}
             </Text>
           </Button>
@@ -221,7 +228,7 @@ export default function HomeScreen(): React.JSX.Element {
           className="mt-2 w-full"
           testID="home-open-plan-button-empty"
         >
-          <Text className="font-semibold text-stone-700 dark:text-stone-200">
+          <Text className="font-semibold text-ink">
             {t('editor.home.openPlan')}
           </Text>
         </Button>
@@ -231,7 +238,7 @@ export default function HomeScreen(): React.JSX.Element {
           className="mt-2 w-full"
           testID="home-kalender-button"
         >
-          <Text className="font-semibold text-stone-700 dark:text-stone-200">
+          <Text className="font-semibold text-ink">
             {t('kalender.title')}
           </Text>
         </Button>

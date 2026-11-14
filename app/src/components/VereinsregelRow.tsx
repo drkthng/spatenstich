@@ -6,6 +6,7 @@
 //   istBKleingG === false →  full-opacity text + Switch + Pencil edit button + Trash
 //                            delete button (tap fallback — swipe gesture deferred;
 //                            react-native-gesture-handler not in stack).
+import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { View, Switch, Pressable, Text } from 'react-native';
 import { Lock, Pencil, Trash2 } from 'lucide-react-native';
@@ -34,11 +35,11 @@ export function VereinsregelRow({
         testID={testID}
         className="flex-row items-center gap-3 py-3 px-3 min-h-[52px]"
       >
-        <Lock size={14} color="#A8A29E" accessibilityLabel="BKleingG-Grundregel, nicht deaktivierbar" />
+        <Lock size={14} color={tokens.color.inkMuted} accessibilityLabel="BKleingG-Grundregel, nicht deaktivierbar" />
         <View className="flex-1">
-          <Text className="text-base text-stone-400">{rule.titel}</Text>
+          <Text className="text-base text-ink-muted">{rule.titel}</Text>
           {rule.wert != null ? (
-            <Text className="text-xs text-stone-400">
+            <Text className="text-xs text-ink-muted">
               {rule.wert} {rule.einheit ?? ''}
             </Text>
           ) : null}
@@ -59,11 +60,11 @@ export function VereinsregelRow({
         accessibilityLabel={`Regel ${rule.titel} aktiv`}
       />
       <View className="flex-1">
-        <Text className="text-base text-stone-900 dark:text-stone-100">
+        <Text className="text-base text-ink">
           {rule.titel}
         </Text>
         {rule.wert != null ? (
-          <Text className="text-xs text-stone-500">
+          <Text className="text-xs text-ink-muted">
             {rule.wert} {rule.einheit ?? ''}
           </Text>
         ) : null}
@@ -76,7 +77,7 @@ export function VereinsregelRow({
           className="min-h-[44px] min-w-[44px] items-center justify-center"
           hitSlop={8}
         >
-          <Pencil size={18} color="#78716C" />
+          <Pencil size={18} color={tokens.color.inkMuted} />
         </Pressable>
       ) : null}
       {onDelete ? (
@@ -87,7 +88,7 @@ export function VereinsregelRow({
           className="min-h-[44px] min-w-[44px] items-center justify-center"
           hitSlop={8}
         >
-          <Trash2 size={18} color="#DC2626" />
+          <Trash2 size={18} color={tokens.color.danger} />
         </Pressable>
       ) : null}
     </View>

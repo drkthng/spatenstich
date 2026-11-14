@@ -47,7 +47,7 @@ export function PaletteCard({
           }}
         />
         <Text
-          className="text-xs text-stone-700 dark:text-stone-300 mt-1"
+          className="text-xs text-ink mt-1"
           numberOfLines={1}
         >
           {label}

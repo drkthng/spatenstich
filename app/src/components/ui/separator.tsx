@@ -18,7 +18,7 @@ export const Separator = React.forwardRef<View, SeparatorProps>(
       <View
         ref={ref}
         accessibilityRole="none"
-        className={cn('bg-stone-300 dark:bg-stone-700', orientationClass, className)}
+        className={cn('bg-surface-2', orientationClass, className)}
         {...props}
       />
     );

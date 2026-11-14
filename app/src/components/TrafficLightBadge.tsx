@@ -1,6 +1,7 @@
 // TrafficLightBadge — BKleingG 1/3-Ampel (D-10, RULES-05).
 // UI-SPEC §"Component Contract" — 4 states (green/amber/red/neutral).
 // Phase 2-02-01.
+import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { Pressable, View, Text } from 'react-native';
 import { cn } from '@/src/lib/utils';
@@ -16,10 +17,10 @@ export interface TrafficLightBadgeProps {
 
 // UI-SPEC colors — hard-coded hex so color-reporting greps find them.
 const STATE_COLORS: Record<TrafficLightState, string> = {
-  green: '#15803D',
-  amber: '#D97706',
-  red: '#DC2626',
-  neutral: '#78716C',
+  green: tokens.color.primary,
+  amber: tokens.color.warn,
+  red: tokens.color.danger,
+  neutral: tokens.color.inkMuted,
 };
 
 export function TrafficLightBadge({
@@ -38,7 +39,7 @@ export function TrafficLightBadge({
         className="w-7 h-7 rounded-full"
         style={{ backgroundColor: color }}
       />
-      <Text className="text-sm text-stone-800 dark:text-stone-100">{label}</Text>
+      <Text className="text-sm text-ink">{label}</Text>
     </View>
   );
 

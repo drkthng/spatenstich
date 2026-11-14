@@ -1,3 +1,24 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Feldführer base (web). The font files live in public/fonts and are declared in
+   public/index.html so they load before the bundle. React Native Web gives every Text a
+   system font through its own reset class; the attribute selector below has the same
+   specificity, comes later, and so sets Newsreader as the default. Tailwind utilities such
+   as `font-display` come after this block and still win. */
+@layer base {
+  html, body {
+    background-color: #FBF8F1;
+    color: #1F2A22;
+    font-family: 'Newsreader', Georgia, serif;
+  }
+  [dir='auto'], input, textarea, select, button {
+    font-family: 'Newsreader', Georgia, serif;
+  }
+  /* Headings: React Native Web renders accessibilityRole="header" as h1..h6 with dir=auto.
+     The extra attribute lifts specificity above the default-font rule. */
+  h1[dir='auto'], h2[dir='auto'], h3[dir='auto'], [role='heading'] {
+    font-family: 'Fraunces', Georgia, serif;
+  }
+}

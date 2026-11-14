@@ -1,6 +1,7 @@
 // Phase 9 Plan 03: Floating companion-hint toast (D-06, D-07).
 // Positioned absolutely above editor toolbar. Non-blocking (pointerEvents box-none).
 // Auto-dismisses after autoDismissMs (default 4000ms). Manual dismiss via X button.
+import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { View, Pressable, Text } from 'react-native';
 import { AlertTriangle, CheckCircle, X } from 'lucide-react-native';
@@ -16,15 +17,15 @@ export interface CompanionToastProps {
 
 const VARIANT_STYLES = {
   error: {
-    border: 'border-red-600',
-    bg: 'bg-red-50 dark:bg-red-950',
-    iconColor: '#DC2626',
+    border: 'border-danger',
+    bg: 'bg-danger-soft',
+    iconColor: tokens.color.danger,
     Icon: AlertTriangle,
   },
   success: {
-    border: 'border-green-600',
-    bg: 'bg-green-100 dark:bg-green-950',
-    iconColor: '#16A34A',
+    border: 'border-primary',
+    bg: 'bg-ok-soft',
+    iconColor: tokens.color.primary,
     Icon: CheckCircle,
   },
 } as const;
@@ -59,7 +60,7 @@ export function CompanionToast({
       >
         <vs.Icon size={16} color={vs.iconColor} />
         <View className="flex-1 ml-2">
-          <Text className="text-sm text-stone-800 dark:text-stone-100">
+          <Text className="text-sm text-ink">
             {message}
           </Text>
         </View>
@@ -70,7 +71,7 @@ export function CompanionToast({
           className="min-h-[44px] min-w-[44px] items-center justify-center"
           hitSlop={8}
         >
-          <X size={16} color="#78716C" />
+          <X size={16} color={tokens.color.inkMuted} />
         </Pressable>
       </View>
     </View>

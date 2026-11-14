@@ -5,6 +5,7 @@
 //   3. File picker — expo-document-picker for manual JSON file selection.
 // Security (T-06-08, T-06-09): JSON.parse + validatePayload before any navigation or state update.
 // Payload passed via importStore (Zustand), NOT navigation params (Pitfall 1 from RESEARCH).
+import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { View, Text, TextInput, ScrollView, ActivityIndicator, Platform } from 'react-native';
 import { useRouter, useLocalSearchParams, Stack } from 'expo-router';
@@ -116,16 +117,16 @@ export default function ImportEntryScreen(): React.JSX.Element {
   const canImport = pasteValue.trim().length > 0;
 
   return (
-    <View className="flex-1 bg-stone-50 dark:bg-stone-900">
+    <View className="flex-1 bg-bg">
       <Stack.Screen options={{ headerTitle: t('import.title') }} />
       <ScrollView contentContainerClassName="p-4 gap-4">
-        <Text className="text-base text-stone-600 dark:text-stone-400 text-center">
+        <Text className="text-base text-ink-muted text-center">
           JSON-Datei teilen oder einfügen
         </Text>
 
         {shareLoading && (
           <Text
-            className="text-sm text-stone-500 dark:text-stone-400 text-center"
+            className="text-sm text-ink-muted text-center"
             testID="import-share-loading"
           >
             {t('import.share.loading')}
@@ -136,10 +137,10 @@ export default function ImportEntryScreen(): React.JSX.Element {
           multiline
           numberOfLines={8}
           placeholder={t('import.pasteHint')}
-          placeholderTextColor="#A8A29E"
+          placeholderTextColor={tokens.color.inkMuted}
           value={pasteValue}
           onChangeText={(v) => { setPasteValue(v); setErrors(null); }}
-          className="font-mono text-xs min-h-[120px] p-3 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100"
+          className="font-mono text-xs min-h-[120px] p-3 rounded-lg border border-line bg-bg text-ink"
           textAlignVertical="top"
           testID="import-paste-textarea"
         />
@@ -152,14 +153,14 @@ export default function ImportEntryScreen(): React.JSX.Element {
           disabled={!canImport || loading}
           testID="import-submit-button"
         >
-          {loading ? <ActivityIndicator size="small" color="#fff" /> : null}
-          <Text className="text-white font-semibold">{t('import.importButton')}</Text>
+          {loading ? <ActivityIndicator size="small" color={tokens.color.onPrimary} /> : null}
+          <Text className="text-on-primary font-semibold">{t('import.importButton')}</Text>
         </Button>
 
         <View className="flex-row items-center gap-3 my-2">
-          <View className="flex-1 h-px bg-stone-300 dark:bg-stone-600" />
-          <Text className="text-sm text-stone-400">oder</Text>
-          <View className="flex-1 h-px bg-stone-300 dark:bg-stone-600" />
+          <View className="flex-1 h-px bg-surface-2" />
+          <Text className="text-sm text-ink-muted">oder</Text>
+          <View className="flex-1 h-px bg-surface-2" />
         </View>
 
         <Button
@@ -168,7 +169,7 @@ export default function ImportEntryScreen(): React.JSX.Element {
           disabled={loading}
           testID="import-filepicker-button"
         >
-          <Text className="font-semibold text-stone-700 dark:text-stone-200">
+          <Text className="font-semibold text-ink">
             {t('import.filePickerButton')}
           </Text>
         </Button>

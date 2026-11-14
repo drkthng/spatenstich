@@ -54,7 +54,7 @@ export function ImportEntityCard({
       <CardHeader>
         <View className="flex-row items-center justify-between">
           <View className="flex-1 mr-3">
-            <Text className="text-base font-semibold text-stone-800 dark:text-stone-100">
+            <Text className="text-base font-semibold text-ink">
               {entity.label}
             </Text>
           </View>
@@ -69,7 +69,7 @@ export function ImportEntityCard({
           label={confidenceLabel(state, entity.confidence)}
         />
         {showWarning && (
-          <Text className="text-sm text-red-600 dark:text-red-400 mt-1">
+          <Text className="text-sm text-danger mt-1">
             Niedrige Erkennungssicherheit — bitte manuell prüfen
           </Text>
         )}

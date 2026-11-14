@@ -348,6 +348,33 @@
         "heightMin": "Höhe muss mindestens 5 cm sein",
         "heightMax": "Höhe darf höchstens 500 cm sein"
       }
+    },
+    "done": "Fertig",
+    "add": "Hinzufügen",
+    "addTitle": "Was soll auf den Plan?",
+    "addClose": "Schließen",
+    "fit": "Ganzen Plan zeigen",
+    "props": {
+      "name": "Name",
+      "width": "Breite",
+      "depth": "Tiefe",
+      "rotation": "Drehung",
+      "unitM": "m",
+      "unitDeg": "°",
+      "more": "Mehr",
+      "moreLabel": "Weitere Angaben und Löschen",
+      "hint": "Tippe ein Element an. Ziehen verschiebt es, die Griffe ziehen es breiter oder drehen es, Doppeltippen benennt es um."
+    },
+    "rename": {
+      "label": "Name des Elements"
+    },
+    "north": {
+      "open": "Norden einstellen",
+      "title": "Norden",
+      "left": "15° nach links",
+      "right": "15° nach rechts",
+      "angle": "Richtung in Grad",
+      "close": "Fertig"
     }
   },
   "plan": {
@@ -360,6 +387,15 @@
       "error_invalid": "Bitte gültige Maße eingeben (0,5–100 m).",
       "account_required": "Zum Anlegen eines Gartens wird ein Account benötigt.",
       "account_required_cta": "Zu den Einstellungen"
+    },
+    "view": {
+      "title": "Plan",
+      "edit": "Bearbeiten",
+      "fit": "Ganzen Plan zeigen",
+      "parcelSize": "{width} × {depth} m",
+      "ariaPlan": "Gartenplan mit {count} Elementen",
+      "ariaScale": "Maßstab: {label}",
+      "north": "Norden"
     }
   },
   "companion": {

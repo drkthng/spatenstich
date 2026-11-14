@@ -30,12 +30,12 @@ export default function ProfileOverviewScreen(): React.JSX.Element {
 
   return (
     <ScrollView
-      className="flex-1 bg-stone-50 dark:bg-stone-900"
+      className="flex-1 bg-bg"
       contentContainerClassName="p-4 gap-6"
     >
       {/* Section 1 — Standort */}
       <View className="gap-2">
-        <Text className="text-xs font-semibold uppercase text-stone-500">Standort</Text>
+        <Text className="text-xs font-semibold uppercase text-ink-muted">Standort</Text>
         {plz === null ? (
           <InlineBanner
             message={t('profile.banner.plz_missing')}
@@ -47,7 +47,7 @@ export default function ProfileOverviewScreen(): React.JSX.Element {
           <Card>
             <CardContent className="p-4 pt-4 flex-row items-center justify-between">
               <View className="flex-row items-center gap-3">
-                <Text className="text-base text-stone-900 dark:text-stone-100">
+                <Text className="text-base text-ink">
                   PLZ {plz}
                 </Text>
                 {klimazone !== null ? (
@@ -57,7 +57,7 @@ export default function ProfileOverviewScreen(): React.JSX.Element {
               <Text
                 accessibilityRole="link"
                 onPress={() => router.push('/(app)/profile/plz')}
-                className="text-sm text-[#4A7C59] dark:text-[#6BAA7E] min-h-[44px] py-3"
+                className="text-sm text-primary min-h-[44px] py-3"
               >
                 Ändern
               </Text>
@@ -70,7 +70,7 @@ export default function ProfileOverviewScreen(): React.JSX.Element {
 
       {/* Section 2 — Garten-Archetyp */}
       <View className="gap-2">
-        <Text className="text-xs font-semibold uppercase text-stone-500">Garten-Archetyp</Text>
+        <Text className="text-xs font-semibold uppercase text-ink-muted">Garten-Archetyp</Text>
         {archetype === null ? (
           <InlineBanner
             message={t('profile.banner.archetype_missing')}
@@ -81,13 +81,13 @@ export default function ProfileOverviewScreen(): React.JSX.Element {
         ) : (
           <Card>
             <CardContent className="p-4 pt-4 flex-row items-center justify-between">
-              <Text className="text-base text-stone-900 dark:text-stone-100">
+              <Text className="text-base text-ink">
                 {ARCHETYPE_LABELS[archetype]}
               </Text>
               <Text
                 accessibilityRole="link"
                 onPress={() => router.push('/(app)/profile/archetype')}
-                className="text-sm text-[#4A7C59] dark:text-[#6BAA7E] min-h-[44px] py-3"
+                className="text-sm text-primary min-h-[44px] py-3"
               >
                 Ändern
               </Text>
@@ -102,7 +102,7 @@ export default function ProfileOverviewScreen(): React.JSX.Element {
 
           {/* Section 3 — Vereinsregeln (hinter FEATURES.vereinsregeln, D-05) */}
           <View className="gap-2">
-            <Text className="text-xs font-semibold uppercase text-stone-500">Vereinsregeln</Text>
+            <Text className="text-xs font-semibold uppercase text-ink-muted">Vereinsregeln</Text>
             {vereinsregeln.length === 0 ? (
               <InlineBanner
                 message={t('profile.banner.rules_missing')}
@@ -113,13 +113,13 @@ export default function ProfileOverviewScreen(): React.JSX.Element {
             ) : (
               <Card>
                 <CardContent className="p-4 pt-4 flex-row items-center justify-between">
-                  <Text className="text-base text-stone-900 dark:text-stone-100">
+                  <Text className="text-base text-ink">
                     {vereinsregeln.length} Regel{vereinsregeln.length === 1 ? '' : 'n'} hinterlegt
                   </Text>
                   <Text
                     accessibilityRole="link"
                     onPress={() => router.push('/(app)/profile/vereinsregeln' as any)}
-                    className="text-sm text-[#4A7C59] dark:text-[#6BAA7E] min-h-[44px] py-3"
+                    className="text-sm text-primary min-h-[44px] py-3"
                   >
                     Bearbeiten
                   </Text>
@@ -134,7 +134,7 @@ export default function ProfileOverviewScreen(): React.JSX.Element {
 
       {/* Section 4 — BKleingG-Status (D-10, Phase-2 placeholder — always neutral) */}
       <View className="gap-2">
-        <Text className="text-xs font-semibold uppercase text-stone-500">BKleingG-Status</Text>
+        <Text className="text-xs font-semibold uppercase text-ink-muted">BKleingG-Status</Text>
         <TrafficLightBadge
           state="neutral"
           label={t('profile.bkleingg.no_plan')}

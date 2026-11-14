@@ -75,13 +75,13 @@ export default function JoinByCodeScreen(): React.JSX.Element {
 
   return (
     <ScrollView
-      className="flex-1 bg-stone-50 dark:bg-stone-900"
+      className="flex-1 bg-bg"
       contentContainerClassName="flex-grow p-6 gap-4"
     >
-      <Text className="text-2xl font-semibold text-stone-900 dark:text-stone-100">
+      <Text className="text-2xl font-display font-semibold text-ink">
         {t('auth.join.title')}
       </Text>
-      <Text className="text-sm text-stone-600 dark:text-stone-300">
+      <Text className="text-sm text-ink-muted">
         {t('auth.join.subtitle')}
       </Text>
 
@@ -102,7 +102,7 @@ export default function JoinByCodeScreen(): React.JSX.Element {
       {error ? (
         <Text
           accessibilityLiveRegion="polite"
-          className="text-sm text-red-600 dark:text-red-400"
+          className="text-sm text-danger"
           testID="join-error"
         >
           {error}
@@ -114,7 +114,7 @@ export default function JoinByCodeScreen(): React.JSX.Element {
         disabled={loading || code.length !== 6}
         testID="join-submit"
       >
-        <Text className="text-white font-semibold">
+        <Text className="text-on-primary font-semibold">
           {loading ? t('common.loading') : t('auth.join.submit')}
         </Text>
       </Button>
@@ -124,12 +124,12 @@ export default function JoinByCodeScreen(): React.JSX.Element {
         onPress={() => router.back()}
         testID="join-cancel"
       >
-        <Text className="text-stone-700 dark:text-stone-200">
+        <Text className="text-ink">
           {t('common.cancel')}
         </Text>
       </Button>
 
-      <Text className="text-xs text-stone-500 mt-4">{t('auth.join.hint')}</Text>
+      <Text className="text-xs text-ink-muted mt-4">{t('auth.join.hint')}</Text>
     </ScrollView>
   );
 }

@@ -44,28 +44,28 @@ export function WebPaletteBar({
 
   return (
     <View
-      className="border-t border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900"
+      className="border-t border-line bg-bg"
       testID="web-palette-bar"
     >
       {/* Placing-mode indicator + cancel */}
       {placingKind && (
-        <View className="flex-row items-center justify-between px-4 py-2 bg-sky-50 dark:bg-sky-900/30 border-b border-sky-200 dark:border-sky-800">
-          <Text className="text-sm text-sky-900 dark:text-sky-100">
+        <View className="flex-row items-center justify-between px-4 py-2 bg-surface-2 border-b border-line">
+          <Text className="text-sm text-primary">
             Klick in den Plan, um <Text className="font-semibold">{placingKind}</Text> zu platzieren.
           </Text>
           <Pressable
             onPress={onCancel}
-            className="px-3 py-1 rounded-md bg-sky-100 dark:bg-sky-800"
+            className="px-3 py-1 rounded-md bg-surface-2"
             testID="web-palette-cancel"
             accessibilityRole="button"
           >
-            <Text className="text-xs font-medium text-sky-900 dark:text-sky-100">Abbrechen</Text>
+            <Text className="text-xs font-medium text-primary">Abbrechen</Text>
           </Pressable>
         </View>
       )}
 
       {/* Tab strip */}
-      <View className="flex-row border-b border-stone-200 dark:border-stone-700">
+      <View className="flex-row border-b border-line">
         {TABS.map((tab) => {
           const active = tab.id === activeTab;
           return (
@@ -73,7 +73,7 @@ export function WebPaletteBar({
               key={tab.id}
               onPress={() => setActiveTab(tab.id)}
               className={`flex-1 py-2 items-center ${
-                active ? 'border-b-2 border-stone-900 dark:border-stone-100' : ''
+                active ? 'border-b-2 border-line' : ''
               }`}
               testID={`web-palette-tab-${tab.id}`}
               accessibilityRole="tab"
@@ -82,8 +82,8 @@ export function WebPaletteBar({
               <Text
                 className={`text-sm ${
                   active
-                    ? 'font-semibold text-stone-900 dark:text-stone-100'
-                    : 'text-stone-500 dark:text-stone-400'
+                    ? 'font-semibold text-ink'
+                    : 'text-ink-muted'
                 }`}
               >
                 {tab.label}
@@ -141,7 +141,7 @@ export function WebPaletteBar({
                     borderColor: active ? '#0EA5E9' : '#8B7355',
                   }}
                 />
-                <Text className="text-xs text-stone-700 dark:text-stone-300 mt-1">{kind}</Text>
+                <Text className="text-xs text-ink mt-1">{kind}</Text>
               </Pressable>
             );
           })}

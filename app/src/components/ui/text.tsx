@@ -14,7 +14,7 @@ export const Text = React.forwardRef<RNText, TextProps>(({ className, ...props }
   return (
     <RNText
       ref={ref}
-      className={cn('text-base text-stone-900 dark:text-stone-100', className)}
+      className={cn('text-base text-ink', className)}
       {...props}
     />
   );

@@ -1,5 +1,6 @@
 // Phase 10 Plan 03: GanttLegende — Farb-Legende der 4 Gantt-Phasentypen.
 // UI-SPEC §Gantt-Rendering-Kontrakt: flex-row flex-wrap, color dot (10x10px) + label text-xs.
+import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { View, Text } from 'react-native';
 import de from '@spatenstich/shared/i18n/de';
@@ -14,10 +15,10 @@ const t = (key: string): string =>
  * Legende-Einträge in der Reihenfolge aus UI-SPEC §Gantt-Phasen-Farben.
  */
 const LEGENDE_ITEMS = [
-  { typ: 'Vorkultur',   farbe: '#A78BFA', key: 'kalender.legende.vorkultur'   },
-  { typ: 'Direktsaat',  farbe: '#34D399', key: 'kalender.legende.direktsaat'  },
-  { typ: 'Auspflanzen', farbe: '#60A5FA', key: 'kalender.legende.auspflanzen' },
-  { typ: 'Ernte',       farbe: '#FB923C', key: 'kalender.legende.ernte'       },
+  { typ: 'Vorkultur',   farbe: tokens.gantt.Vorkultur, key: 'kalender.legende.vorkultur'   },
+  { typ: 'Direktsaat',  farbe: tokens.gantt.Direktsaat, key: 'kalender.legende.direktsaat'  },
+  { typ: 'Auspflanzen', farbe: tokens.gantt.Auspflanzen, key: 'kalender.legende.auspflanzen' },
+  { typ: 'Ernte',       farbe: tokens.gantt.Ernte, key: 'kalender.legende.ernte'       },
 ] as const;
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -30,7 +31,7 @@ export function GanttLegende(): React.JSX.Element {
           <View
             style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: item.farbe }}
           />
-          <Text className="text-xs text-stone-600 dark:text-stone-300">{t(item.key)}</Text>
+          <Text className="text-xs text-ink-muted">{t(item.key)}</Text>
         </View>
       ))}
     </View>

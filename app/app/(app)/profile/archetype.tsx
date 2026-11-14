@@ -71,13 +71,13 @@ export default function ArchetypeScreen(): React.JSX.Element {
 
   return (
     <ScrollView
-      className="flex-1 bg-stone-50 dark:bg-stone-900"
+      className="flex-1 bg-bg"
       contentContainerClassName="flex-grow p-6 gap-4"
     >
-      <Text className="text-xl font-semibold text-stone-900 dark:text-stone-100">
+      <Text className="text-xl font-display font-semibold text-ink">
         Wähle deinen Garten-Stil
       </Text>
-      <Text className="text-sm text-stone-600 dark:text-stone-300">
+      <Text className="text-sm text-ink-muted">
         Der Archetyp beeinflusst Pflanzenvorschläge und die Flächenverteilung im Plan.
       </Text>
 
@@ -96,7 +96,7 @@ export default function ArchetypeScreen(): React.JSX.Element {
       </View>
 
       <Button onPress={onSubmit} disabled={!selected || saving} testID="archetype-submit">
-        <Text className="text-white font-semibold">
+        <Text className="text-on-primary font-semibold">
           {saving ? t('common.loading') : t('profile.archetype.submit')}
         </Text>
       </Button>

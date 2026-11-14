@@ -3,6 +3,7 @@
 // D-11: Default-collapsed; counter "(N)" next to toggle label when fields have values.
 // Security V5: maxLength={500} on note TextInput to mitigate DoS (T-09.1-DOS-NOTE).
 
+import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { View, Text, TextInput, Pressable } from 'react-native';
 import de from '@spatenstich/shared/i18n/de';
@@ -42,7 +43,7 @@ export function ElementEditorMoreFields({
         onPress={onToggle}
         className="flex-row items-center py-2"
       >
-        <Text className="text-sm font-medium text-stone-600 dark:text-stone-300">
+        <Text className="text-sm font-medium text-ink-muted">
           {expanded ? t('editor.elementEditor.lessFields') : t('editor.elementEditor.moreFields')}
           {extraCount > 0 && !expanded ? ` (${extraCount})` : ''}
         </Text>
@@ -52,7 +53,7 @@ export function ElementEditorMoreFields({
         <View className="mt-2 gap-3">
           {/* Notiz — maxLength 500 per Security V5 / T-09.1-DOS-NOTE */}
           <View>
-            <Text className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+            <Text className="text-xs text-ink-muted mb-1">
               {t('editor.elementEditor.note')}
             </Text>
             <TextInput
@@ -61,15 +62,15 @@ export function ElementEditorMoreFields({
               onChangeText={setNote}
               multiline
               maxLength={500}
-              className="border border-stone-300 dark:border-stone-600 rounded-md p-2 min-h-[60px] text-stone-800 dark:text-stone-200 bg-stone-50 dark:bg-stone-700"
-              placeholderTextColor="#a8a29e"
+              className="border border-line rounded-md p-2 min-h-[60px] text-ink bg-bg"
+              placeholderTextColor={tokens.color.inkMuted}
               placeholder={t('editor.elementEditor.note')}
             />
           </View>
 
           {/* Pflanzdatum */}
           <View>
-            <Text className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+            <Text className="text-xs text-ink-muted mb-1">
               {t('editor.elementEditor.plantedAt')}
             </Text>
             <CrossPlatformDatePicker
@@ -81,7 +82,7 @@ export function ElementEditorMoreFields({
 
           {/* Akzentfarbe */}
           <View>
-            <Text className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+            <Text className="text-xs text-ink-muted mb-1">
               {t('editor.elementEditor.accentColor')}
             </Text>
             <CrossPlatformColorPicker

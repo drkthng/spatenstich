@@ -11,10 +11,10 @@ export default function VereinsregelnEntryScreen(): React.JSX.Element {
 
   return (
     <ScrollView
-      className="flex-1 bg-stone-50 dark:bg-stone-900"
+      className="flex-1 bg-bg"
       contentContainerClassName="p-4 gap-4"
     >
-      <Text className="text-2xl font-semibold text-stone-900 dark:text-stone-100">
+      <Text className="text-2xl font-display font-semibold text-ink">
         Vereinsregeln
       </Text>
 

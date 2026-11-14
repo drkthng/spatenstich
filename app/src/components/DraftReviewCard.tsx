@@ -64,7 +64,7 @@ export function DraftReviewCard({
       <CardHeader>
         <View className="flex-row items-center justify-between">
           <View className="flex-1 mr-3">
-            <Text className="text-base font-semibold text-stone-800 dark:text-stone-100">
+            <Text className="text-base font-semibold text-ink">
               {draft.label}
             </Text>
           </View>
@@ -82,13 +82,13 @@ export function DraftReviewCard({
               variant="default"
               testID={entityType ? `accept-button-${entityType}-${draft.id}` : `accept-${draft.id}`}
             >
-              <Text className="text-white font-semibold">{t('import.review.accept')}</Text>
+              <Text className="text-on-primary font-semibold">{t('import.review.accept')}</Text>
             </Button>
             <Button onPress={onEdit} variant="outline" testID={`edit-${draft.id}`}>
-              <Text className="font-semibold text-stone-700 dark:text-stone-200">{t('import.review.edit')}</Text>
+              <Text className="font-semibold text-ink">{t('import.review.edit')}</Text>
             </Button>
             <Button onPress={onDismiss} variant="outline" testID={`dismiss-${draft.id}`}>
-              <Text className="font-semibold text-stone-700 dark:text-stone-200">{t('import.review.dismiss')}</Text>
+              <Text className="font-semibold text-ink">{t('import.review.dismiss')}</Text>
             </Button>
           </View>
         </CardContent>

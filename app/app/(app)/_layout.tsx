@@ -5,6 +5,7 @@
 // Teilen-Weg wird in 20-03 durch den PWA Web Share Target + Service Worker ersetzt.
 import { Stack } from 'expo-router';
 import { SyncStatusBadge } from '@/src/components/SyncStatusBadge';
+import { tokens } from '@/src/theme/tokens';
 
 export default function AppLayout() {
   return (
@@ -13,6 +14,11 @@ export default function AppLayout() {
         headerShown: true,
         headerTitle: '',
         headerRight: () => <SyncStatusBadge />,
+        // Feldführer: ink on warm white, no shadow under the header, hairline instead.
+        headerStyle: { backgroundColor: tokens.color.bg },
+        headerTintColor: tokens.color.ink,
+        headerShadowVisible: false,
+        contentStyle: { backgroundColor: tokens.color.bg },
       }}
     />
   );

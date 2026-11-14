@@ -101,7 +101,7 @@ export function WebEditorToolbar({ onBack }: WebEditorToolbarProps): React.JSX.E
 
   return (
     <View
-      className="flex-row items-center justify-between px-4 py-2 border-b border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900"
+      className="flex-row items-center justify-between px-4 py-2 border-b border-line bg-bg"
       testID="web-editor-toolbar"
     >
       <View className="flex-row items-center gap-2">
@@ -112,9 +112,9 @@ export function WebEditorToolbar({ onBack }: WebEditorToolbarProps): React.JSX.E
           accessibilityRole="button"
           accessibilityLabel="Zurück"
         >
-          <Text className="text-base text-stone-700 dark:text-stone-300">←</Text>
+          <Text className="text-base text-ink">←</Text>
         </Pressable>
-        <Text className="text-base font-semibold text-stone-900 dark:text-stone-100 ml-2">
+        <Text className="text-base font-semibold text-ink ml-2">
           {t('editor.title')}
         </Text>
       </View>
@@ -159,10 +159,10 @@ export function WebEditorToolbar({ onBack }: WebEditorToolbarProps): React.JSX.E
           disabled={mode !== 'account' || saveStatus === 'saving'}
           className={`px-3 py-1.5 rounded-md ${
             saveStatus === 'error'
-              ? 'bg-red-600'
+              ? 'bg-danger'
               : saveStatus === 'saved'
-              ? 'bg-green-600'
-              : 'bg-stone-900 dark:bg-stone-100'
+              ? 'bg-primary'
+              : 'bg-primary'
           } ${mode !== 'account' || saveStatus === 'saving' ? 'opacity-50' : ''}`}
           testID="web-toolbar-save"
           accessibilityRole="button"
@@ -171,8 +171,8 @@ export function WebEditorToolbar({ onBack }: WebEditorToolbarProps): React.JSX.E
           <Text
             className={`text-sm font-medium ${
               saveStatus === 'error' || saveStatus === 'saved'
-                ? 'text-white'
-                : 'text-stone-50 dark:text-stone-900'
+                ? 'text-on-primary'
+                : 'text-on-primary'
             }`}
           >
             {saveLabel}
@@ -205,13 +205,13 @@ function ToolbarButton({
       onPress={onPress}
       disabled={disabled}
       className={`px-2 py-1.5 rounded-md ${
-        disabled ? 'opacity-30' : 'hover:bg-stone-200 dark:hover:bg-stone-800'
+        disabled ? 'opacity-30' : 'hover:bg-surface-2'
       }`}
       testID={testID}
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <Text className={`text-base ${danger ? 'text-red-600' : 'text-stone-700 dark:text-stone-300'}`}>
+      <Text className={`text-base ${danger ? 'text-danger' : 'text-ink'}`}>
         {icon}
       </Text>
     </Pressable>

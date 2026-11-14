@@ -13,7 +13,7 @@ export const Label = React.forwardRef<RNText, LabelProps>(({ className, ...props
   return (
     <RNText
       ref={ref}
-      className={cn('text-sm font-medium text-stone-700 dark:text-stone-300 mb-1', className)}
+      className={cn('text-sm font-medium text-ink mb-1', className)}
       {...props}
     />
   );

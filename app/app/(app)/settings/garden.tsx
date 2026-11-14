@@ -103,8 +103,8 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
 
   if (mode !== 'account') {
     return (
-      <View className="flex-1 bg-stone-50 dark:bg-stone-900 p-6">
-        <Text className="text-stone-700 dark:text-stone-200">
+      <View className="flex-1 bg-bg p-6">
+        <Text className="text-ink">
           {t('garden.local_mode_notice')}
         </Text>
       </View>
@@ -224,8 +224,8 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-stone-50 dark:bg-stone-900 p-6 items-center justify-center">
-        <Text className="text-stone-600 dark:text-stone-300">
+      <View className="flex-1 bg-bg p-6 items-center justify-center">
+        <Text className="text-ink-muted">
           {t('common.loading')}
         </Text>
       </View>
@@ -234,9 +234,9 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
 
   if (!garden) {
     return (
-      <View className="flex-1 bg-stone-50 dark:bg-stone-900 p-6">
+      <View className="flex-1 bg-bg p-6">
         <Text
-          className="text-red-600 dark:text-red-400"
+          className="text-danger"
           testID="settings-garden-error"
         >
           {error ?? t('garden.not_found')}
@@ -247,20 +247,20 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
 
   return (
     <ScrollView
-      className="flex-1 bg-stone-50 dark:bg-stone-900"
+      className="flex-1 bg-bg"
       contentContainerClassName="flex-grow p-6 gap-4"
     >
-      <Text className="text-2xl font-semibold text-stone-900 dark:text-stone-100">
+      <Text className="text-2xl font-display font-semibold text-ink">
         {garden.name}
       </Text>
       {garden.plz ? (
-        <Text className="text-sm text-stone-600 dark:text-stone-300">
+        <Text className="text-sm text-ink-muted">
           {t('garden.plz_label')}: {garden.plz}
         </Text>
       ) : null}
       {garden.updatedByUserId && garden.updatedAt ? (
         <Text
-          className="text-xs text-stone-500"
+          className="text-xs text-ink-muted"
           testID="settings-garden-lww-label"
         >
           {t('audit.last_edited_by', {
@@ -274,24 +274,24 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
 
       {/* Members */}
       <View className="gap-2 mt-4">
-        <Text className="text-xs uppercase text-stone-500">
+        <Text className="text-xs uppercase text-ink-muted">
           {t('garden.members_title')}
         </Text>
         {members.map((m, idx) => (
           <View
             key={m.userId}
-            className="flex-row items-center justify-between p-3 rounded-lg border border-stone-200 dark:border-stone-700"
+            className="flex-row items-center justify-between p-3 rounded-lg border border-line"
             testID={`settings-garden-member-${idx}`}
           >
             <View className="flex-row items-center gap-2">
-              <Text className="text-base text-stone-900 dark:text-stone-100">
+              <Text className="text-base text-ink">
                 {m.displayName ?? '?'}
               </Text>
               <Text
                 className={`text-xs px-2 py-0.5 rounded ${
                   m.role === 'owner'
-                    ? 'bg-amber-200 text-amber-900'
-                    : 'bg-stone-200 text-stone-700'
+                    ? 'bg-warn-soft text-warn'
+                    : 'bg-surface-2 text-ink'
                 }`}
               >
                 {m.role === 'owner'
@@ -307,7 +307,7 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
                     onPress={() => handleRemoveMember(m.userId)}
                     testID={`settings-garden-member-remove-confirm-${idx}`}
                   >
-                    <Text className="text-white">{t('common.confirm')}</Text>
+                    <Text className="text-on-primary">{t('common.confirm')}</Text>
                   </Button>
                   <Button
                     variant="outline"
@@ -322,7 +322,7 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
                   onPress={() => setConfirmRemove(m.userId)}
                   testID={`settings-garden-member-remove-${idx}`}
                 >
-                  <Text className="text-red-600">{t('garden.member.remove')}</Text>
+                  <Text className="text-danger">{t('garden.member.remove')}</Text>
                 </Button>
               )
             ) : null}
@@ -339,25 +339,25 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
               disabled={creatingCode}
               testID="settings-garden-invite-btn"
             >
-              <Text className="text-white font-semibold">
+              <Text className="text-on-primary font-semibold">
                 {creatingCode ? t('common.loading') : t('garden.invite.create')}
               </Text>
             </Button>
           ) : (
             <View
-              className="gap-2 p-4 rounded-lg border border-stone-200 dark:border-stone-700"
+              className="gap-2 p-4 rounded-lg border border-line"
               testID="settings-garden-code-display"
             >
-              <Text className="text-xs uppercase text-stone-500">
+              <Text className="text-xs uppercase text-ink-muted">
                 {t('garden.invite.code_display_title')}
               </Text>
               <Text
-                className="text-3xl font-mono tracking-widest text-stone-900 dark:text-stone-100"
+                className="text-3xl font-display font-mono tracking-widest text-ink"
                 testID="settings-garden-code-value"
               >
                 {code}
               </Text>
-              <Text className="text-xs text-stone-500">
+              <Text className="text-xs text-ink-muted">
                 {t('garden.invite.expires_in_hours')}
               </Text>
               <View className="flex-row gap-2">
@@ -389,11 +389,11 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
             onPress={() => setConfirmLeave(true)}
             testID="settings-garden-leave-btn"
           >
-            <Text className="text-red-600">{t('garden.member.leave')}</Text>
+            <Text className="text-danger">{t('garden.member.leave')}</Text>
           </Button>
         ) : (
-          <View className="gap-2 p-4 rounded-lg border border-stone-200 dark:border-stone-700">
-            <Text className="text-base text-stone-900 dark:text-stone-100">
+          <View className="gap-2 p-4 rounded-lg border border-line">
+            <Text className="text-base text-ink">
               {t('garden.member.leave_confirm')}
             </Text>
             <View className="flex-row gap-2">
@@ -402,7 +402,7 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
                 onPress={handleLeaveGarden}
                 testID="settings-garden-leave-confirm"
               >
-                <Text className="text-white">{t('common.confirm')}</Text>
+                <Text className="text-on-primary">{t('common.confirm')}</Text>
               </Button>
               <Button
                 variant="outline"
@@ -417,8 +417,8 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
 
       {/* D-16: Transfer ownership — owner only, at least one other member */}
       {isOwner && otherMembers.length >= 1 ? (
-        <View className="gap-2 mt-6 pt-4 border-t border-stone-200 dark:border-stone-700">
-          <Text className="text-xs uppercase text-stone-500">
+        <View className="gap-2 mt-6 pt-4 border-t border-line">
+          <Text className="text-xs uppercase text-ink-muted">
             {t('garden.owner_badge')}
           </Text>
           {!transferExpanded ? (
@@ -427,13 +427,13 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
               onPress={() => setTransferExpanded(true)}
               testID="settings-garden-transfer-btn"
             >
-              <Text className="text-amber-700 dark:text-amber-400">
+              <Text className="text-warn">
                 {t('garden.transferOwnership.button')}
               </Text>
             </Button>
           ) : (
-            <View className="gap-2 p-4 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-950">
-              <Text className="text-base text-stone-900 dark:text-stone-100">
+            <View className="gap-2 p-4 rounded-lg border border-warn bg-warn-soft">
+              <Text className="text-base text-ink">
                 {t('garden.transferOwnership.confirm')}
               </Text>
               {/* Target-member select list (one-tap-to-transfer, no extra confirm step — the expanded panel IS the confirm) */}
@@ -445,7 +445,7 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
                   disabled={transferring !== null}
                   testID={`settings-garden-transfer-target-${idx}`}
                 >
-                  <Text className="text-white">
+                  <Text className="text-on-primary">
                     {transferring === m.userId
                       ? t('common.loading')
                       : `${t('common.confirm')}: ${m.displayName ?? '?'}`}
@@ -466,7 +466,7 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
 
       {/* D-16: Delete garden — owner only, disabled if other members exist */}
       {isOwner ? (
-        <View className="gap-2 mt-4 pt-4 border-t border-stone-200 dark:border-stone-700">
+        <View className="gap-2 mt-4 pt-4 border-t border-line">
           {!confirmDelete ? (
             <>
               <Button
@@ -475,13 +475,13 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
                 disabled={!canDelete}
                 testID="settings-garden-delete-btn"
               >
-                <Text className="text-white font-semibold">
+                <Text className="text-on-primary font-semibold">
                   {t('garden.delete.button')}
                 </Text>
               </Button>
               {!canDelete ? (
                 <Text
-                  className="text-xs text-stone-500"
+                  className="text-xs text-ink-muted"
                   testID="settings-garden-delete-disabled-hint"
                 >
                   {t('garden.delete.disabledHint')}
@@ -489,8 +489,8 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
               ) : null}
             </>
           ) : (
-            <View className="gap-2 p-4 rounded-lg border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950">
-              <Text className="text-base text-red-900 dark:text-red-100 font-semibold">
+            <View className="gap-2 p-4 rounded-lg border border-danger bg-danger-soft">
+              <Text className="text-base text-danger font-semibold">
                 {t('garden.delete.warning')}
               </Text>
               <View className="flex-row gap-2">
@@ -500,7 +500,7 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
                   disabled={deleting}
                   testID="settings-garden-delete-confirm"
                 >
-                  <Text className="text-white">
+                  <Text className="text-on-primary">
                     {deleting ? t('common.loading') : t('garden.delete.confirm_cta')}
                   </Text>
                 </Button>
@@ -521,7 +521,7 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
       {error ? (
         <Text
           accessibilityLiveRegion="polite"
-          className="text-sm text-red-600 dark:text-red-400"
+          className="text-sm text-danger"
           testID="settings-garden-error"
         >
           {error}

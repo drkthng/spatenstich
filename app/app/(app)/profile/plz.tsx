@@ -40,13 +40,13 @@ export default function PlzScreen(): React.JSX.Element {
 
   return (
     <ScrollView
-      className="flex-1 bg-stone-50 dark:bg-stone-900"
+      className="flex-1 bg-bg"
       contentContainerClassName="flex-grow p-6 gap-4"
     >
-      <Text className="text-2xl font-semibold text-stone-900 dark:text-stone-100 mb-2">
+      <Text className="text-2xl font-display font-semibold text-ink mb-2">
         Postleitzahl
       </Text>
-      <Text className="text-sm text-stone-600 dark:text-stone-300">
+      <Text className="text-sm text-ink-muted">
         Deine PLZ bestimmt die Klimazone und damit Aussaat- und Pflanzzeitpunkte.
       </Text>
 
@@ -83,14 +83,14 @@ export default function PlzScreen(): React.JSX.Element {
       {showFormatError ? (
         <Text
           accessibilityLiveRegion="polite"
-          className="text-sm text-red-600 dark:text-red-400"
+          className="text-sm text-danger"
         >
           {t('profile.plz.error_invalid')}
         </Text>
       ) : null}
 
       <Button onPress={onSubmit} disabled={!canSubmit} testID="plz-submit">
-        <Text className="text-white font-semibold">
+        <Text className="text-on-primary font-semibold">
           {saving ? t('common.loading') : t('profile.plz.submit')}
         </Text>
       </Button>

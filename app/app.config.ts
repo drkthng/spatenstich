@@ -8,7 +8,7 @@ const config: ExpoConfig = {
   userInterfaceStyle: 'light',
   icon: './public/icons/icon-512.png',
   splash: {
-    backgroundColor: '#F6F1E7',
+    backgroundColor: '#FBF8F1',
   },
   ios: { bundleIdentifier: 'de.spatenstich.app', supportsTablet: true },
   web: {

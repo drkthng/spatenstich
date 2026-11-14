@@ -19,20 +19,20 @@ export interface ButtonProps extends Omit<PressableProps, 'children'> {
 
 const variantClasses: Record<ButtonVariant, { root: string; text: string }> = {
   default: {
-    root: 'bg-[#4A7C59] dark:bg-[#6BAA7E] active:opacity-80',
-    text: 'text-white font-semibold',
+    root: 'bg-primary active:opacity-80',
+    text: 'text-on-primary font-semibold',
   },
   destructive: {
-    root: 'bg-red-600 dark:bg-red-500 active:opacity-80',
-    text: 'text-white font-semibold',
+    root: 'bg-danger active:opacity-80',
+    text: 'text-on-primary font-semibold',
   },
   outline: {
-    root: 'border border-stone-300 dark:border-stone-700 bg-transparent active:opacity-80',
-    text: 'text-stone-900 dark:text-stone-100 font-semibold',
+    root: 'border border-line bg-transparent active:opacity-80',
+    text: 'text-ink font-semibold',
   },
   ghost: {
     root: 'bg-transparent active:opacity-80',
-    text: 'text-stone-900 dark:text-stone-100 font-semibold',
+    text: 'text-ink font-semibold',
   },
 };
 

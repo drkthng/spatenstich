@@ -91,14 +91,14 @@ export default function SyncDetailScreen(): React.JSX.Element {
 
   return (
     <ScrollView
-      className="flex-1 bg-white dark:bg-gray-900"
+      className="flex-1 bg-bg"
       testID="sync-detail-screen"
     >
       <Stack.Screen options={{ title: t.sync.detail.title }} />
 
       {entries.length === 0 && (
         <Text
-          className="p-4 text-gray-600 dark:text-gray-400"
+          className="p-4 text-ink-muted"
           testID="sync-detail-empty"
         >
           {t.sync.detail.empty}
@@ -107,19 +107,19 @@ export default function SyncDetailScreen(): React.JSX.Element {
 
       {pending.length > 0 && (
         <View testID="sync-detail-pending-section">
-          <Text className="px-4 pt-4 pb-2 text-xs uppercase text-gray-500">
+          <Text className="px-4 pt-4 pb-2 text-xs uppercase text-ink-muted">
             {t.sync.detail.pendingHeader}
           </Text>
           {pending.map((entry) => (
             <View
               key={entry.id}
               testID={`sync-entry-${entry.id}`}
-              className="px-4 py-3 border-b border-gray-200 dark:border-gray-700"
+              className="px-4 py-3 border-b border-line"
             >
               <Text className="text-sm">
                 {entryLabel(entry.entity, entry.operation)}
               </Text>
-              <Text className="text-xs text-gray-500">
+              <Text className="text-xs text-ink-muted">
                 {attemptsLabel(entry.attempts)}
               </Text>
             </View>
@@ -129,24 +129,24 @@ export default function SyncDetailScreen(): React.JSX.Element {
 
       {failed.length > 0 && (
         <View testID="sync-detail-failed-section">
-          <Text className="px-4 pt-4 pb-2 text-xs uppercase text-amber-600">
+          <Text className="px-4 pt-4 pb-2 text-xs uppercase text-warn">
             {t.sync.detail.failedHeader}
           </Text>
           {failed.map((entry) => (
             <View
               key={entry.id}
               testID={`sync-entry-${entry.id}`}
-              className="px-4 py-3 border-b border-gray-200 dark:border-gray-700"
+              className="px-4 py-3 border-b border-line"
             >
               <Text className="text-sm">
                 {entryLabel(entry.entity, entry.operation)}
               </Text>
               {entry.lastError ? (
-                <Text className="text-xs text-amber-700 mt-1">
+                <Text className="text-xs text-warn mt-1">
                   {t.sync.detail.lastError}: {entry.lastError}
                 </Text>
               ) : null}
-              <Text className="text-xs text-gray-500 mt-1">
+              <Text className="text-xs text-ink-muted mt-1">
                 {attemptsLabel(entry.attempts)}
               </Text>
 
@@ -156,9 +156,9 @@ export default function SyncDetailScreen(): React.JSX.Element {
                   testID={`retry-${entry.id}`}
                   disabled={busyId === entry.id}
                   onPress={() => void handleRetry(entry.id)}
-                  className="px-3 py-1 bg-blue-600 rounded"
+                  className="px-3 py-1 bg-surface-2 rounded"
                 >
-                  <Text className="text-white text-xs">{t.sync.detail.retryButton}</Text>
+                  <Text className="text-on-primary text-xs">{t.sync.detail.retryButton}</Text>
                 </Pressable>
                 <Pressable
                   testID={`discard-${entry.id}`}
@@ -166,7 +166,7 @@ export default function SyncDetailScreen(): React.JSX.Element {
                   onPress={() =>
                     setConfirmDiscardId(confirmDiscardId === entry.id ? null : entry.id)
                   }
-                  className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded"
+                  className="px-3 py-1 bg-surface-2 rounded"
                 >
                   <Text className="text-xs">{t.sync.detail.discardButton}</Text>
                 </Pressable>
@@ -176,21 +176,21 @@ export default function SyncDetailScreen(): React.JSX.Element {
               {confirmDiscardId === entry.id && (
                 <View
                   testID={`discard-confirm-${entry.id}`}
-                  className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/30 rounded"
+                  className="mt-3 p-3 bg-warn-soft rounded"
                 >
                   <Text className="text-xs mb-2">{t.sync.detail.discardConfirm}</Text>
                   <View className="flex-row gap-2">
                     <Pressable
                       testID={`discard-confirm-yes-${entry.id}`}
                       onPress={() => void handleDiscard(entry.id)}
-                      className="px-3 py-1 bg-red-600 rounded"
+                      className="px-3 py-1 bg-danger rounded"
                     >
-                      <Text className="text-white text-xs">{t.sync.detail.discardConfirmYes}</Text>
+                      <Text className="text-on-primary text-xs">{t.sync.detail.discardConfirmYes}</Text>
                     </Pressable>
                     <Pressable
                       testID={`discard-confirm-no-${entry.id}`}
                       onPress={() => setConfirmDiscardId(null)}
-                      className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded"
+                      className="px-3 py-1 bg-surface-2 rounded"
                     >
                       <Text className="text-xs">{t.sync.detail.discardConfirmNo}</Text>
                     </Pressable>

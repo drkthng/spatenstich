@@ -29,7 +29,7 @@ export function PflanzenKalenderZeile({
       className="flex-row items-center gap-3 py-2 min-h-[44px]"
       testID={testID}
     >
-      <Text className="flex-1 text-sm font-semibold text-stone-800 dark:text-stone-100">
+      <Text className="flex-1 text-sm font-semibold text-ink">
         {plant.nameDe}
       </Text>
       <View style={{ width: 128 }}>

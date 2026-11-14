@@ -13,7 +13,7 @@ export const Card = React.forwardRef<View, CardProps>(({ className, ...props }, 
   <View
     ref={ref}
     className={cn(
-      'rounded-xl bg-stone-200 dark:bg-stone-800 border border-stone-300 dark:border-stone-700',
+      'rounded-xl bg-surface-2 border border-line',
       className
     )}
     {...props}

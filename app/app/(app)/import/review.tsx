@@ -189,7 +189,7 @@ export default function ImportReviewScreen(): React.JSX.Element {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-stone-50 dark:bg-stone-900">
+      <View className="flex-1 items-center justify-center bg-bg">
         <Stack.Screen options={{ headerTitle: t('import.review.title') }} />
         <ActivityIndicator size="large" />
       </View>
@@ -197,11 +197,11 @@ export default function ImportReviewScreen(): React.JSX.Element {
   }
 
   return (
-    <View className="flex-1 bg-stone-50 dark:bg-stone-900">
+    <View className="flex-1 bg-bg">
       <Stack.Screen options={{ headerTitle: t('import.review.title') }} />
       <ScrollView contentContainerClassName="p-4 pb-32">
         <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-sm text-stone-700 dark:text-stone-300 flex-1 mr-3">
+          <Text className="text-sm text-ink flex-1 mr-3">
             {t('import.review.autoPromoteToggle')}
           </Text>
           <Switch
@@ -213,7 +213,7 @@ export default function ImportReviewScreen(): React.JSX.Element {
 
         {promoting && (
           <View className="mb-3" testID="promoting-banner">
-            <Text className="text-sm text-stone-600 dark:text-stone-400 italic">
+            <Text className="text-sm text-ink-muted italic">
               {t('import.review.promoting')}
             </Text>
           </View>
@@ -222,7 +222,7 @@ export default function ImportReviewScreen(): React.JSX.Element {
         {isEmpty && (
           <View className="items-center py-12">
             <Text
-              className="text-base text-stone-500 dark:text-stone-400"
+              className="text-base text-ink-muted"
               testID="empty-state"
             >
               {t('import.review.emptyState')}
@@ -232,7 +232,7 @@ export default function ImportReviewScreen(): React.JSX.Element {
 
         {drafts.beds.length > 0 && (
           <View className="mb-6">
-            <Text className="text-base font-semibold text-stone-700 dark:text-stone-300 mb-2">
+            <Text className="text-base font-semibold text-ink mb-2">
               {t('import.sections.beds')} ({drafts.beds.length})
             </Text>
             {drafts.beds.map((bed) => (
@@ -264,7 +264,7 @@ export default function ImportReviewScreen(): React.JSX.Element {
 
         {drafts.plants.length > 0 && (
           <View className="mb-6">
-            <Text className="text-base font-semibold text-stone-700 dark:text-stone-300 mb-2">
+            <Text className="text-base font-semibold text-ink mb-2">
               {t('import.sections.plants')} ({drafts.plants.length})
             </Text>
             {drafts.plants.map((plant) => (
@@ -296,7 +296,7 @@ export default function ImportReviewScreen(): React.JSX.Element {
 
         {drafts.observations.length > 0 && (
           <View className="mb-6">
-            <Text className="text-base font-semibold text-stone-700 dark:text-stone-300 mb-2">
+            <Text className="text-base font-semibold text-ink mb-2">
               {t('import.sections.observations')} ({drafts.observations.length})
             </Text>
             {drafts.observations.map((obs) => (
@@ -327,13 +327,13 @@ export default function ImportReviewScreen(): React.JSX.Element {
         )}
       </ScrollView>
 
-      <View className="absolute bottom-0 left-0 right-0 p-4 bg-stone-50 dark:bg-stone-900 border-t border-stone-200 dark:border-stone-700">
+      <View className="absolute bottom-0 left-0 right-0 p-4 bg-bg border-t border-line">
         {promoteError && (
           <View
-            className="mb-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700"
+            className="mb-2 p-3 rounded-lg bg-warn-soft border border-warn"
             testID="promote-error-banner"
           >
-            <Text className="text-amber-800 dark:text-amber-200 text-sm">{promoteError}</Text>
+            <Text className="text-warn text-sm">{promoteError}</Text>
           </View>
         )}
         <Button
@@ -342,7 +342,7 @@ export default function ImportReviewScreen(): React.JSX.Element {
           className="mb-2"
           testID="review-done-button"
         >
-          <Text className="text-white font-semibold">{t('import.review.done')}</Text>
+          <Text className="text-on-primary font-semibold">{t('import.review.done')}</Text>
         </Button>
       </View>
     </View>

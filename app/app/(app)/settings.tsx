@@ -162,10 +162,10 @@ export default function SettingsScreen(): React.JSX.Element | null {
   if (mode === 'account') {
     return (
       <ScrollView
-        className="flex-1 bg-stone-50 dark:bg-stone-900"
+        className="flex-1 bg-bg"
         contentContainerClassName="p-6 gap-4"
       >
-        <Text className="text-2xl font-semibold text-stone-900 dark:text-stone-100">
+        <Text className="text-2xl font-display font-semibold text-ink">
           Konto
         </Text>
 
@@ -181,10 +181,10 @@ export default function SettingsScreen(): React.JSX.Element | null {
 
         {email ? (
           <View className="gap-1">
-            <Text className="text-xs uppercase text-stone-500">E-Mail</Text>
+            <Text className="text-xs uppercase text-ink-muted">E-Mail</Text>
             <Text
               selectable
-              className="text-base text-stone-900 dark:text-stone-100"
+              className="text-base text-ink"
               testID="settings-email"
             >
               {email}
@@ -197,7 +197,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
           onPress={() => router.push('/(app)/settings/garden' as any)}
           testID="settings-garden-link"
         >
-          <Text className="text-stone-700 dark:text-stone-200 font-semibold">
+          <Text className="text-ink font-semibold">
             {t('garden.settings_link')}
           </Text>
         </Button>
@@ -207,22 +207,22 @@ export default function SettingsScreen(): React.JSX.Element | null {
           onPress={() => router.push('/(app)/join-garden' as any)}
           testID="settings-join-garden-link"
         >
-          <Text className="text-stone-700 dark:text-stone-200 font-semibold">
+          <Text className="text-ink font-semibold">
             Garten beitreten
           </Text>
         </Button>
 
         <Link href="/(app)/settings/sync" asChild>
           <Pressable
-            className="py-3 border-b border-stone-200 dark:border-stone-800 flex-row items-center justify-between"
+            className="py-3 border-b border-line flex-row items-center justify-between"
             accessibilityRole="button"
             accessibilityLabel="Sync-Status"
             testID="settings-link-sync"
           >
-            <Text className="text-base text-stone-700 dark:text-stone-200 font-semibold">
+            <Text className="text-base text-ink font-semibold">
               Sync-Status
             </Text>
-            <Text className="text-stone-400">›</Text>
+            <Text className="text-ink-muted">›</Text>
           </Pressable>
         </Link>
 
@@ -232,13 +232,13 @@ export default function SettingsScreen(): React.JSX.Element | null {
             onPress={() => setShowConfirmLogout(true)}
             testID="settings-logout"
           >
-            <Text className="text-stone-700 dark:text-stone-200 font-semibold">
+            <Text className="text-ink font-semibold">
               {t('settings.logout')}
             </Text>
           </Button>
         ) : (
-          <View className="gap-2 p-4 rounded-lg border border-stone-200 dark:border-stone-700">
-            <Text className="text-base text-stone-900 dark:text-stone-100">
+          <View className="gap-2 p-4 rounded-lg border border-line">
+            <Text className="text-base text-ink">
               {t('settings.logout_confirm')}
             </Text>
             <View className="flex-row gap-2">
@@ -249,7 +249,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
                 testID="settings-logout-confirm"
                 className="flex-1"
               >
-                <Text className="text-white font-semibold">
+                <Text className="text-on-primary font-semibold">
                   {loggingOut ? t('common.loading') : 'Ja, abmelden'}
                 </Text>
               </Button>
@@ -260,7 +260,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
                 testID="settings-logout-cancel"
                 className="flex-1"
               >
-                <Text className="text-stone-900 dark:text-stone-100 font-semibold">
+                <Text className="text-ink font-semibold">
                   {t('common.cancel')}
                 </Text>
               </Button>
@@ -274,10 +274,10 @@ export default function SettingsScreen(): React.JSX.Element | null {
   // mode === 'local' — Migration CTA + inline form
   return (
     <ScrollView
-      className="flex-1 bg-stone-50 dark:bg-stone-900"
+      className="flex-1 bg-bg"
       contentContainerClassName="p-6 gap-4"
     >
-      <Text className="text-2xl font-semibold text-stone-900 dark:text-stone-100">
+      <Text className="text-2xl font-display font-semibold text-ink">
         Account erstellen
       </Text>
 
@@ -291,7 +291,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
         />
       ) : null}
 
-      <Text className="text-sm text-stone-600 dark:text-stone-300">
+      <Text className="text-sm text-ink-muted">
         Übertrage deine Daten (PLZ, Archetyp, Vereinsregeln) in einen Account,
         damit sie auf anderen Geräten verfügbar sind.
       </Text>
@@ -327,7 +327,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
       {migError ? (
         <Text
           accessibilityLiveRegion="polite"
-          className="text-sm text-red-600 dark:text-red-400"
+          className="text-sm text-danger"
         >
           {migError}
         </Text>
@@ -338,13 +338,13 @@ export default function SettingsScreen(): React.JSX.Element | null {
         disabled={migrating || !migEmail || !migPassword}
         testID="settings-migrate-submit"
       >
-        <Text className="text-white font-semibold">
+        <Text className="text-on-primary font-semibold">
           {migrating ? t('common.loading') : t('settings.migration.cta')}
         </Text>
       </Button>
 
-      <View className="mt-6 pt-6 border-t border-stone-200 dark:border-stone-700 gap-2">
-        <Text className="text-sm text-stone-600 dark:text-stone-300">
+      <View className="mt-6 pt-6 border-t border-line gap-2">
+        <Text className="text-sm text-ink-muted">
           {t('settings.login_existing_desc')}
         </Text>
         {!showLogin ? (
@@ -353,12 +353,12 @@ export default function SettingsScreen(): React.JSX.Element | null {
             onPress={() => setShowLogin(true)}
             testID="settings-login-existing"
           >
-            <Text className="text-stone-700 dark:text-stone-200 font-semibold">
+            <Text className="text-ink font-semibold">
               {t('settings.login_existing')}
             </Text>
           </Button>
         ) : (
-          <View className="gap-2 p-4 rounded-lg border border-stone-200 dark:border-stone-700">
+          <View className="gap-2 p-4 rounded-lg border border-line">
             <View className="gap-2">
               <Label nativeID="login-email-label">E-Mail</Label>
               <Input
@@ -390,7 +390,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
             {loginError ? (
               <Text
                 accessibilityLiveRegion="polite"
-                className="text-sm text-red-600 dark:text-red-400"
+                className="text-sm text-danger"
               >
                 {loginError}
               </Text>
@@ -403,7 +403,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
                 testID="settings-login-submit"
                 className="flex-1"
               >
-                <Text className="text-white font-semibold">
+                <Text className="text-on-primary font-semibold">
                   {loggingIn ? t('common.loading') : t('auth.login.submit')}
                 </Text>
               </Button>
@@ -414,7 +414,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
                 testID="settings-login-cancel"
                 className="flex-1"
               >
-                <Text className="text-stone-900 dark:text-stone-100 font-semibold">
+                <Text className="text-ink font-semibold">
                   {t('common.cancel')}
                 </Text>
               </Button>

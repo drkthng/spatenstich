@@ -104,19 +104,19 @@ export default function VereinsregelnChecklistScreen(): React.JSX.Element {
   }, [rows, mode, userId, existingRules, router]);
 
   return (
-    <View className="flex-1 bg-stone-50 dark:bg-stone-900">
+    <View className="flex-1 bg-bg">
       <ScrollView contentContainerClassName="p-4 gap-3">
-        <Text className="text-2xl font-semibold text-stone-900 dark:text-stone-100">
+        <Text className="text-2xl font-display font-semibold text-ink">
           Checkliste
         </Text>
-        <Text className="text-sm text-stone-600 dark:text-stone-300">
+        <Text className="text-sm text-ink-muted">
           Wähle zutreffende Regeln aus deiner Vereinssatzung und trage Werte ein.
         </Text>
 
         {rows.map((row) => (
           <View
             key={row.item.id}
-            className="bg-white dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-3 gap-2"
+            className="bg-bg rounded-lg border border-line p-3 gap-2"
           >
             <Pressable
               onPress={() => toggleRow(row.item.id)}
@@ -128,13 +128,13 @@ export default function VereinsregelnChecklistScreen(): React.JSX.Element {
               <View
                 className={`w-6 h-6 rounded border-2 items-center justify-center ${
                   row.checked
-                    ? 'bg-[#4A7C59] border-[#4A7C59]'
-                    : 'border-stone-400 dark:border-stone-500'
+                    ? 'bg-primary border-primary'
+                    : 'border-line'
                 }`}
               >
                 {row.checked ? <Check size={14} color="white" /> : null}
               </View>
-              <Text className="flex-1 text-base text-stone-900 dark:text-stone-100">
+              <Text className="flex-1 text-base text-ink">
                 {row.item.label}
               </Text>
             </Pressable>
@@ -146,9 +146,9 @@ export default function VereinsregelnChecklistScreen(): React.JSX.Element {
                   keyboardType="numeric"
                   accessibilityLabel={`Wert für ${row.item.label}`}
                   testID={`checklist-input-${row.item.id}`}
-                  className="min-h-[40px] min-w-[80px] px-3 rounded border border-stone-300 dark:border-stone-600 text-base text-stone-900 dark:text-stone-100 bg-white dark:bg-stone-900"
+                  className="min-h-[40px] min-w-[80px] px-3 rounded border border-line text-base text-ink bg-bg"
                 />
-                <Text className="text-sm text-stone-600 dark:text-stone-300">
+                <Text className="text-sm text-ink-muted">
                   {row.item.einheit}
                 </Text>
               </View>
@@ -157,13 +157,13 @@ export default function VereinsregelnChecklistScreen(): React.JSX.Element {
         ))}
       </ScrollView>
 
-      <View className="p-4 border-t border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900">
+      <View className="p-4 border-t border-line bg-bg">
         <Button
           onPress={handleSave}
           disabled={saving}
           testID="vereinsregeln-checklist-save"
         >
-          <Text className="text-white font-semibold">
+          <Text className="text-on-primary font-semibold">
             {saving ? t('common.loading') : t('rules.confirm.submit')}
           </Text>
         </Button>

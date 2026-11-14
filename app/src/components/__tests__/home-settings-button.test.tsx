@@ -20,7 +20,7 @@ jest.mock('@/src/lib/supabase', () => ({
 
 // react-native-svg ships as CommonJS but its Touchable internals reference
 // a 'Touchable' export from RN that is undefined in jsdom env.
-// Mock the whole module so GardenPlanView (transitively imported by HomeScreen)
+// Mock the whole module so SVG users (transitively imported by HomeScreen)
 // can render without crashing.
 jest.mock('react-native-svg', () => {
   const React = require('react');
