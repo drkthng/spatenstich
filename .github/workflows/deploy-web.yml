@@ -4,7 +4,14 @@ on:
     branches: [master]
   workflow_dispatch:
 jobs:
+  # Work goes straight to master, so nothing is deployed that has not passed the checks:
+  # secret scan, typecheck, lint, tests, edge function tests.
+  checks:
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
   deploy:
+    needs: checks
     runs-on: ubuntu-latest
     env:
       EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
@@ -23,8 +30,11 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build web (PWA)
         run: pnpm --filter app run build:web
+      # AI-01: the bundle that is about to go to every browser holds no server secret.
       - name: Scan bundle for secrets
-        run: bash scripts/check-claude-key-in-bundle.sh app/dist
+        run: |
+          bash scripts/check-claude-key-in-bundle.sh app/dist
+          node scripts/check-secrets.mjs dir app/dist
       # wrangler-action installiert sonst per `pnpm add wrangler` in die Workspace-Wurzel
       # und scheitert an ERR_PNPM_ADDING_TO_ROOT; ein vorinstalliertes wrangler nutzt sie direkt.
       - name: Install Wrangler

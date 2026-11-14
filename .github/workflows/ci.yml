@@ -1,7 +1,12 @@
-name: CI — PR Checks
+name: CI — Checks
+
+# Runs for pull requests, and is called by the deploy workflow before every deploy
+# (work goes straight to master, so the deploy is the gate).
 on:
   pull_request:
     branches: [master, main]
+  workflow_call:
+
 jobs:
   checks:
     runs-on: ubuntu-latest
@@ -18,6 +23,14 @@ jobs:
         with:
           node-version: 22
           cache: 'pnpm'
+
+      # AI-01: no server secret in the repository. The self-test plants made-up keys and
+      # expects the scan to fail on them, so a scan that passes means something.
+      - name: Secret scan — self-test with planted keys
+        run: node scripts/check-secrets.test.mjs
+      - name: Secret scan — repository
+        run: node scripts/check-secrets.mjs repo
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Typecheck
@@ -26,7 +39,19 @@ jobs:
         run: pnpm -r run lint
       - name: Test
         run: pnpm -r run test --passWithNoTests
+
+      # The AI edge function: type-check against the real SDK, then its tests.
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Edge function — type-check
+        run: deno check supabase/functions/ai/index.ts
+      - name: Edge function — tests
+        run: deno test supabase/functions/ai/
+
       - name: Web export (for bundle scan)
         run: pnpm --filter app exec expo export --platform web
-      - name: Scan bundle for secrets
-        run: bash scripts/check-claude-key-in-bundle.sh app/dist
+      - name: Secret scan — bundle
+        run: |
+          bash scripts/check-claude-key-in-bundle.sh app/dist
+          node scripts/check-secrets.mjs dir app/dist
