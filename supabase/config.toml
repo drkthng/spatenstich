@@ -388,6 +388,11 @@ static_files = [ "../packages/shared/src/data/plants.json:./plants.json" ]
 # the bundled file to the function's working directory. Requires Supabase CLI >= 2.7.0.
 # IMPORTANT: First deploy MUST use Docker (not --use-api) per RESEARCH Pitfall 1.
 
+# Phase 34: the only place that calls the Claude API. The function checks the sign-in
+# token itself (auth.getUser), so the gateway check is off and the CORS preflight passes.
+[functions.ai]
+verify_jwt = false
+
 
 [analytics]
 enabled = true
