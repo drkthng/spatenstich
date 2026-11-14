@@ -21,7 +21,7 @@ import { getRotateDeg } from '@/src/lib/editor/elementGeometry';
 import { HANDLE_VISUAL_PX, ROTATE_OFFSET_PX, handleSpots } from '@/src/lib/editor/handles';
 import { estimateTextWidth, fitLabel, type MeasureText } from '@/src/lib/editor/labelFit';
 import { scaleBar } from '@/src/lib/editor/scaleBar';
-import { formatDegrees, parseDegrees } from '@/src/lib/editor/numberFormat';
+import { formatDegrees, formatMeters, parseDegrees } from '@/src/lib/editor/numberFormat';
 import {
   clampPan,
   fitScale,
@@ -32,6 +32,7 @@ import {
 import {
   InteractionController,
   type ControllerPort,
+  type MarqueeRect,
   type PointerSample,
   type PointerType,
 } from '@/src/lib/editor/interactionController';
@@ -41,6 +42,7 @@ const C = tokens.color;
 const HATCHED_KINDS = new Set(['Beet', 'Hochbeet']);
 const ROUND_KINDS = new Set(['Baum', 'Pflanze']);
 const RENAME_MAX_LENGTH = 24;
+const NO_IDS: string[] = [];
 /** Strip at the bottom of the canvas kept free for the scale bar when the plan is fitted. */
 const SCALE_BAR_RESERVE_PX = 30;
 
@@ -55,14 +57,37 @@ export interface PlanEditorHandle {
   visibleCenterM(): { xM: number; yM: number };
 }
 
+/** What is being placed: drawn as a preview that follows the pointer. */
+export interface PlacingPreview {
+  kind: string;
+  label: string;
+  widthM: number;
+  heightM: number;
+  /** Plants: recommended distance to the next plant, drawn as a ring (EDIT3-16). */
+  spacingM?: number;
+  /** True when another plant stands inside the ring. */
+  tooClose?: boolean;
+}
+
 export interface PlanEditorProps {
   mode: 'edit' | 'readOnly';
   dimensions: GardenDimensionsRow;
   elements: PlanElementRow[];
   /** False draws a still picture: no input, always fitted. Default true. */
   interactive?: boolean;
-  selection?: string | null;
-  onSelect?: (id: string | null) => void;
+  selectedIds?: string[];
+  onSelect?: (ids: string[]) => void;
+  /** Touch "Mehrere" switch: taps add or remove elements (EDIT3-10). */
+  multiSelect?: boolean;
+  /** Non-null while a new element is being placed (EDIT3-09). */
+  placing?: PlacingPreview | null;
+  /** Centre of the placement preview; null hides it. */
+  ghost?: { xM: number; yM: number } | null;
+  onGhostChange?: (pos: { xM: number; yM: number }) => void;
+  /** A mouse click while placing: set the element at this centre. */
+  onPlace?: (pos: { xM: number; yM: number }) => void;
+  /** Plants that stand next to a bad neighbour; marked on the plan. */
+  conflictIds?: Set<string>;
   onUpdateElement?: (id: string, patch: Partial<PlanElementRow>) => void;
   /** True while an element is being moved, resized or rotated. */
   onGestureActive?: (active: boolean) => void;
@@ -121,6 +146,8 @@ interface ElementShapeProps {
   hatchId: string;
   /** Changes when the fonts have loaded; makes memoised shapes fit their names again. */
   fontEpoch: number;
+  /** True for a plant next to a bad neighbour. */
+  conflict: boolean;
 }
 
 const ElementShape = React.memo(function ElementShape({
@@ -129,6 +156,7 @@ const ElementShape = React.memo(function ElementShape({
   selected,
   hideLabel,
   hatchId,
+  conflict,
 }: ElementShapeProps): React.JSX.Element {
   const w = el.widthM * scale;
   const h = el.heightM * scale;
@@ -183,6 +211,9 @@ const ElementShape = React.memo(function ElementShape({
       {shape({ fill, fillOpacity: P.fillOpacity })}
       {hatched ? shape({ fill: `url(#${hatchId})` }) : null}
       {shape({ fill: 'none', stroke, strokeWidth })}
+      {conflict ? (
+        <circle cx={w / 2} cy={-h / 2} r={4.5} fill={C.danger} stroke={C.bg} strokeWidth={1.2} data-conflict="" />
+      ) : null}
       {labelNode}
     </g>
   );
@@ -202,41 +233,57 @@ function SelectionOverlay({
   const h = el.heightM * scale;
   const half = HANDLE_VISUAL_PX / 2;
   const rot = getRotateDeg(el);
-  // The full name of the selected element (D-12): inside it when it fits, otherwise on a
-  // tag under it, on its own solid background.
+  // Under the selected element, each on its own solid background: its size (EDIT3-16) and,
+  // when the name does not fit inside the element, its full name (D-12).
+  const upsideDown = rot > 90 && rot < 270;
   const label = fitLabel(el.label || el.elementType, w, h, P.labelPx, true, measureLabel);
-  let tag: React.ReactNode = null;
+  const sizeText = `${formatMeters(el.widthM)} × ${formatMeters(el.heightM)} m`;
+  const tagH = P.labelPx + 9;
+  const tags: { key: string; text: string; font: string; px: number; weight: number; border: boolean }[] = [
+    { key: 'size', text: sizeText, font: tokens.font.body, px: 12.5, weight: 400, border: false },
+  ];
   if (label && !label.fits && !hideName) {
-    const tagW = measureLabel(label.text, P.labelPx) + 14;
-    const tagH = P.labelPx + 9;
-    const upsideDown = rot > 90 && rot < 270;
-    tag = (
+    tags.push({ key: 'name', text: label.text, font: tokens.font.display, px: P.labelPx, weight: P.labelWeight, border: true });
+  }
+  const tagNodes = tags.map((tag, i) => {
+    const tagW =
+      (tag.key === 'name' ? measureLabel(tag.text, tag.px) : estimateTextWidth(tag.text, tag.px) * 0.92) + 14;
+    return (
       <g
-        transform={`translate(0 ${h / 2 + half + 8 + tagH / 2}) rotate(${upsideDown ? 180 : 0})`}
-        data-name-tag=""
+        key={tag.key}
+        transform={`translate(0 ${h / 2 + half + 8 + tagH / 2 + i * (tagH + 4)}) rotate(${upsideDown ? 180 : 0})`}
+        {...(tag.key === 'name' ? { 'data-name-tag': '' } : { 'data-size-label': '' })}
       >
-        <rect x={-tagW / 2} y={-tagH / 2} width={tagW} height={tagH} fill={C.bg} stroke={P.select} strokeWidth={1} />
+        <rect
+          x={-tagW / 2}
+          y={-tagH / 2}
+          width={tagW}
+          height={tagH}
+          fill={C.bg}
+          stroke={tag.border ? P.select : C.line}
+          strokeWidth={1}
+        />
         <text
           x={0}
           y={0}
           textAnchor="middle"
           dominantBaseline="central"
-          fontFamily={tokens.font.display}
-          fontSize={P.labelPx}
-          fontWeight={P.labelWeight}
+          fontFamily={tag.font}
+          fontSize={tag.px}
+          fontWeight={tag.weight}
           fill={P.label}
         >
-          {label.text}
+          {tag.text}
         </text>
       </g>
     );
-  }
+  });
   return (
     <g
       transform={`translate(${el.xM * scale} ${el.yM * scale}) rotate(${rot})`}
       data-selection={el.id}
     >
-      {tag}
+      {tagNodes}
       <line x1={0} y1={-h / 2} x2={0} y2={-h / 2 - ROTATE_OFFSET_PX} stroke={P.select} strokeWidth={1} />
       {handleSpots(w, h).map((spot) =>
         spot.id === 'rot' ? (
@@ -263,6 +310,50 @@ function SelectionOverlay({
             strokeWidth={1.4}
           />
         ),
+      )}
+    </g>
+  );
+}
+
+function GhostShape({
+  placing,
+  pos,
+  scale,
+}: {
+  placing: PlacingPreview;
+  pos: { xM: number; yM: number };
+  scale: number;
+}): React.JSX.Element {
+  const w = placing.widthM * scale;
+  const h = placing.heightM * scale;
+  const round = ROUND_KINDS.has(placing.kind);
+  const paint = {
+    fill: elementFill(placing.kind),
+    fillOpacity: 0.3,
+    stroke: P.select,
+    strokeWidth: 1.4,
+    strokeDasharray: '5 3',
+  };
+  const ringColor = placing.tooClose ? C.danger : C.primary;
+  return (
+    <g transform={`translate(${pos.xM * scale} ${pos.yM * scale})`} data-ghost={placing.kind}>
+      {placing.spacingM && placing.spacingM > 0 ? (
+        <circle
+          cx={0}
+          cy={0}
+          r={placing.spacingM * scale}
+          fill={ringColor}
+          fillOpacity={0.06}
+          stroke={ringColor}
+          strokeWidth={1.2}
+          strokeDasharray="2 4"
+          data-spacing-ring={placing.tooClose ? 'close' : 'ok'}
+        />
+      ) : null}
+      {round ? (
+        <ellipse cx={0} cy={0} rx={w / 2} ry={h / 2} {...paint} />
+      ) : (
+        <rect x={-w / 2} y={-h / 2} width={w} height={h} {...paint} />
       )}
     </g>
   );
@@ -418,7 +509,10 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
   props,
   ref,
 ): React.JSX.Element {
-  const { mode, dimensions, elements, selection = null, testID } = props;
+  const { mode, dimensions, elements, testID } = props;
+  const selectedIds = props.selectedIds ?? NO_IDS;
+  const placing = props.placing ?? null;
+  const ghost = props.ghost ?? null;
   const interactive = props.interactive !== false;
   const padding = interactive ? FIT_PADDING_PX : 14;
 
@@ -427,6 +521,7 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
   const [vp, setVpState] = React.useState<Viewport>({ tx: 0, ty: 0, scale: 1 });
   const [rename, setRenameState] = React.useState<{ id: string; value: string } | null>(null);
   const [northOpen, setNorthOpen] = React.useState(false);
+  const [marquee, setMarquee] = React.useState<MarqueeRect | null>(null);
   const fontEpoch = useFontEpoch();
   const rawId = React.useId();
   const uid = rawId.replace(/[^a-zA-Z0-9]/g, '');
@@ -446,8 +541,10 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
   propsRef.current = props;
   const elementsRef = React.useRef(visible);
   elementsRef.current = visible;
-  const selectionRef = React.useRef<string | null>(selection);
-  selectionRef.current = selection;
+  const selectedIdsRef = React.useRef<string[]>(selectedIds);
+  selectedIdsRef.current = selectedIds;
+  const ghostRef = React.useRef(ghost);
+  ghostRef.current = ghost;
   const gardenRef = React.useRef(garden);
   gardenRef.current = garden;
   const sizeRef = React.useRef(size);
@@ -482,14 +579,15 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
     const port: ControllerPort = {
       mode: () => propsRef.current.mode,
       elements: () => elementsRef.current,
-      selection: () => selectionRef.current,
+      selectedIds: () => selectedIdsRef.current,
+      multiSelect: () => propsRef.current.multiSelect === true,
       viewport: () => vpRef.current,
       garden: () => gardenRef.current,
       canvas: () => sizeRef.current,
       fitScale: () => fitScale(gardenRef.current, fitArea(sizeRef.current), FIT_PADDING_PX),
-      setSelection: (id) => {
-        selectionRef.current = id;
-        propsRef.current.onSelect?.(id);
+      setSelectedIds: (ids) => {
+        selectedIdsRef.current = ids;
+        propsRef.current.onSelect?.(ids);
       },
       updateElement: (id, patch) => {
         elementsRef.current = elementsRef.current.map((e) => (e.id === id ? { ...e, ...patch } : e));
@@ -501,6 +599,17 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
         const el = elementsRef.current.find((e) => e.id === id);
         if (el) setRename({ id, value: el.label ?? '' });
       },
+      placing: () => {
+        const p = propsRef.current.placing;
+        return p ? { widthM: p.widthM, heightM: p.heightM } : null;
+      },
+      ghost: () => ghostRef.current,
+      setGhost: (pos) => {
+        ghostRef.current = pos;
+        propsRef.current.onGhostChange?.(pos);
+      },
+      commitPlacement: (pos) => propsRef.current.onPlace?.(pos),
+      setMarquee: (rect) => setMarquee(rect),
     };
     return new InteractionController(port);
   }, [setViewport, setRename]);
@@ -546,9 +655,32 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
   }, []);
 
   // Fit on first layout; afterwards a fitted view stays fitted, a user's view is kept.
+  // Exception: when the canvas only gets shorter while something is selected or being renamed
+  // (the properties strip or the on-screen keyboard came up after a tap), the view stays
+  // where it is, so the plan does not jump under the finger. It moves up just enough to
+  // keep that element visible. When the canvas grows again, a fitted view is fitted again.
   React.useEffect(() => {
+    const prev = sizeRef.current;
     sizeRef.current = size;
     if (size.width === 0 || size.height === 0) return;
+    const focusId =
+      renameRef.current?.id ?? (selectedIdsRef.current.length === 1 ? selectedIdsRef.current[0] : null);
+    const shrankOnly =
+      interactive && prev.height > 0 && prev.width === size.width && size.height < prev.height;
+    if (shrankOnly && (focusId !== null || selectedIdsRef.current.length > 0)) {
+      const current = vpRef.current;
+      const el = focusId ? elementsRef.current.find((e) => e.id === focusId) : undefined;
+      if (el) {
+        const cy = el.yM * current.scale + current.ty;
+        const lowest = size.height - 56;
+        if (cy > lowest) {
+          const wasFitted = fittedRef.current;
+          setViewport({ ...current, ty: current.ty - (cy - lowest) }, false);
+          fittedRef.current = wasFitted;
+        }
+      }
+      return;
+    }
     if (fittedRef.current || !interactive) {
       setViewport(fitViewport(garden, fitArea(size), padding), false);
     } else {
@@ -571,7 +703,7 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
         true,
       );
     }
-  }, [rename?.id, size.height, size.width, setViewport]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [rename?.id, size.height, size.width, setViewport]);
 
   // Pointer, wheel and key input.
   React.useEffect(() => {
@@ -614,7 +746,13 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
       if (e.pointerType === 'mouse') e.preventDefault();
     };
     const onMove = (e: PointerEvent) => {
-      if (!down.has(e.pointerId)) return;
+      if (!down.has(e.pointerId)) {
+        if (e.pointerType === 'mouse' && !isUi(e)) {
+          const r = node.getBoundingClientRect();
+          controller.hover(e.clientX - r.left, e.clientY - r.top);
+        }
+        return;
+      }
       controller.handle(toSample(e, 'move'));
     };
     const onUp = (e: PointerEvent) => {
@@ -672,7 +810,10 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
 
   const s = vp.scale;
   const ready = size.width > 0 && size.height > 0;
-  const selectedEl = mode === 'edit' && selection ? visible.find((e) => e.id === selection) : undefined;
+  const selectedSet = mode === 'edit' ? new Set(selectedIds) : new Set<string>();
+  // Handles, size label and name tag only for a single selected element.
+  const selectedEl =
+    mode === 'edit' && selectedIds.length === 1 ? visible.find((e) => e.id === selectedIds[0]) : undefined;
   const renameEl = rename ? visible.find((e) => e.id === rename.id) : undefined;
   const bar = scaleBar(s);
   const hatchId = `hatch${uid}`;
@@ -690,6 +831,7 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
         overflow: 'hidden',
         background: P.bg,
         touchAction: interactive ? 'none' : 'auto',
+        cursor: placing ? 'crosshair' : 'default',
         userSelect: 'none',
         WebkitUserSelect: 'none',
         // Long-press on Android must not open the text callout over the plan.
@@ -720,7 +862,8 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
                 key={el.id}
                 el={el}
                 scale={s}
-                selected={selectedEl?.id === el.id}
+                selected={selectedSet.has(el.id)}
+                conflict={props.conflictIds?.has(el.id) === true}
                 hideLabel={rename?.id === el.id}
                 hatchId={hatchId}
                 fontEpoch={fontEpoch}
@@ -738,7 +881,22 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
             {selectedEl ? (
               <SelectionOverlay el={selectedEl} scale={s} hideName={rename?.id === selectedEl.id} />
             ) : null}
+            {mode === 'edit' && placing && ghost ? <GhostShape placing={placing} pos={ghost} scale={s} /> : null}
           </g>
+          {marquee ? (
+            <rect
+              data-marquee=""
+              x={Math.min(marquee.x0, marquee.x1)}
+              y={Math.min(marquee.y0, marquee.y1)}
+              width={Math.abs(marquee.x1 - marquee.x0)}
+              height={Math.abs(marquee.y1 - marquee.y0)}
+              fill={P.select}
+              fillOpacity={0.07}
+              stroke={P.select}
+              strokeWidth={1}
+              strokeDasharray="4 3"
+            />
+          ) : null}
           <g transform={`translate(14 ${size.height - 14})`} aria-label={t('plan.view.ariaScale', { label: bar.label })}>
             <rect x={-6} y={-24} width={bar.widthPx + 12} height={30} fill={P.bg} fillOpacity={0.85} />
             <path d={`M0 -6 V0 H${bar.widthPx} V-6`} fill="none" stroke={C.ink} strokeWidth={1.2} />

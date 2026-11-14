@@ -276,7 +276,14 @@
         "Baum": "Baum",
         "Sitzplatz": "Sitzplatz",
         "Sonstiges": "Sonstiges"
-      }
+      },
+      "title": "Hinzufügen",
+      "sectionBeds": "Beete",
+      "sectionPlants": "Pflanzen",
+      "sectionFacilities": "Anlagen",
+      "searchPlants": "Pflanze suchen",
+      "noPlants": "Keine Pflanze gefunden.",
+      "close": "Schließen"
     },
     "spacing": {
       "warning": "Mindestabstand unterschritten",
@@ -375,6 +382,27 @@
       "right": "15° nach rechts",
       "angle": "Richtung in Grad",
       "close": "Fertig"
+    },
+    "multi": "Mehrere auswählen",
+    "notSaved": "Nicht gespeichert – tippen zum Wiederholen",
+    "deletedOne": "Element gelöscht",
+    "deletedMany": "{count} Elemente gelöscht",
+    "undoDelete": "Rückgängig",
+    "placing": {
+      "title": "{name} setzen",
+      "hintMouse": "Klicke auf die Stelle im Plan.",
+      "hintTouch": "Tippe auf die Stelle oder ziehe die Vorschau.",
+      "set": "Setzen",
+      "done": "Fertig",
+      "cancel": "Abbrechen",
+      "tooClose": "Zu nah an einer anderen Pflanze."
+    },
+    "actions": {
+      "duplicate": "Duplizieren",
+      "front": "Nach vorn",
+      "back": "Nach hinten",
+      "delete": "Löschen",
+      "selectedCount": "{count} ausgewählt"
     }
   },
   "plan": {

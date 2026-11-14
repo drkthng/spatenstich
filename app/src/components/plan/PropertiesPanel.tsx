@@ -1,10 +1,11 @@
-// Phase 30: the properties field of the selected element (EDIT3-05, EDIT3-06, D-07).
-// On a phone it is a strip under the plan; on desktop a panel on the right. Name, Breite,
-// Tiefe and Drehung update the plan as you type: metres with a decimal comma exact to 1 cm,
-// degrees exact to 1°.
+// The properties field of the selected element (EDIT3-05, EDIT3-06, D-07) and the actions on
+// a selection (EDIT3-10). On a phone it is a strip under the plan; on desktop a panel on the
+// right. Name, Breite, Tiefe and Drehung update the plan as you type: metres with a decimal
+// comma exact to 1 cm, degrees exact to 1°.
 
 import * as React from 'react';
 import { View, Text, TextInput, Pressable } from 'react-native';
+import { BringToFront, Copy, SendToBack, Trash2 } from 'lucide-react-native';
 import type { PlanElementRow } from '@spatenstich/shared';
 import { t } from '@/src/lib/i18n';
 import { tokens } from '@/src/theme/tokens';
@@ -27,9 +28,21 @@ interface FieldProps {
   testID: string;
   /** Called on every keystroke; applies the text when it is valid. */
   onText: (text: string) => void;
+  onEditStart?: () => void;
+  onEditEnd?: () => void;
 }
 
-function Field({ label, value, unit, inputMode, maxLength, testID, onText }: FieldProps): React.JSX.Element {
+function Field({
+  label,
+  value,
+  unit,
+  inputMode,
+  maxLength,
+  testID,
+  onText,
+  onEditStart,
+  onEditEnd,
+}: FieldProps): React.JSX.Element {
   // While the field has focus it shows what was typed, even when that is not valid yet.
   const [draft, setDraft] = React.useState<string | null>(null);
   return (
@@ -46,8 +59,14 @@ function Field({ label, value, unit, inputMode, maxLength, testID, onText }: Fie
           accessibilityLabel={label}
           placeholderTextColor={tokens.color.inkMuted}
           testID={testID}
-          onFocus={() => setDraft(value)}
-          onBlur={() => setDraft(null)}
+          onFocus={() => {
+            setDraft(value);
+            onEditStart?.();
+          }}
+          onBlur={() => {
+            setDraft(null);
+            onEditEnd?.();
+          }}
           onChangeText={(text) => {
             setDraft(text);
             onText(text);
@@ -59,19 +78,79 @@ function Field({ label, value, unit, inputMode, maxLength, testID, onText }: Fie
   );
 }
 
+export interface SelectionActionHandlers {
+  onDuplicate: () => void;
+  onFront: () => void;
+  onBack: () => void;
+  onDelete: () => void;
+}
+
+/** Duplizieren, nach vorn, nach hinten, Löschen: for one element or several. */
+export function SelectionActions({
+  handlers,
+  showLabels,
+}: {
+  handlers: SelectionActionHandlers;
+  showLabels: boolean;
+}): React.JSX.Element {
+  const items = [
+    { key: 'duplicate', label: t('editor.actions.duplicate'), Icon: Copy, onPress: handlers.onDuplicate, danger: false },
+    { key: 'front', label: t('editor.actions.front'), Icon: BringToFront, onPress: handlers.onFront, danger: false },
+    { key: 'back', label: t('editor.actions.back'), Icon: SendToBack, onPress: handlers.onBack, danger: false },
+    { key: 'delete', label: t('editor.actions.delete'), Icon: Trash2, onPress: handlers.onDelete, danger: true },
+  ];
+  return (
+    <View className={showLabels ? 'gap-1' : 'flex-row gap-2'} testID="selection-actions">
+      {items.map(({ key, label, Icon, onPress, danger }) => (
+        <Pressable
+          key={key}
+          onPress={onPress}
+          accessibilityRole="button"
+          accessibilityLabel={label}
+          testID={`action-${key}`}
+          className={
+            showLabels
+              ? 'flex-row items-center min-h-[44px] px-1'
+              : 'flex-1 h-11 items-center justify-center border border-line'
+          }
+        >
+          <Icon size={20} color={danger ? tokens.color.danger : tokens.color.ink} strokeWidth={1.5} />
+          {showLabels ? (
+            <Text className={danger ? 'ml-3 text-base text-danger' : 'ml-3 text-base text-ink'}>{label}</Text>
+          ) : null}
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
 export interface PropertiesPanelProps {
   element: PlanElementRow;
   layout: 'strip' | 'side';
   onUpdate: (id: string, patch: Partial<PlanElementRow>) => void;
-  /** Opens the dialog with the remaining fields and delete. */
+  /** Opens the dialog with the remaining fields. */
   onMore: () => void;
+  actions: SelectionActionHandlers;
+  /** Typing in a field is one undo step: called on focus and on blur. */
+  onEditStart?: () => void;
+  onEditEnd?: () => void;
 }
 
-export function PropertiesPanel({ element, layout, onUpdate, onMore }: PropertiesPanelProps): React.JSX.Element {
+export function PropertiesPanel({
+  element,
+  layout,
+  onUpdate,
+  onMore,
+  actions,
+  onEditStart,
+  onEditEnd,
+}: PropertiesPanelProps): React.JSX.Element {
   const id = element.id;
+  const edit = { onEditStart, onEditEnd };
 
   const nameField = (
     <Field
+      {...edit}
       label={t('editor.props.name')}
       value={element.label ?? ''}
       inputMode="text"
@@ -84,6 +163,7 @@ export function PropertiesPanel({ element, layout, onUpdate, onMore }: Propertie
   );
   const widthField = (
     <Field
+      {...edit}
       label={t('editor.props.width')}
       value={formatMeters(element.widthM)}
       unit={t('editor.props.unitM')}
@@ -97,6 +177,7 @@ export function PropertiesPanel({ element, layout, onUpdate, onMore }: Propertie
   );
   const depthField = (
     <Field
+      {...edit}
       label={t('editor.props.depth')}
       value={formatMeters(element.heightM)}
       unit={t('editor.props.unitM')}
@@ -110,6 +191,7 @@ export function PropertiesPanel({ element, layout, onUpdate, onMore }: Propertie
   );
   const rotationField = (
     <Field
+      {...edit}
       label={t('editor.props.rotation')}
       value={formatDegrees(getRotateDeg(element))}
       unit={t('editor.props.unitDeg')}
@@ -147,6 +229,9 @@ export function PropertiesPanel({ element, layout, onUpdate, onMore }: Propertie
           {rotationField}
           {moreButton}
         </View>
+        <View className="border-t border-line-soft pt-2">
+          <SelectionActions handlers={actions} showLabels />
+        </View>
       </View>
     );
   }
@@ -162,6 +247,38 @@ export function PropertiesPanel({ element, layout, onUpdate, onMore }: Propertie
         {depthField}
         {rotationField}
       </View>
+      <SelectionActions handlers={actions} showLabels={false} />
+    </View>
+  );
+}
+
+/** Shown instead of the properties when several elements are selected. */
+export function MultiSelectionPanel({
+  count,
+  layout,
+  actions,
+}: {
+  count: number;
+  layout: 'strip' | 'side';
+  actions: SelectionActionHandlers;
+}): React.JSX.Element {
+  const title = (
+    <Text className="text-base font-display font-medium text-ink" testID="multi-count">
+      {t('editor.actions.selectedCount', { count })}
+    </Text>
+  );
+  if (layout === 'side') {
+    return (
+      <View className="p-4 gap-3" testID="multi-panel">
+        {title}
+        <SelectionActions handlers={actions} showLabels />
+      </View>
+    );
+  }
+  return (
+    <View className="border-t border-line bg-bg px-4 pt-3 pb-3 gap-2" testID="multi-panel">
+      {title}
+      <SelectionActions handlers={actions} showLabels={false} />
     </View>
   );
 }

@@ -1,7 +1,15 @@
-// Phase 30: the full-screen plan editor, for finger and mouse alike (EDIT3-01 … EDIT3-08).
-// Top bar with "Fertig", the interim "+" list (D-09) and the fit button; the plate in the
-// middle; the properties field as a strip under the plan on a phone and as a panel on the
-// right on desktop (D-07). Saving still runs through the editor store's existing autosave.
+// The full-screen plan editor, for finger and mouse alike.
+//
+// Phase 30 (EDIT3-01 … EDIT3-08): the plate, select/move/resize/rotate/rename, zoom and pan,
+//   the properties field as a strip under the plan on a phone and a panel on desktop.
+// Phase 31:
+//   EDIT3-09  palette with beds, plants (search) and facilities; placing with a preview
+//   EDIT3-10  several elements: move together, duplicate, layer order, delete with a way back
+//   EDIT3-11  undo and redo
+//   EDIT3-16  size label on the selected element; spacing ring and neighbour hint for plants
+//   EDIT3-17  keyboard: Entf, Esc, arrow keys (Shift for big steps), Strg+Z, Strg+Y, Strg+A
+//   EDIT3-18  changes are saved without doing anything, the save state is visible, and what
+//             is still waiting is written when the app is hidden or closed
 
 import * as React from 'react';
 import {
@@ -9,29 +17,72 @@ import {
   Text,
   Pressable,
   ActivityIndicator,
-  ScrollView,
   Platform,
   useWindowDimensions,
 } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
-import { ArrowLeft, Maximize, Plus } from 'lucide-react-native';
-import { withNorthDeg, type GardenDimensionsRow } from '@spatenstich/shared';
+import {
+  ArrowLeft,
+  Maximize,
+  Plus,
+  Redo2,
+  SquareDashedMousePointer,
+  Undo2,
+  X,
+} from 'lucide-react-native';
+import {
+  withNorthDeg,
+  type GardenDimensionsRow,
+  type PlantDbBundle,
+} from '@spatenstich/shared';
+import plantsBundle from '@spatenstich/shared/data/plants';
 import { useAuthStore } from '@/src/stores/authStore';
 import { useEditorStore } from '@/src/stores/editorStore';
 import { loadDimensions, loadAcceptedElements, saveDimensions } from '@/src/lib/gardenPlanRepo';
-import { flushOnLeave, hasPendingSaves } from '@/src/lib/editor/saveDebounce';
+import {
+  flushOnLeave,
+  getSaveState,
+  retryFailedSaves,
+  subscribeSaveState,
+} from '@/src/lib/editor/saveDebounce';
 import { notifyPlanChanged } from '@/src/lib/editor/planRefresh';
-import { ADDABLE_KINDS, createElement } from '@/src/lib/editor/elementFactory';
+import { createElement, newElementId } from '@/src/lib/editor/elementFactory';
+import { clampGroupDelta, DRAG_STEP_M } from '@/src/lib/editor/elementGeometry';
 import { bringToFront } from '@/src/lib/editor/zOrder';
+import {
+  isTooClose,
+  placementProvenance,
+  previewElement,
+  type PaletteItem,
+} from '@/src/lib/editor/placing';
+import {
+  buildCompanionMap,
+  computeToastForElement,
+  useCompanionDetection,
+} from '@/src/hooks/useCompanionDetection';
+import { usePlants } from '@/src/hooks/usePlants';
 import { PlanEditor, type PlanEditorHandle } from '@/src/components/plan/PlanEditor';
-import { PropertiesPanel } from '@/src/components/plan/PropertiesPanel';
+import { PlanPalette } from '@/src/components/plan/PlanPalette';
+import {
+  MultiSelectionPanel,
+  PropertiesPanel,
+  type SelectionActionHandlers,
+} from '@/src/components/plan/PropertiesPanel';
 import { ElementEditorModal } from '@/src/components/editor/ElementEditorModal';
+import { CompanionToast } from '@/src/components/editor/CompanionToast';
 import { t } from '@/src/lib/i18n';
-import { tokens, elementFill } from '@/src/theme/tokens';
+import { tokens } from '@/src/theme/tokens';
 
-/** From this window width the properties field is a panel on the right. */
+/** From this window width the palette and the properties field are side panels. */
 const WIDE_LAYOUT_MIN_PX = 900;
 const NORTH_SAVE_DELAY_MS = 600;
+/** How long the "gelöscht · Rückgängig" hint stays. */
+const DELETE_HINT_MS = 6000;
+/** Arrow keys: small step, and the big step with Shift (EDIT3-17). */
+const NUDGE_STEP_M = DRAG_STEP_M;
+const NUDGE_BIG_STEP_M = 0.5;
+/** A burst of arrow keys is one undo step; it ends this long after the last key. */
+const NUDGE_STEP_END_MS = 500;
 
 function formatLength(m: number): string {
   return String(Math.round(m * 100) / 100).replace('.', ',');
@@ -41,6 +92,66 @@ async function flushEditorSaves(): Promise<void> {
   const mode = useAuthStore.getState().mode;
   const byId = (id: string) => useEditorStore.getState().elements.find((e) => e.id === id);
   await flushOnLeave(mode, byId);
+}
+
+function isTextField(target: EventTarget | null): boolean {
+  const el = target as HTMLElement | null;
+  if (!el || typeof el.tagName !== 'string') return false;
+  return el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable === true;
+}
+
+function useSaveState(): ReturnType<typeof getSaveState> {
+  return React.useSyncExternalStore(subscribeSaveState, getSaveState, getSaveState);
+}
+
+function useHistoryDepth(): { canUndo: boolean; canRedo: boolean } {
+  const subscribe = useEditorStore.temporal.subscribe;
+  const past = React.useSyncExternalStore(
+    subscribe,
+    () => useEditorStore.temporal.getState().pastStates.length,
+    () => 0,
+  );
+  const future = React.useSyncExternalStore(
+    subscribe,
+    () => useEditorStore.temporal.getState().futureStates.length,
+    () => 0,
+  );
+  return { canUndo: past > 0, canRedo: future > 0 };
+}
+
+function IconButton({
+  label,
+  testID,
+  onPress,
+  disabled,
+  active,
+  children,
+}: {
+  label: string;
+  testID: string;
+  onPress: () => void;
+  disabled?: boolean;
+  active?: boolean;
+  children: React.ReactNode;
+}): React.JSX.Element {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: disabled === true, selected: active === true }}
+      testID={testID}
+      className={
+        active
+          ? 'h-11 w-11 items-center justify-center bg-surface-2 border border-line'
+          : 'h-11 w-11 items-center justify-center'
+      }
+      style={disabled ? { opacity: 0.35 } : undefined}
+    >
+      {children}
+    </Pressable>
+  );
 }
 
 export default function PlanEditScreen(): React.JSX.Element {
@@ -54,17 +165,32 @@ export default function PlanEditScreen(): React.JSX.Element {
   const editorRef = React.useRef<PlanEditorHandle>(null);
   const [dimensions, setDimensions] = React.useState<GardenDimensionsRow | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const [addOpen, setAddOpen] = React.useState(false);
+  const [paletteOpen, setPaletteOpen] = React.useState(false);
+  const [multi, setMulti] = React.useState(false);
+  const [placing, setPlacing] = React.useState<PaletteItem | null>(null);
+  const [ghost, setGhost] = React.useState<{ xM: number; yM: number } | null>(null);
+  const [deleted, setDeleted] = React.useState<string[] | null>(null);
 
   const elements = useEditorStore((s) => s.elements);
-  const selection = useEditorStore((s) => s.selection);
+  const selectedIds = useEditorStore((s) => s.selectedIds);
   const editingElementId = useEditorStore((s) => s.editingElementId);
-  const selected = selection
-    ? elements.find((e) => e.id === selection && e.deletedAt === null)
-    : undefined;
+  const selected =
+    selectedIds.length === 1
+      ? elements.find((e) => e.id === selectedIds[0] && e.deletedAt === null)
+      : undefined;
   const editing = editingElementId ? elements.find((e) => e.id === editingElementId) : undefined;
 
-  // Load the plan into the editor store.
+  const saveState = useSaveState();
+  const { canUndo, canRedo } = useHistoryDepth();
+  const { conflictElementIds, toastState, dismissToast } = useCompanionDetection();
+  const { data: plants = [] } = usePlants();
+  const plantBySlug = React.useMemo(() => new Map(plants.map((p) => [p.slug, p])), [plants]);
+  const companionMap = React.useMemo(
+    () => buildCompanionMap(plantsBundle as unknown as PlantDbBundle),
+    [],
+  );
+
+  // Load the plan into the editor store: no write, no undo step.
   React.useEffect(() => {
     if (!activeGardenId) {
       setLoading(false);
@@ -79,7 +205,7 @@ export default function PlanEditScreen(): React.JSX.Element {
         ]);
         if (cancelled) return;
         setDimensions(dims);
-        useEditorStore.setState({ elements: elems, selection: null, selectedIds: [] });
+        useEditorStore.getState().hydrate(elems);
       } catch (err) {
         console.error('plan editor: load failed', err);
       } finally {
@@ -94,19 +220,28 @@ export default function PlanEditScreen(): React.JSX.Element {
   // Leaving by any route: write what is still waiting, then let the plan view reload.
   React.useEffect(() => {
     return () => {
-      useEditorStore.getState().setSelection(null);
+      const store = useEditorStore.getState();
+      store.endHistoryStep();
+      store.clearSelection();
       void flushEditorSaves().finally(notifyPlanChanged);
     };
   }, []);
 
-  // Closing or reloading the tab: write what is still waiting.
+  // App hidden, tab closed or reloaded: write what is still waiting (EDIT3-18).
   React.useEffect(() => {
     if (Platform.OS !== 'web') return;
-    const handler = () => {
-      if (hasPendingSaves()) void flushEditorSaves();
+    const flush = () => {
+      void flushEditorSaves();
     };
-    window.addEventListener('beforeunload', handler);
-    return () => window.removeEventListener('beforeunload', handler);
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') flush();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', flush);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', flush);
+    };
   }, []);
 
   const handleDone = React.useCallback(async () => {
@@ -120,25 +255,154 @@ export default function PlanEditScreen(): React.JSX.Element {
     else router.replace('/(app)/plan' as never);
   }, [router]);
 
-  const handleAdd = React.useCallback(
-    (kind: string) => {
-      setAddOpen(false);
-      if (!activeGardenId || !dimensions) return;
-      const center = editorRef.current?.visibleCenterM() ?? {
-        xM: dimensions.widthM / 2,
-        yM: dimensions.heightM / 2,
-      };
-      const el = createElement(kind, center, activeGardenId, userId, t(`editor.palette.items.${kind}`));
+  // ── placing (EDIT3-09) ────────────────────────────────────────────────
+
+  const startPlacing = React.useCallback((item: PaletteItem) => {
+    setPaletteOpen(false);
+    useEditorStore.getState().clearSelection();
+    setPlacing(item);
+    setGhost(editorRef.current?.visibleCenterM() ?? null);
+  }, []);
+
+  const stopPlacing = React.useCallback(() => {
+    setPlacing(null);
+    setGhost(null);
+  }, []);
+
+  const placeAt = React.useCallback(
+    (pos: { xM: number; yM: number }) => {
+      if (!placing || !activeGardenId) return;
       const store = useEditorStore.getState();
-      // A new element goes on top of everything that is already there.
-      el.provenance = { ...(el.provenance ?? {}), zOrder: bringToFront(store.elements, el.id) };
+      const el = createElement(placing.kind, pos, activeGardenId, userId, placing.label);
+      el.provenance = {
+        ...placementProvenance(placing, pos, store.elements),
+        // A new element goes on top of everything that is already there.
+        zOrder: bringToFront(store.elements, el.id),
+      };
       store.addElement(el);
+      if (placing.plantSlug) return; // plants: keep placing more of the same
+      setPlacing(null);
+      setGhost(null);
       store.setSelection(el.id);
     },
-    [activeGardenId, dimensions, userId],
+    [placing, activeGardenId, userId],
   );
 
-  // North direction (D-11): shown at once, written to the garden shortly after the last change.
+  const placingHint = React.useMemo(() => {
+    if (!placing || !ghost || !placing.plantSlug) return null;
+    return computeToastForElement(
+      previewElement(placing, ghost, elements),
+      elements,
+      plantBySlug,
+      companionMap,
+    );
+  }, [placing, ghost, elements, plantBySlug, companionMap]);
+  const tooClose = placing && ghost ? isTooClose(placing, ghost, elements) : false;
+
+  // ── selection actions (EDIT3-10) ──────────────────────────────────────
+
+  const deleteTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showDeleted = React.useCallback((ids: string[]) => {
+    if (ids.length === 0) return;
+    if (deleteTimer.current) clearTimeout(deleteTimer.current);
+    setDeleted(ids);
+    deleteTimer.current = setTimeout(() => setDeleted(null), DELETE_HINT_MS);
+  }, []);
+  React.useEffect(
+    () => () => {
+      if (deleteTimer.current) clearTimeout(deleteTimer.current);
+    },
+    [],
+  );
+
+  const deleteSelection = React.useCallback(() => {
+    showDeleted(useEditorStore.getState().deleteSelected());
+  }, [showDeleted]);
+
+  const actions: SelectionActionHandlers = React.useMemo(
+    () => ({
+      onDuplicate: () => {
+        if (!dimensions) return;
+        useEditorStore.getState().duplicateSelected(newElementId, dimensions);
+      },
+      onFront: () => useEditorStore.getState().reorderSelected('front'),
+      onBack: () => useEditorStore.getState().reorderSelected('back'),
+      onDelete: deleteSelection,
+    }),
+    [dimensions, deleteSelection],
+  );
+
+  const undo = React.useCallback(() => useEditorStore.temporal.getState().undo(), []);
+  const redo = React.useCallback(() => useEditorStore.temporal.getState().redo(), []);
+
+  // ── keyboard (EDIT3-17) ───────────────────────────────────────────────
+
+  const nudgeTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  React.useEffect(() => {
+    if (Platform.OS !== 'web' || !dimensions) return;
+    const garden = { widthM: dimensions.widthM, heightM: dimensions.heightM };
+
+    const nudge = (dxM: number, dyM: number) => {
+      const store = useEditorStore.getState();
+      const moving = store.elements.filter(
+        (e) => e.deletedAt === null && store.selectedIds.includes(e.id),
+      );
+      if (moving.length === 0) return;
+      const delta = clampGroupDelta(moving, dxM, dyM, garden);
+      if (delta.dxM === 0 && delta.dyM === 0) return;
+      // A burst of key presses is one undo step.
+      if (nudgeTimer.current) clearTimeout(nudgeTimer.current);
+      else store.beginHistoryStep();
+      for (const e of moving) {
+        store.updateElement(e.id, {
+          xM: Math.round((e.xM + delta.dxM) * 10000) / 10000,
+          yM: Math.round((e.yM + delta.dyM) * 10000) / 10000,
+        });
+      }
+      nudgeTimer.current = setTimeout(() => {
+        nudgeTimer.current = null;
+        useEditorStore.getState().endHistoryStep();
+      }, NUDGE_STEP_END_MS);
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (isTextField(e.target)) return;
+      if (useEditorStore.getState().editingElementId) return;
+      const mod = e.ctrlKey || e.metaKey;
+      const key = e.key.toLowerCase();
+      if (mod && key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      } else if (mod && (key === 'y' || (key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        redo();
+      } else if (mod && key === 'a') {
+        e.preventDefault();
+        const store = useEditorStore.getState();
+        store.setSelectedIds(store.elements.filter((el) => el.deletedAt === null).map((el) => el.id));
+      } else if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        deleteSelection();
+      } else if (e.key === 'Escape') {
+        setPaletteOpen(false);
+        if (placing) stopPlacing();
+        else useEditorStore.getState().clearSelection();
+      } else if (e.key.startsWith('Arrow')) {
+        const step = e.shiftKey ? NUDGE_BIG_STEP_M : NUDGE_STEP_M;
+        const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0;
+        const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0;
+        if (dx !== 0 || dy !== 0) {
+          e.preventDefault();
+          nudge(dx, dy);
+        }
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [dimensions, placing, stopPlacing, deleteSelection, undo, redo]);
+
+  // ── north direction (D-11) ────────────────────────────────────────────
+
   const northTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleNorthChange = React.useCallback(
     (deg: number) => {
@@ -190,12 +454,31 @@ export default function PlanEditScreen(): React.JSX.Element {
   }
 
   const store = useEditorStore.getState();
+  const layout = wide ? 'side' : 'strip';
+  const saveLabel =
+    saveState === 'saving' ? t('editor.saving') : saveState === 'error' ? t('editor.notSaved') : t('editor.saved');
+
+  const selectionPanel = selected ? (
+    <PropertiesPanel
+      key={selected.id}
+      element={selected}
+      layout={layout}
+      onUpdate={store.updateElement}
+      onMore={() => store.setEditingElementId(selected.id)}
+      actions={actions}
+      onEditStart={store.beginHistoryStep}
+      onEditEnd={store.endHistoryStep}
+    />
+  ) : selectedIds.length > 1 ? (
+    <MultiSelectionPanel count={selectedIds.length} layout={layout} actions={actions} />
+  ) : null;
 
   return (
     <View className="flex-1 bg-bg" testID="plan-edit-screen">
       <Stack.Screen options={{ headerShown: false }} />
 
-      <View className="flex-row items-center border-b border-line px-2 min-h-[56px]">
+      {/* Top bar */}
+      <View className="flex-row items-center border-b border-line px-1 min-h-[56px]">
         <Pressable
           onPress={handleDone}
           accessibilityRole="button"
@@ -206,109 +489,202 @@ export default function PlanEditScreen(): React.JSX.Element {
           <ArrowLeft size={20} color={tokens.color.ink} strokeWidth={1.5} />
           <Text className="ml-1 text-base font-medium text-ink">{t('editor.done')}</Text>
         </Pressable>
-        <View className="flex-1 items-center">
-          <Text className="text-lg font-display font-medium text-ink" accessibilityRole="header">
+        <View className="flex-1 min-w-0 items-center">
+          <Text className="text-lg font-display font-medium text-ink" accessibilityRole="header" numberOfLines={1}>
             {t('plan.view.title')}
+            {wide
+              ? ` · ${t('plan.view.parcelSize', {
+                  width: formatLength(dimensions.widthM),
+                  depth: formatLength(dimensions.heightM),
+                })}`
+              : ''}
           </Text>
-          <Text className="text-xs text-ink-muted">
-            {t('plan.view.parcelSize', {
-              width: formatLength(dimensions.widthM),
-              depth: formatLength(dimensions.heightM),
-            })}
-          </Text>
+          <Pressable
+            onPress={saveState === 'error' ? retryFailedSaves : undefined}
+            disabled={saveState !== 'error'}
+            accessibilityRole={saveState === 'error' ? 'button' : 'text'}
+            testID="editor-save-state"
+          >
+            <Text
+              className={saveState === 'error' ? 'text-xs text-danger' : 'text-xs text-ink-muted'}
+              numberOfLines={1}
+            >
+              {saveLabel}
+            </Text>
+          </Pressable>
         </View>
-        <Pressable
-          onPress={() => setAddOpen((open) => !open)}
-          accessibilityRole="button"
-          accessibilityLabel={t('editor.add')}
-          testID="editor-add"
-          className="h-12 min-w-[48px] flex-row items-center justify-center px-2"
+        <IconButton label={t('editor.undo')} testID="editor-undo" onPress={undo} disabled={!canUndo}>
+          <Undo2 size={20} color={tokens.color.ink} strokeWidth={1.5} />
+        </IconButton>
+        <IconButton label={t('editor.redo')} testID="editor-redo" onPress={redo} disabled={!canRedo}>
+          <Redo2 size={20} color={tokens.color.ink} strokeWidth={1.5} />
+        </IconButton>
+        <IconButton
+          label={t('editor.multi')}
+          testID="editor-multi"
+          onPress={() => setMulti((on) => !on)}
+          active={multi}
         >
-          <Plus size={22} color={tokens.color.ink} strokeWidth={1.5} />
-          {wide ? <Text className="ml-1 text-base text-ink">{t('editor.add')}</Text> : null}
-        </Pressable>
-        <Pressable
-          onPress={() => editorRef.current?.fit()}
-          accessibilityRole="button"
-          accessibilityLabel={t('editor.fit')}
-          testID="editor-fit"
-          className="h-12 w-12 items-center justify-center"
-        >
+          <SquareDashedMousePointer size={20} color={tokens.color.ink} strokeWidth={1.5} />
+        </IconButton>
+        {wide ? null : (
+          <IconButton
+            label={t('editor.add')}
+            testID="editor-add"
+            onPress={() => setPaletteOpen((open) => !open)}
+            active={paletteOpen}
+          >
+            <Plus size={22} color={tokens.color.ink} strokeWidth={1.5} />
+          </IconButton>
+        )}
+        <IconButton label={t('editor.fit')} testID="editor-fit" onPress={() => editorRef.current?.fit()}>
           <Maximize size={20} color={tokens.color.ink} strokeWidth={1.5} />
-        </Pressable>
+        </IconButton>
       </View>
 
       <View className="flex-1 flex-row">
+        {wide ? (
+          <View className="w-[250px] border-r border-line bg-bg" testID="palette-side">
+            <Text className="px-4 pt-4 text-lg font-display font-medium text-ink">
+              {t('editor.palette.title')}
+            </Text>
+            <PlanPalette onPick={startPlacing} activeKey={placing?.key ?? null} />
+          </View>
+        ) : null}
+
         <View className="flex-1">
           <PlanEditor
             ref={editorRef}
             mode="edit"
             dimensions={dimensions}
             elements={elements}
-            selection={selection}
-            onSelect={store.setSelection}
+            selectedIds={selectedIds}
+            multiSelect={multi}
+            placing={placing ? { ...placing, tooClose } : null}
+            ghost={ghost}
+            conflictIds={conflictElementIds}
+            onSelect={store.setSelectedIds}
             onUpdateElement={store.updateElement}
             onGestureActive={store.setGestureActive}
+            onGhostChange={setGhost}
+            onPlace={placeAt}
             onNorthChange={handleNorthChange}
             testID="plan-editor"
           />
+          {toastState ? (
+            <CompanionToast
+              variant={toastState.variant}
+              message={toastState.message}
+              onDismiss={dismissToast}
+              testID={`companion-toast-${toastState.variant}`}
+            />
+          ) : null}
+          {deleted ? (
+            <View
+              className="absolute bottom-3 left-3 right-3 flex-row items-center justify-between border border-line bg-bg px-4 min-h-[48px]"
+              testID="delete-hint"
+            >
+              <Text className="text-base text-ink">
+                {deleted.length === 1
+                  ? t('editor.deletedOne')
+                  : t('editor.deletedMany', { count: deleted.length })}
+              </Text>
+              <Pressable
+                onPress={() => {
+                  useEditorStore.getState().restoreElements(deleted);
+                  setDeleted(null);
+                }}
+                accessibilityRole="button"
+                testID="delete-undo"
+                className="min-h-[44px] justify-center pl-4"
+              >
+                <Text className="text-base font-semibold text-accent">{t('editor.undoDelete')}</Text>
+              </Pressable>
+            </View>
+          ) : null}
         </View>
+
         {wide ? (
           <View className="w-[300px] border-l border-line bg-bg" testID="props-side">
-            {selected ? (
-              <PropertiesPanel
-                key={selected.id}
-                element={selected}
-                layout="side"
-                onUpdate={store.updateElement}
-                onMore={() => store.setEditingElementId(selected.id)}
-              />
-            ) : (
+            {selectionPanel ?? (
               <Text className="p-4 text-sm italic text-ink-muted">{t('editor.props.hint')}</Text>
             )}
           </View>
         ) : null}
       </View>
 
-      {!wide && selected ? (
-        <PropertiesPanel
-          key={selected.id}
-          element={selected}
-          layout="strip"
-          onUpdate={store.updateElement}
-          onMore={() => store.setEditingElementId(selected.id)}
-        />
+      {/* Under the plan: what is being placed, or the selection (phone). */}
+      {placing ? (
+        <View className="border-t border-line bg-bg px-4 py-3 gap-2" testID="placing-bar">
+          <View className="flex-row items-center gap-3">
+            <View className="flex-1 min-w-0">
+              <Text className="text-base font-display font-medium text-ink" numberOfLines={1}>
+                {t('editor.placing.title', { name: placing.label })}
+              </Text>
+              <Text className="text-sm text-ink-muted" numberOfLines={2}>
+                {wide ? t('editor.placing.hintMouse') : t('editor.placing.hintTouch')}
+              </Text>
+            </View>
+            <Pressable
+              onPress={() => ghost && placeAt(ghost)}
+              disabled={!ghost}
+              accessibilityRole="button"
+              testID="placing-set"
+              className="min-h-[44px] items-center justify-center bg-primary px-4"
+              style={ghost ? undefined : { opacity: 0.4 }}
+            >
+              <Text className="text-base font-semibold text-on-primary">{t('editor.placing.set')}</Text>
+            </Pressable>
+            <Pressable
+              onPress={stopPlacing}
+              accessibilityRole="button"
+              testID="placing-done"
+              className="min-h-[44px] items-center justify-center border border-line px-4"
+            >
+              <Text className="text-base text-ink">
+                {placing.plantSlug ? t('editor.placing.done') : t('editor.placing.cancel')}
+              </Text>
+            </Pressable>
+          </View>
+          {tooClose ? (
+            <Text className="text-sm text-danger" testID="placing-too-close">
+              {t('editor.placing.tooClose')}
+            </Text>
+          ) : null}
+          {placingHint ? (
+            <Text
+              className={placingHint.variant === 'error' ? 'text-sm text-danger' : 'text-sm text-primary'}
+              testID={`placing-hint-${placingHint.variant}`}
+            >
+              {placingHint.message}
+            </Text>
+          ) : null}
+        </View>
+      ) : !wide ? (
+        selectionPanel
       ) : null}
 
-      {addOpen ? (
-        <View className="absolute inset-0" testID="editor-add-list">
+      {/* Palette as a sheet on the phone. */}
+      {paletteOpen && !wide ? (
+        <View className="absolute inset-0" testID="palette-sheet">
           <Pressable
             className="absolute inset-0 bg-ink/20"
-            onPress={() => setAddOpen(false)}
+            onPress={() => setPaletteOpen(false)}
             accessibilityRole="button"
-            accessibilityLabel={t('editor.addClose')}
+            accessibilityLabel={t('editor.palette.close')}
           />
-          <View className="absolute right-2 top-[60px] w-[240px] max-h-[75%] border border-line bg-bg">
-            <Text className="px-4 pt-3 pb-2 text-[11px] uppercase tracking-widest text-ink-muted">
-              {t('editor.addTitle')}
-            </Text>
-            <ScrollView>
-              {ADDABLE_KINDS.map((kind) => (
-                <Pressable
-                  key={kind}
-                  onPress={() => handleAdd(kind)}
-                  accessibilityRole="button"
-                  testID={`editor-add-${kind}`}
-                  className="flex-row items-center min-h-[48px] px-4 border-t border-line-soft"
-                >
-                  <View
-                    className="h-4 w-6 border border-line"
-                    style={{ backgroundColor: elementFill(kind), opacity: 0.75 }}
-                  />
-                  <Text className="ml-3 text-base text-ink">{t(`editor.palette.items.${kind}`)}</Text>
-                </Pressable>
-              ))}
-            </ScrollView>
+          <View className="absolute bottom-0 left-0 right-0 h-[72%] border-t border-line bg-bg">
+            <View className="flex-row items-center justify-between pl-4 pr-1 min-h-[52px] border-b border-line-soft">
+              <Text className="text-lg font-display font-medium text-ink">{t('editor.palette.title')}</Text>
+              <IconButton
+                label={t('editor.palette.close')}
+                testID="palette-close"
+                onPress={() => setPaletteOpen(false)}
+              >
+                <X size={20} color={tokens.color.ink} strokeWidth={1.5} />
+              </IconButton>
+            </View>
+            <PlanPalette onPick={startPlacing} activeKey={placing?.key ?? null} />
           </View>
         </View>
       ) : null}
@@ -323,9 +699,9 @@ export default function PlanEditScreen(): React.JSX.Element {
           }}
           onCancel={() => store.setEditingElementId(null)}
           onDelete={() => {
-            store.deleteElement(editing.id);
-            store.setSelection(null);
+            store.setSelectedIds([editing.id]);
             store.setEditingElementId(null);
+            deleteSelection();
           }}
         />
       ) : null}
