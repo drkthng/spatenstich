@@ -19,9 +19,14 @@ export function scheduleWriteDebounced(): void {
   if (writeDebounceTimer) clearTimeout(writeDebounceTimer);
   writeDebounceTimer = setTimeout(() => {
     writeDebounceTimer = null;
-    getSyncWorker().push().catch((e) => {
-      if (typeof __DEV__ !== 'undefined' && __DEV__) console.warn('[SyncTriggers] debounced push failed', e);
-    });
+    // Nothing may escape from a timer: there is nobody to catch it.
+    try {
+      getSyncWorker().push().catch((e) => {
+        if (typeof __DEV__ !== 'undefined' && __DEV__) console.warn('[SyncTriggers] debounced push failed', e);
+      });
+    } catch (e) {
+      if (typeof __DEV__ !== 'undefined' && __DEV__) console.warn('[SyncTriggers] debounced push could not start', e);
+    }
   }, WRITE_DEBOUNCE_MS);
 }
 

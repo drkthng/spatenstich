@@ -268,6 +268,21 @@ export default function SettingsScreen(): React.JSX.Element | null {
           </Pressable>
         </Link>
 
+        {/* The route list for typed links is generated at build time; a new route is not in it yet. */}
+        <Link href={'/(app)/settings/ai' as never} asChild>
+          <Pressable
+            className="py-3 border-b border-line flex-row items-center justify-between"
+            accessibilityRole="button"
+            accessibilityLabel={t('settings.ai_link')}
+            testID="settings-link-ai"
+          >
+            <Text className="text-base text-ink font-semibold">
+              {t('settings.ai_link')}
+            </Text>
+            <Text className="text-ink-muted">›</Text>
+          </Pressable>
+        </Link>
+
         {!showConfirmLogout ? (
           <Button
             variant="ghost"

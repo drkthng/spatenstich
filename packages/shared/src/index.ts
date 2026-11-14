@@ -7,6 +7,7 @@ export * from './constants/archetypes';
 export * from './constants/vereinsregeln';
 export * from './lib/kalenderEngine';
 export * from './utils';
+export * from './ai/contract';
 // Phase 3: Row-Types + Entity-Definitions
 export type {
   EntityName,

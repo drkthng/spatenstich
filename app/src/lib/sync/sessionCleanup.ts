@@ -63,6 +63,8 @@ export async function clearLocalAccountData(storage: StorageAdapter = defaultSto
   _resetEditorSaveTimers();
   await storage.clearAll();
   await storage.delete(SYNC_SCOPE_KEY);
+  // What the device remembered about the garden's AI budget goes too.
+  for (const key of await storage.list('ai_usage:')) await storage.delete(key);
   useProfileStore.getState().reset();
   useEditorStore.getState().hydrate([]);
 }
