@@ -1,4 +1,4 @@
-import { getNorthDeg, withNorthDeg, NORTH_DEG_KEY } from '../utils';
+import { getNorthDeg, withNorthDeg, NORTH_DEG_KEY, getBoundary, withBoundary, BOUNDARY_KEY } from '../utils';
 
 describe('north direction in extraDims', () => {
   it('defaults to 0 when nothing is stored', () => {
@@ -18,5 +18,25 @@ describe('north direction in extraDims', () => {
     const next = withNorthDeg({ lShapeCut: 2 }, 45);
     expect(next).toEqual({ lShapeCut: 2, [NORTH_DEG_KEY]: 45 });
     expect(withNorthDeg(null, -90)).toEqual({ [NORTH_DEG_KEY]: 270 });
+  });
+});
+
+describe('free parcel boundary in extraDims', () => {
+  const tri = [{ x: 0, y: 0 }, { x: 12, y: 0 }, { x: 6, y: 13 }];
+
+  it('is null for a plain rectangle and for broken data', () => {
+    expect(getBoundary(null, 12, 13)).toBeNull();
+    expect(getBoundary({ [BOUNDARY_KEY]: [{ x: 0, y: 0 }] }, 12, 13)).toBeNull();
+    expect(getBoundary({ [BOUNDARY_KEY]: [{ x: 0, y: 0 }, { x: 1, y: 'a' }, { x: 2, y: 2 }] }, 12, 13)).toBeNull();
+  });
+
+  it('is clamped into the rectangle of the parcel', () => {
+    expect(getBoundary({ [BOUNDARY_KEY]: [{ x: -1, y: 0 }, { x: 20, y: 0 }, { x: 6, y: 99 }] }, 12, 13)).toEqual(tri);
+  });
+
+  it('is set and removed without touching other keys', () => {
+    const set = withBoundary({ [NORTH_DEG_KEY]: 30 }, tri);
+    expect(set).toEqual({ [NORTH_DEG_KEY]: 30, [BOUNDARY_KEY]: tri });
+    expect(withBoundary(set, null)).toEqual({ [NORTH_DEG_KEY]: 30 });
   });
 });

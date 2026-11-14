@@ -12,6 +12,8 @@ import {
 import { getRotateDeg, localToWorld, toBox } from '../elementGeometry';
 import { ROTATE_OFFSET_PX } from '../handles';
 import type { Viewport } from '../viewport';
+import type { Guides } from '../snapping';
+import type { WorldPoint } from '../outline';
 
 function makeEl(id: string, overrides: Partial<PlanElementRow> = {}): PlanElementRow {
   return {
@@ -52,6 +54,12 @@ interface Harness {
     ghost: { xM: number; yM: number } | null;
     placed: { xM: number; yM: number }[];
     marquee: ({ x0: number; y0: number; x1: number; y1: number } | null)[];
+    snap: boolean;
+    guides: (Guides | null)[];
+    outline: WorldPoint[] | null;
+    outlineDone: boolean[];
+    drawing: boolean;
+    drawn: WorldPoint[];
   };
   el: (id: string) => PlanElementRow;
 }
@@ -74,6 +82,12 @@ function harness(elements: PlanElementRow[] = [makeEl('a')], mode: 'edit' | 'rea
     ghost: null,
     placed: [],
     marquee: [],
+    snap: false,
+    guides: [],
+    outline: null,
+    outlineDone: [],
+    drawing: false,
+    drawn: [],
   };
   const port: ControllerPort = {
     mode: () => state.mode,
@@ -109,6 +123,19 @@ function harness(elements: PlanElementRow[] = [makeEl('a')], mode: 'edit' | 'rea
     },
     setMarquee: (rect) => {
       state.marquee.push(rect);
+    },
+    snapEnabled: () => state.snap,
+    setGuides: (guides) => {
+      state.guides.push(guides);
+    },
+    outlinePoints: () => state.outline,
+    setOutlinePoints: (points, done) => {
+      state.outline = points;
+      state.outlineDone.push(done);
+    },
+    drawing: () => state.drawing,
+    addDrawPoint: (point) => {
+      state.drawn.push(point);
     },
   };
   return {
@@ -679,5 +706,137 @@ describe('placing with a preview (EDIT3-09)', () => {
     const h = harness();
     h.ctrl.hover(300, 300);
     expect(h.state.ghost).toBeNull();
+  });
+});
+
+// ── Phase 32 ──────────────────────────────────────────────────────────────
+
+describe('snapping (EDIT3-13)', () => {
+  // 'a' covers 1…3 m; 'b' covers 5…7 m in x, 4…6 m in y.
+  const two = () => [makeEl('a'), makeEl('b', { xM: 6, yM: 5 })];
+
+  it('a moved element catches on the edge of a neighbour and reports a guide', () => {
+    const h = harness(two());
+    h.state.snap = true;
+    // 95 px = 1.9 m: the right edge would be at 4.9, 0.1 m short of the neighbour's left edge.
+    drag(h, [100, 100], [195, 100], 'mouse');
+    expect(h.el('a').xM).toBeCloseTo(4, 5);
+    const withLines = h.state.guides.filter((g) => g && g.align.length > 0);
+    expect(withLines.length).toBeGreaterThan(0);
+    expect(withLines[withLines.length - 1]!.align[0]).toMatchObject({ axis: 'x', at: 5 });
+    expect(h.state.guides[h.state.guides.length - 1]).toBeNull();
+  });
+
+  it('with snapping off the element only lands on the 5 cm step', () => {
+    const h = harness(two());
+    drag(h, [100, 100], [195, 100], 'mouse');
+    expect(h.el('a').xM).toBeCloseTo(3.9, 5);
+    expect(h.state.guides.filter((g) => g !== null)).toEqual([]);
+  });
+
+  it('a resized edge catches on a neighbour; the other edge stays', () => {
+    const h = harness(two());
+    h.state.snap = true;
+    tap(h, 100, 100, 'mouse');
+    // East edge from 3 to 4.9 m.
+    drag(h, [152, 100], [247, 100], 'mouse');
+    expect(h.el('a').widthM).toBeCloseTo(4, 5);
+    expect(h.el('a').xM - h.el('a').widthM / 2).toBeCloseTo(1, 5);
+  });
+
+  it('a bed does not catch on its own plants while they travel with it', () => {
+    const plant = makeEl('p', {
+      elementType: 'Pflanze',
+      layer: 'seasonal',
+      xM: 2.5,
+      yM: 2,
+      widthM: 0.4,
+      heightM: 0.4,
+      provenance: { parentBedId: 'a', zOrder: -1 },
+    });
+    const h = harness([plant, makeEl('a')]);
+    h.state.snap = true;
+    // 0.33 m: far from any grid line or boundary; only the plant could attract an edge.
+    drag(h, [60, 60], [77, 60], 'mouse');
+    expect(h.el('a').xM).toBeCloseTo(2.35, 5);
+  });
+});
+
+describe('free outlines (EDIT3-14)', () => {
+  const square = (): WorldPoint[] => [
+    { x: 1, y: 1 },
+    { x: 3, y: 1 },
+    { x: 3, y: 3 },
+    { x: 1, y: 3 },
+  ];
+
+  it('dragging a corner moves it on the 5 cm step and finishes the change at the end', () => {
+    const h = harness();
+    h.state.outline = square();
+    drag(h, [150, 50], [201, 73], 'mouse');
+    expect(h.state.outline![1]).toEqual({ x: 4, y: 1.45 });
+    expect(h.state.outlineDone[h.state.outlineDone.length - 1]).toBe(true);
+    expect(h.state.outlineDone.slice(0, -1).every((d) => d === false)).toBe(true);
+    expect(h.state.gestureLog).toEqual([true, false]);
+    expect(h.el('a').xM).toBe(2);
+  });
+
+  it('pressing the marker in the middle of an edge adds a corner that can be dragged on', () => {
+    const h = harness();
+    h.state.outline = square();
+    // Middle of the top edge is (2,1) m = (100,50) px.
+    drag(h, [100, 50], [100, 25], 'mouse');
+    expect(h.state.outline).toHaveLength(5);
+    expect(h.state.outline![1]).toEqual({ x: 2, y: 0.5 });
+  });
+
+  it('a tap on an edge marker adds the corner there', () => {
+    const h = harness();
+    h.state.outline = square();
+    tap(h, 100, 50, 'touch');
+    expect(h.state.outline).toHaveLength(5);
+    expect(h.state.outline![1]).toEqual({ x: 2, y: 1 });
+  });
+
+  it('a double tap on a corner removes it, but never below three corners', () => {
+    const h = harness();
+    h.state.outline = square();
+    tap(h, 150, 50, 'touch');
+    tap(h, 150, 50, 'touch');
+    expect(h.state.outline).toHaveLength(3);
+    tap(h, 50, 50, 'touch');
+    tap(h, 50, 50, 'touch');
+    expect(h.state.outline).toHaveLength(3);
+  });
+
+  it('a corner cannot be dragged out of the parcel', () => {
+    const h = harness();
+    h.state.outline = square();
+    drag(h, [50, 50], [-400, -400], 'mouse');
+    expect(h.state.outline![0]).toEqual({ x: 0, y: 0 });
+  });
+
+  it('while corners are edited, elements are not selected or moved; elsewhere pans', () => {
+    const h = harness();
+    h.state.outline = square();
+    tap(h, 100, 100, 'mouse');
+    expect(h.state.selectedIds).toEqual([]);
+    drag(h, [300, 300], [320, 310], 'touch');
+    expect(h.state.vp).toEqual({ tx: 20, ty: 10, scale: 50 });
+  });
+
+  it('while a new outline is drawn, each tap adds a corner on the step; a drag pans', () => {
+    const h = harness();
+    h.state.drawing = true;
+    tap(h, 101, 99, 'touch');
+    tap(h, 303, 152, 'mouse');
+    expect(h.state.drawn).toEqual([
+      { x: 2, y: 2 },
+      { x: 6.05, y: 3.05 },
+    ]);
+    drag(h, [100, 100], [130, 100], 'touch');
+    expect(h.state.vp.tx).toBe(30);
+    expect(h.state.drawn).toHaveLength(2);
+    expect(h.state.selectedIds).toEqual([]);
   });
 });

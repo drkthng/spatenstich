@@ -10,6 +10,11 @@
 //   EDIT3-17  keyboard: Entf, Esc, arrow keys (Shift for big steps), Strg+Z, Strg+Y, Strg+A
 //   EDIT3-18  changes are saved without doing anything, the save state is visible, and what
 //             is still waiting is written when the app is hidden or closed
+// Phase 32:
+//   EDIT3-12  plants follow their bed (in the store)
+//   EDIT3-13  snapping with guide lines, with a switch in the bar
+//   EDIT3-14  beds with a free outline: drawn corner by corner, corners edited afterwards
+//   EDIT3-15  size and boundary of the parcel
 
 import * as React from 'react';
 import {
@@ -23,6 +28,7 @@ import {
 import { useRouter, Stack } from 'expo-router';
 import {
   ArrowLeft,
+  Magnet,
   Maximize,
   Plus,
   Redo2,
@@ -31,6 +37,8 @@ import {
   X,
 } from 'lucide-react-native';
 import {
+  getBoundary,
+  withBoundary,
   withNorthDeg,
   type GardenDimensionsRow,
   type PlantDbBundle,
@@ -49,6 +57,13 @@ import { notifyPlanChanged } from '@/src/lib/editor/planRefresh';
 import { createElement, newElementId } from '@/src/lib/editor/elementFactory';
 import { clampGroupDelta, DRAG_STEP_M } from '@/src/lib/editor/elementGeometry';
 import { bringToFront } from '@/src/lib/editor/zOrder';
+import {
+  elementPolygon,
+  outlineFromCorners,
+  outlinePatch,
+  type WorldPoint,
+} from '@/src/lib/editor/outline';
+import { ParcelPanel } from '@/src/components/plan/ParcelPanel';
 import {
   isTooClose,
   placementProvenance,
@@ -170,6 +185,12 @@ export default function PlanEditScreen(): React.JSX.Element {
   const [placing, setPlacing] = React.useState<PaletteItem | null>(null);
   const [ghost, setGhost] = React.useState<{ xM: number; yM: number } | null>(null);
   const [deleted, setDeleted] = React.useState<string[] | null>(null);
+  const [snap, setSnap] = React.useState(true);
+  /** Corners of the bed that is being drawn; null when not drawing. */
+  const [drawPoints, setDrawPoints] = React.useState<WorldPoint[] | null>(null);
+  /** Whose corners are being edited: an element id, the parcel, or nothing. */
+  const [outlineTarget, setOutlineTarget] = React.useState<string | 'parcel' | null>(null);
+  const [parcelOpen, setParcelOpen] = React.useState(false);
 
   const elements = useEditorStore((s) => s.elements);
   const selectedIds = useEditorStore((s) => s.selectedIds);
@@ -257,8 +278,19 @@ export default function PlanEditScreen(): React.JSX.Element {
 
   // ── placing (EDIT3-09) ────────────────────────────────────────────────
 
+  const leaveModes = React.useCallback(() => {
+    setPlacing(null);
+    setGhost(null);
+    setDrawPoints(null);
+    setOutlineTarget(null);
+    setParcelOpen(false);
+  }, []);
+
   const startPlacing = React.useCallback((item: PaletteItem) => {
     setPaletteOpen(false);
+    setDrawPoints(null);
+    setOutlineTarget(null);
+    setParcelOpen(false);
     useEditorStore.getState().clearSelection();
     setPlacing(item);
     setGhost(editorRef.current?.visibleCenterM() ?? null);
@@ -385,7 +417,7 @@ export default function PlanEditScreen(): React.JSX.Element {
         deleteSelection();
       } else if (e.key === 'Escape') {
         setPaletteOpen(false);
-        if (placing) stopPlacing();
+        if (placing || drawPoints || outlineTarget || parcelOpen) leaveModes();
         else useEditorStore.getState().clearSelection();
       } else if (e.key.startsWith('Arrow')) {
         const step = e.shiftKey ? NUDGE_BIG_STEP_M : NUDGE_STEP_M;
@@ -399,22 +431,20 @@ export default function PlanEditScreen(): React.JSX.Element {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [dimensions, placing, stopPlacing, deleteSelection, undo, redo]);
+  }, [dimensions, placing, drawPoints, outlineTarget, parcelOpen, leaveModes, deleteSelection, undo, redo]);
 
   // ── north direction (D-11) ────────────────────────────────────────────
 
-  const northTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const handleNorthChange = React.useCallback(
-    (deg: number) => {
-      if (!dimensions || !activeGardenId) return;
-      const next: GardenDimensionsRow = {
-        ...dimensions,
-        extraDims: withNorthDeg(dimensions.extraDims, deg),
-      };
+  // The garden itself (north, size, boundary): shown at once, written shortly after the
+  // last change.
+  const dimsTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const changeDimensions = React.useCallback(
+    (next: GardenDimensionsRow) => {
+      if (!activeGardenId) return;
       setDimensions(next);
-      if (northTimer.current) clearTimeout(northTimer.current);
-      northTimer.current = setTimeout(() => {
-        northTimer.current = null;
+      if (dimsTimer.current) clearTimeout(dimsTimer.current);
+      dimsTimer.current = setTimeout(() => {
+        dimsTimer.current = null;
         saveDimensions(mode, activeGardenId, {
           shape: next.shape,
           widthM: next.widthM,
@@ -422,10 +452,114 @@ export default function PlanEditScreen(): React.JSX.Element {
           extraDims: next.extraDims,
         })
           .then(notifyPlanChanged)
-          .catch((err) => console.error('plan editor: saving north failed', err));
+          .catch((err) => console.error('plan editor: saving the garden failed', err));
       }, NORTH_SAVE_DELAY_MS);
     },
-    [dimensions, activeGardenId, mode],
+    [activeGardenId, mode],
+  );
+  const handleNorthChange = React.useCallback(
+    (deg: number) => {
+      if (!dimensions) return;
+      changeDimensions({ ...dimensions, extraDims: withNorthDeg(dimensions.extraDims, deg) });
+    },
+    [dimensions, changeDimensions],
+  );
+
+  // ── free outlines (EDIT3-14) and the parcel (EDIT3-15) ────────────────
+
+  const boundary = dimensions
+    ? getBoundary(dimensions.extraDims, dimensions.widthM, dimensions.heightM)
+    : null;
+  const outlineElement =
+    outlineTarget && outlineTarget !== 'parcel'
+      ? elements.find((e) => e.id === outlineTarget && e.deletedAt === null)
+      : undefined;
+  const outlinePoints: WorldPoint[] | null = !dimensions
+    ? null
+    : outlineTarget === 'parcel'
+      ? boundary ?? [
+          { x: 0, y: 0 },
+          { x: dimensions.widthM, y: 0 },
+          { x: dimensions.widthM, y: dimensions.heightM },
+          { x: 0, y: dimensions.heightM },
+        ]
+      : outlineElement
+        ? elementPolygon(outlineElement)
+        : null;
+
+  const handleOutlineChange = React.useCallback(
+    (points: WorldPoint[]) => {
+      if (outlineTarget === 'parcel') {
+        if (!dimensions) return;
+        changeDimensions({
+          ...dimensions,
+          shape: 'freehand',
+          extraDims: withBoundary(dimensions.extraDims, points),
+        });
+        return;
+      }
+      const state = useEditorStore.getState();
+      const el = state.elements.find((e) => e.id === outlineTarget);
+      if (el) state.updateElement(el.id, outlinePatch(el, points));
+    },
+    [outlineTarget, dimensions, changeDimensions],
+  );
+
+  const startDrawing = React.useCallback(() => {
+    setPaletteOpen(false);
+    leaveModes();
+    useEditorStore.getState().clearSelection();
+    setDrawPoints([]);
+  }, [leaveModes]);
+
+  const finishDrawing = React.useCallback(() => {
+    if (!drawPoints || drawPoints.length < 3 || !activeGardenId) return;
+    const { box, outline } = outlineFromCorners(drawPoints);
+    const state = useEditorStore.getState();
+    const el = createElement('Beet', box, activeGardenId, userId, t('editor.palette.items.Beet'));
+    el.widthM = box.widthM;
+    el.heightM = box.heightM;
+    el.provenance = { source: 'manual', outline, zOrder: bringToFront(state.elements, el.id) };
+    state.addElement(el);
+    state.setSelection(el.id);
+    setDrawPoints(null);
+  }, [drawPoints, activeGardenId, userId]);
+
+  const openParcel = React.useCallback(() => {
+    setPaletteOpen(false);
+    leaveModes();
+    useEditorStore.getState().clearSelection();
+    setParcelOpen(true);
+  }, [leaveModes]);
+
+  const handleParcelSize = React.useCallback(
+    (size: { widthM: number; heightM: number }) => {
+      if (!dimensions) return;
+      const kept = getBoundary(dimensions.extraDims, size.widthM, size.heightM);
+      changeDimensions({
+        ...dimensions,
+        ...size,
+        extraDims: kept ? withBoundary(dimensions.extraDims, kept) : dimensions.extraDims,
+      });
+    },
+    [dimensions, changeDimensions],
+  );
+
+  const handleParcelShape = React.useCallback(
+    (shape: 'rect' | 'free') => {
+      if (!dimensions) return;
+      if (shape === 'free') {
+        setOutlineTarget('parcel');
+        return;
+      }
+      setOutlineTarget(null);
+      changeDimensions({
+        ...dimensions,
+        shape: 'rectangle',
+        extraDims: withBoundary(dimensions.extraDims, null),
+      });
+    },
+    [dimensions, changeDimensions],
   );
 
   if (loading) {
@@ -468,6 +602,7 @@ export default function PlanEditScreen(): React.JSX.Element {
       actions={actions}
       onEditStart={store.beginHistoryStep}
       onEditEnd={store.endHistoryStep}
+      onOutline={selected.elementType === 'Beet' ? () => setOutlineTarget(selected.id) : undefined}
     />
   ) : selectedIds.length > 1 ? (
     <MultiSelectionPanel count={selectedIds.length} layout={layout} actions={actions} />
@@ -537,8 +672,13 @@ export default function PlanEditScreen(): React.JSX.Element {
             <Plus size={22} color={tokens.color.ink} strokeWidth={1.5} />
           </IconButton>
         )}
-        <IconButton label={t('editor.fit')} testID="editor-fit" onPress={() => editorRef.current?.fit()}>
-          <Maximize size={20} color={tokens.color.ink} strokeWidth={1.5} />
+        <IconButton
+          label={t('editor.snap')}
+          testID="editor-snap"
+          onPress={() => setSnap((on) => !on)}
+          active={snap}
+        >
+          <Magnet size={20} color={tokens.color.ink} strokeWidth={1.5} />
         </IconButton>
       </View>
 
@@ -548,7 +688,12 @@ export default function PlanEditScreen(): React.JSX.Element {
             <Text className="px-4 pt-4 text-lg font-display font-medium text-ink">
               {t('editor.palette.title')}
             </Text>
-            <PlanPalette onPick={startPlacing} activeKey={placing?.key ?? null} />
+            <PlanPalette
+              onPick={startPlacing}
+              activeKey={placing?.key ?? null}
+              onDraw={startDrawing}
+              onParcel={openParcel}
+            />
           </View>
         ) : null}
 
@@ -563,6 +708,11 @@ export default function PlanEditScreen(): React.JSX.Element {
             placing={placing ? { ...placing, tooClose } : null}
             ghost={ghost}
             conflictIds={conflictElementIds}
+            snap={snap}
+            outlinePoints={outlinePoints}
+            onOutlineChange={handleOutlineChange}
+            drawPoints={drawPoints}
+            onDrawPoint={(point) => setDrawPoints((points) => (points ? [...points, point] : points))}
             onSelect={store.setSelectedIds}
             onUpdateElement={store.updateElement}
             onGestureActive={store.setGestureActive}
@@ -571,6 +721,17 @@ export default function PlanEditScreen(): React.JSX.Element {
             onNorthChange={handleNorthChange}
             testID="plan-editor"
           />
+          <View className="absolute right-2 top-[58px]">
+            <Pressable
+              onPress={() => editorRef.current?.fit()}
+              accessibilityRole="button"
+              accessibilityLabel={t('editor.fit')}
+              testID="editor-fit"
+              className="h-11 w-11 items-center justify-center border border-line bg-bg"
+            >
+              <Maximize size={20} color={tokens.color.ink} strokeWidth={1.5} />
+            </Pressable>
+          </View>
           {toastState ? (
             <CompanionToast
               variant={toastState.variant}
@@ -660,6 +821,64 @@ export default function PlanEditScreen(): React.JSX.Element {
             </Text>
           ) : null}
         </View>
+      ) : drawPoints ? (
+        <View className="border-t border-line bg-bg px-4 py-3 gap-2" testID="draw-bar">
+          <Text className="text-base font-display font-medium text-ink">{t('editor.draw.title')}</Text>
+          <Text className="text-sm text-ink-muted">{t('editor.draw.hint')}</Text>
+          <View className="flex-row gap-2">
+            <Pressable
+              onPress={() => setDrawPoints((points) => (points ? points.slice(0, -1) : points))}
+              disabled={drawPoints.length === 0}
+              accessibilityRole="button"
+              testID="draw-remove-last"
+              className="flex-1 min-h-[44px] items-center justify-center border border-line px-2"
+              style={drawPoints.length === 0 ? { opacity: 0.4 } : undefined}
+            >
+              <Text className="text-base text-ink">{t('editor.draw.removeLast')}</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setDrawPoints(null)}
+              accessibilityRole="button"
+              testID="draw-cancel"
+              className="min-h-[44px] items-center justify-center border border-line px-3"
+            >
+              <Text className="text-base text-ink">{t('editor.draw.cancel')}</Text>
+            </Pressable>
+            <Pressable
+              onPress={finishDrawing}
+              disabled={drawPoints.length < 3}
+              accessibilityRole="button"
+              testID="draw-finish"
+              className="min-h-[44px] items-center justify-center bg-primary px-3"
+              style={drawPoints.length < 3 ? { opacity: 0.4 } : undefined}
+            >
+              <Text className="text-base font-semibold text-on-primary">{t('editor.draw.finish')}</Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : parcelOpen ? (
+        <ParcelPanel
+          widthM={dimensions.widthM}
+          heightM={dimensions.heightM}
+          free={outlineTarget === 'parcel' || boundary !== null}
+          onSize={handleParcelSize}
+          onShape={handleParcelShape}
+          onDone={leaveModes}
+        />
+      ) : outlineElement ? (
+        <View className="border-t border-line bg-bg px-4 py-3 gap-2" testID="outline-bar">
+          <View className="flex-row items-center gap-3">
+            <Text className="flex-1 text-sm text-ink-muted">{t('editor.outline.hint')}</Text>
+            <Pressable
+              onPress={() => setOutlineTarget(null)}
+              accessibilityRole="button"
+              testID="outline-done"
+              className="min-h-[44px] items-center justify-center bg-primary px-4"
+            >
+              <Text className="text-base font-semibold text-on-primary">{t('editor.outline.done')}</Text>
+            </Pressable>
+          </View>
+        </View>
       ) : !wide ? (
         selectionPanel
       ) : null}
@@ -684,7 +903,12 @@ export default function PlanEditScreen(): React.JSX.Element {
                 <X size={20} color={tokens.color.ink} strokeWidth={1.5} />
               </IconButton>
             </View>
-            <PlanPalette onPick={startPlacing} activeKey={placing?.key ?? null} />
+            <PlanPalette
+              onPick={startPlacing}
+              activeKey={placing?.key ?? null}
+              onDraw={startDrawing}
+              onParcel={openParcel}
+            />
           </View>
         </View>
       ) : null}

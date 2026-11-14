@@ -16,6 +16,7 @@ import { polygonToBbox, type Point2D } from '../lib/geometry/bedLayout';
 import { useAuthStore } from './authStore';
 import { scheduleSaveElement } from '../lib/editor/saveDebounce';
 import { getZOrder } from '../lib/editor/zOrder';
+import { applyElementPatch } from '../lib/editor/bedBinding';
 
 /** Undo steps kept (EDIT3-11). */
 const HISTORY_LIMIT = 100;
@@ -224,12 +225,9 @@ export const useEditorStore = create<EditorState>()(
 
       addElement: (el) => set((s) => ({ elements: [...s.elements, el] })),
 
+      // Phase 32 (EDIT3-12): a bed takes its plants along; a moved plant notes its bed.
       updateElement: (id, patch) =>
-        set((s) => ({
-          elements: s.elements.map((e) =>
-            e.id === id ? { ...e, ...patch, updatedAt: nowIso() } : e,
-          ),
-        })),
+        set((s) => ({ elements: applyElementPatch(s.elements, id, patch, nowIso()) })),
 
       deleteElement: (id) =>
         set((s) => ({

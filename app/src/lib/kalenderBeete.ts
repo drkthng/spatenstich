@@ -4,6 +4,7 @@
 // Reuses pointInPolygon from lib/geometry/bedLayout.ts (Phase 9).
 // Codebase-Konvention: xM/yM = bbox CENTER (bedLayout.ts:3-4, editorStore.polygonCommit).
 
+import { elementPolygon } from './editor/outline';
 import type { PlanElementRow } from '@spatenstich/shared';
 import { pointInPolygon, type Point2D } from './geometry/bedLayout';
 
@@ -28,20 +29,8 @@ export function getPlantSlug(el: PlanElementRow): string | null {
  * T-10-06-01: Array.isArray + length >= 3 guard prevents degenerate polygon fallback.
  */
 function beetToPolygon(beet: PlanElementRow): Point2D[] {
-  const prov = beet.provenance as Record<string, unknown> | null;
-  if (prov && Array.isArray(prov.polygonPointsM) && (prov.polygonPointsM as unknown[]).length >= 3) {
-    return prov.polygonPointsM as Point2D[];
-  }
-  // Fallback: axis-aligned rectangle from bbox CENTER ± half-dimensions.
-  // Matches useCompanionDetection.getBedPolygon (Phase 9): xM/yM = center.
-  const halfW = beet.widthM / 2;
-  const halfH = beet.heightM / 2;
-  return [
-    { x: beet.xM - halfW, y: beet.yM - halfH },
-    { x: beet.xM + halfW, y: beet.yM - halfH },
-    { x: beet.xM + halfW, y: beet.yM + halfH },
-    { x: beet.xM - halfW, y: beet.yM + halfH },
-  ];
+  // Phase 32: the bed's real shape, following its rotation and free outline.
+  return elementPolygon(beet);
 }
 
 /**

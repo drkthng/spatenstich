@@ -32,7 +32,7 @@ interface FieldProps {
   onEditEnd?: () => void;
 }
 
-function Field({
+export function Field({
   label,
   value,
   unit,
@@ -134,6 +134,8 @@ export interface PropertiesPanelProps {
   /** Typing in a field is one undo step: called on focus and on blur. */
   onEditStart?: () => void;
   onEditEnd?: () => void;
+  /** Beds: start editing the corners of the outline (EDIT3-14). */
+  onOutline?: () => void;
 }
 
 export function PropertiesPanel({
@@ -144,8 +146,19 @@ export function PropertiesPanel({
   actions,
   onEditStart,
   onEditEnd,
+  onOutline,
 }: PropertiesPanelProps): React.JSX.Element {
   const id = element.id;
+  const outlineButton = onOutline ? (
+    <Pressable
+      onPress={onOutline}
+      accessibilityRole="button"
+      testID="props-outline"
+      className="min-h-[44px] items-center justify-center border border-line px-3"
+    >
+      <Text className="text-base text-ink">{t('editor.outline.edit')}</Text>
+    </Pressable>
+  ) : null;
   const edit = { onEditStart, onEditEnd };
 
   const nameField = (
@@ -229,6 +242,7 @@ export function PropertiesPanel({
           {rotationField}
           {moreButton}
         </View>
+        {outlineButton}
         <View className="border-t border-line-soft pt-2">
           <SelectionActions handlers={actions} showLabels />
         </View>
@@ -247,6 +261,7 @@ export function PropertiesPanel({
         {depthField}
         {rotationField}
       </View>
+      {outlineButton}
       <SelectionActions handlers={actions} showLabels={false} />
     </View>
   );

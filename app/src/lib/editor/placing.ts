@@ -3,8 +3,7 @@
 
 import type { PlanElementRow, PlantRow } from '@spatenstich/shared';
 import { DEFAULT_SIZES } from './elementFactory';
-import { pointInBox, toBox } from './elementGeometry';
-import { sortByZOrder } from './zOrder';
+import { bedContaining } from './bedBinding';
 import { hasOverlap } from '../geometry/plantSpacing';
 
 /** Something the palette can put on the plan. */
@@ -76,13 +75,9 @@ export function searchPlants(plants: PlantRow[], query: string, limit = 60): Pla
   return [...starts, ...contains].slice(0, limit);
 }
 
-/** The topmost bed under a point, following the bed's rotation. */
+/** The topmost bed under a point, following the bed's rotation and free outline. */
 export function bedAt(elements: PlanElementRow[], xM: number, yM: number): PlanElementRow | undefined {
-  const beds = sortByZOrder(elements.filter((e) => e.elementType === 'Beet' && e.deletedAt === null));
-  for (let i = beds.length - 1; i >= 0; i--) {
-    if (pointInBox(toBox(beds[i]), xM, yM)) return beds[i];
-  }
-  return undefined;
+  return bedContaining(elements, xM, yM);
 }
 
 /** Provenance for a newly placed item: plant slug and the bed it stands in, if any. */

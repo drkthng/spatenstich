@@ -27,3 +27,41 @@ export function withNorthDeg(
   const safe = Number.isFinite(deg) ? deg : 0;
   return { ...(extraDims ?? {}), [NORTH_DEG_KEY]: ((Math.round(safe) % 360) + 360) % 360 };
 }
+
+// ── Free boundary of a parcel (Phase 32, EDIT3-15) ───────────────────────────
+// Stored with the garden in `garden_dimensions.extraDims` under BOUNDARY_KEY as corner points
+// in metres. The points lie inside the rectangle 0…widthM by 0…heightM, which stays the
+// extent of the plan; without the key the boundary is that rectangle.
+export const BOUNDARY_KEY = 'boundary';
+
+export interface BoundaryPoint {
+  x: number;
+  y: number;
+}
+
+/** The free boundary, clamped into the rectangle; null when the parcel is a plain rectangle. */
+export function getBoundary(
+  extraDims: Record<string, unknown> | null | undefined,
+  widthM: number,
+  heightM: number,
+): BoundaryPoint[] | null {
+  const raw = extraDims ? extraDims[BOUNDARY_KEY] : undefined;
+  if (!Array.isArray(raw) || raw.length < 3) return null;
+  const points: BoundaryPoint[] = [];
+  for (const p of raw as BoundaryPoint[]) {
+    if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return null;
+    points.push({ x: Math.min(widthM, Math.max(0, p.x)), y: Math.min(heightM, Math.max(0, p.y)) });
+  }
+  return points;
+}
+
+/** Returns a copy of `extraDims` with the boundary set, or removed when `points` is null. */
+export function withBoundary(
+  extraDims: Record<string, unknown> | null | undefined,
+  points: BoundaryPoint[] | null,
+): Record<string, unknown> {
+  const next: Record<string, unknown> = { ...(extraDims ?? {}) };
+  if (points && points.length >= 3) next[BOUNDARY_KEY] = points.map((p) => ({ x: p.x, y: p.y }));
+  else delete next[BOUNDARY_KEY];
+  return next;
+}

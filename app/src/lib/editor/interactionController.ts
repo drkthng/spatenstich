@@ -22,10 +22,18 @@
 //   EDIT3-09  Placing with a preview. Mouse: the preview follows the cursor and a click sets
 //             the element. Touch: a tap moves the preview, it can be dragged, and a button in
 //             the host sets it. Panning and zooming keep working while placing.
+//
+// Added in Phase 32:
+//   EDIT3-13  While moving and resizing, edges and centres catch on neighbours, the parcel
+//             boundary, equal gaps and the grid; the host draws the guides. Can be off.
+//   EDIT3-14  Free outlines: while a shape's corners are being edited, a corner can be
+//             dragged, a marker in the middle of an edge adds a corner, and a double tap on
+//             a corner removes it. While a new outline is drawn, each tap adds a corner.
 
 import type { PlanElementRow } from '@spatenstich/shared';
 import { findElementAtPoint } from './hitTest';
 import {
+  boxBounds,
   boxTouchesRect,
   clampCenter,
   clampGroupDelta,
@@ -35,11 +43,22 @@ import {
   rotationFromPointer,
   toBox,
   worldToLocal,
+  MIN_SIZE_M,
   type Box,
   type GardenSize,
   type HandleId,
   type ResizeHandleId,
 } from './elementGeometry';
+import { plantsOfBed } from './bedBinding';
+import {
+  edgeMidpoints,
+  insertCorner,
+  moveCorner,
+  removeCorner,
+  snapPoint,
+  type WorldPoint,
+} from './outline';
+import { snapMove, snapResize, unionBounds, type Bounds, type Guides } from './snapping';
 import { hitHandle, MOUSE_HIT, TOUCH_HIT } from './handles';
 import { snapRotation } from './rotationSnap';
 import {
@@ -108,7 +127,24 @@ export interface ControllerPort {
   /** Mouse click while placing: set the element here. */
   commitPlacement(pos: { xM: number; yM: number }): void;
   setMarquee(rect: MarqueeRect | null): void;
+  /** Snapping to neighbours, boundary and grid is switched on. */
+  snapEnabled(): boolean;
+  setGuides(guides: Guides | null): void;
+  /** Corner points (garden metres) of the shape whose outline is being edited, or null. */
+  outlinePoints(): WorldPoint[] | null;
+  /** New corner points; `done` is true when the change is complete (end of a drag, a tap). */
+  setOutlinePoints(points: WorldPoint[], done: boolean): void;
+  /** True while a new free outline is being drawn: a tap adds a corner. */
+  drawing(): boolean;
+  addDrawPoint(point: WorldPoint): void;
 }
+
+/** How close (in screen pixels) an edge must come to catch. */
+export const SNAP_DISTANCE_PX = 8;
+/** Grid lines that edges catch on, in metres (the drawn grid). */
+export const SNAP_GRID_M = 1;
+/** Reach of a corner or edge marker while editing an outline. */
+export const CORNER_HIT_PX = { mouse: 10, touch: 22 } as const;
 
 /** Movement below this is a tap or click, not a drag. */
 export const DRAG_THRESHOLD_PX = { mouse: 5, touch: 8, handle: 4 } as const;
@@ -117,7 +153,7 @@ export const DOUBLE_TAP = {
   mouse: { ms: 400, px: 6 },
 } as const;
 
-type Intent = 'move' | 'resize' | 'rotate' | 'pan' | 'marquee' | 'ghost' | 'none';
+type Intent = 'move' | 'resize' | 'rotate' | 'pan' | 'marquee' | 'ghost' | 'corner' | 'none';
 
 interface SingleGesture {
   pointerId: number;
@@ -142,6 +178,15 @@ interface SingleGesture {
   toggle: boolean;
   /** A tap places (mouse) or moves the preview (touch) instead of selecting. */
   placeOnTap: boolean;
+  /** Bounds of everything that is not being moved, for snapping; filled on first use. */
+  otherBounds: Bounds[] | null;
+  /** Outline editing: the corner being dragged and the corner points at `down`. */
+  cornerIndex: number;
+  cornerPoints: WorldPoint[] | null;
+  /** Outline editing: the corner was just added by pressing an edge marker. */
+  cornerAdded: boolean;
+  /** A tap adds a corner to the outline that is being drawn. */
+  drawOnTap: boolean;
 }
 
 interface PinchGesture {
@@ -249,6 +294,11 @@ export class InteractionController {
       tapCounts: true,
       toggle: false,
       placeOnTap: false,
+      otherBounds: null,
+      cornerIndex: -1,
+      cornerPoints: null,
+      cornerAdded: false,
+      drawOnTap: false,
     };
     const mouse = isMouseLike(sample.type);
     const panOverride = mouse && (sample.button === 1 || this.spaceHeld);
@@ -265,6 +315,35 @@ export class InteractionController {
 
     const xM = (sample.x - vp.tx) / vp.scale;
     const yM = (sample.y - vp.ty) / vp.scale;
+
+    // Drawing a new outline: every tap adds a corner; a drag pans.
+    if (this.port.drawing()) {
+      return { ...base, intent: 'pan', drawOnTap: true };
+    }
+
+    // Editing an outline: corners can be dragged, edge markers add a corner; the rest pans.
+    const corners = this.port.outlinePoints();
+    if (corners) {
+      const reach = sample.type === 'mouse' ? CORNER_HIT_PX.mouse : CORNER_HIT_PX.touch;
+      const near = (p: WorldPoint) =>
+        Math.hypot(p.x * vp.scale + vp.tx - sample.x, p.y * vp.scale + vp.ty - sample.y) <= reach;
+      const cornerIndex = corners.findIndex(near);
+      if (cornerIndex >= 0) {
+        return { ...base, intent: 'corner', cornerIndex, cornerPoints: corners };
+      }
+      const edgeIndex = edgeMidpoints(corners).findIndex(near);
+      if (edgeIndex >= 0) {
+        const added = insertCorner(corners, edgeIndex);
+        return {
+          ...base,
+          intent: 'corner',
+          cornerIndex: added.index,
+          cornerPoints: added.points,
+          cornerAdded: true,
+        };
+      }
+      return { ...base, intent: 'pan', tapCounts: false };
+    }
 
     // Placing a new element: a tap sets it (mouse) or moves the preview (touch); the preview
     // can be dragged by touch; everything else pans.
@@ -356,6 +435,25 @@ export class InteractionController {
     return hitHandle(local.x, local.y, screenBox.widthM, screenBox.heightM, profile);
   }
 
+  /**
+   * Bounds of the elements that stay put during this gesture: everything except what is
+   * being changed and the plants that travel with a moving bed. Computed once per gesture.
+   */
+  private othersFor(g: SingleGesture): Bounds[] {
+    if (g.otherBounds) return g.otherBounds;
+    const elements = this.port.elements();
+    const moving = new Set(g.starts.map((s) => s.el.id));
+    for (const s of g.starts) {
+      if (s.el.elementType === 'Beet') {
+        for (const plant of plantsOfBed(s.el, elements)) moving.add(plant.id);
+      }
+    }
+    g.otherBounds = elements
+      .filter((e) => e.deletedAt === null && !moving.has(e.id))
+      .map((e) => boxBounds(toBox(e)));
+    return g.otherBounds;
+  }
+
   /** Centre for a new element at a canvas point: edges on the step, centre in the parcel. */
   private placementAt(
     placing: PlacingSpec,
@@ -427,7 +525,7 @@ export class InteractionController {
       if (Math.hypot(dx, dy) < threshold) return;
       g.dragging = true;
       this.lastTap = null;
-      if (g.intent === 'move' || onHandle) this.port.setGestureActive(true);
+      if (g.intent === 'move' || onHandle || g.intent === 'corner') this.port.setGestureActive(true);
     }
 
     const scale = g.startVp.scale;
@@ -442,10 +540,23 @@ export class InteractionController {
         if (!g.primary || g.starts.length === 0) break;
         // The element under the pointer lands on the step; the others keep their offset.
         const pos = moveBox(g.primary, dx / scale, dy / scale, garden);
+        let stepX = pos.xM - g.primary.xM;
+        let stepY = pos.yM - g.primary.yM;
+        if (this.port.snapEnabled()) {
+          const start = unionBounds(g.starts.map((s) => boxBounds(s.box)));
+          const snap = snapMove(
+            { minX: start.minX + stepX, maxX: start.maxX + stepX, minY: start.minY + stepY, maxY: start.maxY + stepY },
+            this.othersFor(g),
+            { toleranceM: SNAP_DISTANCE_PX / scale, gridM: SNAP_GRID_M, garden },
+          );
+          stepX += snap.dxM;
+          stepY += snap.dyM;
+          this.port.setGuides(snap.guides);
+        }
         const delta = clampGroupDelta(
           g.starts.map((s) => s.box),
-          pos.xM - g.primary.xM,
-          pos.yM - g.primary.yM,
+          stepX,
+          stepY,
           garden,
         );
         for (const s of g.starts) {
@@ -456,7 +567,18 @@ export class InteractionController {
       case 'resize': {
         const start = g.starts[0];
         if (!start || !g.handle) break;
-        const box = resizeBox(start.box, g.handle, dx / scale, dy / scale);
+        let box = resizeBox(start.box, g.handle, dx / scale, dy / scale);
+        if (this.port.snapEnabled()) {
+          const snap = snapResize(
+            start.box,
+            box,
+            this.othersFor(g),
+            { toleranceM: SNAP_DISTANCE_PX / scale, gridM: SNAP_GRID_M, garden },
+            MIN_SIZE_M,
+          );
+          box = snap.box;
+          this.port.setGuides(snap.guides);
+        }
         // D-06: a resize that would push the centre out of the parcel is not applied.
         const clamped = clampCenter(box.xM, box.yM, garden);
         if (clamped.xM !== box.xM || clamped.yM !== box.yM) break;
@@ -500,6 +622,17 @@ export class InteractionController {
           .filter((e) => e.deletedAt === null && boxTouchesRect(toBox(e), rect))
           .map((e) => e.id);
         this.port.setSelectedIds(ids);
+        break;
+      }
+      case 'corner': {
+        if (!g.cornerPoints) break;
+        const vp = g.startVp;
+        const raw = snapPoint({ x: (sample.x - vp.tx) / vp.scale, y: (sample.y - vp.ty) / vp.scale });
+        const inside = clampCenter(raw.x, raw.y, garden);
+        this.port.setOutlinePoints(
+          moveCorner(g.cornerPoints, g.cornerIndex, { x: inside.xM, y: inside.yM }),
+          false,
+        );
         break;
       }
       case 'ghost': {
@@ -546,6 +679,11 @@ export class InteractionController {
     this.single = null;
     if (g.dragging) {
       if (g.intent === 'move' || g.intent === 'resize' || g.intent === 'rotate') {
+        this.port.setGuides(null);
+        this.port.setGestureActive(false);
+      } else if (g.intent === 'corner') {
+        const points = this.port.outlinePoints();
+        if (points) this.port.setOutlinePoints(points, true);
         this.port.setGestureActive(false);
       } else if (g.intent === 'marquee') {
         this.port.setMarquee(null);
@@ -557,6 +695,39 @@ export class InteractionController {
 
   private onTap(g: SingleGesture, sample: PointerSample): void {
     if (!g.tapCounts || this.port.mode() !== 'edit') return;
+
+    if (g.drawOnTap) {
+      const vp = g.startVp;
+      const raw = snapPoint({ x: (sample.x - vp.tx) / vp.scale, y: (sample.y - vp.ty) / vp.scale });
+      const inside = clampCenter(raw.x, raw.y, this.port.garden());
+      this.port.addDrawPoint({ x: inside.xM, y: inside.yM });
+      return;
+    }
+
+    if (g.intent === 'corner' && g.cornerPoints) {
+      if (g.cornerAdded) {
+        // A tap on an edge marker adds the corner there.
+        this.port.setOutlinePoints(g.cornerPoints, true);
+        this.lastTap = null;
+        return;
+      }
+      // A double tap on a corner removes it.
+      const key = `corner:${g.cornerIndex}`;
+      const limits = isMouseLike(g.type) ? DOUBLE_TAP.mouse : DOUBLE_TAP.touch;
+      const prev = this.lastTap;
+      if (
+        prev &&
+        prev.targetId === key &&
+        sample.ts - prev.ts <= limits.ms &&
+        Math.hypot(sample.x - prev.x, sample.y - prev.y) <= limits.px
+      ) {
+        this.lastTap = null;
+        this.port.setOutlinePoints(removeCorner(g.cornerPoints, g.cornerIndex), true);
+        return;
+      }
+      this.lastTap = { targetId: key, ts: sample.ts, x: sample.x, y: sample.y };
+      return;
+    }
 
     if (g.placeOnTap) {
       const placing = this.port.placing();
@@ -617,6 +788,11 @@ export class InteractionController {
           provenance: s.el.provenance,
         });
       }
+      this.port.setGuides(null);
+      this.port.setGestureActive(false);
+    } else if (g.intent === 'corner') {
+      const before = g.cornerAdded && g.cornerPoints ? removeCorner(g.cornerPoints, g.cornerIndex) : g.cornerPoints;
+      if (before) this.port.setOutlinePoints(before, true);
       this.port.setGestureActive(false);
     } else if (g.intent === 'marquee') {
       this.port.setMarquee(null);

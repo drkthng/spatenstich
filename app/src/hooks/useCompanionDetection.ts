@@ -10,6 +10,7 @@ import { usePlants } from './usePlants';
 import plantsBundle from '@spatenstich/shared/data/plants';
 import type { PlanElementRow, PlantRow, PlantDbBundle } from '@spatenstich/shared';
 import { pointInPolygon, type Point2D } from '../lib/geometry/bedLayout';
+import { elementPolygon } from '../lib/editor/outline';
 
 // ---- Exported types ----
 
@@ -56,19 +57,8 @@ export function buildCompanionMap(bundle: PlantDbBundle): Map<string, CompanionE
  * Per D-03: provenance.polygonPointsM is the primary source.
  */
 export function getBedPolygon(bed: PlanElementRow): Point2D[] {
-  const prov = bed.provenance as Record<string, unknown> | null;
-  if (prov && Array.isArray(prov.polygonPointsM) && prov.polygonPointsM.length >= 3) {
-    return prov.polygonPointsM as Point2D[];
-  }
-  // Fallback: axis-aligned rectangle from xM/yM/widthM/heightM
-  const halfW = bed.widthM / 2;
-  const halfH = bed.heightM / 2;
-  return [
-    { x: bed.xM - halfW, y: bed.yM - halfH },
-    { x: bed.xM + halfW, y: bed.yM - halfH },
-    { x: bed.xM + halfW, y: bed.yM + halfH },
-    { x: bed.xM - halfW, y: bed.yM + halfH },
-  ];
+  // Phase 32: the bed's real shape, following its rotation and free outline.
+  return elementPolygon(bed);
 }
 
 /**

@@ -60,9 +60,29 @@ export interface PlanPaletteProps {
   onPick: (item: PaletteItem) => void;
   /** Key of the item that is being placed, if any. */
   activeKey: string | null;
+  /** Start drawing a bed with a free outline (EDIT3-14). */
+  onDraw: () => void;
+  /** Open size and boundary of the parcel (EDIT3-15). */
+  onParcel: () => void;
 }
 
-export function PlanPalette({ onPick, activeKey }: PlanPaletteProps): React.JSX.Element {
+function ActionRow({ label, testID, onPress }: { label: string; testID: string; onPress: () => void }): React.JSX.Element {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      testID={testID}
+      className="flex-row items-center min-h-[44px] px-4"
+    >
+      <View className="h-4 w-6 border border-line border-dashed" />
+      <Text className="ml-3 flex-1 text-base text-ink" numberOfLines={1}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+export function PlanPalette({ onPick, activeKey, onDraw, onParcel }: PlanPaletteProps): React.JSX.Element {
   const { data: plants = [] } = usePlants();
   const [query, setQuery] = React.useState('');
   const found = React.useMemo(() => searchPlants(plants, query), [plants, query]);
@@ -70,11 +90,14 @@ export function PlanPalette({ onPick, activeKey }: PlanPaletteProps): React.JSX.
 
   return (
     <ScrollView className="flex-1" keyboardShouldPersistTaps="handled" testID="plan-palette">
+      <SectionLabel>{t('editor.parcel.section')}</SectionLabel>
+      <ActionRow label={t('editor.parcel.item')} testID="palette-parcel" onPress={onParcel} />
       <SectionLabel>{t('editor.palette.sectionBeds')}</SectionLabel>
       {BED_KINDS.map((kind) => {
         const item = kindItem(kind, kindLabel(kind));
         return <Row key={item.key} item={item} active={activeKey === item.key} onPick={onPick} />;
       })}
+      <ActionRow label={t('editor.draw.item')} testID="palette-draw" onPress={onDraw} />
 
       <SectionLabel>{t('editor.palette.sectionFacilities')}</SectionLabel>
       {FACILITY_KINDS.map((kind) => {

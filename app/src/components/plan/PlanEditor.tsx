@@ -13,11 +13,18 @@
 
 import * as React from 'react';
 import { Platform, View } from 'react-native';
-import { getNorthDeg, type GardenDimensionsRow, type PlanElementRow } from '@spatenstich/shared';
+import {
+  getBoundary,
+  getNorthDeg,
+  type GardenDimensionsRow,
+  type PlanElementRow,
+} from '@spatenstich/shared';
 import { tokens, elementFill } from '@/src/theme/tokens';
 import { t } from '@/src/lib/i18n';
 import { sortByZOrder } from '@/src/lib/editor/zOrder';
 import { getRotateDeg } from '@/src/lib/editor/elementGeometry';
+import { edgeMidpoints, getOutline, type WorldPoint } from '@/src/lib/editor/outline';
+import type { Guides } from '@/src/lib/editor/snapping';
 import { HANDLE_VISUAL_PX, ROTATE_OFFSET_PX, handleSpots } from '@/src/lib/editor/handles';
 import { estimateTextWidth, fitLabel, type MeasureText } from '@/src/lib/editor/labelFit';
 import { scaleBar } from '@/src/lib/editor/scaleBar';
@@ -88,6 +95,14 @@ export interface PlanEditorProps {
   onPlace?: (pos: { xM: number; yM: number }) => void;
   /** Plants that stand next to a bad neighbour; marked on the plan. */
   conflictIds?: Set<string>;
+  /** Snapping to neighbours, boundary and grid (EDIT3-13). */
+  snap?: boolean;
+  /** Corner points (garden metres) of the shape whose outline is being edited (EDIT3-14/15). */
+  outlinePoints?: WorldPoint[] | null;
+  onOutlineChange?: (points: WorldPoint[], done: boolean) => void;
+  /** Non-null while a new free outline is drawn: the corners set so far. */
+  drawPoints?: WorldPoint[] | null;
+  onDrawPoint?: (point: WorldPoint) => void;
   onUpdateElement?: (id: string, patch: Partial<PlanElementRow>) => void;
   /** True while an element is being moved, resized or rotated. */
   onGestureActive?: (active: boolean) => void;
@@ -169,8 +184,12 @@ const ElementShape = React.memo(function ElementShape({
   const round = ROUND_KINDS.has(el.elementType);
   const hatched = HATCHED_KINDS.has(el.elementType);
 
+  const outline = getOutline(el);
+  const outlinePoints = outline ? outline.map((p) => `${p.u * w},${p.v * h}`).join(' ') : null;
   const shape = (paint: { fill: string; fillOpacity?: number; stroke?: string; strokeWidth?: number }) =>
-    round ? (
+    outlinePoints ? (
+      <polygon points={outlinePoints} strokeLinejoin="round" {...paint} />
+    ) : round ? (
       <ellipse cx={0} cy={0} rx={w / 2} ry={h / 2} {...paint} />
     ) : (
       <rect x={-w / 2} y={-h / 2} width={w} height={h} {...paint} />
@@ -359,6 +378,117 @@ function GhostShape({
   );
 }
 
+/** Lines that show what a moved or resized element is aligned with (EDIT3-13). */
+function GuideLines({ guides, scale }: { guides: Guides; scale: number }): React.JSX.Element {
+  const tick = 4;
+  return (
+    <g data-guides="">
+      {guides.align.map((g, i) =>
+        g.axis === 'x' ? (
+          <line
+            key={`a${i}`}
+            data-guide="align"
+            x1={g.at * scale}
+            x2={g.at * scale}
+            y1={g.from * scale - 6}
+            y2={g.to * scale + 6}
+            stroke={P.select}
+            strokeWidth={1}
+            strokeDasharray="5 3"
+          />
+        ) : (
+          <line
+            key={`a${i}`}
+            data-guide="align"
+            x1={g.from * scale - 6}
+            x2={g.to * scale + 6}
+            y1={g.at * scale}
+            y2={g.at * scale}
+            stroke={P.select}
+            strokeWidth={1}
+            strokeDasharray="5 3"
+          />
+        ),
+      )}
+      {guides.gaps.flatMap((g, i) =>
+        [g.first, g.second].map((span, j) => {
+          const a = span[0] * scale;
+          const b = span[1] * scale;
+          const c = g.cross * scale;
+          const d =
+            g.axis === 'x'
+              ? `M${a} ${c - tick} V${c + tick} M${a} ${c} H${b} M${b} ${c - tick} V${c + tick}`
+              : `M${c - tick} ${a} H${c + tick} M${c} ${a} V${b} M${c - tick} ${b} H${c + tick}`;
+          return <path key={`g${i}-${j}`} data-guide="gap" d={d} fill="none" stroke={P.select} strokeWidth={1.2} />;
+        }),
+      )}
+    </g>
+  );
+}
+
+/** Corners and edge markers of the outline that is being edited (EDIT3-14, EDIT3-15). */
+function OutlineHandles({ points, scale }: { points: WorldPoint[]; scale: number }): React.JSX.Element {
+  const px = (p: WorldPoint) => `${p.x * scale},${p.y * scale}`;
+  return (
+    <g data-outline-edit="">
+      <polygon points={points.map(px).join(' ')} fill="none" stroke={P.select} strokeWidth={1.6} strokeLinejoin="round" />
+      {edgeMidpoints(points).map((p, i) => (
+        <circle
+          key={`m${i}`}
+          data-edge={i}
+          cx={p.x * scale}
+          cy={p.y * scale}
+          r={4.5}
+          fill={P.bg}
+          stroke={P.select}
+          strokeWidth={1.2}
+        />
+      ))}
+      {points.map((p, i) => (
+        <circle
+          key={`c${i}`}
+          data-corner={i}
+          cx={p.x * scale}
+          cy={p.y * scale}
+          r={7}
+          fill={P.handleFill}
+          stroke={P.select}
+          strokeWidth={1.6}
+        />
+      ))}
+    </g>
+  );
+}
+
+/** The outline that is being drawn: the corners so far and the closing edge. */
+function DrawPreview({ points, scale }: { points: WorldPoint[]; scale: number }): React.JSX.Element {
+  const px = (p: WorldPoint) => `${p.x * scale},${p.y * scale}`;
+  return (
+    <g data-draw={points.length}>
+      {points.length >= 3 ? (
+        <polygon points={points.map(px).join(' ')} fill={elementFill('Beet')} fillOpacity={0.25} stroke="none" />
+      ) : null}
+      {points.length >= 2 ? (
+        <polyline points={points.map(px).join(' ')} fill="none" stroke={P.select} strokeWidth={1.6} strokeLinejoin="round" />
+      ) : null}
+      {points.length >= 3 ? (
+        <line
+          x1={points[points.length - 1].x * scale}
+          y1={points[points.length - 1].y * scale}
+          x2={points[0].x * scale}
+          y2={points[0].y * scale}
+          stroke={P.select}
+          strokeWidth={1.2}
+          strokeDasharray="4 4"
+        />
+      ) : null}
+      {points.map((p, i) => (
+        <circle key={i} cx={p.x * scale} cy={p.y * scale} r={5} fill={P.handleFill} stroke={P.select} strokeWidth={1.6} />
+      ))}
+    </g>
+  );
+}
+
 function NorthGlyph({ deg }: { deg: number }): React.JSX.Element {
   const rad = (deg * Math.PI) / 180;
   // The letter stays upright and sits beyond the tip of the arrow.
@@ -522,6 +652,7 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
   const [rename, setRenameState] = React.useState<{ id: string; value: string } | null>(null);
   const [northOpen, setNorthOpen] = React.useState(false);
   const [marquee, setMarquee] = React.useState<MarqueeRect | null>(null);
+  const [guides, setGuides] = React.useState<Guides | null>(null);
   const fontEpoch = useFontEpoch();
   const rawId = React.useId();
   const uid = rawId.replace(/[^a-zA-Z0-9]/g, '');
@@ -545,6 +676,8 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
   selectedIdsRef.current = selectedIds;
   const ghostRef = React.useRef(ghost);
   ghostRef.current = ghost;
+  const outlineRef = React.useRef<WorldPoint[] | null>(props.outlinePoints ?? null);
+  outlineRef.current = props.outlinePoints ?? null;
   const gardenRef = React.useRef(garden);
   gardenRef.current = garden;
   const sizeRef = React.useRef(size);
@@ -610,6 +743,16 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
       },
       commitPlacement: (pos) => propsRef.current.onPlace?.(pos),
       setMarquee: (rect) => setMarquee(rect),
+      snapEnabled: () => propsRef.current.snap === true,
+      setGuides: (next) =>
+        setGuides(next && (next.align.length > 0 || next.gaps.length > 0) ? next : null),
+      outlinePoints: () => outlineRef.current,
+      setOutlinePoints: (points, done) => {
+        outlineRef.current = points;
+        propsRef.current.onOutlineChange?.(points, done);
+      },
+      drawing: () => propsRef.current.drawPoints != null,
+      addDrawPoint: (point) => propsRef.current.onDrawPoint?.(point),
     };
     return new InteractionController(port);
   }, [setViewport, setRename]);
@@ -703,7 +846,7 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
         true,
       );
     }
-  }, [rename?.id, size.height, size.width, setViewport]);
+  }, [rename, size.height, size.width, setViewport]);
 
   // Pointer, wheel and key input.
   React.useEffect(() => {
@@ -813,9 +956,22 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
   const selectedSet = mode === 'edit' ? new Set(selectedIds) : new Set<string>();
   // Handles, size label and name tag only for a single selected element.
   const selectedEl =
-    mode === 'edit' && selectedIds.length === 1 ? visible.find((e) => e.id === selectedIds[0]) : undefined;
+    mode === 'edit' && selectedIds.length === 1 && !props.outlinePoints
+      ? visible.find((e) => e.id === selectedIds[0])
+      : undefined;
   const renameEl = rename ? visible.find((e) => e.id === rename.id) : undefined;
   const bar = scaleBar(s);
+  const boundary = getBoundary(dimensions.extraDims, garden.widthM, garden.heightM);
+  const boundaryPoints = boundary ? boundary.map((p) => `${p.x * s},${p.y * s}`).join(' ') : null;
+  // The parcel: its free boundary when it has one, otherwise the rectangle.
+  const parcel = (paint: { fill: string; stroke?: string; strokeWidth?: number }) =>
+    boundaryPoints ? (
+      <polygon points={boundaryPoints} strokeLinejoin="round" data-parcel="free" {...paint} />
+    ) : (
+      <rect x={0} y={0} width={garden.widthM * s} height={garden.heightM * s} data-parcel="rect" {...paint} />
+    );
+  const outlineEdit = mode === 'edit' ? props.outlinePoints ?? null : null;
+  const drawPoints = mode === 'edit' ? props.drawPoints ?? null : null;
   const hatchId = `hatch${uid}`;
   const gridId = `grid${uid}`;
 
@@ -824,6 +980,9 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
       ref={wrapRef}
       data-testid={testID}
       data-plan-mode={mode}
+      data-scale={s}
+      data-tx={vp.tx}
+      data-ty={vp.ty}
       style={{
         position: 'relative',
         width: '100%',
@@ -831,7 +990,7 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
         overflow: 'hidden',
         background: P.bg,
         touchAction: interactive ? 'none' : 'auto',
-        cursor: placing ? 'crosshair' : 'default',
+        cursor: placing || drawPoints ? 'crosshair' : 'default',
         userSelect: 'none',
         WebkitUserSelect: 'none',
         // Long-press on Android must not open the text callout over the plan.
@@ -855,8 +1014,8 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
             </pattern>
           </defs>
           <g transform={`translate(${vp.tx} ${vp.ty})`}>
-            <rect x={0} y={0} width={garden.widthM * s} height={garden.heightM * s} fill={P.bg} />
-            <rect x={0} y={0} width={garden.widthM * s} height={garden.heightM * s} fill={`url(#${gridId})`} />
+            {parcel({ fill: P.bg })}
+            {parcel({ fill: `url(#${gridId})` })}
             {visible.map((el) => (
               <ElementShape
                 key={el.id}
@@ -869,19 +1028,14 @@ export const PlanEditor = React.forwardRef<PlanEditorHandle, PlanEditorProps>(fu
                 fontEpoch={fontEpoch}
               />
             ))}
-            <rect
-              x={0}
-              y={0}
-              width={garden.widthM * s}
-              height={garden.heightM * s}
-              fill="none"
-              stroke={P.border}
-              strokeWidth={P.borderWidth}
-            />
+            {parcel({ fill: 'none', stroke: P.border, strokeWidth: P.borderWidth })}
             {selectedEl ? (
               <SelectionOverlay el={selectedEl} scale={s} hideName={rename?.id === selectedEl.id} />
             ) : null}
             {mode === 'edit' && placing && ghost ? <GhostShape placing={placing} pos={ghost} scale={s} /> : null}
+            {guides ? <GuideLines guides={guides} scale={s} /> : null}
+            {outlineEdit ? <OutlineHandles points={outlineEdit} scale={s} /> : null}
+            {drawPoints ? <DrawPreview points={drawPoints} scale={s} /> : null}
           </g>
           {marquee ? (
             <rect

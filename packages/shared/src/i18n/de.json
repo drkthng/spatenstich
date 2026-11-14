@@ -403,6 +403,30 @@
       "back": "Nach hinten",
       "delete": "Löschen",
       "selectedCount": "{count} ausgewählt"
+    },
+    "snap": "Einrasten",
+    "outline": {
+      "edit": "Umriss bearbeiten",
+      "done": "Umriss fertig",
+      "hint": "Ziehe eine Ecke. Der kleine Punkt auf einer Kante setzt eine neue Ecke, Doppeltippen entfernt eine Ecke."
+    },
+    "draw": {
+      "item": "Beet mit freiem Umriss",
+      "title": "Beet zeichnen",
+      "hint": "Tippe nacheinander die Ecken an.",
+      "removeLast": "Letzte Ecke weg",
+      "finish": "Beet anlegen",
+      "cancel": "Abbrechen"
+    },
+    "parcel": {
+      "section": "Parzelle",
+      "item": "Größe und Grenze",
+      "title": "Parzelle",
+      "width": "Breite",
+      "depth": "Tiefe",
+      "rect": "Rechteck",
+      "free": "Freier Umriss",
+      "done": "Fertig"
     }
   },
   "plan": {
