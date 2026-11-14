@@ -147,16 +147,93 @@ Erfasst, aber nicht in dieser Roadmap.
 
 ## Traceability
 
-Wird bei der Roadmap-Erstellung gefüllt.
+Jede Anforderung gehört zu genau einer Phase (Roadmap vom 2026-11-14, Phasen 30–39, siehe `ROADMAP.md`).
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| EDIT3-01 | Phase 30 | Pending |
+| EDIT3-02 | Phase 30 | Pending |
+| EDIT3-03 | Phase 30 | Pending |
+| EDIT3-04 | Phase 30 | Pending |
+| EDIT3-05 | Phase 30 | Pending |
+| EDIT3-06 | Phase 30 | Pending |
+| EDIT3-07 | Phase 30 | Pending |
+| EDIT3-08 | Phase 30 | Pending |
+| EDIT3-09 | Phase 31 | Pending |
+| EDIT3-10 | Phase 31 | Pending |
+| EDIT3-11 | Phase 31 | Pending |
+| EDIT3-12 | Phase 32 | Pending |
+| EDIT3-13 | Phase 32 | Pending |
+| EDIT3-14 | Phase 32 | Pending |
+| EDIT3-15 | Phase 32 | Pending |
+| EDIT3-16 | Phase 31 | Pending |
+| EDIT3-17 | Phase 31 | Pending |
+| EDIT3-18 | Phase 31 | Pending |
+| EDIT3-19 | Phase 32 | Pending |
+| DESIGN3-01 | Phase 30 | Pending |
+| DESIGN3-02 | Phase 30 | Pending |
+| DESIGN3-03 | Phase 30 | Pending |
+| DESIGN3-04 | Phase 38 | Pending |
+| DESIGN3-05 | Phase 38 | Pending |
+| DESIGN3-06 | Phase 38 | Pending |
+| DESIGN3-07 | Phase 38 | Pending |
+| DESIGN3-08 | Phase 38 | Pending |
+| SYNC3-01 | Phase 33 | Pending |
+| SYNC3-02 | Phase 33 | Pending |
+| SYNC3-03 | Phase 33 | Pending |
+| SYNC3-04 | Phase 33 | Pending |
+| SYNC3-05 | Phase 33 | Pending |
+| SYNC3-06 | Phase 33 | Pending |
+| SYNC3-07 | Phase 33 | Pending |
+| SYNC3-08 | Phase 33 | Pending |
+| SYNC3-09 | Phase 33 | Pending |
+| AI-01 | Phase 34 | Pending |
+| AI-02 | Phase 34 | Pending |
+| AI-03 | Phase 34 | Pending |
+| AI-04 | Phase 34 | Pending |
+| AI-05 | Phase 34 | Pending |
+| AI-06 | Phase 34 | Pending |
+| AI-07 | Phase 34 | Pending |
+| AI-08 | Phase 34 | Pending |
+| PHOTO-01 | Phase 35 | Pending |
+| PHOTO-02 | Phase 35 | Pending |
+| PHOTO-03 | Phase 35 | Pending |
+| PHOTO-04 | Phase 35 | Pending |
+| PHOTO-05 | Phase 35 | Pending |
+| PHOTO-06 | Phase 35 | Pending |
+| PHOTO-07 | Phase 35 | Pending |
+| PHOTO-08 | Phase 35 | Pending |
+| PHOTO-09 | Phase 35 | Pending |
+| PHOTO-10 | Phase 35 | Pending |
+| PHOTO-11 | Phase 35 | Pending |
+| TASK-01 | Phase 36 | Pending |
+| TASK-02 | Phase 36 | Pending |
+| TASK-03 | Phase 36 | Pending |
+| TASK-04 | Phase 36 | Pending |
+| TASK-05 | Phase 36 | Pending |
+| TASK-06 | Phase 36 | Pending |
+| TASK-07 | Phase 36 | Pending |
+| TASK-08 | Phase 36 | Pending |
+| TASK-09 | Phase 36 | Pending |
+| TASK-10 | Phase 36 | Pending |
+| NAV3-01 | Phase 37 | Pending |
+| NAV3-02 | Phase 37 | Pending |
+| NAV3-03 | Phase 37 | Pending |
+| NAV3-04 | Phase 37 | Pending |
+| NAV3-05 | Phase 37 | Pending |
+| NAV3-06 | Phase 37 | Pending |
+| NAV3-07 | Phase 37 | Pending |
+| UAT3-01 | Phase 39 | Pending |
+| UAT3-02 | Phase 39 | Pending |
+| UAT3-03 | Phase 39 | Pending |
 
 **Coverage:**
 - v3.0 requirements: 75 total
-- Mapped to phases: 0
-- Unmapped: 75 ⚠️
+- Mapped to phases: 75 ✓
+- Unmapped: 0
+
+**Anforderungen je Phase:** 30: 11 · 31: 6 · 32: 5 · 33: 9 · 34: 8 · 35: 11 · 36: 10 · 37: 7 · 38: 5 · 39: 3
 
 ---
 *Requirements defined: 2026-11-14*
-*Last updated: 2026-11-14 after initial definition of v3.0*
+*Last updated: 2026-11-14 after roadmap creation (Traceability gefüllt, 75/75 zugeordnet)*
