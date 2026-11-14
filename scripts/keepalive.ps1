@@ -20,7 +20,7 @@
         2. Trigger: taeglich, z. B. 07:00 Uhr
         3. Aktion: Programm starten
              Programm/Skript: powershell.exe
-             Argumente: -NoProfile -ExecutionPolicy Bypass -File "D:\AiProjects\garden-app\scripts\keepalive.ps1"
+             Argumente: -NoProfile -ExecutionPolicy Bypass -File "D:\AiProjects\spatenstich\scripts\keepalive.ps1"
         4. Unter "Bedingungen": "Nur starten, wenn Netzwerkverbindung verfuegbar" aktivieren
         5. Umgebungsvariablen SPATENSTICH_SUPABASE_URL und SPATENSTICH_SUPABASE_ANON_KEY
            muessen im Systemkontext gesetzt sein (System -> Erweiterte Systemeinstellungen ->

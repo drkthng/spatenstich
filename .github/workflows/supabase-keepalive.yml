@@ -1,18 +1,92 @@
 name: Supabase Keep-alive
+
+# Phase 33 (SYNC3-01): runs every day and tells the owner when the backend is down.
+# - Success: a real request reached the database and the auth service.
+# - Failure: an issue is opened and assigned to the repository owner (GitHub notifies
+#   them), or a comment is added if one is already open. It closes by itself as soon as
+#   the backend answers again.
+# Background: docs/betrieb/2026-10-backend-ausfall.md
+
 on:
   schedule:
-    - cron: '0 6 */3 * *'
+    - cron: '17 5 * * *'
   workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: false
+
+env:
+  ISSUE_TITLE: 'Backend nicht erreichbar (Supabase Keep-alive)'
+
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase REST (plants table, limit 1)
+      - name: Ping database and auth
+        id: ping
+        env:
+          SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
         run: |
-          if [ -z "${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}" ] || [ -z "${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}" ]; then
-            echo "::error::EXPO_PUBLIC_SUPABASE_URL oder EXPO_PUBLIC_SUPABASE_ANON_KEY ist leer — Secret fehlt, Keep-alive kann nicht laufen." >&2
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::EXPO_PUBLIC_SUPABASE_URL oder EXPO_PUBLIC_SUPABASE_ANON_KEY ist leer — Secret fehlt, Keep-alive kann nicht laufen."
+            echo "reason=Secret fehlt" >> "$GITHUB_OUTPUT"
             exit 1
           fi
-          curl -sf "${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}/rest/v1/plants?select=slug&limit=1" \
-            -H "apikey: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}"
+          check() {
+            # $1 = name, $2 = path. Prints the HTTP status; 000 means no answer at all.
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$SUPABASE_URL$2" \
+              -H "apikey: $SUPABASE_ANON_KEY" \
+              -H "Authorization: Bearer $SUPABASE_ANON_KEY") || code="000"
+            echo "$1: HTTP $code"
+            [ "$code" = "200" ]
+          }
+          for attempt in 1 2 3; do
+            echo "Versuch $attempt"
+            if check "Datenbank" "/rest/v1/plants?select=slug&limit=1" && check "Anmeldung" "/auth/v1/health"; then
+              echo "reason=" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 30
+          done
+          echo "reason=Datenbank oder Anmeldung haben in drei Versuchen nicht geantwortet (letzter Status $code; 000 heißt: gar keine Antwort)" >> "$GITHUB_OUTPUT"
+          exit 1
+
+      - name: Tell the owner (open or update the issue)
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REASON: ${{ steps.ping.outputs.reason }}
+        run: |
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          number=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "in:title \"$ISSUE_TITLE\"" --json number --jq '.[0].number // empty')
+          if [ -z "$number" ]; then
+            {
+              echo "Der tägliche Keep-alive hat das Supabase-Backend nicht erreicht."
+              echo
+              echo "- Grund: ${REASON:-unbekannt}"
+              echo "- Lauf: $run_url"
+              echo
+              echo "Was zu tun ist: im Supabase-Dashboard nachsehen, ob das Projekt pausiert ist, und es dort wiederherstellen. Details und Vorgeschichte stehen in docs/betrieb/2026-10-backend-ausfall.md."
+              echo
+              echo "Dieses Issue schließt sich von selbst, sobald das Backend wieder antwortet."
+            } > body.md
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$ISSUE_TITLE" --body-file body.md --assignee "$GITHUB_REPOSITORY_OWNER"
+          else
+            gh issue comment "$number" --repo "$GITHUB_REPOSITORY" --body "Weiterhin nicht erreichbar. Grund: ${REASON:-unbekannt}. Lauf: $run_url"
+          fi
+
+      - name: Close the issue when the backend is back
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          number=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "in:title \"$ISSUE_TITLE\"" --json number --jq '.[0].number // empty')
+          if [ -n "$number" ]; then
+            gh issue close "$number" --repo "$GITHUB_REPOSITORY" --comment "Das Backend antwortet wieder."
+          fi

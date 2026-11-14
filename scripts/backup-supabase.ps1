@@ -33,7 +33,7 @@
 
     Task-Scheduler-Registrierung: taeglich 03:00 Uhr, Aktion "Programm starten",
     Programm powershell.exe, Argumente:
-        -NoProfile -ExecutionPolicy Bypass -File "D:\AiProjects\garden-app\scripts\backup-supabase.ps1"
+        -NoProfile -ExecutionPolicy Bypass -File "D:\AiProjects\spatenstich\scripts\backup-supabase.ps1"
 #>
 
 param(

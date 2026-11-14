@@ -112,7 +112,7 @@ Für die KI-gestützte Analyse (optional, die App selbst macht keine KI-Aufrufe)
 
 - **Deploy:** Jeder Merge nach `master` löst automatisch einen Deploy nach Cloudflare Pages aus (`https://spatenstich.pages.dev`).
 - **Rollback:** Über das Cloudflare-Dashboard (Workers & Pages → spatenstich → Deployments → „Rollback") lässt sich jederzeit auf einen früheren Stand zurückspringen.
-- **Supabase-Keep-alive:** Der GitHub-Zeitplan (`supabase-keepalive.yml`) pausiert nach **60 Tagen ohne Repo-Aktivität** — das ist dokumentiertes GitHub-Verhalten, nicht spatenstich-spezifisch. Deshalb läuft zusätzlich ein täglicher Ping über den Windows Task Scheduler auf dem 24/7-PC (`scripts/keepalive.ps1`) als unabhängiger zweiter Weg.
+- **Supabase-Keep-alive:** Der GitHub-Zeitplan (`supabase-keepalive.yml`) fragt das Backend jeden Morgen ab. Scheitert er, legt er ein Issue an und weist es dem Inhaber des Repositories zu; es schließt sich von selbst, sobald das Backend wieder antwortet. Der Zeitplan pausiert nach **60 Tagen ohne Repo-Aktivität** (dokumentiertes GitHub-Verhalten). Ein täglicher Ping vom 24/7-PC (`scripts/keepalive.ps1`) ist als zweiter, unabhängiger Weg vorgesehen, aber noch nicht eingerichtet. Vorgeschichte: `docs/betrieb/2026-10-backend-ausfall.md`.
 - **Backup:** `scripts/backup-supabase.ps1` erstellt ein komprimiertes `pg_dump`-Backup mit 30-Tage-Rotation. Wird vor jeder destruktiven Migration gebraucht (z. B. Migration 021 in Phase 21) — vorher einmal manuell ausführen und das Datenbank-Passwort im Windows Credential Manager hinterlegen.
 
 ---
