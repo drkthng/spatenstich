@@ -10,6 +10,7 @@ import type {
 } from '@spatenstich/shared';
 import { OutboxEnqueueError } from './errors';
 import { scheduleWriteDebounced } from './sync/SyncTriggers';
+import { sameContent } from './sameContent';
 
 function assertAccount(mode: AuthMode): void {
   if (mode !== 'account') throw new Error('gardens are account-only');
@@ -59,6 +60,7 @@ export async function saveDimensions(
     deletedAt: null,
   };
 
+  if (existingRow && sameContent(existingRow, row)) return existingRow;
   try {
     await storage.writeWithOutbox('garden_dimensions', row, {
       entity: 'garden_dimensions',
@@ -279,13 +281,14 @@ export async function writePlanElement(
   if (!userId) throw new Error('not_authenticated');
 
   // Detect insert vs update by checking local storage for an existing row.
-  const existing = await storage.getRowsByGarden<PlanElementRow>(
-    'plan_elements',
-    el.gardenId,
-  );
-  const op: 'insert' | 'update' = existing.some((r) => r.id === el.id)
-    ? 'update'
-    : 'insert';
+  const stored = await storage.getRow<PlanElementRow>('plan_elements', el.id, {
+    includeDeleted: true,
+  });
+  // SYNC3-05: a write that changes nothing is no write. Without this, opening the editor
+  // or re-saving an untouched element would give it a new edit time and editor, and
+  // that "edit" could then win against a real change by the partner.
+  if (stored && sameContent(stored, el)) return;
+  const op: 'insert' | 'update' = stored ? 'update' : 'insert';
 
   try {
     await storage.writeWithOutbox('plan_elements', el, {

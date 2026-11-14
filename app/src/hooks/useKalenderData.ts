@@ -26,6 +26,7 @@ import {
   getAktuelleKw,
 } from '@spatenstich/shared';
 import type { PlantRow, PlanElementRow, GardenDimensionsRow } from '@spatenstich/shared';
+import { useDataVersion } from '../lib/sync/dataVersion';
 
 export interface WochenAktion {
   plant: PlantRow;
@@ -131,6 +132,12 @@ export function useKalenderData(options: UseKalenderDataOptions = {}): UseKalend
       console.error('useKalenderData: refresh failed', err);
     }
   }, [activeGardenId]);
+
+  // Phase 33: a sync that brought changes to the plan reloads the calendar by itself.
+  const syncedVersion = useDataVersion('plan_elements', 'garden_dimensions');
+  React.useEffect(() => {
+    if (syncedVersion > 0) void refresh();
+  }, [syncedVersion, refresh]);
 
   // "Nur meine Pflanzen" filter: set of plantSlugs present in non-deleted Pflanze elements.
   const meinePflanzenslugs = React.useMemo<Set<string>>(() => {

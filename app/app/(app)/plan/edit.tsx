@@ -43,6 +43,7 @@ import {
   type GardenDimensionsRow,
   type PlantDbBundle,
 } from '@spatenstich/shared';
+import type { PlanElementRow } from '@spatenstich/shared';
 import plantsBundle from '@spatenstich/shared/data/plants';
 import { useAuthStore } from '@/src/stores/authStore';
 import { useEditorStore } from '@/src/stores/editorStore';
@@ -54,6 +55,10 @@ import {
   subscribeSaveState,
 } from '@/src/lib/editor/saveDebounce';
 import { notifyPlanChanged } from '@/src/lib/editor/planRefresh';
+import { syncEvents } from '@/src/lib/sync/events';
+import { storage } from '@/src/storage';
+import { hasPendingSave } from '@/src/lib/editor/saveDebounce';
+import { memberName, showSyncToast } from '@/src/components/SyncToastHost';
 import { createElement, newElementId } from '@/src/lib/editor/elementFactory';
 import { clampGroupDelta, DRAG_STEP_M } from '@/src/lib/editor/elementGeometry';
 import { bringToFront } from '@/src/lib/editor/zOrder';
@@ -236,6 +241,39 @@ export default function PlanEditScreen(): React.JSX.Element {
     return () => {
       cancelled = true;
     };
+  }, [activeGardenId]);
+
+  // Phase 33 (SYNC3-04): what the partner changes arrives while the editor is open.
+  // Rows with a change of this device still on its way are left alone.
+  React.useEffect(() => {
+    if (!activeGardenId) return;
+    return syncEvents.on((evt) => {
+      if (evt.type !== 'pull_success' || evt.changedIds.length === 0) return;
+      if (evt.entity === 'garden_dimensions') {
+        void loadDimensions(activeGardenId)
+          .then((dims) => {
+            if (dims) setDimensions(dims);
+          })
+          .catch(() => {});
+        return;
+      }
+      if (evt.entity !== 'plan_elements') return;
+      void (async () => {
+        const stored = await Promise.all(
+          evt.changedIds.map((id) =>
+            storage.getRow<PlanElementRow>('plan_elements', id, { includeDeleted: true }),
+          ),
+        );
+        const rows = stored.filter(
+          (r): r is PlanElementRow => r !== null && r.gardenId === activeGardenId,
+        );
+        const taken = useEditorStore.getState().mergeRemote(rows, hasPendingSave);
+        if (taken > 0 && evt.foreignUserIds.length > 0) {
+          const name = await memberName(evt.foreignUserIds[0]);
+          showSyncToast(t('sync.toast.partnerChanged', { name }));
+        }
+      })().catch(() => {});
+    });
   }, [activeGardenId]);
 
   // Leaving by any route: write what is still waiting, then let the plan view reload.

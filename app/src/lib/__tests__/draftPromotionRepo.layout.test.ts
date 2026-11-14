@@ -79,29 +79,33 @@ beforeEach(() => {
 });
 
 describe('draftPromotionRepo layout > nextFreeBedSlot', () => {
-  it('places first bed near (1, 1)', () => {
+  // Positions are centres (Phase 33): a 2 m x 1 m bed whose edges sit 1 m from the
+  // boundary has its centre at (2, 1.5).
+  it('places the first bed 1 m from the boundary and returns its centre', () => {
     const slot = nextFreeBedSlot([], dims, { widthM: 2, heightM: 1 });
-    expect(slot.xM).toBe(1);
-    expect(slot.yM).toBe(1);
+    expect(slot).toEqual({ xM: 2, yM: 1.5 });
   });
 
   it('does not overlap a previously placed bed', () => {
-    const existing = [bedAt('e1', 1, 1, 2, 1)];
+    const existing = [bedAt('e1', 2, 1.5, 2, 1)];
     const slot = nextFreeBedSlot(existing, dims, { widthM: 2, heightM: 1 });
-    // Second slot should be past the first bed's right edge + gap.
-    expect(slot.xM).toBeGreaterThan(1 + 2);
+    // The new bed's left edge lies past the first bed's right edge (3 m) plus the gap.
+    expect(slot.xM - 1).toBeGreaterThanOrEqual(3 + 0.5);
+    expect(slot.yM).toBe(1.5);
   });
 
   it('wraps to a new row when garden width is exhausted', () => {
     // Pack the row with 2m-wide beds. After three beds the cursor is far enough
     // along that a fourth 2m bed would exceed the garden width minus the 1m margin.
     const beds = [
-      bedAt('e1', 1, 1, 2, 1),
-      bedAt('e2', 3.5, 1, 2, 1),
-      bedAt('e3', 6.0, 1, 2, 1),
+      bedAt('e1', 2, 1.5, 2, 1),
+      bedAt('e2', 4.5, 1.5, 2, 1),
+      bedAt('e3', 7.0, 1.5, 2, 1),
     ];
     const slot = nextFreeBedSlot(beds, dims, { widthM: 2, heightM: 1 });
-    expect(slot.yM).toBeGreaterThan(1);
+    expect(slot.yM).toBeGreaterThan(1.5);
+    // and it stays inside the parcel
+    expect(slot.xM + 1).toBeLessThanOrEqual(dims.widthM);
   });
 
   it('uses default 1.5m x 1.0m when draft dimensions are null (verified via promoteBedDraft)', async () => {
@@ -136,7 +140,6 @@ describe('draftPromotionRepo layout > nextFreeBedSlot', () => {
     const beds = [bedAt('e-deleted', 1, 1, 5, 1)];
     beds[0].deletedAt = '2026-05-12T01:00:00.000Z';
     const slot = nextFreeBedSlot(beds, dims, { widthM: 1, heightM: 1 });
-    expect(slot.xM).toBe(1);
-    expect(slot.yM).toBe(1);
+    expect(slot).toEqual({ xM: 1.5, yM: 1.5 });
   });
 });

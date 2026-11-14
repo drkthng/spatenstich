@@ -21,6 +21,7 @@ import {
   dismissDraft,
 } from '@/src/lib/draftPromotionRepo';
 import de from '@spatenstich/shared/i18n/de';
+import { useDataVersion } from '@/src/lib/sync/dataVersion';
 import type {
   BedDraftRow,
   PlantDraftRow,
@@ -76,6 +77,14 @@ export default function ImportReviewScreen(): React.JSX.Element {
       setLoading(false);
     })();
   }, [refresh]);
+
+  // Phase 33: what the partner accepted or dismissed shows up here without a reload.
+  const syncedVersion = useDataVersion(
+    'bed_drafts', 'plant_drafts', 'observation_drafts', 'plan_elements', 'garden_dimensions',
+  );
+  React.useEffect(() => {
+    if (syncedVersion > 0) void refresh();
+  }, [syncedVersion, refresh]);
 
   const handleAcceptBed = async (draft: BedDraftRow): Promise<void> => {
     if (!dimensions) return;

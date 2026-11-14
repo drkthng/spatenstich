@@ -50,7 +50,22 @@ export interface StorageAdapter {
   upsertRowFromServer<T extends AnyRow>(entity: EntityName, row: T): Promise<void>;
 
   /** Mehrere Rows vom Server atomar anwenden (Delta-Pull). */
-  upsertRowsFromServer<T extends AnyRow>(entity: EntityName, rows: T[]): Promise<void>;
+  /**
+   * Takes rows that came from the server. A row is skipped when a local change for it
+   * is still waiting in the outbox, or when the local row was edited later (unless
+   * `force`). Returns the ids that were written.
+   */
+  upsertRowsFromServer<T extends AnyRow>(
+    entity: EntityName,
+    rows: T[],
+    opts?: { force?: boolean },
+  ): Promise<string[]>;
+
+  /**
+   * Replaces everything stored for one garden with the given rows (members, invite
+   * codes: the server list is the truth). Returns whether anything changed.
+   */
+  replaceRowsForGarden<T extends AnyRow>(entity: EntityName, gardenId: string, rows: T[]): Promise<boolean>;
 
   // ---- Phase 3: Outbox ----
   /** FIFO-sortiert (ASC created_at). */
@@ -58,9 +73,18 @@ export interface StorageAdapter {
   /** Nach erfolgreichem Server-Ack entfernen. */
   deleteOutboxEntry(id: string): Promise<void>;
   /** Backoff-Zähler + Fehlertext aktualisieren nach Push-Fehler. */
-  updateOutboxEntry(id: string, patch: Pick<OutboxEntry, 'attempts' | 'lastError'>): Promise<void>;
+  updateOutboxEntry(
+    id: string,
+    patch: Partial<Pick<OutboxEntry, 'attempts' | 'lastError' | 'nextAttemptAt'>>,
+  ): Promise<void>;
 
   // ---- Phase 3: sync_state ----
   getSyncState(entity: EntityName): Promise<SyncStateEntry | null>;
   setSyncState(state: SyncStateEntry): Promise<void>;
+
+  /** Forgets all pull cursors, so the next pull fetches everything again. */
+  clearSyncState(): Promise<void>;
+
+  /** Removes all rows, the outbox and the pull cursors (sign-out, change of user). */
+  clearAll(): Promise<void>;
 }

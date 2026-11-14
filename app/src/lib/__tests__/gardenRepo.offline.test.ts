@@ -144,18 +144,46 @@ describe('gardenRepo.updateGarden (offline-first write)', () => {
     expect(mockFrom).not.toHaveBeenCalled();
   });
 
-  it('creates insert Outbox entry when no existing row found', async () => {
+  // Phase 33: a garden this device has not seen is never written from nothing. A row
+  // built from nothing would carry an empty name and overwrite the real one.
+  it('refuses to write a garden that is unknown locally and on the server', async () => {
     mockStorageGetRow.mockResolvedValue(null);
+    const maybeSingle = jest.fn().mockResolvedValue({ data: null, error: null });
+    const eq = jest.fn(() => ({ maybeSingle }));
+    const select = jest.fn(() => ({ eq }));
+    mockFrom.mockReturnValue({ select });
+
+    await expect(
+      repo.updateGarden('account', 'g-new', 'u-1', { plz: '10115' }),
+    ).rejects.toThrow('garden_not_loaded');
+    expect(mockStorageWriteWithOutbox).not.toHaveBeenCalled();
+  });
+
+  it('loads an unknown garden first and keeps its name when changing something else', async () => {
+    mockStorageGetRow.mockResolvedValueOnce(null).mockResolvedValueOnce(null).mockResolvedValue(GARDEN_ROW);
     mockStorageWriteWithOutbox.mockResolvedValue(undefined);
+    const maybeSingle = jest.fn().mockResolvedValue({
+      data: {
+        id: 'g-1', name: GARDEN_ROW.name, created_at: GARDEN_ROW.createdAt, updated_at: GARDEN_ROW.updatedAt,
+        updated_by_user_id: 'u-1', created_by_user_id: 'u-1', deleted_at: null,
+        plz: null, klimazone: null, archetype: null,
+      },
+      error: null,
+    });
+    const eq = jest.fn(() => ({ maybeSingle }));
+    const select = jest.fn(() => ({ eq }));
+    mockFrom.mockReturnValue({ select });
 
-    await repo.updateGarden('account', 'g-new', 'u-1', { name: 'Neuer Garten' });
+    await repo.updateGarden('account', 'g-1', 'u-1', { plz: '10115' });
 
-    const [, , outbox] = mockStorageWriteWithOutbox.mock.calls[0] as [
+    const [, row, outbox] = mockStorageWriteWithOutbox.mock.calls[0] as [
       string,
-      GardenRow,
+      GardenRow & { plz?: string },
       { operation: string },
     ];
-    expect(outbox.operation).toBe('insert');
+    expect(row.name).toBe(GARDEN_ROW.name);
+    expect(row.plz).toBe('10115');
+    expect(outbox.operation).toBe('update');
   });
 });
 

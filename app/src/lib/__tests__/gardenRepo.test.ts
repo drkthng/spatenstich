@@ -36,6 +36,11 @@ jest.mock('../../storage', () => ({
 }));
 
 // Mock NetInfo — online by default (removeMember, deleteGarden, transferOwnership are online-only)
+const mockPullMembers = jest.fn().mockResolvedValue(undefined);
+jest.mock('../sync/SyncWorker', () => ({
+  getSyncWorker: () => ({ pull: (...args: unknown[]) => mockPullMembers(...args) }),
+}));
+
 jest.mock('@react-native-community/netinfo', () => ({
   __esModule: true,
   default: {
@@ -255,30 +260,38 @@ describe('gardenRepo.removeMember', () => {
     );
   });
 
-  it('issues double-equality delete (garden_id + user_id)', async () => {
-    const eq2 = jest.fn().mockResolvedValue({ data: null, error: null });
-    const eq1 = jest.fn(() => ({ eq: eq2 }));
-    const del = jest.fn(() => ({ eq: eq1 }));
-    mockFrom.mockReturnValue({ delete: del });
+  // Phase 33: the member is marked as removed by a server function, not deleted, so
+  // the removal reaches the other device like any other change.
+  it('marks the member as removed through the server function', async () => {
+    mockRpc.mockResolvedValue({ data: { status: 'removed' }, error: null });
 
     await repo.removeMember('account', 'g-1', 'u-2');
 
-    expect(eq1).toHaveBeenCalledWith('garden_id', 'g-1');
-    expect(eq2).toHaveBeenCalledWith('user_id', 'u-2');
+    expect(mockRpc).toHaveBeenCalledWith('remove_garden_member', {
+      p_garden_id: 'g-1',
+      p_user_id: 'u-2',
+    });
+    expect(mockPullMembers).toHaveBeenCalledWith('garden_members');
+  });
+
+  it('maps 42501 to NotOwnerError', async () => {
+    mockRpc.mockResolvedValue({ data: null, error: { code: '42501', message: 'not_owner' } });
+    await expect(repo.removeMember('account', 'g-1', 'u-2')).rejects.toBeInstanceOf(
+      repo.NotOwnerError,
+    );
   });
 });
 
 describe('gardenRepo.leaveGarden', () => {
-  it('delegates to removeMember (same delete path)', async () => {
-    const eq2 = jest.fn().mockResolvedValue({ data: null, error: null });
-    const eq1 = jest.fn(() => ({ eq: eq2 }));
-    const del = jest.fn(() => ({ eq: eq1 }));
-    mockFrom.mockReturnValue({ delete: del });
+  it('delegates to removeMember (same server function)', async () => {
+    mockRpc.mockResolvedValue({ data: { status: 'removed' }, error: null });
 
     await repo.leaveGarden('account', 'g-1', 'u-self');
 
-    expect(eq1).toHaveBeenCalledWith('garden_id', 'g-1');
-    expect(eq2).toHaveBeenCalledWith('user_id', 'u-self');
+    expect(mockRpc).toHaveBeenCalledWith('remove_garden_member', {
+      p_garden_id: 'g-1',
+      p_user_id: 'u-self',
+    });
   });
 });
 

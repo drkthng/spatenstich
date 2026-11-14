@@ -8,7 +8,14 @@ export type SyncEvent =
   | { type: 'push_conflict'; entry: OutboxEntry; error: ConflictError }
   | { type: 'push_permanent_failure'; entry: OutboxEntry; lastError: string }
   | { type: 'pull_start'; entity: string }
-  | { type: 'pull_success'; entity: string; rowsFetched: number; serverNow: string }
+  /** changedIds: rows whose stored version changed; foreignUserIds: other people whose edits arrived. */
+  | { type: 'pull_success'; entity: string; rowsFetched: number; changedIds: string[]; foreignUserIds: string[] }
+  /** A local edit lost against a later one on the server; that one is now stored locally. */
+  | { type: 'conflict_resolved'; entity: string; rowId: string; winnerUserId: string | null }
+  /** The signed-in user is no longer a member of the active garden. */
+  | { type: 'membership_lost'; gardenId: string }
+  /** The live connection came up or went away. */
+  | { type: 'realtime_status'; connected: boolean }
   | { type: 'pull_failure'; entity: string; error: string }
   | { type: 'status_change'; status: 'idle' | 'syncing' | 'offline' | 'degraded' };
 

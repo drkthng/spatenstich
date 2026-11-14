@@ -133,6 +133,111 @@ export function runStorageContractTests(
         const state = await adapter.getSyncState('gardens');
         expect(state?.lastPullAt).toBe('2026-04-24T12:00:00.000Z');
       });
+
+      it('clearSyncState forgets every cursor', async () => {
+        await adapter.setSyncState({ entity: 'gardens', lastPullAt: '2026-04-24T12:00:00.000Z', lastPushAt: null });
+        await adapter.clearSyncState();
+        expect(await adapter.getSyncState('gardens')).toBeNull();
+      });
+    });
+
+    // Phase 33
+    describe('one outbox entry per row', () => {
+      it('a second write to the same row replaces the waiting entry', async () => {
+        for (const name of ['eins', 'zwei']) {
+          const row = sampleGarden({ name });
+          await adapter.writeWithOutbox('gardens', row, {
+            entity: 'gardens', rowId: row.id, operation: 'update', payload: row as unknown as Record<string, unknown>,
+          });
+        }
+        const outbox = await adapter.listOutboxEntries();
+        expect(outbox).toHaveLength(1);
+        expect(outbox[0]!.payload['name']).toBe('zwei');
+      });
+
+      it('updateOutboxEntry stores the time of the next attempt', async () => {
+        const row = sampleGarden();
+        await adapter.writeWithOutbox('gardens', row, {
+          entity: 'gardens', rowId: row.id, operation: 'update', payload: {},
+        });
+        const [entry] = await adapter.listOutboxEntries();
+        await adapter.updateOutboxEntry(entry!.id, { attempts: 1, lastError: 'x', nextAttemptAt: '2026-04-24T12:00:05.000Z' });
+        const [stored] = await adapter.listOutboxEntries();
+        expect(stored).toMatchObject({ attempts: 1, lastError: 'x', nextAttemptAt: '2026-04-24T12:00:05.000Z' });
+      });
+    });
+
+    describe('rows from the server', () => {
+      const fromServer = (overrides: Partial<GardenRow> = {}): GardenRow =>
+        sampleGarden({ serverUpdatedAt: '2026-04-24T10:00:01.000000+00:00', ...overrides });
+
+      it('a new row is stored and reported', async () => {
+        const written = await adapter.upsertRowsFromServer('gardens', [fromServer()]);
+        expect(written).toEqual([sampleGarden().id]);
+        expect(await adapter.getRow('gardens', sampleGarden().id)).toBeTruthy();
+      });
+
+      it('the version already stored is not written again', async () => {
+        await adapter.upsertRowsFromServer('gardens', [fromServer()]);
+        expect(await adapter.upsertRowsFromServer('gardens', [fromServer()])).toEqual([]);
+      });
+
+      it('a row with a waiting local change is left alone', async () => {
+        const local = sampleGarden({ name: 'lokal' });
+        await adapter.writeWithOutbox('gardens', local, {
+          entity: 'gardens', rowId: local.id, operation: 'update', payload: {},
+        });
+        const written = await adapter.upsertRowsFromServer('gardens', [
+          fromServer({ name: 'Server', updatedAt: '2026-04-24T11:00:00.000Z' }),
+        ]);
+        expect(written).toEqual([]);
+        expect((await adapter.getRow<GardenRow>('gardens', local.id))?.name).toBe('lokal');
+      });
+
+      it('an older server row does not replace a later local edit, unless forced', async () => {
+        await adapter.upsertRowFromServer('gardens', sampleGarden({ name: 'später', updatedAt: '2026-04-24T11:00:00.000Z' }));
+        const older = fromServer({ name: 'Server', updatedAt: '2026-04-24T10:30:00+00:00' });
+        expect(await adapter.upsertRowsFromServer('gardens', [older])).toEqual([]);
+        expect((await adapter.getRow<GardenRow>('gardens', older.id))?.name).toBe('später');
+        expect(await adapter.upsertRowsFromServer('gardens', [older], { force: true })).toEqual([older.id]);
+        expect((await adapter.getRow<GardenRow>('gardens', older.id))?.name).toBe('Server');
+      });
+
+      it('edit times compare by instant, whatever the notation', async () => {
+        await adapter.upsertRowFromServer('gardens', sampleGarden({ updatedAt: '2026-04-24T10:00:00.000Z' }));
+        const same = fromServer({ name: 'gleichzeitig', updatedAt: '2026-04-24T10:00:00+00:00' });
+        expect(await adapter.upsertRowsFromServer('gardens', [same])).toEqual([same.id]);
+      });
+    });
+
+    describe('replaceRowsForGarden and clearAll', () => {
+      const member = (userId: string) => ({
+        id: `g-1:${userId}`, gardenId: 'g-1', userId, role: 'member' as const,
+        createdAt: '2026-04-24T10:00:00.000Z', updatedAt: '2026-04-24T10:00:00.000Z',
+        updatedByUserId: userId, deletedAt: null,
+      });
+
+      it('the given list replaces what was stored for the garden', async () => {
+        expect(await adapter.replaceRowsForGarden('garden_members', 'g-1', [member('a'), member('b')])).toBe(true);
+        expect(await adapter.replaceRowsForGarden('garden_members', 'g-1', [member('a'), member('b')])).toBe(false);
+        expect(await adapter.replaceRowsForGarden('garden_members', 'g-1', [member('a')])).toBe(true);
+        const rows = await adapter.getRowsByGarden('garden_members', 'g-1');
+        expect(rows.map((r) => r.id)).toEqual(['g-1:a']);
+      });
+
+      it('clearAll removes rows, outbox and cursors but keeps the schema version', async () => {
+        const row = sampleGarden();
+        await adapter.writeWithOutbox('gardens', row, {
+          entity: 'gardens', rowId: row.id, operation: 'update', payload: {},
+        });
+        await adapter.setSyncState({ entity: 'gardens', lastPullAt: 'x', lastPushAt: null });
+        const version = await adapter.getSchemaVersion();
+        await adapter.clearAll();
+        expect(await adapter.getAllRows('gardens', { includeDeleted: true })).toHaveLength(0);
+        expect(await adapter.listOutboxEntries()).toHaveLength(0);
+        expect(await adapter.getSyncState('gardens')).toBeNull();
+        expect(await adapter.getSchemaVersion()).toBe(version);
+      });
     });
   });
 }

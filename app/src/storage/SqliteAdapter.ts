@@ -7,6 +7,7 @@ import type {
   SyncStateEntry,
   QueryOptions,
 } from '@spatenstich/shared';
+import { shouldApplyServerRow, sameRows } from './serverMerge';
 
 const SCHEMA_VERSION_KEY = '__schema_version__';
 
@@ -289,6 +290,11 @@ export class SqliteAdapter implements StorageAdapter {
           row.id, JSON.stringify(row), row.deletedAt, row.updatedAt,
         );
       }
+      // Only the newest snapshot of a row is worth sending: older entries are replaced.
+      await tx.runAsync(
+        'DELETE FROM sync_outbox WHERE entity = ? AND row_id = ?',
+        outbox.entity, outbox.rowId,
+      );
       await tx.runAsync(
         `INSERT INTO sync_outbox(id, entity, row_id, operation, payload, created_at, attempts, last_error)
          VALUES(?,?,?,?,?,?,?,?)`,
@@ -323,11 +329,28 @@ export class SqliteAdapter implements StorageAdapter {
     }
   }
 
-  async upsertRowsFromServer<T extends AnyRow>(entity: EntityName, rows: T[]): Promise<void> {
-    if (rows.length === 0) return;
+  async upsertRowsFromServer<T extends AnyRow>(
+    entity: EntityName,
+    rows: T[],
+    opts: { force?: boolean } = {},
+  ): Promise<string[]> {
+    if (rows.length === 0) return [];
     const db = await this.dbPromise;
+    const waiting = await db.getAllAsync<{ row_id: string }>(
+      'SELECT row_id FROM sync_outbox WHERE entity = ?',
+      entity,
+    );
+    const pending = new Set(waiting.map((w) => w.row_id));
+    const written: string[] = [];
     await db.withExclusiveTransactionAsync(async (tx) => {
       for (const row of rows) {
+        const stored = await tx.getFirstAsync<{ data: string }>(
+          `SELECT data FROM ${entity} WHERE id = ?`,
+          row.id,
+        );
+        const local = stored ? (JSON.parse(stored.data) as T) : null;
+        if (!shouldApplyServerRow(local, row, pending.has(row.id), opts.force === true)) continue;
+        written.push(row.id);
         const gidCol = GARDEN_ID_COLUMN[entity];
         const gidField = GARDEN_ID_FIELD[entity];
         const gidValue =
@@ -351,6 +374,35 @@ export class SqliteAdapter implements StorageAdapter {
         }
       }
     });
+    return written;
+  }
+
+  async replaceRowsForGarden<T extends AnyRow>(
+    entity: EntityName,
+    gardenId: string,
+    rows: T[],
+  ): Promise<boolean> {
+    const gidCol = GARDEN_ID_COLUMN[entity];
+    if (!gidCol || gidCol === 'id') {
+      throw new Error(`Entity ${entity} cannot be replaced per garden.`);
+    }
+    const db = await this.dbPromise;
+    const stored = await db.getAllAsync<{ data: string }>(
+      `SELECT data FROM ${entity} WHERE ${gidCol} = ?`,
+      gardenId,
+    );
+    const existing = stored.map((r) => JSON.parse(r.data) as T);
+    if (sameRows(existing, rows)) return false;
+    await db.withExclusiveTransactionAsync(async (tx) => {
+      await tx.runAsync(`DELETE FROM ${entity} WHERE ${gidCol} = ?`, gardenId);
+      for (const row of rows) {
+        await tx.runAsync(
+          `INSERT INTO ${entity}(id, data, ${gidCol}, deleted_at, updated_at) VALUES(?,?,?,?,?)`,
+          row.id, JSON.stringify(row), gardenId, row.deletedAt, row.updatedAt,
+        );
+      }
+    });
+    return true;
   }
 
   // ---- Outbox ----
@@ -371,6 +423,7 @@ export class SqliteAdapter implements StorageAdapter {
       createdAt: r['created_at'] as string,
       attempts: r['attempts'] as number,
       lastError: r['last_error'] as string | null,
+      nextAttemptAt: (r['next_attempt_at'] as string | null | undefined) ?? null,
     }));
   }
 
@@ -381,13 +434,21 @@ export class SqliteAdapter implements StorageAdapter {
 
   async updateOutboxEntry(
     id: string,
-    patch: Pick<OutboxEntry, 'attempts' | 'lastError'>,
+    patch: Partial<Pick<OutboxEntry, 'attempts' | 'lastError' | 'nextAttemptAt'>>,
   ): Promise<void> {
     const db = await this.dbPromise;
-    await db.runAsync(
-      'UPDATE sync_outbox SET attempts = ?, last_error = ? WHERE id = ?',
-      patch.attempts, patch.lastError, id,
-    );
+    if (patch.attempts !== undefined) {
+      await db.runAsync('UPDATE sync_outbox SET attempts = ? WHERE id = ?', patch.attempts, id);
+    }
+    if (patch.lastError !== undefined) {
+      await db.runAsync('UPDATE sync_outbox SET last_error = ? WHERE id = ?', patch.lastError, id);
+    }
+    if (patch.nextAttemptAt !== undefined) {
+      await db.runAsync(
+        'UPDATE sync_outbox SET next_attempt_at = ? WHERE id = ?',
+        patch.nextAttemptAt, id,
+      );
+    }
   }
 
   // ---- sync_state ----
@@ -415,6 +476,31 @@ export class SqliteAdapter implements StorageAdapter {
                                           last_push_at=excluded.last_push_at`,
       state.entity, state.lastPullAt, state.lastPushAt,
     );
+  }
+
+  async clearSyncState(): Promise<void> {
+    const db = await this.dbPromise;
+    await db.runAsync('DELETE FROM sync_state');
+  }
+
+  async clearAll(): Promise<void> {
+    const db = await this.dbPromise;
+    await db.withExclusiveTransactionAsync(async (tx) => {
+      for (const entity of ROW_ENTITIES) {
+        await tx.runAsync(`DELETE FROM ${entity}`);
+      }
+      await tx.runAsync('DELETE FROM sync_outbox');
+      await tx.runAsync('DELETE FROM sync_state');
+    });
+  }
+
+  // ---- Migration hook V6 (Phase 33: outbox retry time) ----
+  async __migrateV6(): Promise<void> {
+    const db = await this.dbPromise;
+    const cols = await db.getAllAsync<{ name: string }>('PRAGMA table_info(sync_outbox)');
+    if (!cols.some((c) => c.name === 'next_attempt_at')) {
+      await db.execAsync('ALTER TABLE sync_outbox ADD COLUMN next_attempt_at TEXT');
+    }
   }
 }
 

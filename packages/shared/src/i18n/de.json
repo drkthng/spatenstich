@@ -94,7 +94,13 @@
       "cta": "Account erstellen und Daten übertragen",
       "error_partial": "Account angelegt, aber Datenübertragung fehlgeschlagen. Bitte erneut versuchen.",
       "error_already_account": "Du bist bereits angemeldet."
-    }
+    },
+    "logout_yes": "Ja, abmelden",
+    "logout_unsynced_one": "Eine Änderung ist noch nicht abgeglichen. Wenn du dich jetzt abmeldest, geht sie verloren.",
+    "logout_unsynced_many": "{n} Änderungen sind noch nicht abgeglichen. Wenn du dich jetzt abmeldest, gehen sie verloren.",
+    "logout_sync_first": "Erst abgleichen",
+    "logout_anyway": "Trotzdem abmelden",
+    "sync_status": "Speicherstatus"
   },
   "app": {
     "index": {
@@ -459,28 +465,70 @@
   },
   "sync": {
     "badge": {
-      "synced": "Synchronisiert",
-      "syncing": "Synchronisiere …",
-      "degraded": "Probleme beim Synchronisieren",
+      "synced": "Abgeglichen",
+      "syncing": "Gleiche ab …",
+      "degraded": "Nicht alles abgeglichen",
       "offline": "Offline",
-      "pendingCount": "{n} ausstehend",
+      "pendingCount": "{n} offen",
       "failedCount": "{n} fehlgeschlagen"
     },
     "detail": {
-      "title": "Sync-Status",
-      "pendingHeader": "Ausstehend",
-      "failedHeader": "Fehlgeschlagen",
-      "empty": "Alle Änderungen sind synchronisiert.",
-      "entryLabel": "{entity} · {op}",
+      "title": "Speicherstatus",
+      "allSynced": "Alles ist gespeichert und abgeglichen.",
+      "empty": "Alles ist gespeichert und abgeglichen.",
+      "pendingOne": "Eine Änderung wartet auf den Abgleich.",
+      "pendingMany": "{n} Änderungen warten auf den Abgleich.",
+      "failedOne": "Eine Änderung konnte nicht abgeglichen werden.",
+      "failedMany": "{n} Änderungen konnten nicht abgeglichen werden.",
+      "offlineHint": "Du bist offline. Deine Änderungen sind auf diesem Gerät gespeichert und werden abgeglichen, sobald wieder eine Verbindung besteht.",
+      "liveOn": "Änderungen aus eurem Garten kommen sofort an.",
+      "liveOff": "Die Sofort-Verbindung steht gerade nicht. Änderungen kommen spätestens nach einer Minute an.",
+      "pendingHeader": "Wartet auf den Abgleich",
+      "failedHeader": "Nicht abgeglichen",
+      "entryLabel": "{what}: {label}",
+      "entryLabelDeleted": "{what} gelöscht: {label}",
+      "entryLabelPlain": "{what}",
+      "waiting": "Wird beim nächsten Abgleich gesendet.",
+      "waitingRetry": "Der letzte Versuch ist gescheitert. Der nächste folgt von selbst.",
       "retryButton": "Erneut versuchen",
+      "retryAllButton": "Alle erneut versuchen",
       "discardButton": "Verwerfen",
-      "discardConfirm": "Änderung wirklich verwerfen? Dein lokaler Wert wird durch den Server-Stand überschrieben.",
+      "discardConfirm": "Änderung wirklich verwerfen? Auf diesem Gerät gilt danach wieder der Stand vom Server.",
       "discardConfirmYes": "Verwerfen",
       "discardConfirmNo": "Abbrechen",
-      "lastError": "Letzter Fehler",
+      "lastError": "Technische Angabe",
       "attemptsLabel": "Versuche: {n}",
-      "conflictLabel": "Konflikt — älterer Stand, wurde verworfen."
-    }
+      "conflictLabel": "Konflikt — älterer Stand, wurde verworfen.",
+      "what": {
+        "plan_elements": "Element im Plan",
+        "garden_dimensions": "Größe der Parzelle",
+        "gardens": "Garten",
+        "profiles": "Dein Name",
+        "imports": "Import",
+        "import_items": "Eintrag eines Imports",
+        "bed_drafts": "Beet-Vorschlag",
+        "plant_drafts": "Pflanzen-Vorschlag",
+        "observation_drafts": "Beobachtung",
+        "vereinsregeln": "Vereinsregeln",
+        "garden_members": "Mitglied",
+        "invite_codes": "Einladungscode"
+      },
+      "reason": {
+        "notAllowed": "Du darfst in diesem Garten nichts mehr ändern.",
+        "duplicate": "Diesen Eintrag gibt es auf dem Server schon.",
+        "missingParent": "Ein Eintrag, zu dem dieser gehört, fehlt auf dem Server.",
+        "rejected": "Der Server nimmt diesen Eintrag in dieser Form nicht an.",
+        "unknownKind": "Der Server kennt diese Art von Eintrag nicht.",
+        "unreachable": "Der Server war nicht erreichbar oder hat einen Fehler gemeldet."
+      }
+    },
+    "toast": {
+      "partnerChanged": "{name} hat den Plan geändert.",
+      "conflictTaken": "Änderung von {name} übernommen. Deine ältere Änderung wurde verworfen.",
+      "someone": "Jemand",
+      "dismiss": "Schließen"
+    },
+    "offlineStart": "Keine Verbindung. Dein Garten wird geladen, sobald das Netz wieder da ist."
   },
   "kalender": {
     "title": "Aussaatkalender",

@@ -51,9 +51,11 @@ function confidenceToBand(c: number | null): 'high' | 'medium' | 'low' | null {
 }
 
 /**
- * Pure layout helper (Pitfall-2): stack new beds in rows starting at (1m, 1m), 50cm gap.
- * Returns the next free slot for a new bed of the given size, given existing placed beds.
- * Ignores non-bed elements and soft-deleted beds.
+ * Finds room for a new bed: the first free place when scanning the parcel row by row,
+ * 1 m from the boundary and 50 cm from other beds. Returns the CENTRE of the new bed,
+ * like every other position in the plan (Phase 33; it used to return a corner, which
+ * put accepted beds half outside the parcel). Ignores other kinds of elements and
+ * deleted beds. If nothing is free, the first place is used and the bed lies on top.
  */
 export function nextFreeBedSlot(
   existing: PlanElementRow[],
@@ -61,22 +63,33 @@ export function nextFreeBedSlot(
   size: { widthM: number; heightM: number },
 ): { xM: number; yM: number } {
   const GAP = 0.5;
-  const beds = existing.filter((e) => e.elementType === 'Beet' && e.deletedAt === null);
-  let cursorX = 1;
-  let cursorY = 1;
-  let rowMaxH = 0;
-  for (const bed of beds) {
-    const advance = bed.widthM + GAP;
-    if (cursorX + advance + size.widthM > dims.widthM - 1) {
-      cursorX = 1;
-      cursorY += rowMaxH + GAP;
-      rowMaxH = 0;
-    } else {
-      cursorX += advance;
+  const MARGIN = 1;
+  const STEP = 0.5;
+  const taken = existing
+    .filter((e) => e.elementType === 'Beet' && e.deletedAt === null)
+    .map((e) => ({
+      left: e.xM - e.widthM / 2 - GAP,
+      right: e.xM + e.widthM / 2 + GAP,
+      top: e.yM - e.heightM / 2 - GAP,
+      bottom: e.yM + e.heightM / 2 + GAP,
+    }));
+  const isFree = (left: number, top: number): boolean =>
+    taken.every(
+      (t) =>
+        left >= t.right || left + size.widthM <= t.left || top >= t.bottom || top + size.heightM <= t.top,
+    );
+  const centre = (left: number, top: number) => ({
+    xM: left + size.widthM / 2,
+    yM: top + size.heightM / 2,
+  });
+  const maxLeft = Math.max(MARGIN, dims.widthM - MARGIN - size.widthM);
+  const maxTop = Math.max(MARGIN, dims.heightM - MARGIN - size.heightM);
+  for (let top = MARGIN; top <= maxTop + 1e-9; top += STEP) {
+    for (let left = MARGIN; left <= maxLeft + 1e-9; left += STEP) {
+      if (isFree(left, top)) return centre(left, top);
     }
-    rowMaxH = Math.max(rowMaxH, bed.heightM);
   }
-  return { xM: cursorX, yM: cursorY };
+  return centre(MARGIN, MARGIN);
 }
 
 /**
@@ -196,8 +209,9 @@ export async function promotePlantDraft(
   if (!userId) throw new Error('not_authenticated');
 
   const now = new Date().toISOString();
-  const xM = parentBedElement ? parentBedElement.xM + 0.2 : 0;
-  const yM = parentBedElement ? parentBedElement.yM + 0.2 : 0;
+  // Positions are centres: next to the middle of its bed, or 1 m inside the parcel.
+  const xM = parentBedElement ? parentBedElement.xM + 0.2 : 1;
+  const yM = parentBedElement ? parentBedElement.yM + 0.2 : 1;
 
   const element: PlanElementRow = {
     id: randomId(),

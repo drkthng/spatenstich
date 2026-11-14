@@ -118,6 +118,7 @@ export function gardenFromDb(row: DbGardenRow): GardenRow {
     deletedAt: r.deleted_at ?? null,
     name: r.name,
     ownerUserId: r.owner_user_id ?? r.updated_by_user_id ?? r.created_by_user_id ?? '',
+    serverUpdatedAt: (r as { server_updated_at?: string | null }).server_updated_at ?? null,
     // Extended fields (Phase 2.5 D-01):
     ...(r.plz != null ? { plz: r.plz } : {}),
     ...(r.klimazone != null ? { klimazone: r.klimazone } : {}),
@@ -281,18 +282,25 @@ export function profileFromDb(row: DbProfileRow): ProfileRow {
     userId: r.id,
     displayName: r.display_name ?? null,
     locale: r.locale ?? null,
+    serverUpdatedAt: (r as { server_updated_at?: string | null }).server_updated_at ?? null,
   };
 }
 
 // ── Garden Members ─────────────────────────────────────────────────────────
 
-export function gardenMemberFromDb(row: DbGardenMemberRow): GardenMemberRow {
+export function gardenMemberFromDb(
+  row: DbGardenMemberRow & {
+    updated_at?: string | null;
+    updated_by_user_id?: string | null;
+    deleted_at?: string | null;
+  },
+): GardenMemberRow {
   return {
     id: `${row.garden_id}:${row.user_id}`,
     createdAt: row.joined_at,
-    updatedAt: row.joined_at,
-    updatedByUserId: row.user_id,
-    deletedAt: null, // garden_members nutzt DELETE, nicht Soft-Delete
+    updatedAt: row.updated_at ?? row.joined_at,
+    updatedByUserId: row.updated_by_user_id ?? row.user_id,
+    deletedAt: row.deleted_at ?? null, // removed members are marked, not deleted (Migration 021)
     gardenId: row.garden_id,
     userId: row.user_id,
     role: row.role as 'owner' | 'member',
@@ -346,6 +354,7 @@ export function gardenDimensionsToLocal(db: DbGardenDimensionsRowLoose): GardenD
     updatedAt: db.updated_at,
     updatedByUserId: db.updated_by_user_id ?? null,
     deletedAt: db.deleted_at ?? null,
+    serverUpdatedAt: (db as { server_updated_at?: string | null }).server_updated_at ?? null,
   };
 }
 
@@ -418,6 +427,7 @@ export function planElementToLocal(db: DbPlanElementRowLoose): PlanElementRow {
     importedFrom: db.imported_from ?? null,
     provenance: (db.provenance as Record<string, unknown> | null | undefined) ?? null,
     layer: layerValue,
+    serverUpdatedAt: (db as { server_updated_at?: string | null }).server_updated_at ?? null,
   };
 }
 
@@ -492,6 +502,7 @@ export function importEntityToDb(
   };
 
   for (const [key, value] of Object.entries(row)) {
+    if (key === 'serverUpdatedAt') continue; // set by the server, never sent
     const snakeKey = camelToSnakeMap[key] ?? key;
     result[snakeKey] = value;
   }
@@ -544,6 +555,7 @@ export function importEntityFromDb(
     updated_at: 'updatedAt',
     updated_by_user_id: 'updatedByUserId',
     deleted_at: 'deletedAt',
+    server_updated_at: 'serverUpdatedAt',
   };
 
   for (const [key, value] of Object.entries(row)) {

@@ -23,6 +23,13 @@ jest.mock('@/src/lib/supabase', () => ({
 jest.mock('@/src/lib/auth', () => ({
   useAuth: () => ({ signOut: jest.fn() }),
 }));
+jest.mock('@/src/lib/sync/SyncWorker', () => ({
+  getSyncWorker: () => ({ push: jest.fn().mockResolvedValue(undefined), retryAllFailed: jest.fn() }),
+}));
+jest.mock('@/src/lib/sync/sessionCleanup', () => ({
+  clearLocalAccountData: jest.fn().mockResolvedValue(undefined),
+  countUnsyncedChanges: jest.fn().mockResolvedValue(0),
+}));
 jest.mock('@/src/lib/migrateLocalToAccount', () => ({
   migrateLocalToAccount: jest.fn(),
 }));

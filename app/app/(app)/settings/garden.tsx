@@ -28,6 +28,7 @@ import {
   TargetNotMemberError,
 } from '@/src/lib/gardenRepo';
 import { createInviteForGarden } from '@/src/lib/inviteCodeRepo';
+import { useDataVersion } from '@/src/lib/sync/dataVersion';
 import type { Garden, GardenMember } from '@spatenstich/shared';
 
 const t = (key: string, vars?: Record<string, string | number>): string => {
@@ -74,6 +75,9 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
   const [confirmDelete, setConfirmDelete] = React.useState(false);
   const [deleting, setDeleting] = React.useState(false);
 
+  // Phase 33: members who joined or were removed, and a renamed garden, appear by themselves.
+  const syncedVersion = useDataVersion('gardens', 'garden_members', 'profiles');
+
   React.useEffect(() => {
     if (mode !== 'account' || !activeGardenId) {
       setLoading(false);
@@ -99,7 +103,7 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
     return () => {
       cancelled = true;
     };
-  }, [mode, activeGardenId]);
+  }, [mode, activeGardenId, syncedVersion]);
 
   if (mode !== 'account') {
     return (

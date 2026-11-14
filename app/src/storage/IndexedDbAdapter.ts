@@ -7,11 +7,18 @@ import type {
   SyncStateEntry,
   QueryOptions,
 } from '@spatenstich/shared';
+import { shouldApplyServerRow, sameRows } from './serverMerge';
 
 const KV_STORE = 'kv';
 const OUTBOX_STORE = 'sync_outbox';
 const STATE_STORE = 'sync_state';
 const SCHEMA_VERSION_KEY = '__schema_version__';
+
+const ROW_STORES: EntityName[] = [
+  'gardens', 'garden_members', 'profiles', 'vereinsregeln', 'invite_codes',
+  'garden_dimensions', 'plan_elements', 'imports', 'import_items', 'bed_drafts',
+  'plant_drafts', 'observation_drafts',
+];
 
 // Which entities have a garden_id field (in camelCase JS objects)?
 // gardens is special: id == garden_id (self-reference).
@@ -245,11 +252,18 @@ export class IndexedDbAdapter implements StorageAdapter {
       attempts: 0,
       lastError: null,
     };
-    // L-6: Multi-Store-Transaction → atomic
+    // One transaction: the row, and exactly one outbox entry for it. Older entries for
+    // the same row are replaced, because only the newest snapshot is worth sending.
     const tx = db.transaction([entity, OUTBOX_STORE], 'readwrite');
+    const outboxStore = tx.objectStore(OUTBOX_STORE);
+    const waiting = (await outboxStore.getAll()) as OutboxEntry[];
+    const superseded = waiting.filter(
+      (e) => e.entity === outboxEntry.entity && e.rowId === outboxEntry.rowId,
+    );
     await Promise.all([
+      ...superseded.map((e) => outboxStore.delete(e.id)),
       tx.objectStore(entity).put(row),
-      tx.objectStore(OUTBOX_STORE).put(outboxEntry),
+      outboxStore.put(outboxEntry),
       tx.done,
     ]);
   }
@@ -259,14 +273,48 @@ export class IndexedDbAdapter implements StorageAdapter {
     await db.put(entity, row);
   }
 
-  async upsertRowsFromServer<T extends AnyRow>(entity: EntityName, rows: T[]): Promise<void> {
-    if (rows.length === 0) return;
+  async upsertRowsFromServer<T extends AnyRow>(
+    entity: EntityName,
+    rows: T[],
+    opts: { force?: boolean } = {},
+  ): Promise<string[]> {
+    if (rows.length === 0) return [];
+    const db = await this.dbPromise;
+    const tx = db.transaction([entity, OUTBOX_STORE], 'readwrite');
+    const store = tx.objectStore(entity);
+    const waiting = (await tx.objectStore(OUTBOX_STORE).getAll()) as OutboxEntry[];
+    const pending = new Set(waiting.filter((e) => e.entity === entity).map((e) => e.rowId));
+    const written: string[] = [];
+    for (const row of rows) {
+      const local = ((await store.get(row.id)) as T | undefined) ?? null;
+      if (!shouldApplyServerRow(local, row, pending.has(row.id), opts.force === true)) continue;
+      await store.put(row);
+      written.push(row.id);
+    }
+    await tx.done;
+    return written;
+  }
+
+  async replaceRowsForGarden<T extends AnyRow>(
+    entity: EntityName,
+    gardenId: string,
+    rows: T[],
+  ): Promise<boolean> {
     const db = await this.dbPromise;
     const tx = db.transaction(entity, 'readwrite');
+    const store = tx.objectStore(entity);
+    const existing = (await store.index('by_gardenId').getAll(gardenId)) as T[];
+    if (sameRows(existing, rows)) {
+      await tx.done;
+      return false;
+    }
+    const keep = new Set(rows.map((r) => r.id));
     await Promise.all([
-      ...rows.map((r) => tx.objectStore(entity).put(r)),
+      ...existing.filter((r) => !keep.has(r.id)).map((r) => store.delete(r.id)),
+      ...rows.map((r) => store.put(r)),
       tx.done,
     ]);
+    return true;
   }
 
   // ---- Outbox ----
@@ -284,7 +332,7 @@ export class IndexedDbAdapter implements StorageAdapter {
 
   async updateOutboxEntry(
     id: string,
-    patch: Pick<OutboxEntry, 'attempts' | 'lastError'>,
+    patch: Partial<Pick<OutboxEntry, 'attempts' | 'lastError' | 'nextAttemptAt'>>,
   ): Promise<void> {
     const db = await this.dbPromise;
     const entry = (await db.get(OUTBOX_STORE, id)) as OutboxEntry | undefined;
@@ -302,6 +350,20 @@ export class IndexedDbAdapter implements StorageAdapter {
   async setSyncState(state: SyncStateEntry): Promise<void> {
     const db = await this.dbPromise;
     await db.put(STATE_STORE, state);
+  }
+
+  async clearSyncState(): Promise<void> {
+    const db = await this.dbPromise;
+    await db.clear(STATE_STORE);
+  }
+
+  async clearAll(): Promise<void> {
+    const db = await this.dbPromise;
+    const stores = [...ROW_STORES, OUTBOX_STORE, STATE_STORE].filter((s) =>
+      db.objectStoreNames.contains(s),
+    );
+    const tx = db.transaction(stores, 'readwrite');
+    await Promise.all([...stores.map((s) => tx.objectStore(s).clear()), tx.done]);
   }
 }
 

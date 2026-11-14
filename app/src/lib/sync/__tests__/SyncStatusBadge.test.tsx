@@ -35,7 +35,7 @@ describe('SyncStatusBadge', () => {
     jest.clearAllMocks();
   });
 
-  test('Test 1: status=synced → rendert Badge mit Label "Synchronisiert"', () => {
+  test('Test 1: status=synced → rendert Badge mit Label "Abgeglichen"', () => {
     mockUseSyncStatus.mockReturnValue({
       status: 'synced', pendingCount: 0, failedCount: 0, activelySyncing: false,
     });
@@ -44,16 +44,16 @@ describe('SyncStatusBadge', () => {
     expect(queryByText(i18n.sync.badge.synced)).toBeTruthy();
   });
 
-  test('Test 2: status=syncing + pendingCount=3 → Label "Synchronisiere …" + "3 ausstehend"', () => {
+  test('Test 2: status=syncing + pendingCount=3 → Label "Gleiche ab …" + "3 offen"', () => {
     mockUseSyncStatus.mockReturnValue({
       status: 'syncing', pendingCount: 3, failedCount: 0, activelySyncing: true,
     });
     const { queryByText } = render(<SyncStatusBadge />);
     expect(queryByText(i18n.sync.badge.syncing)).toBeTruthy();
-    expect(queryByText('3 ausstehend')).toBeTruthy();
+    expect(queryByText('3 offen')).toBeTruthy();
   });
 
-  test('Test 3: status=degraded + failedCount=2 → Label "Probleme..." + "2 fehlgeschlagen"', () => {
+  test('Test 3: status=degraded + failedCount=2 → Label "Nicht alles abgeglichen" + "2 fehlgeschlagen"', () => {
     mockUseSyncStatus.mockReturnValue({
       status: 'degraded', pendingCount: 0, failedCount: 2, activelySyncing: false,
     });

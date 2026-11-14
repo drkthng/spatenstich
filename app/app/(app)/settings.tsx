@@ -22,6 +22,9 @@ import { useAuth } from '@/src/lib/auth';
 import { useAuthStore } from '@/src/stores/authStore';
 import { supabase } from '@/src/lib/supabase';
 import { migrateLocalToAccount } from '@/src/lib/migrateLocalToAccount';
+import { getSyncWorker } from '@/src/lib/sync/SyncWorker';
+import { clearLocalAccountData, countUnsyncedChanges } from '@/src/lib/sync/sessionCleanup';
+import { t as tv } from '@/src/lib/i18n';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
@@ -65,6 +68,9 @@ export default function SettingsScreen(): React.JSX.Element | null {
   const [email, setEmail] = React.useState<string | null>(null);
   const [showConfirmLogout, setShowConfirmLogout] = React.useState(false);
   const [loggingOut, setLoggingOut] = React.useState(false);
+  // Phase 33 (SYNC3-07): changes the server does not have yet would be lost by signing out.
+  const [unsynced, setUnsynced] = React.useState(0);
+  const [syncingFirst, setSyncingFirst] = React.useState(false);
 
   // Local mode — migration form
   const [migEmail, setMigEmail] = React.useState('');
@@ -91,10 +97,46 @@ export default function SettingsScreen(): React.JSX.Element | null {
     };
   }, [mode]);
 
+  const openLogoutConfirm = React.useCallback(async () => {
+    try {
+      // One last attempt to send what is waiting, then count what is left.
+      await Promise.race([
+        getSyncWorker().push(),
+        new Promise((resolve) => setTimeout(resolve, 4000)),
+      ]);
+    } catch {
+      // Offline: the count below says what is at stake.
+    }
+    try {
+      setUnsynced(await countUnsyncedChanges());
+    } catch {
+      setUnsynced(0);
+    }
+    setShowConfirmLogout(true);
+  }, []);
+
+  const handleSyncFirst = React.useCallback(async () => {
+    setSyncingFirst(true);
+    try {
+      await getSyncWorker().retryAllFailed();
+    } catch {
+      // The count below shows whether it helped.
+    } finally {
+      try {
+        setUnsynced(await countUnsyncedChanges());
+      } catch {
+        setUnsynced(0);
+      }
+      setSyncingFirst(false);
+    }
+  }, []);
+
   const handleLogoutConfirm = React.useCallback(async () => {
     setLoggingOut(true);
     try {
       await signOut();
+      // Nothing of this account stays on the device for whoever signs in next.
+      await clearLocalAccountData().catch(() => {});
       useAuthStore.getState().clearAuth();
       if (process.env.EXPO_PUBLIC_SENTRY_DSN) {
         Sentry.setUser(null);
@@ -220,7 +262,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
             testID="settings-link-sync"
           >
             <Text className="text-base text-ink font-semibold">
-              Sync-Status
+              {t('settings.sync_status')}
             </Text>
             <Text className="text-ink-muted">›</Text>
           </Pressable>
@@ -229,7 +271,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
         {!showConfirmLogout ? (
           <Button
             variant="ghost"
-            onPress={() => setShowConfirmLogout(true)}
+            onPress={() => void openLogoutConfirm()}
             testID="settings-logout"
           >
             <Text className="text-ink font-semibold">
@@ -238,9 +280,25 @@ export default function SettingsScreen(): React.JSX.Element | null {
           </Button>
         ) : (
           <View className="gap-2 p-4 rounded-lg border border-line">
-            <Text className="text-base text-ink">
-              {t('settings.logout_confirm')}
+            <Text className="text-base text-ink" testID="settings-logout-message">
+              {unsynced === 0
+                ? t('settings.logout_confirm')
+                : unsynced === 1
+                  ? t('settings.logout_unsynced_one')
+                  : tv('settings.logout_unsynced_many', { n: unsynced })}
             </Text>
+            {unsynced > 0 ? (
+              <Button
+                variant="outline"
+                onPress={() => void handleSyncFirst()}
+                disabled={syncingFirst || loggingOut}
+                testID="settings-logout-sync-first"
+              >
+                <Text className="text-ink font-semibold">
+                  {syncingFirst ? t('common.loading') : t('settings.logout_sync_first')}
+                </Text>
+              </Button>
+            ) : null}
             <View className="flex-row gap-2">
               <Button
                 variant="destructive"
@@ -250,7 +308,11 @@ export default function SettingsScreen(): React.JSX.Element | null {
                 className="flex-1"
               >
                 <Text className="text-on-primary font-semibold">
-                  {loggingOut ? t('common.loading') : 'Ja, abmelden'}
+                  {loggingOut
+                    ? t('common.loading')
+                    : unsynced > 0
+                      ? t('settings.logout_anyway')
+                      : t('settings.logout_yes')}
                 </Text>
               </Button>
               <Button

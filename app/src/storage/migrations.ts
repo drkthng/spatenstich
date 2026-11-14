@@ -12,6 +12,7 @@ interface RowTableCreator {
   __createRowTablesV3?: () => Promise<void>;
   __createRowTablesV4?: () => Promise<void>;
   __createRowTablesV5?: () => Promise<void>;
+  __migrateV6?: () => Promise<void>;
 }
 
 // Phase 1: initial bootstrap migration (no local schema needed yet,
@@ -74,6 +75,19 @@ export const MIGRATIONS: LocalMigration[] = [
           'Update SqliteAdapter/IndexedDbAdapter.',
         );
       }
+    },
+  },
+  {
+    version: 6,
+    up: async (adapter) => {
+      // Phase 33: pulls now follow server_updated_at. The old cursors were server clock
+      // readings and mean something else, so they are dropped: the first pull after the
+      // update fetches everything once. The outbox learns when an entry may be retried.
+      const creator = adapter as StorageAdapter & RowTableCreator;
+      if (typeof creator.__migrateV6 === 'function') {
+        await creator.__migrateV6();
+      }
+      await adapter.clearSyncState();
     },
   },
 ];

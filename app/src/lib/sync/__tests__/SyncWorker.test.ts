@@ -139,43 +139,13 @@ describe('SyncWorker.push() — FEATURES.vereinsregeln Gate (Plan 20-02 D-05)', 
   });
 });
 
+// Cursor, paging and what a pull stores are covered against a fake server in
+// SyncWorker.phase33.test.ts.
 describe('SyncWorker.pull / pullAll / syncAll', () => {
   beforeEach(() => {
     syncEvents._reset();
     jest.clearAllMocks();
     supabaseMock.rpc.mockResolvedValue({ data: '2026-04-24T12:00:00Z', error: null });
-  });
-
-  it('pull(entity) aktualisiert sync_state.lastPullAt auf server_now()', async () => {
-    supabaseMock.from.mockReturnValue({
-      select: jest.fn().mockReturnValue({
-        gt: jest.fn().mockResolvedValue({ data: [], error: null }),
-      }),
-    });
-    const worker = makeWorker();
-    await worker.pull('gardens');
-    const state = await storage.getSyncState('gardens');
-    expect(state?.lastPullAt).toBe('2026-04-24T12:00:00Z');
-  });
-
-  it('pull speichert Rows via upsertRowsFromServer (KEINE Outbox)', async () => {
-    supabaseMock.from.mockReturnValue({
-      select: jest.fn().mockReturnValue({
-        gt: jest.fn().mockResolvedValue({
-          data: [{
-            id: 'g-1', name: 'Test', created_at: 'now', updated_at: 'now',
-            updated_by_user_id: 'user-a', owner_user_id: 'user-a',
-            deleted_at: null, plz: null, klimazone: null, archetype: null,
-          }],
-          error: null,
-        }),
-      }),
-    });
-    const worker = makeWorker();
-    await worker.pull('gardens');
-    const row = await storage.getRow('gardens', 'g-1');
-    expect(row).toBeTruthy();
-    expect(await storage.listOutboxEntries()).toHaveLength(0);
   });
 
   it('pullAll() iteriert alle PULL_ENTITIES und continued bei Einzel-Fehlern', async () => {
@@ -249,15 +219,6 @@ describe('SyncWorker.retryOp / discardOp', () => {
   it('retryOp("does-not-exist") wirft outbox_entry_not_found', async () => {
     const worker = makeWorker();
     await expect(worker.retryOp('does-not-exist')).rejects.toThrow('outbox_entry_not_found');
-  });
-
-  it('discardOp löscht Entry + triggert pull(entity)', async () => {
-    const id = await seedFailedEntry();
-    const worker = makeWorker();
-    const pullSpy = jest.spyOn(worker, 'pull').mockResolvedValue();
-    await worker.discardOp(id);
-    expect(await storage.listOutboxEntries()).toHaveLength(0);
-    expect(pullSpy).toHaveBeenCalledWith('gardens');
   });
 
   it('discardOp("does-not-exist") ist idempotent (kein throw, kein pull)', async () => {

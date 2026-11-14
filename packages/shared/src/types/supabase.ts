@@ -287,6 +287,10 @@ export type Database = {
       delete_garden: { Args: { p_garden_id: string }; Returns: Json }
       ensure_default_garden_for_user: { Args: never; Returns: string }
       gen_invite_code: { Args: never; Returns: string }
+      remove_garden_member: {
+        Args: { p_garden_id: string; p_user_id: string }
+        Returns: Json
+      }
       is_garden_member: { Args: { p_garden_id: string }; Returns: boolean }
       is_garden_owner: { Args: { p_garden_id: string }; Returns: boolean }
       server_now: { Args: never; Returns: string }

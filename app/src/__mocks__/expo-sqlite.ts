@@ -155,12 +155,14 @@ class MockSQLiteDatabase {
     const whereClause = m[2];
     if (!whereClause) { table.clear(); return; }
 
-    const condMatch = whereClause.match(/(\w+)\s*=\s*\?/i);
-    if (condMatch) {
-      const col = condMatch[1]!;
-      const val = params[0];
+    // `col = ?` conditions joined by AND, bound to the params in order.
+    const cols = whereClause
+      .split(/\s+AND\s+/i)
+      .map((cond) => cond.match(/(\w+)\s*=\s*\?/i)?.[1])
+      .filter((col): col is string => typeof col === 'string');
+    if (cols.length > 0) {
       for (const [rowId, rowData] of table) {
-        if (rowData[col] === val) table.delete(rowId);
+        if (cols.every((col, i) => rowData[col] === params[i])) table.delete(rowId);
       }
     }
   }

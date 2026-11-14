@@ -11,6 +11,7 @@
 
 import { create } from 'zustand';
 import { temporal } from 'zundo';
+import { sameContent } from '../lib/sameContent';
 import type { PlanElementRow } from '@spatenstich/shared';
 import { polygonToBbox, type Point2D } from '../lib/geometry/bedLayout';
 import { useAuthStore } from './authStore';
@@ -51,6 +52,12 @@ export interface EditorState {
    * step, clears the selection.
    */
   hydrate: (elements: PlanElementRow[]) => void;
+  /**
+   * Takes rows that changed on another device into the open editor. Nothing is written
+   * and no undo step is created; the undo history is cleared, because undoing across a
+   * change by someone else would silently overwrite it. Returns how many rows were taken.
+   */
+  mergeRemote: (rows: PlanElementRow[], skip?: (id: string) => boolean) => number;
   /**
    * Bracket several changes into one undo step (typing in a field, a burst of arrow keys).
    * Saving continues as usual. Gestures do this themselves through setGestureActive.
@@ -134,6 +141,51 @@ export const useEditorStore = create<EditorState>()(
         } finally {
           hydrating = false;
         }
+      },
+
+      mergeRemote: (rows, skip) => {
+        const state = get();
+        const busy = new Set(state.gestureActive ? state.selectedIds : []);
+        const incoming = rows.filter((r) => !busy.has(r.id) && !(skip?.(r.id) ?? false));
+        if (incoming.length === 0) return 0;
+        const byId = new Map(state.elements.map((el) => [el.id, el]));
+        let taken = 0;
+        for (const row of incoming) {
+          const current = byId.get(row.id);
+          const gone = row.deletedAt !== null || row.isAccepted !== true;
+          if (gone) {
+            if (byId.delete(row.id)) taken += 1;
+            continue;
+          }
+          if (current) {
+            // The echo of this device's own save carries nothing new, and a row that
+            // was edited here later than the incoming one stays as it is.
+            if (sameContent(current, row)) continue;
+            if (Date.parse(current.updatedAt) > Date.parse(row.updatedAt)) continue;
+          }
+          byId.set(row.id, row);
+          taken += 1;
+        }
+        if (taken === 0) return 0;
+        const elements = Array.from(byId.values());
+        const alive = new Set(elements.map((el) => el.id));
+        hydrating = true;
+        try {
+          const temporalState = useEditorStore.temporal.getState();
+          temporalState.pause();
+          set({
+            elements,
+            selectedIds: state.selectedIds.filter((id) => alive.has(id)),
+            selection: state.selection && alive.has(state.selection) ? state.selection : null,
+            editingElementId:
+              state.editingElementId && alive.has(state.editingElementId) ? state.editingElementId : null,
+          });
+          temporalState.resume();
+          temporalState.clear();
+        } finally {
+          hydrating = false;
+        }
+        return taken;
       },
 
       beginHistoryStep: () => beginStep(),

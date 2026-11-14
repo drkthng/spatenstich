@@ -25,6 +25,7 @@ import {
   gardenFromDb,
 } from './mappers/rowMappers';
 import { scheduleWriteDebounced } from './sync/SyncTriggers';
+import { getSyncWorker } from './sync/SyncWorker';
 
 // ── Re-export for backward compat (UI callers import from gardenRepo) ─────
 export {
@@ -120,8 +121,14 @@ export async function updateGarden(
   patch: Partial<Pick<Garden, 'name' | 'plz' | 'klimazone' | 'archetype'>>,
 ): Promise<void> {
   assertAccount(mode);
-  // 1. Lokale Row laden (oder fresh anlegen wenn noch nicht vorhanden)
-  const existing = await storage.getRow<GardenRow>('gardens', gardenId);
+  // 1. Lokale Row laden. Never write a garden this device has not seen: a row built
+  //    from nothing would carry an empty name and overwrite the real one on the server.
+  let existing = await storage.getRow<GardenRow>('gardens', gardenId);
+  if (!existing) {
+    await loadGarden(mode, gardenId);
+    existing = await storage.getRow<GardenRow>('gardens', gardenId);
+    if (!existing) throw new Error('garden_not_loaded');
+  }
   // 2. Merge + Stempel (Pattern 6: Client-first fill)
   const updated = gardenToLocalRow(
     gardenId,
@@ -164,12 +171,18 @@ export async function removeMember(
 ): Promise<void> {
   assertAccount(mode);
   if (!(await isOnline())) throw new Error('offline_required');
-  const { error } = await supabase
-    .from('garden_members')
-    .delete()
-    .eq('garden_id', gardenId)
-    .eq('user_id', userId);
-  if (error) throw error;
+  // Phase 33: the member is marked as removed on the server instead of deleted, so the
+  // removal reaches the other device like any other change.
+  const { error } = await supabase.rpc('remove_garden_member', {
+    p_garden_id: gardenId,
+    p_user_id: userId,
+  });
+  if (error) {
+    if ((error as { code?: string }).code === '42501') throw new NotOwnerError(error);
+    throw error;
+  }
+  // The local member list follows at once; a failure here is repaired by the next sync.
+  getSyncWorker().pull('garden_members').catch(() => {});
 }
 
 export async function leaveGarden(

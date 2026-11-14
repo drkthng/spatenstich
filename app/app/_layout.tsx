@@ -16,6 +16,11 @@ import { ensureDefaultGardenForUser } from '@/src/lib/inviteCodeRepo';
 import { registerSyncTriggers } from '@/src/lib/sync/SyncTriggers';
 import { getSyncWorker } from '@/src/lib/sync/SyncWorker';
 import { repairNonUuidElementIds } from '@/src/lib/gardenPlanRepo';
+import { startRealtimeBridge } from '@/src/lib/sync/RealtimeBridge';
+import { syncEvents } from '@/src/lib/sync/events';
+import { ensureSyncScope, clearLocalAccountData } from '@/src/lib/sync/sessionCleanup';
+import { storage, runMigrations } from '@/src/storage';
+import { SyncToastHost } from '@/src/components/SyncToastHost';
 import {
   ServiceWorkerController,
   InstallPromptController,
@@ -88,53 +93,83 @@ function GuardedStack(): React.JSX.Element {
     }
   }, [identity, isLoading, segments, router, pendingRoute, setPendingRoute, clearPendingRoute]);
 
-  // Garden default resolution — ensure account-mode users have a garden
-  const gardenInFlight = React.useRef(false);
+  // Effects below follow the user id, not the identity object: a refreshed session
+  // creates a new object for the same person and must not restart everything.
+  const identityUserId = identity?.userId ?? null;
+  const storeUserId = useAuthStore((st) => st.userId);
+
+  // Garden default resolution — ensure account-mode users have a garden. Without a
+  // connection the server cannot be asked; it is tried again every few seconds until
+  // it works (Phase 33).
+  const [gardenRetry, setGardenRetry] = React.useState(0);
   React.useEffect(() => {
-    if (!identity || mode !== 'account' || activeGardenId || gardenInFlight.current)
-      return;
-    gardenInFlight.current = true;
+    if (!identityUserId || mode !== 'account' || activeGardenId) return;
     let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
     (async () => {
       try {
         const gardenId = await ensureDefaultGardenForUser();
         if (!cancelled) setActiveGarden(gardenId);
       } catch (e) {
         if (__DEV__) console.warn('ensureDefaultGardenForUser failed', e);
-      } finally {
-        gardenInFlight.current = false;
+        if (!cancelled) retryTimer = setTimeout(() => setGardenRetry((n) => n + 1), 8000);
       }
     })();
-    return () => { cancelled = true; };
-  }, [identity, mode, activeGardenId, setActiveGarden]);
+    return () => {
+      cancelled = true;
+      if (retryTimer) clearTimeout(retryTimer);
+    };
+  }, [identityUserId, mode, activeGardenId, setActiveGarden, gardenRetry]);
 
-  // Sync bootstrap — register triggers + initial pull
-  const syncBooted = React.useRef(false);
+  // Sync bootstrap — local schema, account scope, triggers, live connection, first sync.
   React.useEffect(() => {
-    if (syncBooted.current) return;
-    if (!identity || mode !== 'account' || !activeGardenId) return;
-    syncBooted.current = true;
+    if (!identityUserId || mode !== 'account' || !activeGardenId) return;
+    const userId = storeUserId ?? identityUserId;
+    let cancelled = false;
+    let stopRealtime: (() => void) | null = null;
     const unregister = registerSyncTriggers();
-    // Bug C data repair: re-id legacy non-UUID plan_elements (e.g. 'el-...' beds
-    // drawn before the UUID fix) BEFORE the initial sync, so the repaired rows
-    // enter the outbox and get pushed during syncAll(). Idempotent + account-only.
+
+    // Removed from the garden (or it was deleted): nothing of it stays on this device,
+    // and the garden resolution above finds or creates the next one.
+    const unsubscribe = syncEvents.on((evt) => {
+      if (cancelled || evt.type !== 'membership_lost' || evt.gardenId !== activeGardenId) return;
+      void clearLocalAccountData()
+        .catch(() => {})
+        .then(() => {
+          if (!cancelled) setActiveGarden(null);
+        });
+    });
+
     (async () => {
+      try {
+        await runMigrations(storage);
+        await ensureSyncScope(userId, activeGardenId);
+      } catch (e) {
+        if (__DEV__) console.warn('[layout] local storage preparation failed', e);
+      }
+      // Bug C data repair: re-id legacy non-UUID plan_elements BEFORE the initial sync,
+      // so the repaired rows enter the outbox and get pushed. Idempotent + account-only.
       try {
         await repairNonUuidElementIds(mode, activeGardenId);
       } catch (e) {
         if (__DEV__) console.warn('[layout] uuid repair failed', e);
       }
+      if (cancelled) return;
+      stopRealtime = startRealtimeBridge(activeGardenId);
       try {
         await getSyncWorker().syncAll();
       } catch (e) {
         if (__DEV__) console.warn('[layout] initial syncAll failed', e);
       }
     })();
+
     return () => {
+      cancelled = true;
       unregister();
-      syncBooted.current = false;
+      unsubscribe();
+      stopRealtime?.();
     };
-  }, [identity, mode, activeGardenId]);
+  }, [identityUserId, storeUserId, mode, activeGardenId, setActiveGarden]);
 
   return <Stack screenOptions={{ headerShown: false }} />;
 }
@@ -147,6 +182,7 @@ function RootLayoutInner(): React.JSX.Element {
       <InstallPromptController />
       <StorageController />
       <GuardedStack />
+      <SyncToastHost />
     </>
   );
 }

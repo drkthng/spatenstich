@@ -23,6 +23,8 @@ export interface RowBase {
   updatedAt: string;          // ISO-Timestamp — von LWW-Trigger auf Server gesetzt
   updatedByUserId: string | null; // von trigger mm_set_updated_by_user_id_* gesetzt
   deletedAt: string | null;   // Soft-Delete (D-16)
+  /** Server arrival time of the stored version (Phase 33). Absent on rows that were only written locally. */
+  serverUpdatedAt?: string | null;
 }
 
 export interface GardenRow extends RowBase {
@@ -236,11 +238,13 @@ export interface OutboxEntry {
   createdAt: string;           // ISO-Timestamp (lokale Zeit — nur FIFO-Relevanz)
   attempts: number;            // Backoff-Zähler
   lastError: string | null;    // Fehlertext des letzten Push-Versuchs
+  /** Earliest time for the next push attempt (Phase 33). Absent or null: any time. */
+  nextAttemptAt?: string | null;
 }
 
 /** Sync-State pro Entity — persistiert last_pull_at für Delta-Pull. */
 export interface SyncStateEntry {
   entity: EntityName;
-  lastPullAt: string | null;   // ISO-Timestamp vom server_now() RPC (Plan 03-01 Section 8)
+  lastPullAt: string | null;   // Pull cursor: the largest server_updated_at seen so far (Phase 33)
   lastPushAt: string | null;
 }

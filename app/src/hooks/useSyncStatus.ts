@@ -18,9 +18,14 @@ export interface SyncStatus {
   failedCount: number;
   /** True while a push/pull is actively running (from status_change event). */
   activelySyncing: boolean;
+  /** The live connection to the server is up (changes from the partner arrive at once). */
+  liveConnected: boolean;
 }
 
 const DEBOUNCE_MS = 300;
+
+// Remembered across mounts: the connection usually comes up before a screen that asks for it.
+let liveConnectedNow = false;
 
 /** An outbox entry is considered "failed" when max attempts have been exhausted and there is a lastError. */
 function isFailed(e: OutboxEntry): boolean {
@@ -31,6 +36,7 @@ export function useSyncStatus(): SyncStatus {
   const [pendingCount, setPendingCount] = useState(0);
   const [failedCount, setFailedCount] = useState(0);
   const [activelySyncing, setActivelySyncing] = useState(false);
+  const [liveConnected, setLiveConnected] = useState(liveConnectedNow);
   const [isConnected, setIsConnected] = useState<boolean>(true);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -77,6 +83,10 @@ export function useSyncStatus(): SyncStatus {
     })();
 
     const unsub = syncEvents.on((evt: SyncEvent) => {
+      if (evt.type === 'realtime_status') {
+        liveConnectedNow = evt.connected;
+        setLiveConnected(evt.connected);
+      }
       if (evt.type === 'status_change') {
         setActivelySyncing(evt.status === 'syncing');
       }
@@ -103,5 +113,5 @@ export function useSyncStatus(): SyncStatus {
     status = 'synced';
   }
 
-  return { status, pendingCount, failedCount, activelySyncing };
+  return { status, pendingCount, failedCount, activelySyncing, liveConnected };
 }

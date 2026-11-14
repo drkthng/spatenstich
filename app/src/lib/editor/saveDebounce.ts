@@ -136,6 +136,11 @@ export async function flushAllPendingSaves(
  * Used by the leave-flush guard to skip the synchronous beforeunload
  * path when there is nothing to flush.
  */
+/** A change to this element is on its way to storage (or failed to get there). */
+export function hasPendingSave(id: string): boolean {
+  return timers.has(id) || failed.has(id);
+}
+
 export function hasPendingSaves(): boolean {
   return timers.size > 0;
 }

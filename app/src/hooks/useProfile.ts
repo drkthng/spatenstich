@@ -1,16 +1,18 @@
-// useProfile — hook returning profile state + setters bound to profileRepo.
-// Loads persisted data on first mount; subsequent reads/writes go through profileStore + repo.
-// Pattern: 02-PATTERNS.md §"app/src/hooks/useProfile.ts" (analogous to useFlag.ts shape).
+// useProfile — postcode, climate zone, garden type and club rules for the screens.
 //
-// Bug-fix 2026-04-30: Also hydrate vereinsregeln from vereinsregelnRepo on mount
-// so that the profile overview reflects persisted rules without requiring the user
-// to navigate into the vereinsregeln screens first.
+// Phase 33 (SYNC3-06): with an account, postcode, climate zone and garden type belong
+// to the garden (gardens.plz / klimazone / archetype). Both members see the same
+// values, they survive a reload, and a sync that changes them shows here by itself.
+// Without an account they stay in the local profile.
+
 import { useEffect } from 'react';
 import type { Klimazone, Archetype } from '@spatenstich/shared';
 import { useProfileStore } from '../stores/profileStore';
 import { useAuthStore } from '../stores/authStore';
 import { loadProfile, saveProfile } from '../lib/profileRepo';
 import { loadVereinsregeln } from '../lib/vereinsregelnRepo';
+import { loadGarden, updateGarden } from '../lib/gardenRepo';
+import { useDataVersion } from '../lib/sync/dataVersion';
 
 export interface UseProfileValue {
   plz: string | null;
@@ -28,23 +30,39 @@ export function useProfile(): UseProfileValue {
   const vereinsregeln = useProfileStore((s) => s.vereinsregeln);
   const storeSetPlz = useProfileStore((s) => s.setPlz);
   const storeSetArchetype = useProfileStore((s) => s.setArchetype);
+  const mode = useAuthStore((s) => s.mode);
+  const userId = useAuthStore((s) => s.userId);
+  const activeGardenId = useAuthStore((s) => s.activeGardenId);
+  const gardenVersion = useDataVersion('gardens');
 
   useEffect(() => {
     let cancelled = false;
-    loadProfile()
-      .then((p) => {
-        if (cancelled || !p) return;
-        if (p.plz && p.klimazone != null) storeSetPlz(p.plz, p.klimazone);
-        if (p.archetype) storeSetArchetype(p.archetype);
-      })
-      .catch(() => {
-        // Silent — banners on the Profile screen surface the missing state.
-      });
-
-    // Hydrate vereinsregeln from the repo so the profile overview shows the
-    // correct count. Previously this was only loaded when the user navigated
-    // into the vereinsregeln screens.
-    const { mode, userId } = useAuthStore.getState();
+    if (mode === 'account') {
+      if (activeGardenId) {
+        loadGarden(mode, activeGardenId)
+          .then((garden) => {
+            if (cancelled || !garden) return;
+            useProfileStore.setState({
+              plz: garden.plz ?? null,
+              klimazone: garden.klimazone ?? null,
+              archetype: garden.archetype ?? null,
+            });
+          })
+          .catch(() => {
+            // Offline with nothing stored yet: the values appear after the first sync.
+          });
+      }
+    } else {
+      loadProfile()
+        .then((p) => {
+          if (cancelled || !p) return;
+          if (p.plz && p.klimazone != null) storeSetPlz(p.plz, p.klimazone);
+          if (p.archetype) storeSetArchetype(p.archetype);
+        })
+        .catch(() => {
+          // Storage not ready: the defaults stay.
+        });
+    }
     if (mode && userId) {
       loadVereinsregeln(mode, userId)
         .then((rules) => {
@@ -52,15 +70,13 @@ export function useProfile(): UseProfileValue {
           useProfileStore.getState().setVereinsregeln(rules);
         })
         .catch(() => {
-          // Silent — banner on profile screen surfaces missing state.
+          // No rules stored.
         });
     }
-
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [mode, userId, activeGardenId, gardenVersion, storeSetPlz, storeSetArchetype]);
 
   return {
     plz,
@@ -69,11 +85,19 @@ export function useProfile(): UseProfileValue {
     vereinsregeln,
     setPlz: async (nextPlz, nextKlimazone) => {
       storeSetPlz(nextPlz, nextKlimazone);
-      await saveProfile({ plz: nextPlz, klimazone: nextKlimazone });
+      if (mode === 'account' && activeGardenId && userId) {
+        await updateGarden(mode, activeGardenId, userId, { plz: nextPlz, klimazone: nextKlimazone });
+      } else {
+        await saveProfile({ plz: nextPlz, klimazone: nextKlimazone });
+      }
     },
     setArchetype: async (nextArchetype) => {
       storeSetArchetype(nextArchetype);
-      await saveProfile({ archetype: nextArchetype });
+      if (mode === 'account' && activeGardenId && userId) {
+        await updateGarden(mode, activeGardenId, userId, { archetype: nextArchetype });
+      } else {
+        await saveProfile({ archetype: nextArchetype });
+      }
     },
   };
 }

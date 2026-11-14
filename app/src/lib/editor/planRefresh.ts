@@ -2,6 +2,7 @@
 // underneath the editor (plan view, home preview) load it again when the editor closes.
 
 import * as React from 'react';
+import { useDataVersion } from '../sync/dataVersion';
 
 let version = 0;
 const listeners = new Set<() => void>();
@@ -18,11 +19,17 @@ function subscribe(listener: () => void): () => void {
   };
 }
 
-/** Changes whenever the stored plan was changed by the editor; use it as an effect dependency. */
+/**
+ * Changes whenever the stored plan changed: through the editor on this device, or
+ * through a sync that brought someone else's changes (Phase 33). Use it as an effect
+ * dependency.
+ */
 export function usePlanVersion(): number {
-  return React.useSyncExternalStore(
+  const local = React.useSyncExternalStore(
     subscribe,
     () => version,
     () => version,
   );
+  const synced = useDataVersion('plan_elements', 'garden_dimensions');
+  return local + synced;
 }
