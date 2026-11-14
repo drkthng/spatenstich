@@ -67,9 +67,13 @@ describe('editorStore > gesturePause (D-22, Pattern 11)', () => {
       useEditorStore.getState().updateElement('e1', { xM: i * 0.1 });
     }
     useEditorStore.getState().setGestureActive(false);
-    useEditorStore.getState().updateElement('e1', { xM: 3 });
     const after = useEditorStore.temporal.getState().pastStates.length;
+    // Phase 31: the whole drag is exactly one undo step ...
     expect(after - before).toBe(1);
+    // ... and undoing it restores the position from before the drag.
+    const startX = makeEl('e1').xM;
+    useEditorStore.temporal.getState().undo();
+    expect(useEditorStore.getState().elements[0].xM).toBe(startX);
   });
 
   it('zundo.temporal.getState().pause is invoked on gestureActive=true', () => {

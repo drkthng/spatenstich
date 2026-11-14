@@ -87,6 +87,7 @@ describe('editorStore > gestureCommitPersist — Move/Resize/Rotate → persist 
     expect(mockSchedule).toHaveBeenCalledWith(
       'account',
       expect.objectContaining({ id: 'e1', xM: 5, yM: 4 }),
+      0,
     );
 
     // In-memory state also correct
@@ -116,6 +117,7 @@ describe('editorStore > gestureCommitPersist — Move/Resize/Rotate → persist 
         heightM: 2,
         provenance: expect.objectContaining({ rotateDeg: 45 }),
       }),
+      0,
     );
   });
 

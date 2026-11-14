@@ -17,22 +17,89 @@ import { writePlanElement } from '../gardenPlanRepo';
 const timers = new Map<string, ReturnType<typeof setTimeout>>();
 const EDITOR_SAVE_DELAY_MS = 5_000;
 
-/** Schedule a per-element 5s autosave. Subsequent calls for the same id reset the timer. */
-export function scheduleSaveElement(mode: AuthMode, el: PlanElementRow): void {
+// ── save state (Phase 31, EDIT3-18) ─────────────────────────────────────────
+// What the editor shows: "saving" while a write is waiting or running, "error" when the last
+// write of some element failed, otherwise "saved".
+export type SaveState = 'saved' | 'saving' | 'error';
+
+let inFlight = 0;
+/** Elements whose last write failed; retried with the next save or on request. */
+const failed = new Map<string, { mode: AuthMode; el: PlanElementRow }>();
+const stateListeners = new Set<() => void>();
+
+function emitSaveState(): void {
+  for (const listener of stateListeners) listener();
+}
+
+export function getSaveState(): SaveState {
+  if (timers.size > 0 || inFlight > 0) return 'saving';
+  return failed.size > 0 ? 'error' : 'saved';
+}
+
+export function subscribeSaveState(listener: () => void): () => void {
+  stateListeners.add(listener);
+  return () => {
+    stateListeners.delete(listener);
+  };
+}
+
+function runWrite(mode: AuthMode, el: PlanElementRow): Promise<void> {
+  inFlight += 1;
+  emitSaveState();
+  return writePlanElement(mode, el)
+    .then(() => {
+      failed.delete(el.id);
+    })
+    .catch((e) => {
+      failed.set(el.id, { mode, el });
+      if (typeof __DEV__ !== 'undefined' && __DEV__) {
+        console.warn('[editorSave] autosave failed', el.id, e);
+      }
+    })
+    .finally(() => {
+      inFlight -= 1;
+      emitSaveState();
+    });
+}
+
+/** Write again what could not be written (used by the "Nicht gespeichert" indicator). */
+export function retryFailedSaves(): void {
+  const entries = Array.from(failed.values());
+  for (const { mode, el } of entries) void runWrite(mode, el);
+}
+
+/**
+ * Schedule an autosave for one element. Later calls for the same id replace the earlier one.
+ * `delayMs` defaults to 5 s (the original editor debounce); the editor store passes 0 for
+ * changes that are complete (end of a drag, delete, undo) and a short delay while typing.
+ */
+export function scheduleSaveElement(
+  mode: AuthMode,
+  el: PlanElementRow,
+  delayMs: number = EDITOR_SAVE_DELAY_MS,
+): void {
   const existing = timers.get(el.id);
   if (existing) clearTimeout(existing);
+  if (delayMs <= 0) {
+    timers.delete(el.id);
+    void runWrite(mode, el);
+    return;
+  }
   timers.set(
     el.id,
     setTimeout(() => {
       timers.delete(el.id);
-      writePlanElement(mode, el).catch((e) => {
-        if (typeof __DEV__ !== 'undefined' && __DEV__) {
-          // eslint-disable-next-line no-console
-          console.warn('[editorSave] autosave failed', el.id, e);
-        }
-      });
-    }, EDITOR_SAVE_DELAY_MS),
+      void runWrite(mode, el);
+    }, delayMs),
   );
+  emitSaveState();
+}
+
+/** Drop a waiting save for an element (its newer state is written another way). */
+export function cancelSaveElement(id: string): void {
+  const existing = timers.get(id);
+  if (existing) clearTimeout(existing);
+  if (timers.delete(id)) emitSaveState();
 }
 
 /**
@@ -49,12 +116,19 @@ export async function flushAllPendingSaves(
     if (t) clearTimeout(t);
     timers.delete(id);
   }
-  await Promise.all(
-    ids.map(async (id) => {
-      const el = byId(id);
-      if (el) await writePlanElement(mode, el);
-    }),
-  );
+  inFlight += 1;
+  emitSaveState();
+  try {
+    await Promise.all(
+      ids.map(async (id) => {
+        const el = byId(id);
+        if (el) await writePlanElement(mode, el);
+      }),
+    );
+  } finally {
+    inFlight -= 1;
+    emitSaveState();
+  }
 }
 
 /**
@@ -89,4 +163,6 @@ export async function flushOnLeave(
 export function _resetEditorSaveTimers(): void {
   for (const t of timers.values()) clearTimeout(t);
   timers.clear();
+  failed.clear();
+  inFlight = 0;
 }

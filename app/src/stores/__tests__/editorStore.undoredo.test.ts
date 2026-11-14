@@ -82,21 +82,21 @@ describe('editorStore.temporal > undo/redo basics (EDIT-11)', () => {
   });
 });
 
-describe('editorStore.temporal > 20-step limit (EDIT-11)', () => {
-  it('after 25 addElement mutations, pastStates.length === 20 (oldest 5 are dropped)', () => {
-    for (let i = 1; i <= 25; i += 1) {
+describe('editorStore.temporal > 100-step limit (EDIT3-11)', () => {
+  it('after 105 addElement mutations, pastStates.length === 100 (oldest 5 are dropped)', () => {
+    for (let i = 1; i <= 105; i += 1) {
       useEditorStore.getState().addElement(makeEl(`e${i}`));
     }
-    expect(useEditorStore.temporal.getState().pastStates.length).toBe(20);
+    expect(useEditorStore.temporal.getState().pastStates.length).toBe(100);
   });
 
-  it('after 25 mutations and 20 undos, restored state matches state after mutation 5 (not mutation 0)', () => {
-    for (let i = 1; i <= 25; i += 1) {
+  it('after 105 mutations and 100 undos, restored state matches state after mutation 5 (not mutation 0)', () => {
+    for (let i = 1; i <= 105; i += 1) {
       useEditorStore.getState().addElement(makeEl(`e${i}`));
     }
-    // Undo all 20 available snapshots. We end up at the state captured when the oldest
+    // Undo all 100 available snapshots. We end up at the state captured when the oldest
     // remaining past-snapshot was taken — which corresponds to the state after mutation 5.
-    for (let i = 0; i < 20; i += 1) {
+    for (let i = 0; i < 100; i += 1) {
       useEditorStore.temporal.getState().undo();
     }
     const ids = useEditorStore.getState().elements.map((e) => e.id);

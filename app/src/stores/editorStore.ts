@@ -15,6 +15,12 @@ import type { PlanElementRow } from '@spatenstich/shared';
 import { polygonToBbox, type Point2D } from '../lib/geometry/bedLayout';
 import { useAuthStore } from './authStore';
 import { scheduleSaveElement } from '../lib/editor/saveDebounce';
+import { getZOrder } from '../lib/editor/zOrder';
+
+/** Undo steps kept (EDIT3-11). */
+const HISTORY_LIMIT = 100;
+/** Delay before a change made by typing is written; finished changes are written at once. */
+const TYPING_SAVE_DELAY_MS = 300;
 
 export interface EditorState {
   // History-tracked
@@ -39,6 +45,29 @@ export interface EditorState {
   editingElementId: string | null;
 
   // Actions
+  /**
+   * Phase 31 (WP 21.3): put a loaded plan into the editor. Writes nothing, leaves no undo
+   * step, clears the selection.
+   */
+  hydrate: (elements: PlanElementRow[]) => void;
+  /**
+   * Bracket several changes into one undo step (typing in a field, a burst of arrow keys).
+   * Saving continues as usual. Gestures do this themselves through setGestureActive.
+   */
+  beginHistoryStep: () => void;
+  endHistoryStep: () => void;
+  /** Soft-deletes every selected element as one undo step; returns the deleted ids. */
+  deleteSelected: () => string[];
+  /** Brings soft-deleted elements back (the "Rückgängig" hint after a delete). */
+  restoreElements: (ids: string[]) => void;
+  /** Copies the selected elements, offset a little, on top; the copies become the selection. */
+  duplicateSelected: (
+    makeId: () => string,
+    garden: { widthM: number; heightM: number },
+    offsetM?: number,
+  ) => void;
+  /** Moves the selected elements above or below everything else. */
+  reorderSelected: (to: 'front' | 'back') => void;
   addElement: (el: PlanElementRow) => void;
   updateElement: (id: string, patch: Partial<PlanElementRow>) => void;
   deleteElement: (id: string) => void;
@@ -92,6 +121,106 @@ export const useEditorStore = create<EditorState>()(
       polygonInProgress: null,
       gestureActive: false,
       editingElementId: null,
+
+      hydrate: (elements) => {
+        hydrating = true;
+        try {
+          const temporalState = useEditorStore.temporal.getState();
+          temporalState.pause();
+          set({ elements, selection: null, selectedIds: [], editingElementId: null });
+          temporalState.resume();
+          temporalState.clear();
+        } finally {
+          hydrating = false;
+        }
+      },
+
+      beginHistoryStep: () => beginStep(),
+      endHistoryStep: () => endStep(),
+
+      deleteSelected: () => {
+        const { selectedIds, elements } = get();
+        const ids = selectedIds.filter((id) =>
+          elements.some((e) => e.id === id && e.deletedAt === null),
+        );
+        if (ids.length === 0) return [];
+        const now = nowIso();
+        set((s) => ({
+          elements: s.elements.map((e) =>
+            ids.includes(e.id) ? { ...e, deletedAt: now, updatedAt: now } : e,
+          ),
+          selection: null,
+          selectedIds: [],
+        }));
+        return ids;
+      },
+
+      restoreElements: (ids) => {
+        if (ids.length === 0) return;
+        const now = nowIso();
+        set((s) => ({
+          elements: s.elements.map((e) =>
+            ids.includes(e.id) && e.deletedAt !== null
+              ? { ...e, deletedAt: null, updatedAt: now }
+              : e,
+          ),
+        }));
+      },
+
+      duplicateSelected: (makeId, garden, offsetM = 0.5) => {
+        const { selectedIds, elements } = get();
+        const originals = elements.filter(
+          (e) => selectedIds.includes(e.id) && e.deletedAt === null,
+        );
+        if (originals.length === 0) return;
+        const now = nowIso();
+        let top = Math.max(0, ...elements.filter((e) => e.deletedAt === null).map(getZOrder));
+        const copies = originals.map((e) => {
+          top += 1;
+          return {
+            ...e,
+            id: makeId(),
+            xM: Math.min(garden.widthM, e.xM + offsetM),
+            yM: Math.min(garden.heightM, e.yM + offsetM),
+            createdAt: now,
+            updatedAt: now,
+            importedFrom: null,
+            provenance: { ...(e.provenance ?? {}), zOrder: top },
+          };
+        });
+        const ids = copies.map((c) => c.id);
+        set((s) => ({
+          elements: [...s.elements, ...copies],
+          selectedIds: ids,
+          selection: ids[ids.length - 1] ?? null,
+        }));
+      },
+
+      reorderSelected: (to) => {
+        const { selectedIds, elements } = get();
+        const live = elements.filter((e) => e.deletedAt === null);
+        const chosen = live
+          .filter((e) => selectedIds.includes(e.id))
+          .sort((a, b) => getZOrder(a) - getZOrder(b));
+        if (chosen.length === 0) return;
+        const others = live.filter((e) => !selectedIds.includes(e.id)).map(getZOrder);
+        const now = nowIso();
+        const next = new Map<string, number>();
+        if (to === 'front') {
+          let z = others.length > 0 ? Math.max(...others) : 0;
+          for (const e of chosen) next.set(e.id, (z += 1));
+        } else {
+          let z = (others.length > 0 ? Math.min(...others) : 0) - chosen.length - 1;
+          for (const e of chosen) next.set(e.id, (z += 1));
+        }
+        set((s) => ({
+          elements: s.elements.map((e) =>
+            next.has(e.id)
+              ? { ...e, updatedAt: now, provenance: { ...(e.provenance ?? {}), zOrder: next.get(e.id) } }
+              : e,
+          ),
+        }));
+      },
 
       addElement: (el) => set((s) => ({ elements: [...s.elements, el] })),
 
@@ -199,7 +328,7 @@ export const useEditorStore = create<EditorState>()(
         set({ polygonInProgress: null, tool: 'select' }),
     }),
     {
-      limit: 20, // EDIT-11
+      limit: HISTORY_LIMIT, // EDIT3-11
       // editingElementId NOT in partialize: opening modal must not be in undo history (T-09.1-MODAL-ESC).
       partialize: (state) => ({ elements: state.elements }), // Pitfall-3
       equality: (a, b) => a.elements === b.elements, // shallow ref dedup
@@ -229,39 +358,64 @@ export const useEditorStore = create<EditorState>()(
   });
 }
 
-// Phase 09.1: pause zundo during active gestures so handle drags don't spam
-// the 20-step history. One final updateElement after gesture end captures one snapshot.
-// T-09.1-RESUME-LEAK mitigation: resume is called synchronously on gestureActive=false.
+// ── history steps and saving (Phase 31: EDIT3-11, EDIT3-18, Masterplan WP 21.3) ────
 //
-// Quick-260611-l5y: Gesture-end flush.
-// Problem: updateElement runs DURING gesture (gestureActive=true) → autosave bails (Pitfall-5).
-//   On release only setGestureActive(false) is called — elements ref is unchanged in that set-call
-//   → autosave bails again (elements===prev.elements). Move is never persisted.
-// Fix: snapshot elements when gesture starts; on gesture end, diff against snapshot and call
-//   scheduleSaveElement for every element whose reference changed (i.e. was updated during drag).
-//   Uses ONLY the existing scheduleSaveElement → writePlanElement → writeWithOutbox path. No new
-//   persistence mechanism.
+// History: a step that spans several store updates (a drag, typing in a field, a burst of
+// arrow keys) is recorded as ONE undo step that restores the state before it began. Tracking
+// is paused while the step runs and the state from its start is pushed when it ends.
+//
+// Saving: every change is written through scheduleSaveElement -> writePlanElement -> outbox.
+//   - during a gesture nothing is written; at its end every changed element is written at once
+//   - other changes are written after a short delay, so typing does not write per keystroke
+//   - an element that disappears from the list (undo of an add) is written as deleted, so it
+//     does not come back after a reload
+//   - hydrate() writes nothing
+
+let hydrating = false;
+let stepDepth = 0;
+let stepStartElements: PlanElementRow[] | null = null;
+
+function beginStep(): void {
+  stepDepth += 1;
+  if (stepDepth > 1) return;
+  stepStartElements = useEditorStore.getState().elements;
+  useEditorStore.temporal.getState().pause();
+}
+
+function endStep(): void {
+  if (stepDepth === 0) return;
+  stepDepth -= 1;
+  if (stepDepth > 0) return;
+  const start = stepStartElements;
+  stepStartElements = null;
+  const temporalStore = useEditorStore.temporal;
+  temporalStore.getState().resume();
+  if (start !== null && start !== useEditorStore.getState().elements) {
+    const past = [...temporalStore.getState().pastStates, { elements: start }];
+    temporalStore.setState({ pastStates: past.slice(-HISTORY_LIMIT), futureStates: [] });
+  }
+}
+
 let gestureStartElements: PlanElementRow[] | null = null;
 
 useEditorStore.subscribe((state, prev) => {
   if (state.gestureActive && !prev.gestureActive) {
-    // Gesture start: freeze snapshot for later diff
+    // Gesture start: remember the elements for the save at the end, open one history step.
     gestureStartElements = prev.elements;
-    useEditorStore.temporal.getState().pause();
+    beginStep();
   } else if (!state.gestureActive && prev.gestureActive) {
-    // Gesture end: flush elements changed during the gesture
     const snapshot = gestureStartElements;
     gestureStartElements = null;
-    useEditorStore.temporal.getState().resume();
+    endStep();
 
     if (snapshot !== null) {
       const mode = useAuthStore.getState().mode;
       if (mode === 'account') {
         for (const el of state.elements) {
           const snapEl = snapshot.find((s) => s.id === el.id);
-          // Flush if element is new or its reference changed (i.e. it was updated)
+          // Write every element that is new or was changed during the gesture, at once.
           if (!snapEl || snapEl !== el) {
-            scheduleSaveElement(mode, el);
+            scheduleSaveElement(mode, el, 0);
           }
         }
       }
@@ -269,16 +423,31 @@ useEditorStore.subscribe((state, prev) => {
   }
 });
 
-// Auto-save subscription (Pitfall-5: skip during active gesture; account-only).
+// Autosave for everything outside gestures (account-only).
 useEditorStore.subscribe((state, prev) => {
+  if (hydrating) return;
   if (state.gestureActive) return;
   if (state.elements === prev.elements) return;
   const mode = useAuthStore.getState().mode;
   if (mode !== 'account') return; // drafts/elements are account-only
+  const present = new Set<string>();
   for (const el of state.elements) {
+    present.add(el.id);
     const prevEl = prev.elements.find((p) => p.id === el.id);
-    if (!prevEl || prevEl !== el) {
-      scheduleSaveElement(mode, el);
+    if (!prevEl) {
+      // New, or back again after a redo: write at once.
+      scheduleSaveElement(mode, el, 0);
+    } else if (prevEl !== el) {
+      // Written at once, unless it is part of an open history step (typing in a field,
+      // arrow keys), where a short delay avoids one write per keystroke.
+      scheduleSaveElement(mode, el, stepDepth === 0 ? 0 : TYPING_SAVE_DELAY_MS);
+    }
+  }
+  // Gone from the list (undo of an add): store it as deleted so a reload does not bring it back.
+  const now = nowIso();
+  for (const prevEl of prev.elements) {
+    if (!present.has(prevEl.id) && prevEl.deletedAt === null) {
+      scheduleSaveElement(mode, { ...prevEl, deletedAt: now, updatedAt: now }, 0);
     }
   }
 });

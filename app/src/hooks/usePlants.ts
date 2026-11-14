@@ -53,7 +53,12 @@ function initialDataFromBundle(): PlantRow[] {
 export function usePlants() {
   return useQuery({
     queryKey: QUERY_KEY,
-    queryFn: loadAllPlants,
+    // An empty answer (not signed in yet, or a backend without the plant rows) must not
+    // wipe out the plants shipped with the app.
+    queryFn: async () => {
+      const rows = await loadAllPlants();
+      return rows.length > 0 ? rows : initialDataFromBundle();
+    },
     initialData: initialDataFromBundle,           // Synchronous instant data
     initialDataUpdatedAt: 0,                       // Pitfall 2: force background refetch
     staleTime: 1000 * 60 * 60 * 24,                // 24h (D-10)

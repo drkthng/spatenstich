@@ -194,3 +194,39 @@ export function rotationFromPointer(box: Box, xM: number, yM: number): number {
   const deg = (Math.atan2(yM - box.yM, xM - box.xM) * 180) / Math.PI + 90;
   return normalizeDeg(deg);
 }
+
+/** Axis-aligned bounds of a (possibly rotated) box, in metres. */
+export function boxBounds(box: Box): { minX: number; minY: number; maxX: number; maxY: number } {
+  const { c, s } = trig(box.rotateDeg);
+  const halfW = (Math.abs(c) * box.widthM + Math.abs(s) * box.heightM) / 2;
+  const halfH = (Math.abs(s) * box.widthM + Math.abs(c) * box.heightM) / 2;
+  return { minX: box.xM - halfW, minY: box.yM - halfH, maxX: box.xM + halfW, maxY: box.yM + halfH };
+}
+
+/** True when the box's bounds touch the rectangle (selection frame). */
+export function boxTouchesRect(
+  box: Box,
+  rect: { minX: number; minY: number; maxX: number; maxY: number },
+): boolean {
+  const b = boxBounds(box);
+  return b.minX <= rect.maxX && b.maxX >= rect.minX && b.minY <= rect.maxY && b.maxY >= rect.minY;
+}
+
+/**
+ * Limit a move of several elements so that every centre stays inside the parcel (D-06).
+ * Returns the delta that can be applied to all of them.
+ */
+export function clampGroupDelta(
+  centres: { xM: number; yM: number }[],
+  dxM: number,
+  dyM: number,
+  garden: GardenSize,
+): { dxM: number; dyM: number } {
+  let dx = dxM;
+  let dy = dyM;
+  for (const c of centres) {
+    dx = Math.min(garden.widthM - c.xM, Math.max(-c.xM, dx));
+    dy = Math.min(garden.heightM - c.yM, Math.max(-c.yM, dy));
+  }
+  return { dxM: dx, dyM: dy };
+}

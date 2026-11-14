@@ -112,6 +112,7 @@ describe('editorStore > updateElement (drag-in-progress vs commit) — Pitfall-5
     expect(mockSchedule).toHaveBeenCalledWith(
       'account',
       expect.objectContaining({ id: 'e1', xM: 7 }),
+      0,
     );
   });
 

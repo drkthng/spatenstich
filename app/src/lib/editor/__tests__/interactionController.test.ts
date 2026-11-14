@@ -40,11 +40,18 @@ interface Harness {
   ctrl: InteractionController;
   state: {
     elements: PlanElementRow[];
-    selection: string | null;
+    selectedIds: string[];
+    /** The single selected id, or the last one of several; null when nothing is selected. */
+    readonly selection: string | null;
     vp: Viewport;
     mode: 'edit' | 'readOnly';
     gestureLog: boolean[];
     renames: string[];
+    multi: boolean;
+    placing: { widthM: number; heightM: number } | null;
+    ghost: { xM: number; yM: number } | null;
+    placed: { xM: number; yM: number }[];
+    marquee: ({ x0: number; y0: number; x1: number; y1: number } | null)[];
   };
   el: (id: string) => PlanElementRow;
 }
@@ -54,22 +61,31 @@ interface Harness {
 function harness(elements: PlanElementRow[] = [makeEl('a')], mode: 'edit' | 'readOnly' = 'edit'): Harness {
   const state: Harness['state'] = {
     elements,
-    selection: null,
+    selectedIds: [],
+    get selection() {
+      return this.selectedIds[this.selectedIds.length - 1] ?? null;
+    },
     vp: { tx: 0, ty: 0, scale: 50 },
     mode,
     gestureLog: [],
     renames: [],
+    multi: false,
+    placing: null,
+    ghost: null,
+    placed: [],
+    marquee: [],
   };
   const port: ControllerPort = {
     mode: () => state.mode,
     elements: () => state.elements,
-    selection: () => state.selection,
+    selectedIds: () => state.selectedIds,
+    multiSelect: () => state.multi,
     viewport: () => state.vp,
     garden: () => ({ widthM: 12, heightM: 13 }),
     canvas: () => ({ width: 400, height: 600 }),
     fitScale: () => 30,
-    setSelection: (id) => {
-      state.selection = id;
+    setSelectedIds: (ids) => {
+      state.selectedIds = ids;
     },
     updateElement: (id, patch) => {
       state.elements = state.elements.map((e) => (e.id === id ? { ...e, ...patch } : e));
@@ -82,6 +98,17 @@ function harness(elements: PlanElementRow[] = [makeEl('a')], mode: 'edit' | 'rea
     },
     startRename: (id) => {
       state.renames.push(id);
+    },
+    placing: () => state.placing,
+    ghost: () => state.ghost,
+    setGhost: (pos) => {
+      state.ghost = pos;
+    },
+    commitPlacement: (pos) => {
+      state.placed.push(pos);
+    },
+    setMarquee: (rect) => {
+      state.marquee.push(rect);
     },
   };
   return {
@@ -229,12 +256,10 @@ describe('mouse: move at once (D-02) and panning (D-03)', () => {
     expect(h.state.selection).toBeNull();
   });
 
-  it('Shift+drag on empty plan is reserved and does nothing', () => {
+  it('Shift+drag on empty plan never pans (it draws the selection frame)', () => {
     const h = harness();
-    tap(h, 100, 100, 'mouse');
-    drag(h, [300, 400], [200, 300], 'mouse', { shift: true });
+    drag(h, [300, 400], [320, 420], 'mouse', { shift: true });
     expect(h.state.vp).toEqual({ tx: 0, ty: 0, scale: 50 });
-    expect(h.state.selection).toBe('a');
   });
 
   it('the middle button pans even over an element and does not select it', () => {
@@ -480,5 +505,179 @@ describe('interrupted gestures', () => {
     expect(h.state.gestureLog.filter((g) => g).length).toBe(
       h.state.gestureLog.filter((g) => !g).length,
     );
+  });
+});
+
+// ── Phase 31 ──────────────────────────────────────────────────────────────
+
+describe('several elements (EDIT3-10)', () => {
+  const three = () => [makeEl('a'), makeEl('b', { xM: 6, yM: 2 }), makeEl('c', { xM: 6, yM: 6 })];
+
+  it('mouse: Shift+click adds and removes elements', () => {
+    const h = harness(three());
+    tap(h, 100, 100, 'mouse');
+    tap(h, 300, 100, 'mouse', { shift: true });
+    expect(h.state.selectedIds).toEqual(['a', 'b']);
+    tap(h, 100, 100, 'mouse', { shift: true });
+    expect(h.state.selectedIds).toEqual(['b']);
+  });
+
+  it('mouse: Shift+drag on an element does not move it', () => {
+    const h = harness(three());
+    drag(h, [100, 100], [160, 100], 'mouse', { shift: true });
+    expect(h.el('a').xM).toBe(2);
+  });
+
+  it('mouse: dragging one of several selected elements moves all of them', () => {
+    const h = harness(three());
+    tap(h, 100, 100, 'mouse');
+    tap(h, 300, 100, 'mouse', { shift: true });
+    drag(h, [300, 100], [350, 150], 'mouse');
+    expect(h.el('a').xM).toBeCloseTo(3, 5);
+    expect(h.el('a').yM).toBeCloseTo(3, 5);
+    expect(h.el('b').xM).toBeCloseTo(7, 5);
+    expect(h.el('b').yM).toBeCloseTo(3, 5);
+    expect(h.el('c').xM).toBe(6);
+    expect(h.state.selectedIds).toEqual(['a', 'b']);
+    expect(h.state.gestureLog).toEqual([true, false]);
+  });
+
+  it('mouse: a plain click on one of several selected elements selects it alone', () => {
+    const h = harness(three());
+    tap(h, 100, 100, 'mouse');
+    tap(h, 300, 100, 'mouse', { shift: true });
+    tap(h, 300, 100, 'mouse');
+    expect(h.state.selectedIds).toEqual(['b']);
+  });
+
+  it('a group stops as a whole when one of its centres reaches the parcel edge', () => {
+    const h = harness(three());
+    tap(h, 100, 100, 'mouse');
+    tap(h, 300, 100, 'mouse', { shift: true });
+    // 'a' is 2 m from the left edge, 'b' 6 m: the group can go 2 m left, not more.
+    drag(h, [300, 100], [-100, 100], 'mouse');
+    expect(h.el('a').xM).toBe(0);
+    expect(h.el('b').xM).toBeCloseTo(4, 5);
+  });
+
+  it('with several selected, handles are not grabbed', () => {
+    const h = harness(three());
+    tap(h, 100, 100, 'mouse');
+    tap(h, 300, 100, 'mouse', { shift: true });
+    // Where the east handle of 'a' would be if it were selected alone.
+    drag(h, [152, 100], [202, 100], 'mouse');
+    expect(h.el('a').widthM).toBe(2);
+  });
+
+  it('mouse: Shift+drag on empty plan selects what the frame touches', () => {
+    const h = harness(three());
+    // From (20,20) to (330,160) px = 0.4…6.6 m by 0.4…3.2 m: touches 'a' and 'b', not 'c'.
+    drag(h, [20, 20], [330, 160], 'mouse', { shift: true });
+    expect([...h.state.selectedIds].sort()).toEqual(['a', 'b']);
+    expect(h.state.marquee[0]).toEqual(expect.objectContaining({ x0: 20, y0: 20 }));
+    expect(h.state.marquee[h.state.marquee.length - 1]).toBeNull();
+    expect(h.state.vp).toEqual({ tx: 0, ty: 0, scale: 50 });
+    expect(h.state.gestureLog).toEqual([]);
+  });
+
+  it('touch with "Mehrere" on: taps add and remove, dragging a selected one moves all', () => {
+    const h = harness(three());
+    h.state.multi = true;
+    tap(h, 100, 100, 'touch');
+    tap(h, 300, 100, 'touch');
+    expect(h.state.selectedIds).toEqual(['a', 'b']);
+    drag(h, [100, 100], [150, 100], 'touch');
+    expect(h.el('a').xM).toBeCloseTo(3, 5);
+    expect(h.el('b').xM).toBeCloseTo(7, 5);
+    tap(h, 350, 100, 'touch');
+    expect(h.state.selectedIds).toEqual(['a']);
+  });
+
+  it('touch with "Mehrere" on: dragging an unselected element still pans', () => {
+    const h = harness(three());
+    h.state.multi = true;
+    tap(h, 100, 100, 'touch');
+    drag(h, [300, 300], [320, 300], 'touch');
+    expect(h.state.vp.tx).toBe(20);
+    expect(h.el('c').xM).toBe(6);
+  });
+
+  it('a cancelled group move puts every element back', () => {
+    const h = harness(three());
+    tap(h, 100, 100, 'mouse');
+    tap(h, 300, 100, 'mouse', { shift: true });
+    drag(h, [300, 100], [350, 150], 'mouse', {}, false);
+    h.ctrl.handle(sample('cancel', 350, 150, 'mouse'));
+    expect(h.el('a').xM).toBe(2);
+    expect(h.el('b').xM).toBe(6);
+    expect(h.el('b').yM).toBe(2);
+  });
+});
+
+describe('placing with a preview (EDIT3-09)', () => {
+  const placing = { widthM: 2, heightM: 1 };
+
+  it('mouse: the preview follows the cursor on the 5 cm step', () => {
+    const h = harness();
+    h.state.placing = placing;
+    h.ctrl.hover(301, 252);
+    // Left edge at 6.02 - 1 = 5.02 lands on 5.00; top edge at 5.04 - 0.5 = 4.54 on 4.55.
+    expect(h.state.ghost!.xM).toBeCloseTo(6, 5);
+    expect(h.state.ghost!.yM).toBeCloseTo(5.05, 5);
+    expect(h.state.placed).toEqual([]);
+  });
+
+  it('mouse: a click sets the element there, even on top of another element', () => {
+    const h = harness();
+    h.state.placing = placing;
+    tap(h, 100, 100, 'mouse');
+    expect(h.state.placed).toEqual([{ xM: 2, yM: 2 }]);
+    expect(h.state.selectedIds).toEqual([]);
+  });
+
+  it('touch: a tap moves the preview and sets nothing', () => {
+    const h = harness();
+    h.state.placing = placing;
+    tap(h, 300, 250, 'touch');
+    expect(h.state.ghost).toEqual({ xM: 6, yM: 5 });
+    expect(h.state.placed).toEqual([]);
+  });
+
+  it('touch: the preview can be dragged; dragging elsewhere pans', () => {
+    const h = harness();
+    h.state.placing = placing;
+    tap(h, 300, 250, 'touch');
+    drag(h, [300, 250], [350, 300], 'touch');
+    expect(h.state.ghost!.xM).toBeCloseTo(7, 5);
+    expect(h.state.ghost!.yM).toBeCloseTo(6, 5);
+    expect(h.state.vp.tx).toBe(0);
+    drag(h, [50, 500], [70, 520], 'touch');
+    expect(h.state.vp).toEqual({ tx: 20, ty: 20, scale: 50 });
+    expect(h.state.ghost!.xM).toBeCloseTo(7, 5);
+  });
+
+  it('the preview stays inside the parcel', () => {
+    const h = harness();
+    h.state.placing = placing;
+    h.ctrl.hover(-500, 100000);
+    expect(h.state.ghost).toEqual({ xM: 0, yM: 13 });
+  });
+
+  it('while placing nothing is selected, moved or renamed', () => {
+    const h = harness();
+    h.state.placing = placing;
+    drag(h, [100, 100], [160, 100], 'mouse');
+    tap(h, 100, 100, 'touch');
+    tap(h, 100, 100, 'touch');
+    expect(h.el('a').xM).toBe(2);
+    expect(h.state.selectedIds).toEqual([]);
+    expect(h.state.renames).toEqual([]);
+    expect(h.state.gestureLog).toEqual([]);
+  });
+
+  it('without placing, hovering does nothing', () => {
+    const h = harness();
+    h.ctrl.hover(300, 300);
+    expect(h.state.ghost).toBeNull();
   });
 });

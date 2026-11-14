@@ -1,26 +1,36 @@
-// Phase 30: the plan editor's gesture logic, free of any DOM so it can be tested without a
-// browser (PROJECT D-03, EDIT3-19). The web adapter in `PlanEditor.tsx` turns pointer and
-// wheel events into `PointerSample`s; this controller decides what they mean and tells the
-// host what to change through `ControllerPort`.
+// The plan editor's gesture logic, free of any DOM so it can be tested without a browser
+// (PROJECT D-03, EDIT3-19). The web adapter in `PlanEditor.tsx` turns pointer and wheel events
+// into `PointerSample`s; this controller decides what they mean and tells the host what to
+// change through `ControllerPort`.
 //
-// Rules implemented here (30-CONTEXT.md):
+// Rules from Phase 30 (30-CONTEXT.md):
 //   D-01  Touch is select-first: a tap selects; a one-finger drag moves an element only when
-//         it starts on the already selected element or one of its handles; any other
+//         it starts on an already selected element or one of its handles; any other
 //         one-finger drag pans. A tap on empty plan deselects.
 //   D-02  Mouse: pressing on an element selects it and moves it in the same drag.
-//   D-03  Mouse pan: drag on empty plan; middle button or Space+drag anywhere. Shift+drag on
-//         empty plan is reserved for the Phase 31 selection frame and does nothing here.
+//   D-03  Mouse pan: drag on empty plan; middle button or Space+drag anywhere.
 //   D-04  Rotation handle: 15° steps; Shift turns freely with the mouse.
 //   D-05  Move and resize land on a 5 cm step.
 //   D-06  An element's centre stays inside the parcel.
-//   D-12/EDIT3-05  A double tap or double click on an element starts renaming it.
+//   EDIT3-05  A double tap or double click on an element starts renaming it.
 //   EDIT3-07  Two fingers zoom and pan; the wheel zooms around the cursor.
+//
+// Added in Phase 31:
+//   EDIT3-10  Several elements can be selected and moved together. Mouse: Shift+click adds or
+//             removes one, Shift+drag on empty plan draws a selection frame. Touch: with the
+//             "Mehrere" switch on, a tap adds or removes an element.
+//   EDIT3-09  Placing with a preview. Mouse: the preview follows the cursor and a click sets
+//             the element. Touch: a tap moves the preview, it can be dragged, and a button in
+//             the host sets it. Panning and zooming keep working while placing.
 
 import type { PlanElementRow } from '@spatenstich/shared';
 import { findElementAtPoint } from './hitTest';
 import {
+  boxTouchesRect,
   clampCenter,
+  clampGroupDelta,
   moveBox,
+  pointInBox,
   resizeBox,
   rotationFromPointer,
   toBox,
@@ -58,22 +68,46 @@ export interface PointerSample {
   button?: number;
 }
 
+/** Size of the element that is about to be placed. */
+export interface PlacingSpec {
+  widthM: number;
+  heightM: number;
+}
+
+/** Selection frame in canvas pixels. */
+export interface MarqueeRect {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
 /** What the controller needs from, and does to, its host. */
 export interface ControllerPort {
   mode(): 'edit' | 'readOnly';
   elements(): PlanElementRow[];
-  selection(): string | null;
+  selectedIds(): string[];
+  /** Touch "Mehrere" switch: a tap adds or removes an element instead of replacing. */
+  multiSelect(): boolean;
   viewport(): Viewport;
   garden(): GardenSize;
   canvas(): CanvasSize;
   /** Pixels per metre at which the whole parcel fits the canvas. */
   fitScale(): number;
-  setSelection(id: string | null): void;
+  setSelectedIds(ids: string[]): void;
   updateElement(id: string, patch: Partial<PlanElementRow>): void;
   setViewport(vp: Viewport): void;
-  /** True while an element is being moved, resized or rotated (pauses autosave). */
+  /** True while elements are being moved, resized or rotated (one undo step, saved at the end). */
   setGestureActive(active: boolean): void;
   startRename(id: string): void;
+  /** Non-null while a new element is being placed. */
+  placing(): PlacingSpec | null;
+  /** Centre of the placement preview, if it is shown. */
+  ghost(): { xM: number; yM: number } | null;
+  setGhost(pos: { xM: number; yM: number }): void;
+  /** Mouse click while placing: set the element here. */
+  commitPlacement(pos: { xM: number; yM: number }): void;
+  setMarquee(rect: MarqueeRect | null): void;
 }
 
 /** Movement below this is a tap or click, not a drag. */
@@ -83,7 +117,7 @@ export const DOUBLE_TAP = {
   mouse: { ms: 400, px: 6 },
 } as const;
 
-type Intent = 'move' | 'resize' | 'rotate' | 'pan' | 'none';
+type Intent = 'move' | 'resize' | 'rotate' | 'pan' | 'marquee' | 'ghost' | 'none';
 
 interface SingleGesture {
   pointerId: number;
@@ -94,13 +128,20 @@ interface SingleGesture {
   handle: ResizeHandleId | null;
   /** Element under the pointer at `down`; null on empty plan. */
   targetId: string | null;
-  /** Element being changed, as it was at `down`. */
-  startEl: PlanElementRow | null;
-  startBox: Box | null;
+  /** Elements being changed, as they were at `down`. */
+  starts: { el: PlanElementRow; box: Box }[];
+  /** Box whose edges land on the step while moving (the element under the pointer). */
+  primary: Box | null;
+  /** Centre of the placement preview at `down` (intent 'ghost'). */
+  ghostStart: { xM: number; yM: number } | null;
   startVp: Viewport;
   dragging: boolean;
-  /** False for presses that must not select or deselect (middle button, Space, Shift). */
+  /** False for presses that must not select or deselect (middle button, Space). */
   tapCounts: boolean;
+  /** A tap adds or removes `targetId` instead of selecting it alone. */
+  toggle: boolean;
+  /** A tap places (mouse) or moves the preview (touch) instead of selecting. */
+  placeOnTap: boolean;
 }
 
 interface PinchGesture {
@@ -130,7 +171,7 @@ export class InteractionController {
     this.spaceHeld = held;
   }
 
-  /** True while any gesture is in progress (the host uses it for the cursor). */
+  /** True while any gesture is in progress. */
   isBusy(): boolean {
     return this.single !== null || this.pinch !== null;
   }
@@ -148,6 +189,14 @@ export class InteractionController {
         this.onEnd(sample);
         break;
     }
+  }
+
+  /** Mouse moved without a button down: the placement preview follows the cursor. */
+  hover(x: number, y: number): void {
+    if (this.single || this.pinch) return;
+    const placing = this.port.placing();
+    if (!placing || this.port.mode() !== 'edit') return;
+    this.port.setGhost(this.placementAt(placing, x, y, this.port.viewport()));
   }
 
   /** Wheel zoom around the cursor; `ctrl` marks a trackpad pinch (finer steps). */
@@ -192,11 +241,14 @@ export class InteractionController {
       intent: 'pan',
       handle: null,
       targetId: null,
-      startEl: null,
-      startBox: null,
+      starts: [],
+      primary: null,
+      ghostStart: null,
       startVp: vp,
       dragging: false,
       tapCounts: true,
+      toggle: false,
+      placeOnTap: false,
     };
     const mouse = isMouseLike(sample.type);
     const panOverride = mouse && (sample.button === 1 || this.spaceHeld);
@@ -211,52 +263,83 @@ export class InteractionController {
       return { ...base, tapCounts: false };
     }
 
-    const elements = this.port.elements();
-    const selectedId = this.port.selection();
-    const selected = selectedId
-      ? elements.find((e) => e.id === selectedId && e.deletedAt === null)
-      : undefined;
-
     const xM = (sample.x - vp.tx) / vp.scale;
     const yM = (sample.y - vp.ty) / vp.scale;
+
+    // Placing a new element: a tap sets it (mouse) or moves the preview (touch); the preview
+    // can be dragged by touch; everything else pans.
+    const placing = this.port.placing();
+    if (placing) {
+      const ghost = this.port.ghost();
+      if (
+        !mouse &&
+        ghost &&
+        pointInBox({ ...ghost, widthM: placing.widthM, heightM: placing.heightM, rotateDeg: 0 }, xM, yM)
+      ) {
+        return { ...base, intent: 'ghost', ghostStart: ghost, placeOnTap: true };
+      }
+      return { ...base, intent: 'pan', placeOnTap: true };
+    }
+
+    const elements = this.port.elements();
+    const ids = this.port.selectedIds();
+    const selected = elements.filter((e) => e.deletedAt === null && ids.includes(e.id));
     const hit = findElementAtPoint(elements, xM, yM);
 
-    // 1. Handles of the selected element come first, but they only claim drags. Their touch
-    //    areas reach well outside the element, so a plain tap there still selects whatever
-    //    lies under the finger (or deselects on empty plan).
-    if (selected) {
-      const handle = this.handleAt(selected, sample, vp);
+    // 1. Handles of a single selected element come first, but they only claim drags. Their
+    //    touch areas reach well outside the element, so a plain tap there still selects
+    //    whatever lies under the finger (or deselects on empty plan).
+    if (selected.length === 1) {
+      const handle = this.handleAt(selected[0], sample, vp);
       if (handle) {
         return {
           ...base,
           intent: handle === 'rot' ? 'rotate' : 'resize',
           handle: handle === 'rot' ? null : handle,
           targetId: hit?.id ?? null,
-          startEl: selected,
-          startBox: toBox(selected),
+          starts: [{ el: selected[0], box: toBox(selected[0]) }],
+          toggle: !mouse && this.port.multiSelect(),
         };
       }
     }
 
     // 2. The topmost element under the pointer.
-
     if (mouse) {
       if (hit) {
-        // D-02: select and move in one drag.
-        if (hit.id !== selectedId) this.port.setSelection(hit.id);
-        return { ...base, intent: 'move', targetId: hit.id, startEl: hit, startBox: toBox(hit) };
+        if (sample.shift) {
+          // Shift+click adds or removes; it never moves.
+          return { ...base, intent: 'none', targetId: hit.id, toggle: true };
+        }
+        // D-02: select and move in one drag. A press on one of several selected elements
+        // keeps the group so the drag moves all of them.
+        const inSelection = ids.includes(hit.id);
+        if (!inSelection) this.port.setSelectedIds([hit.id]);
+        const moving = inSelection ? selected : [hit];
+        return {
+          ...base,
+          intent: 'move',
+          targetId: hit.id,
+          starts: moving.map((el) => ({ el, box: toBox(el) })),
+          primary: toBox(hit),
+        };
       }
-      // D-03: Shift+drag on empty plan is reserved for the selection frame (Phase 31).
-      return sample.shift
-        ? { ...base, intent: 'none', tapCounts: false }
-        : { ...base, intent: 'pan' };
+      // Shift+drag on empty plan draws the selection frame.
+      return sample.shift ? { ...base, intent: 'marquee', tapCounts: false } : { ...base, intent: 'pan' };
     }
 
-    // D-01: touch moves only the element that is already selected.
-    if (hit && hit.id === selectedId) {
-      return { ...base, intent: 'move', targetId: hit.id, startEl: hit, startBox: toBox(hit) };
+    // D-01: touch moves only what is already selected.
+    const multi = this.port.multiSelect();
+    if (hit && ids.includes(hit.id)) {
+      return {
+        ...base,
+        intent: 'move',
+        targetId: hit.id,
+        starts: selected.map((el) => ({ el, box: toBox(el) })),
+        primary: toBox(hit),
+        toggle: multi,
+      };
     }
-    return { ...base, intent: 'pan', targetId: hit?.id ?? null };
+    return { ...base, intent: 'pan', targetId: hit?.id ?? null, toggle: multi };
   }
 
   private handleAt(el: PlanElementRow, sample: PointerSample, vp: Viewport): HandleId | null {
@@ -271,6 +354,21 @@ export class InteractionController {
     const local = worldToLocal(screenBox, sample.x, sample.y);
     const profile = sample.type === 'mouse' ? MOUSE_HIT : TOUCH_HIT;
     return hitHandle(local.x, local.y, screenBox.widthM, screenBox.heightM, profile);
+  }
+
+  /** Centre for a new element at a canvas point: edges on the step, centre in the parcel. */
+  private placementAt(
+    placing: PlacingSpec,
+    x: number,
+    y: number,
+    vp: Viewport,
+  ): { xM: number; yM: number } {
+    return moveBox(
+      { xM: 0, yM: 0, widthM: placing.widthM, heightM: placing.heightM, rotateDeg: 0 },
+      (x - vp.tx) / vp.scale,
+      (y - vp.ty) / vp.scale,
+      this.port.garden(),
+    );
   }
 
   private beginPinch(a: number, b: number): void {
@@ -329,29 +427,40 @@ export class InteractionController {
       if (Math.hypot(dx, dy) < threshold) return;
       g.dragging = true;
       this.lastTap = null;
-      if (g.intent !== 'pan') this.port.setGestureActive(true);
+      if (g.intent === 'move' || onHandle) this.port.setGestureActive(true);
     }
 
     const scale = g.startVp.scale;
+    const garden = this.port.garden();
     switch (g.intent) {
       case 'pan': {
         const next = panBy(g.startVp, dx, dy);
-        this.port.setViewport(clampPan(next, this.port.garden(), this.port.canvas()));
+        this.port.setViewport(clampPan(next, garden, this.port.canvas()));
         break;
       }
       case 'move': {
-        if (!g.startEl || !g.startBox) break;
-        const pos = moveBox(g.startBox, dx / scale, dy / scale, this.port.garden());
-        this.port.updateElement(g.startEl.id, { xM: pos.xM, yM: pos.yM });
+        if (!g.primary || g.starts.length === 0) break;
+        // The element under the pointer lands on the step; the others keep their offset.
+        const pos = moveBox(g.primary, dx / scale, dy / scale, garden);
+        const delta = clampGroupDelta(
+          g.starts.map((s) => s.box),
+          pos.xM - g.primary.xM,
+          pos.yM - g.primary.yM,
+          garden,
+        );
+        for (const s of g.starts) {
+          this.port.updateElement(s.el.id, { xM: s.box.xM + delta.dxM, yM: s.box.yM + delta.dyM });
+        }
         break;
       }
       case 'resize': {
-        if (!g.startEl || !g.startBox || !g.handle) break;
-        const box = resizeBox(g.startBox, g.handle, dx / scale, dy / scale);
+        const start = g.starts[0];
+        if (!start || !g.handle) break;
+        const box = resizeBox(start.box, g.handle, dx / scale, dy / scale);
         // D-06: a resize that would push the centre out of the parcel is not applied.
-        const clamped = clampCenter(box.xM, box.yM, this.port.garden());
+        const clamped = clampCenter(box.xM, box.yM, garden);
         if (clamped.xM !== box.xM || clamped.yM !== box.yM) break;
-        this.port.updateElement(g.startEl.id, {
+        this.port.updateElement(start.el.id, {
           xM: box.xM,
           yM: box.yM,
           widthM: box.widthM,
@@ -360,20 +469,50 @@ export class InteractionController {
         break;
       }
       case 'rotate': {
-        if (!g.startEl || !g.startBox) break;
+        const start = g.starts[0];
+        if (!start) break;
         const vp = g.startVp;
         const raw = rotationFromPointer(
-          g.startBox,
+          start.box,
           (sample.x - vp.tx) / vp.scale,
           (sample.y - vp.ty) / vp.scale,
         );
         // D-04: hard 15° steps; Shift turns freely with the mouse, to whole degrees.
         const free = isMouseLike(g.type) && sample.shift === true;
         const deg = free ? Math.round(raw) % 360 : snapRotation(raw, false);
-        const current = this.port.elements().find((e) => e.id === g.startEl!.id) ?? g.startEl;
-        this.port.updateElement(g.startEl.id, {
+        const current = this.port.elements().find((e) => e.id === start.el.id) ?? start.el;
+        this.port.updateElement(start.el.id, {
           provenance: { ...(current.provenance ?? {}), rotateDeg: deg },
         });
+        break;
+      }
+      case 'marquee': {
+        const vp = g.startVp;
+        this.port.setMarquee({ x0: g.startX, y0: g.startY, x1: sample.x, y1: sample.y });
+        const rect = {
+          minX: (Math.min(g.startX, sample.x) - vp.tx) / vp.scale,
+          maxX: (Math.max(g.startX, sample.x) - vp.tx) / vp.scale,
+          minY: (Math.min(g.startY, sample.y) - vp.ty) / vp.scale,
+          maxY: (Math.max(g.startY, sample.y) - vp.ty) / vp.scale,
+        };
+        const ids = this.port
+          .elements()
+          .filter((e) => e.deletedAt === null && boxTouchesRect(toBox(e), rect))
+          .map((e) => e.id);
+        this.port.setSelectedIds(ids);
+        break;
+      }
+      case 'ghost': {
+        const placing = this.port.placing();
+        if (!placing || !g.ghostStart) break;
+        this.port.setGhost(
+          moveBox(
+            { ...g.ghostStart, widthM: placing.widthM, heightM: placing.heightM, rotateDeg: 0 },
+            dx / scale,
+            dy / scale,
+            garden,
+          ),
+        );
         break;
       }
     }
@@ -406,7 +545,11 @@ export class InteractionController {
 
     this.single = null;
     if (g.dragging) {
-      if (g.intent !== 'pan' && g.intent !== 'none') this.port.setGestureActive(false);
+      if (g.intent === 'move' || g.intent === 'resize' || g.intent === 'rotate') {
+        this.port.setGestureActive(false);
+      } else if (g.intent === 'marquee') {
+        this.port.setMarquee(null);
+      }
       return;
     }
     this.onTap(g, sample);
@@ -415,14 +558,34 @@ export class InteractionController {
   private onTap(g: SingleGesture, sample: PointerSample): void {
     if (!g.tapCounts || this.port.mode() !== 'edit') return;
 
+    if (g.placeOnTap) {
+      const placing = this.port.placing();
+      if (!placing) return;
+      const pos = this.placementAt(placing, sample.x, sample.y, g.startVp);
+      if (isMouseLike(g.type)) this.port.commitPlacement(pos);
+      else this.port.setGhost(pos);
+      return;
+    }
+
+    const ids = this.port.selectedIds();
+
     if (g.targetId === null) {
       // Tap or click on empty plan deselects.
-      if (this.port.selection() !== null) this.port.setSelection(null);
+      if (ids.length > 0) this.port.setSelectedIds([]);
       this.lastTap = null;
       return;
     }
 
-    if (this.port.selection() !== g.targetId) this.port.setSelection(g.targetId);
+    if (g.toggle) {
+      const targetId = g.targetId;
+      this.port.setSelectedIds(
+        ids.includes(targetId) ? ids.filter((id) => id !== targetId) : [...ids, targetId],
+      );
+      this.lastTap = null;
+      return;
+    }
+
+    if (ids.length !== 1 || ids[0] !== g.targetId) this.port.setSelectedIds([g.targetId]);
 
     const limits = isMouseLike(g.type) ? DOUBLE_TAP.mouse : DOUBLE_TAP.touch;
     const prev = this.lastTap;
@@ -439,22 +602,24 @@ export class InteractionController {
     this.lastTap = { targetId: g.targetId, ts: sample.ts, x: sample.x, y: sample.y };
   }
 
-  /** Stop the single-pointer gesture and put a half-changed element back as it was. */
+  /** Stop the single-pointer gesture and put half-changed elements back as they were. */
   private abortSingle(): void {
     const g = this.single;
     this.single = null;
     if (!g || !g.dragging) return;
     if (g.intent === 'move' || g.intent === 'resize' || g.intent === 'rotate') {
-      if (g.startEl) {
-        this.port.updateElement(g.startEl.id, {
-          xM: g.startEl.xM,
-          yM: g.startEl.yM,
-          widthM: g.startEl.widthM,
-          heightM: g.startEl.heightM,
-          provenance: g.startEl.provenance,
+      for (const s of g.starts) {
+        this.port.updateElement(s.el.id, {
+          xM: s.el.xM,
+          yM: s.el.yM,
+          widthM: s.el.widthM,
+          heightM: s.el.heightM,
+          provenance: s.el.provenance,
         });
       }
       this.port.setGestureActive(false);
+    } else if (g.intent === 'marquee') {
+      this.port.setMarquee(null);
     }
     // A pan is left where it is: snapping the view back when a second finger lands would jump.
   }
