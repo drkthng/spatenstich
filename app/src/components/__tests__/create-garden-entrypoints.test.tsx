@@ -124,27 +124,6 @@ jest.mock('react-native-gesture-handler', () => {
 });
 
 // Mock all editor sub-components (not rendered in no-dimensions branches)
-jest.mock('@/src/components/editor/EditorCanvas', () => ({
-  EditorCanvas: () => null,
-}));
-jest.mock('@/src/components/editor/EditorToolbar', () => ({
-  EditorToolbar: () => null,
-}));
-jest.mock('@/src/components/editor/ElementPalette', () => ({
-  ElementPalette: () => null,
-}));
-jest.mock('@/src/components/editor/DraftsTrayBottomSheet', () => ({
-  DraftsTrayBottomSheet: () => null,
-}));
-jest.mock('@/src/components/editor/web/WebPlanEditor', () => ({
-  WebPlanEditor: () => null,
-}));
-jest.mock('@/src/components/editor/web/WebPaletteBar', () => ({
-  WebPaletteBar: () => null,
-}));
-jest.mock('@/src/components/editor/web/WebEditorToolbar', () => ({
-  WebEditorToolbar: () => null,
-}));
 jest.mock('@/src/components/editor/CompanionToast', () => ({
   CompanionToast: () => null,
 }));

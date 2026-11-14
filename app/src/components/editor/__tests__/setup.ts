@@ -1,5 +1,5 @@
 // Phase 7 Plan 01 Wave 0: jest setup for editor project.
-// Mocks Skia/gesture-handler/reanimated for jsdom env (no native modules).
+// Mocks gesture-handler/reanimated for jsdom env (no native modules).
 // Mirrors app/src/components/__tests__/setup.ts NativeWind + lucide mocks verbatim, adds 3 native libs.
 
 // 1. NativeWind (verbatim from components/__tests__/setup.ts:3-16)
@@ -22,21 +22,6 @@ jest.mock('lucide-react-native', () => {
   return new Proxy({}, { get: () => (_p: unknown) => React.createElement('Icon', null) });
 });
 
-// 3. NEW: Skia — return primitive components for Canvas/Group/Rect/Path/Circle/Line/Skia
-jest.mock('@shopify/react-native-skia', () => {
-  const React = require('react');
-  const stub = (name: string) => (props: any) => React.createElement(name, props, props.children);
-  return {
-    Canvas: stub('Canvas'),
-    Group: stub('Group'),
-    Rect: stub('Rect'),
-    Path: stub('Path'),
-    Circle: stub('Circle'),
-    Line: stub('Line'),
-    DashPathEffect: stub('DashPathEffect'),
-    Skia: { Path: { Make: () => ({ moveTo: jest.fn(), lineTo: jest.fn(), close: jest.fn() }) } },
-  };
-});
 
 // 4. NEW: gesture-handler — passthrough Gesture.* + GestureDetector passes children
 jest.mock('react-native-gesture-handler', () => {

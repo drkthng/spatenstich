@@ -113,7 +113,7 @@ const config: Config = {
       transform: {
         '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.jest-components.json' }],
       },
-      transformIgnorePatterns: ['node_modules/(?!(@testing-library|@shopify/react-native-skia|react-native-gesture-handler|react-native-reanimated|zundo)/)'],
+      transformIgnorePatterns: ['node_modules/(?!(@testing-library|react-native-gesture-handler|react-native-reanimated|zundo)/)'],
     },
   ],
   collectCoverageFrom: ['src/**/*.{ts,tsx}'],

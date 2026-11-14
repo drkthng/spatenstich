@@ -7,12 +7,6 @@ import * as path from 'path';
 
 const APP_DIR = path.resolve(__dirname, '../../..');
 
-// Old editor files that Phase 30 stopped routing to; Phase 32 deletes them (EDIT3-19).
-const LEGACY = [
-  /components[\\/]editor[\\/](EditorCanvas|EditorToolbar|ResizeHandle|RotationHandle|PolygonInProgress|GhostRing|ElementPalette|PaletteCard|DraftsTrayBottomSheet|BedPickerModal)\.tsx$/,
-  /components[\\/]editor[\\/]web[\\/]/,
-  /lib[\\/]colors\.ts$/,
-];
 const SKIP = [/__tests__/, /__mocks__/, /[\\/]theme[\\/]/, /node_modules/, /\.d\.ts$/];
 
 function sourceFiles(dir: string, out: string[] = []): string[] {
@@ -25,7 +19,7 @@ function sourceFiles(dir: string, out: string[] = []): string[] {
 }
 
 const files = [...sourceFiles(path.join(APP_DIR, 'app')), ...sourceFiles(path.join(APP_DIR, 'src'))].filter(
-  (f) => !SKIP.some((r) => r.test(f)) && !LEGACY.some((r) => r.test(f)),
+  (f) => !SKIP.some((r) => r.test(f)),
 );
 
 function codeLines(file: string): { n: number; text: string }[] {
