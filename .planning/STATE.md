@@ -6,10 +6,10 @@ current_phase: 30
 current_phase_name: Feldführer-Fundament und Editor-Kern
 status: planning
 stopped_at: Phase 30 context gathered
-last_updated: "2026-11-14T10:38:47.395Z"
+last_updated: "2026-11-14T10:39:41.798Z"
 last_activity: 2026-11-14
 last_activity_desc: Roadmap v3.0 erstellt (10 Phasen, 75/75 Anforderungen zugeordnet)
-state_head: 992d47c43996aabcf7de8ec70911dff28282cd55
+state_head: cde7029f70bd05cc2ae4984ce0200ecfbacbe5dd
 progress:
   total_phases: 10
   completed_phases: 0
@@ -174,10 +174,11 @@ Keine. (`todos/freier-foto-upload.md` gestrichen — Foto-Upload ist seit M07 ou
 
 ## Session Continuity
 
-Last session: 2026-11-14T10:38:47.308Z
+Last session: 2026-11-14T10:39:41.685Z
 Stopped at: Phase 30 context gathered
-Resume file: None
-Next: `/gsd-discuss-phase 30` (Phase 30 hat UI-Anteil: danach `/gsd-ui-phase 30`, dann `/gsd-plan-phase 30`; Forschung findet je Phase bei der Planung statt)
+Resume file: .planning/phases/30-feldf-hrer-fundament-und-editor-kern/30-CONTEXT.md
+
+Next: `/gsd-ui-phase 30` (Phase 30 hat UI-Anteil), dann `/gsd-plan-phase 30`; Forschung findet je Phase bei der Planung statt
 
 ## Operator Next Steps
 
