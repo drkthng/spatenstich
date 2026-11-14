@@ -43,8 +43,10 @@ Schlägt die Prüfung an: den Schlüssel in der Anthropic Console sofort sperren
 ## Funktion ändern und ausliefern
 
 ```
-deno test supabase/functions/ai/
-deno check supabase/functions/ai/index.ts
+cd supabase/functions/ai
+deno check index.ts
+deno test
+cd ../../..
 supabase functions deploy ai --use-api
 ```
 

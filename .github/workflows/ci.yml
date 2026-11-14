@@ -44,10 +44,14 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+      # Run inside the function folder: it has its own deno.json, and from the repository
+      # root Deno would try to read the pnpm workspace instead.
       - name: Edge function — type-check
-        run: deno check supabase/functions/ai/index.ts
+        working-directory: supabase/functions/ai
+        run: deno check index.ts
       - name: Edge function — tests
-        run: deno test supabase/functions/ai/
+        working-directory: supabase/functions/ai
+        run: deno test
 
       - name: Web export (for bundle scan)
         run: pnpm --filter app exec expo export --platform web
