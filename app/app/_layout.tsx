@@ -12,7 +12,9 @@ if (Platform.OS === 'web') {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '@/src/lib/auth';
 import { useAuthStore } from '@/src/stores/authStore';
-import { ensureDefaultGardenForUser } from '@/src/lib/inviteCodeRepo';
+import { consumeInviteCode, ensureDefaultGardenForUser } from '@/src/lib/inviteCodeRepo';
+import { resolveGarden } from '@/src/lib/nav/startRoute';
+import { t } from '@/src/lib/i18n';
 import { registerSyncTriggers } from '@/src/lib/sync/SyncTriggers';
 import { getSyncWorker } from '@/src/lib/sync/SyncWorker';
 import { repairNonUuidElementIds } from '@/src/lib/gardenPlanRepo';
@@ -20,7 +22,7 @@ import { startRealtimeBridge } from '@/src/lib/sync/RealtimeBridge';
 import { syncEvents } from '@/src/lib/sync/events';
 import { ensureSyncScope, clearLocalAccountData } from '@/src/lib/sync/sessionCleanup';
 import { storage, runMigrations } from '@/src/storage';
-import { SyncToastHost } from '@/src/components/SyncToastHost';
+import { SyncToastHost, showSyncToast } from '@/src/components/SyncToastHost';
 import {
   ServiceWorkerController,
   InstallPromptController,
@@ -108,10 +110,22 @@ function GuardedStack(): React.JSX.Element {
     let retryTimer: ReturnType<typeof setTimeout> | null = null;
     (async () => {
       try {
-        const gardenId = await ensureDefaultGardenForUser();
-        if (!cancelled) setActiveGarden(gardenId);
+        // Phase 37 (NAV3-03): an invite code typed at sign-up comes first. Asking for a
+        // default garden before would leave the person with an empty second garden.
+        const pendingCode = useAuthStore.getState().pendingInviteCode;
+        const found = await resolveGarden({
+          pendingCode,
+          consume: (code) => consumeInviteCode('account', code),
+          ensureDefault: ensureDefaultGardenForUser,
+          isOffline: (error) => (error as Error | null)?.message === 'offline_required',
+        });
+        if (cancelled) return;
+        if (pendingCode) useAuthStore.getState().setPendingInviteCode(null);
+        if (found.joined) showSyncToast(t('onboarding.joined'));
+        else if (found.codeProblem) showSyncToast(t(`onboarding.codeProblem.${found.codeProblem}`));
+        setActiveGarden(found.gardenId);
       } catch (e) {
-        if (__DEV__) console.warn('ensureDefaultGardenForUser failed', e);
+        if (__DEV__) console.warn('garden resolution failed', e);
         if (!cancelled) retryTimer = setTimeout(() => setGardenRetry((n) => n + 1), 8000);
       }
     })();

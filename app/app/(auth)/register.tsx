@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import de from '@spatenstich/shared/i18n/de';
 import { supabase } from '@/src/lib/supabase';
 import { useAuthStore } from '@/src/stores/authStore';
+import { isInviteCode, MIN_PASSWORD, normalizeInviteCode } from '@/src/lib/nav/startRoute';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
@@ -18,12 +19,26 @@ export default function RegisterScreen(): React.JSX.Element {
   const router = useRouter();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  // Phase 37 (NAV3-03): someone who was invited types the code here and lands in the
+  // shared garden right after signing up.
+  const [inviteCode, setInviteCode] = React.useState('');
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
 
   const onSubmit = async (): Promise<void> => {
     setError(null);
+    if (loading) return; // a second tap while the first is on its way
+    if (inviteCode.trim() !== '' && !isInviteCode(inviteCode)) {
+      setError(t('auth.register.code_invalid'));
+      return;
+    }
+    if (password.length < MIN_PASSWORD) {
+      setError(t('auth.register.password_short'));
+      return;
+    }
     setLoading(true);
+    // Kept until the first sign-in; redeemed before a garden of one's own is created.
+    useAuthStore.getState().setPendingInviteCode(isInviteCode(inviteCode) ? normalizeInviteCode(inviteCode) : null);
     try {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
@@ -85,9 +100,29 @@ export default function RegisterScreen(): React.JSX.Element {
         />
       </View>
 
+      <Text className="text-xs text-ink-muted" testID="register-password-hint">
+        {t('auth.register.password_hint')}
+      </Text>
+
+      <View className="gap-2">
+        <Label nativeID="register-code-label">{t('auth.register.code_label')}</Label>
+        <Input
+          value={inviteCode}
+          onChangeText={(text) => setInviteCode(text.toUpperCase())}
+          autoCapitalize="characters"
+          autoCorrect={false}
+          maxLength={8}
+          placeholder={t('auth.join.code_placeholder')}
+          testID="register-invite-code"
+          accessibilityLabelledBy="register-code-label"
+        />
+        <Text className="text-xs text-ink-muted">{t('auth.register.code_hint')}</Text>
+      </View>
+
       {error ? (
         <Text
           accessibilityLiveRegion="polite"
+          testID="register-error"
           className="text-sm text-danger"
         >
           {error}

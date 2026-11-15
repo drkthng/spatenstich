@@ -88,6 +88,15 @@ export default function LoginScreen(): React.JSX.Element {
         </Text>
       ) : null}
 
+      <Text
+        accessibilityRole="link"
+        onPress={() => router.push('/(auth)/reset-request' as never)}
+        className="text-sm text-primary min-h-[44px] py-3"
+        testID="login-forgot"
+      >
+        {t('auth.reset.link')}
+      </Text>
+
       <Button onPress={onSubmit} disabled={loading || !email || !password} testID="login-submit">
         <Text className="text-on-primary font-semibold">
           {loading ? t('common.loading') : t('auth.login.submit')}

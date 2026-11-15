@@ -20,6 +20,10 @@ export interface AuthState {
   // angemeldet ist. Nach erfolgreichem Login navigiert die App dorthin zurück
   // (siehe app/app/_layout.tsx GuardedStack).
   pendingRoute: string | null;
+  // Phase 37 (NAV3-03): an invite code typed at sign-up. It is redeemed after the first
+  // sign-in, before a garden of one's own is asked for. Persisted, so it survives the
+  // way through an e-mail confirmation.
+  pendingInviteCode: string | null;
   // Phase 20 Plan 03 Task 4 (DEPLOY-04): das abgefangene beforeinstallprompt-
   // Ereignis. Kein Standard-DOM-Typ (BeforeInstallPromptEvent) — als unknown
   // geführt. NICHT persistiert (partialize unten): ein Browser-Event-Objekt
@@ -30,6 +34,7 @@ export interface AuthState {
   setActiveGarden: (gardenId: string | null) => void;
   setPendingRoute: (route: string | null) => void;
   clearPendingRoute: () => void;
+  setPendingInviteCode: (code: string | null) => void;
   setInstallPrompt: (event: unknown | null) => void;
   clearInstallPrompt: () => void;
   clearAuth: () => void;
@@ -42,6 +47,7 @@ export const useAuthStore = create<AuthState>()(
       userId: null,
       activeGardenId: null,
       pendingRoute: null,
+      pendingInviteCode: null,
       installPromptEvent: null,
       setAccountMode: (userId) => set({ mode: 'account', userId }),
       setLocalMode: (uuid) =>
@@ -49,6 +55,7 @@ export const useAuthStore = create<AuthState>()(
       setActiveGarden: (gardenId) => set({ activeGardenId: gardenId }),
       setPendingRoute: (route) => set({ pendingRoute: route }),
       clearPendingRoute: () => set({ pendingRoute: null }),
+      setPendingInviteCode: (code) => set({ pendingInviteCode: code }),
       setInstallPrompt: (event) => set({ installPromptEvent: event }),
       clearInstallPrompt: () => set({ installPromptEvent: null }),
       clearAuth: () => set({ mode: null, userId: null, activeGardenId: null }),
@@ -88,6 +95,7 @@ export const useAuthStore = create<AuthState>()(
         userId: state.userId,
         activeGardenId: state.activeGardenId,
         pendingRoute: state.pendingRoute,
+        pendingInviteCode: state.pendingInviteCode,
       }),
     }
   )

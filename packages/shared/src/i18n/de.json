@@ -30,7 +30,12 @@
     "register": {
       "submit": "Konto erstellen",
       "error_generic": "Registrierung fehlgeschlagen. Bitte prüfen ob diese E-Mail bereits verwendet wird.",
-      "verify_email": "Bitte bestätige deine E-Mail-Adresse. Wir haben dir eine E-Mail geschickt."
+      "verify_email": "Bitte bestätige deine E-Mail-Adresse. Wir haben dir eine E-Mail geschickt.",
+      "code_label": "Einladungscode (wenn du einen hast)",
+      "code_hint": "Mit dem Code landest du direkt im gemeinsamen Garten. Ohne Code legst du einen eigenen an.",
+      "code_invalid": "Der Einladungscode hat sechs Zeichen. Lass das Feld leer, wenn du keinen hast.",
+      "password_hint": "Mindestens 8 Zeichen.",
+      "password_short": "Das Passwort braucht mindestens 8 Zeichen."
     },
     "login": {
       "submit": "Anmelden",
@@ -47,6 +52,28 @@
       "error_full": "Dieser Garten hat bereits 2 Mitglieder.",
       "error_generic": "Beitritt fehlgeschlagen. Bitte erneut versuchen.",
       "hint": "Frag die Person, die den Garten angelegt hat, nach dem 6-stelligen Code."
+    },
+    "reset": {
+      "link": "Passwort vergessen?",
+      "title": "Passwort zurücksetzen",
+      "requestIntro": "Gib deine E-Mail-Adresse ein. Du bekommst eine E-Mail mit einem sechsstelligen Code.",
+      "email": "E-Mail",
+      "send": "Code anfordern",
+      "sent": "Wenn es ein Konto mit dieser Adresse gibt, ist jetzt eine E-Mail mit einem Code unterwegs.",
+      "verifyIntro": "Gib den sechsstelligen Code aus der E-Mail ein und wähle ein neues Passwort.",
+      "code": "Code aus der E-Mail",
+      "newPassword": "Neues Passwort",
+      "save": "Passwort ändern",
+      "codeInvalid": "Der Code hat sechs Ziffern.",
+      "codeWrong": "Der Code stimmt nicht oder ist abgelaufen. Fordere einen neuen an.",
+      "failed": "Das hat nicht geklappt. Bitte versuche es noch einmal.",
+      "again": "Neuen Code anfordern",
+      "back": "Zurück zur Anmeldung",
+      "noCodeHint": "Kommt in der E-Mail nur ein Link und kein Code, ist die E-Mail-Vorlage noch nicht umgestellt.",
+      "show": "Zeigen",
+      "hide": "Verbergen",
+      "showPassword": "Passwort anzeigen",
+      "hidePassword": "Passwort verbergen"
     }
   },
   "profile": {
@@ -988,6 +1015,44 @@
     "account": {
       "title": "Konto",
       "hint": "Anmeldung, Abmelden, App installieren"
+    }
+  },
+  "onboarding": {
+    "joined": "Du bist dem Garten beigetreten.",
+    "codeProblem": {
+      "invalid": "Der Einladungscode war ungültig oder abgelaufen. Du hast jetzt einen eigenen Garten; unter „Mehr“ kannst du mit einem neuen Code beitreten.",
+      "full": "Der Garten zu diesem Code hat schon zwei Mitglieder. Du hast jetzt einen eigenen Garten.",
+      "failed": "Der Beitritt hat nicht geklappt. Du hast jetzt einen eigenen Garten; unter „Mehr“ kannst du es noch einmal versuchen."
+    },
+    "step": "Schritt {n} von 3",
+    "next": "Weiter",
+    "skip": "Überspringen",
+    "done": "Fertig",
+    "failed": "Das hat nicht geklappt. Bitte versuche es noch einmal.",
+    "size": {
+      "title": "Wie groß ist euer Garten?",
+      "intro": "Ungefähre Maße reichen. Du kannst sie später im Plan ändern.",
+      "width": "Breite in Metern",
+      "length": "Länge in Metern",
+      "invalid": "Bitte gib beide Maße in Metern an, zwischen 1 und 200. Zum Beispiel 12,5."
+    },
+    "plz": {
+      "title": "Wo liegt der Garten?",
+      "intro": "Mit der Postleitzahl passen Kalender und Wettervorhersage zu eurer Gegend.",
+      "label": "Postleitzahl",
+      "invalid": "Die Postleitzahl hat fünf Ziffern.",
+      "unknown": "Zu dieser Postleitzahl ist keine Klimazone hinterlegt. Bitte prüfe sie."
+    },
+    "partner": {
+      "title": "Gärtnert ihr zu zweit?",
+      "intro": "Mit einem Einladungscode kommt die zweite Person in denselben Garten.",
+      "create": "Einladungscode erzeugen",
+      "codeTitle": "Euer Einladungscode",
+      "codeHint": "Die zweite Person gibt ihn bei der Registrierung ein. Er gilt 24 Stunden.",
+      "copy": "Code kopieren",
+      "copied": "Kopiert",
+      "notOwner": "Nur wer den Garten angelegt hat, kann einladen.",
+      "full": "Der Garten hat schon zwei Mitglieder."
     }
   }
 }
