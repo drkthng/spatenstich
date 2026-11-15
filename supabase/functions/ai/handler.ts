@@ -24,6 +24,8 @@ export interface ModelResult {
   model: string;
   text: string;
   refused: boolean;
+  /** The answer was cut off at the token limit. */
+  truncated?: boolean;
   usage: Record<string, unknown> | null;
 }
 
@@ -120,7 +122,12 @@ export function createHandler(deps: HandlerDeps): (req: Request) => Promise<Resp
       const usage = readUsage(result.usage);
       const cost = costUsd(result.model, usage);
       const text = result.text.trim();
-      const status = result.refused ? 'refused' : text ? 'ok' : 'error';
+      // A feature with a fixed answer shape hands the app data instead of text. An answer
+      // that was cut off or does not have the shape is unusable, but it was paid for
+      // and is written to the usage book like any other.
+      const data = feature.parse && text && !result.refused && !result.truncated ? feature.parse(text) : null;
+      const usable = feature.parse ? data !== null && data !== undefined : Boolean(text);
+      const status = result.refused ? 'refused' : usable ? 'ok' : 'error';
       const recorded = await deps.record({
         gardenId,
         userId,
@@ -129,17 +136,20 @@ export function createHandler(deps: HandlerDeps): (req: Request) => Promise<Resp
         usage,
         cost,
         status,
-        errorCode: result.refused ? 'refused' : text ? undefined : 'service_error',
+        errorCode: result.refused ? 'refused' : usable ? undefined : 'service_error',
       });
       if (!recorded) log('ai: a request could not be written to the usage book');
       const budget = { limitUsd, spentUsd: spentBefore + cost };
       if (result.refused) return fail('refused', budget);
-      if (!text) return fail('service_error', budget);
+      if (!usable) {
+        log('ai: unusable answer', featureName, result.truncated ? 'truncated' : 'shape');
+        return fail('service_error', budget);
+      }
       return json(
         {
           ok: true,
           feature: featureName,
-          text,
+          ...(feature.parse ? { data } : { text }),
           usage: { ...usage, costUsd: cost, model: result.model, recorded },
           ...budget,
         },

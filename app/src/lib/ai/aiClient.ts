@@ -38,11 +38,15 @@ function isOffline(): boolean {
 export function readAiResponse(body: unknown): AiResult {
   if (!body || typeof body !== 'object') return failure('service_error');
   const data = body as Record<string, unknown>;
-  if (data['ok'] === true && typeof data['text'] === 'string' && data['text'].trim().length > 0) {
+  const text = typeof data['text'] === 'string' ? data['text'].trim() : '';
+  // A feature answers with text, or (photo check) with data in a fixed shape.
+  const hasData = data['data'] !== undefined && data['data'] !== null;
+  if (data['ok'] === true && (text.length > 0 || hasData)) {
     const usage = (data['usage'] ?? {}) as Record<string, unknown>;
     return {
       ok: true,
-      text: data['text'],
+      text,
+      ...(hasData ? { data: data['data'] } : {}),
       costUsd: num(usage['costUsd']) ?? 0,
       limitUsd: num(data['limitUsd']),
       spentUsd: num(data['spentUsd']),

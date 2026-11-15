@@ -53,8 +53,10 @@ Deno.serve(
       // The key is read here, handed to the SDK, and goes nowhere else.
       const anthropic = new Anthropic({
         apiKey: Deno.env.get('ANTHROPIC_API_KEY'),
-        timeout: 90_000,
-        maxRetries: 1,
+        timeout: request.timeoutMs ?? 90_000,
+        // A long photo request is not repeated: a second try would run past the time an
+        // edge function may take.
+        maxRetries: request.timeoutMs ? 0 : 1,
       });
       try {
         const response = await anthropic.beta.messages.create({
@@ -64,7 +66,9 @@ Deno.serve(
           // fallback model inside the same call instead of simply stopping.
           betas: ['server-side-fallback-2026-07-01'],
           fallbacks: 'default',
-          output_config: { effort: request.effort },
+          output_config: request.schema
+            ? { effort: request.effort, format: { type: 'json_schema', schema: request.schema } }
+            : { effort: request.effort },
           system: request.system,
           messages: request.messages,
         });
@@ -76,6 +80,7 @@ Deno.serve(
           model: response.model,
           text,
           refused: response.stop_reason === 'refusal',
+          truncated: response.stop_reason === 'max_tokens',
           usage: response.usage as unknown as Record<string, unknown>,
         };
       } catch (error) {

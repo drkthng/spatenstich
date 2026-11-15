@@ -43,11 +43,14 @@ export function isAiServerCode(value: unknown): value is AiServerCode {
 }
 
 /** The features the edge function knows. */
-export type AiFeature = 'test';
+export type AiFeature = 'test' | 'photo_check' | 'photo_closeup';
 
 export interface AiSuccess {
   ok: true;
+  /** The answer as text; empty for features that answer with data. */
   text: string;
+  /** The answer of a feature with a fixed shape (photo check). */
+  data?: unknown;
   costUsd: number;
   limitUsd: number | null;
   spentUsd: number | null;
