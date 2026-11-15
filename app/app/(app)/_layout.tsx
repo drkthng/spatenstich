@@ -24,7 +24,8 @@ import { t } from '@/src/lib/i18n';
 function OnboardingGuard(): null {
   const mode = useAuthStore((s) => s.mode);
   const gardenId = useAuthStore((s) => s.activeGardenId);
-  const segments = useSegments();
+  // The router types the segments per route; here they are only read as a list.
+  const segments: readonly string[] = useSegments();
   const router = useRouter();
   const version = useDataVersion('garden_dimensions');
   const [pulls, setPulls] = React.useState(0);

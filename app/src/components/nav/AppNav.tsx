@@ -26,7 +26,7 @@ export function AppNav({
   /** The route segments, for a caller that already knows them; otherwise asked from the router. */
   segments?: readonly string[];
 }): React.JSX.Element {
-  const fromRouter = useSegments();
+  const fromRouter: readonly string[] = useSegments();
   const segments = given ?? fromRouter;
   const router = useRouter();
   const { width } = useWindowDimensions();
