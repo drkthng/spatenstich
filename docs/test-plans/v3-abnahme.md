@@ -16,10 +16,10 @@ Welche Ausgabe geprüft wurde, steht unter „Mehr“ ganz unten (Version und Bu
 
 | # | Schritt | erledigt |
 |---|---|---|
-| V1 | Supabase-Dashboard, Edge Functions, Secrets: `ANTHROPIC_API_KEY` gesetzt. In der Anthropic Console ein Monatslimit von 100 $ gesetzt. | |
-| V2 | Supabase-Dashboard, Authentication, Providers, Email: „Confirm email“ aus. | |
+| V1 | Supabase-Dashboard, Edge Functions, Secrets: `ANTHROPIC_API_KEY` gesetzt. In der Anthropic Console ein Monatslimit von 100 $ gesetzt. | Schlüssel: ja (2026-11-15, Name steht in `supabase secrets list`). Limit: |
+| V2 | Supabase-Dashboard, Authentication, Providers, Email: „Confirm email“ aus. | offen (2026-11-15 abgefragt: Bestätigung ist noch an) |
 | V3 | Supabase-Dashboard, Authentication, Email Templates, „Reset Password“: Text enthält `{{ .Token }}` (der sechsstellige Code). | |
-| V4 | GitHub, Settings, Secrets and variables, Actions, Variables: `EXPO_PUBLIC_IMPRINT` gesetzt, Zeilen mit `\|` getrennt (Name, Straße, Ort, E-Mail). Danach einmal neu ausliefern (Deploy-Workflow von Hand starten). | |
+| V4 | GitHub, Settings, Secrets and variables, Actions, Variables: `EXPO_PUBLIC_IMPRINT` gesetzt, Zeilen mit `\|` getrennt (Name, Straße, Ort, E-Mail). Danach einmal neu ausliefern (Deploy-Workflow von Hand starten). | offen (2026-11-15: Variable fehlt) |
 | V5 | Beide Handys: Chrome, Adresse öffnen, Menü, „App installieren“. | |
 
 ## 1. Installation, Teilen, Start ohne Netz (offen aus v2.0, Phase 20)
