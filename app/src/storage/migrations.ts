@@ -14,6 +14,7 @@ interface RowTableCreator {
   __createRowTablesV5?: () => Promise<void>;
   __migrateV6?: () => Promise<void>;
   __createRowTablesV7?: () => Promise<void>;
+  __createRowTablesV8?: () => Promise<void>;
 }
 
 // Phase 1: initial bootstrap migration (no local schema needed yet,
@@ -101,6 +102,21 @@ export const MIGRATIONS: LocalMigration[] = [
       } else {
         throw new Error(
           'Migration v7 requires adapter to implement __createRowTablesV7(). ' +
+          'Update SqliteAdapter/IndexedDbAdapter.',
+        );
+      }
+    },
+  },
+  {
+    version: 8,
+    up: async (adapter) => {
+      // Phase 36: own tasks, ticked-off tasks, the AI's order of a day's list.
+      const creator = adapter as StorageAdapter & RowTableCreator;
+      if (typeof creator.__createRowTablesV8 === 'function') {
+        await creator.__createRowTablesV8();
+      } else {
+        throw new Error(
+          'Migration v8 requires adapter to implement __createRowTablesV8(). ' +
           'Update SqliteAdapter/IndexedDbAdapter.',
         );
       }

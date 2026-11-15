@@ -18,7 +18,10 @@ export type EntityName =
   | 'plant_drafts'
   | 'observation_drafts'
   | 'photo_findings'
-  | 'garden_plants';
+  | 'garden_plants'
+  | 'garden_tasks'
+  | 'task_done'
+  | 'task_sorts';
 
 /** Gemeinsame Basis-Felder für alle LWW-managed Rows (Plan 03-01 Migration 013). */
 export interface RowBase {
@@ -101,7 +104,52 @@ export type AnyRow =
   | PlantDraftRow
   | ObservationDraftRow
   | PhotoFindingRow
-  | GardenPlantRow;
+  | GardenPlantRow
+  | GardenTaskRow
+  | TaskDoneRow
+  | TaskSortRow;
+
+/** Phase 36: a task the members added themselves (TASK-06). */
+export interface GardenTaskRow extends RowBase {
+  gardenId: string;
+  title: string;
+  /** Where, in words ("am Kompost"). */
+  whereText: string | null;
+  /** Or a plan element it belongs to. */
+  targetElementId: string | null;
+  durationMin: number;
+  /** null: once. Otherwise it comes back this many days after it was done. */
+  intervalDays: number | null;
+  /** First day it is due, as YYYY-MM-DD. */
+  dueOn: string;
+  notes: string | null;
+  createdByUserId: string | null;
+}
+
+/** Phase 36: a task that was ticked off (TASK-05). Undone by deleting the row. */
+export interface TaskDoneRow extends RowBase {
+  gardenId: string;
+  /** Stable key of the task (rule, own task or finding). */
+  taskKey: string;
+  /** YYYY-MM-DD */
+  doneOn: string;
+  /** The task stays off the list up to and including this day; null: for good. */
+  hideUntil: string | null;
+  doneByUserId: string | null;
+}
+
+/** Phase 36: the order the AI gave a day's list (TASK-09). */
+export interface TaskSortRow extends RowBase {
+  gardenId: string;
+  /** YYYY-MM-DD */
+  day: string;
+  /** Minutes the person has; 0 when no budget was chosen. */
+  budgetMin: number;
+  /** Fingerprint of the list that was sorted. */
+  inputHash: string;
+  items: { key: string; reason: string }[];
+  createdByUserId: string | null;
+}
 
 /**
  * Phase 35: one finding of a photo check. A proposal: nothing in the plan or the catalog

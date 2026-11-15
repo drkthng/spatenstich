@@ -26,6 +26,9 @@ const ROW_ENTITIES: EntityName[] = [
   'observation_drafts',
   'photo_findings',
   'garden_plants',
+  'garden_tasks',
+  'task_done',
+  'task_sorts',
 ];
 
 // Which entities have a garden_id column?
@@ -45,6 +48,9 @@ const GARDEN_ID_COLUMN: Record<EntityName, string | null> = {
   observation_drafts: 'garden_id',
   photo_findings: 'garden_id',
   garden_plants: 'garden_id',
+  garden_tasks: 'garden_id',
+  task_done: 'garden_id',
+  task_sorts: 'garden_id',
 };
 
 // camelCase field name that maps to the garden_id column in the row object
@@ -63,6 +69,9 @@ const GARDEN_ID_FIELD: Record<EntityName, string | null> = {
   observation_drafts: 'gardenId',
   photo_findings: 'gardenId',
   garden_plants: 'gardenId',
+  garden_tasks: 'gardenId',
+  task_done: 'gardenId',
+  task_sorts: 'gardenId',
 };
 
 // Monotonic counter for Outbox created_at (prevents FIFO collisions at same Date.now())
@@ -500,10 +509,19 @@ export class SqliteAdapter implements StorageAdapter {
     });
   }
 
+  // ---- Migration hook V8 (Phase 36: tasks) ----
+  async __createRowTablesV8(): Promise<void> {
+    await this.createPlainTables(['garden_tasks', 'task_done', 'task_sorts']);
+  }
+
   // ---- Migration hook V7 (Phase 35: photo findings, garden plants) ----
   async __createRowTablesV7(): Promise<void> {
+    await this.createPlainTables(['photo_findings', 'garden_plants']);
+  }
+
+  private async createPlainTables(entities: EntityName[]): Promise<void> {
     const db = await this.dbPromise;
-    for (const entity of ['photo_findings', 'garden_plants'] as EntityName[]) {
+    for (const entity of entities) {
       await db.execAsync(`
         CREATE TABLE IF NOT EXISTS ${entity} (
           id TEXT PRIMARY KEY NOT NULL,

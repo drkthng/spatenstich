@@ -9,7 +9,7 @@ type Result = { data: unknown; error: null } | { data: null; error: { code: stri
 const GUARDED = new Set([
   'gardens', 'profiles', 'garden_dimensions', 'plan_elements',
   'imports', 'bed_drafts', 'plant_drafts', 'observation_drafts',
-  'photo_findings', 'garden_plants',
+  'photo_findings', 'garden_plants', 'garden_tasks', 'task_done', 'task_sorts',
 ]);
 
 /** Microseconds of a timestamp string ("...Z" or "...123456+00:00"). */

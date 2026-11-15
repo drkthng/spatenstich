@@ -32,6 +32,10 @@ export type {
   // Phase 35: photo findings and garden-own catalog entries
   PhotoFindingRow,
   GardenPlantRow,
+  // Phase 36: tasks
+  GardenTaskRow,
+  TaskDoneRow,
+  TaskSortRow,
   ImportPayload,
   ImportPayloadBed,
   ImportPayloadPlant,

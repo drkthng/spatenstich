@@ -65,10 +65,11 @@ describe('IndexedDbAdapter Web-specific', () => {
 
     const adapter = new IndexedDbAdapter(name);
     await runMigrations(adapter);
-    expect(await adapter.getSchemaVersion()).toBe(7);
+    expect(await adapter.getSchemaVersion()).toBe(8);
     expect((await adapter.getRowsByGarden('plan_elements', 'g-1')).map((r) => r.id)).toEqual(['e-1']);
     expect(await adapter.getRowsByGarden('photo_findings', 'g-1')).toEqual([]);
     expect(await adapter.getRowsByGarden('garden_plants', 'g-1')).toEqual([]);
+    expect(await adapter.getRowsByGarden('task_done', 'g-1')).toEqual([]);
   });
 
   it('Version-Upgrade 1 → 2 legt alle Row-Stores + Outbox + State an', async () => {

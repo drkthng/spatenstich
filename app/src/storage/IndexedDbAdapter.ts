@@ -18,6 +18,7 @@ const ROW_STORES: EntityName[] = [
   'gardens', 'garden_members', 'profiles', 'vereinsregeln', 'invite_codes',
   'garden_dimensions', 'plan_elements', 'imports', 'import_items', 'bed_drafts',
   'plant_drafts', 'observation_drafts', 'photo_findings', 'garden_plants',
+  'garden_tasks', 'task_done', 'task_sorts',
 ];
 
 // Which entities have a garden_id field (in camelCase JS objects)?
@@ -37,10 +38,15 @@ const GARDEN_ID_COLUMN: Record<EntityName, string | null> = {
   observation_drafts: 'gardenId',
   photo_findings: 'gardenId',
   garden_plants: 'gardenId',
+  garden_tasks: 'gardenId',
+  task_done: 'gardenId',
+  task_sorts: 'gardenId',
 };
 
 /** Phase 35 (local schema version 7). */
 const V7_ENTITIES: EntityName[] = ['photo_findings', 'garden_plants'];
+/** Phase 36 (local schema version 8). */
+const V8_ENTITIES: EntityName[] = ['garden_tasks', 'task_done', 'task_sorts'];
 
 // Monotonic counter for Outbox created_at (prevents FIFO collisions at same ms)
 let outboxCounter = 0;
@@ -49,7 +55,7 @@ export class IndexedDbAdapter implements StorageAdapter {
   private dbPromise: Promise<IDBPDatabase>;
 
   constructor(dbName: string) {
-    this.dbPromise = openDB(dbName, 5, {
+    this.dbPromise = openDB(dbName, 6, {
       // Another tab was opened with a newer version of the app and has to upgrade the
       // database. Holding on to the connection would leave that tab hanging at start,
       // so this older one lets go and loads the new version as well.
@@ -123,6 +129,15 @@ export class IndexedDbAdapter implements StorageAdapter {
         if (oldVersion < 5) {
           // Phase 35: photo findings and garden-own catalog entries
           for (const entity of V7_ENTITIES) {
+            if (!db.objectStoreNames.contains(entity)) {
+              const store = db.createObjectStore(entity, { keyPath: 'id' });
+              store.createIndex('by_gardenId', 'gardenId', { unique: false });
+            }
+          }
+        }
+        if (oldVersion < 6) {
+          // Phase 36: own tasks, ticked-off tasks, the AI's order of a day's list
+          for (const entity of V8_ENTITIES) {
             if (!db.objectStoreNames.contains(entity)) {
               const store = db.createObjectStore(entity, { keyPath: 'id' });
               store.createIndex('by_gardenId', 'gardenId', { unique: false });
@@ -226,6 +241,18 @@ export class IndexedDbAdapter implements StorageAdapter {
     if (missing.length > 0) {
       throw new Error(
         `IndexedDbAdapter: v7 stores missing after upgrade: ${missing.join(', ')}. ` +
+        'Delete dev database and retry.',
+      );
+    }
+  }
+
+  // ---- Migration hook V8 (Phase 36: tasks) ----
+  async __createRowTablesV8(): Promise<void> {
+    const db = await this.dbPromise;
+    const missing = V8_ENTITIES.filter((s) => !db.objectStoreNames.contains(s));
+    if (missing.length > 0) {
+      throw new Error(
+        `IndexedDbAdapter: v8 stores missing after upgrade: ${missing.join(', ')}. ` +
         'Delete dev database and retry.',
       );
     }

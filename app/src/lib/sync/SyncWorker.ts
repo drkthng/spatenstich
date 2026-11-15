@@ -60,6 +60,9 @@ export const PULL_ENTITIES: EntityName[] = [
   'observation_drafts',
   'photo_findings',
   'garden_plants',
+  'garden_tasks',
+  'task_done',
+  'task_sorts',
 ];
 
 export const PAGE_SIZE = 500;
@@ -134,6 +137,9 @@ const CURSOR_SPECS: Partial<Record<EntityName, CursorSpec>> = {
   observation_drafts: importSpec('observation_drafts'),
   photo_findings: plainSpec('photo_findings'),
   garden_plants: plainSpec('garden_plants'),
+  garden_tasks: plainSpec('garden_tasks'),
+  task_done: plainSpec('task_done'),
+  task_sorts: plainSpec('task_sorts'),
 };
 
 export interface PullResult {
@@ -372,6 +378,9 @@ export class SyncWorker {
         return this.pushImportEntity(entry);
       case 'photo_findings':
       case 'garden_plants':
+      case 'garden_tasks':
+      case 'task_done':
+      case 'task_sorts':
         return this.pushPlainRow(entry);
       default:
         throw new Error(`Unknown entity for push: ${(entry as { entity: string }).entity}`);
