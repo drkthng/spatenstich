@@ -30,7 +30,8 @@ export function describeBuild(values: BuildValues): BuildInfo {
 
 /**
  * The operator's lines for the Impressum from EXPO_PUBLIC_IMPRINT: lines separated by line
- * breaks or by "|". Empty when the value is missing, so the screen can say that it is.
+ * breaks or by "|". Empty when the value is missing; the screen then says that the app is run privately for one
+ * household (the usual case: no name and address are needed for that).
  */
 export function imprintLines(raw: string | null | undefined): string[] {
   if (!raw) return [];

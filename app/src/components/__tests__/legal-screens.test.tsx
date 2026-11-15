@@ -20,7 +20,7 @@ describe('Datenschutz', () => {
   it('names where the garden data lies and who is responsible', () => {
     const { getByText } = render(<PrivacyContent dsn={null} />);
     expect(getByText(/Supabase auf Servern in Frankfurt/)).toBeTruthy();
-    expect(getByText(/Name und Anschrift stehen im Impressum/)).toBeTruthy();
+    expect(getByText(/Verantwortlich ist der Betreiber der App. Die App wird privat für einen Haushalt betrieben/)).toBeTruthy();
   });
 
   it('says the truth about crash reports for this build', () => {
@@ -43,12 +43,14 @@ describe('Impressum', () => {
     );
     expect(getByText('Erika Muster')).toBeTruthy();
     expect(getByText('12345 Musterstadt')).toBeTruthy();
-    expect(queryByTestId('legal-imprint-missing')).toBeNull();
+    expect(queryByTestId('legal-imprint-private')).toBeNull();
   });
 
-  it('says so when the operator is not entered', () => {
+  it('says that the app is run privately when no operator is entered, and asks for no address', () => {
     const { getByTestId, queryByTestId } = render(<ImprintContent imprint={undefined} build={build} />);
-    expect(getByTestId('legal-imprint-missing')).toBeTruthy();
+    const text = String(getByTestId('legal-imprint-private').props.children);
+    expect(text).toContain('privat');
+    expect(text).not.toMatch(/noch nicht|fehlt/);
     expect(queryByTestId('legal-imprint-operator')).toBeNull();
   });
 

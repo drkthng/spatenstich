@@ -103,8 +103,8 @@ export function ImprintContent({
           ))}
         </View>
       ) : (
-        <Text className="font-body text-base text-ink mt-2" testID="legal-imprint-missing">
-          {t('legal.imprint.missing')}
+        <Text className="font-body text-base text-ink mt-2" testID="legal-imprint-private">
+          {t('legal.imprint.private')}
         </Text>
       )}
       <Text className="font-body text-base text-ink mt-4">{t('legal.imprint.about')}</Text>

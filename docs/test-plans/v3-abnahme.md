@@ -19,7 +19,7 @@ Welche Ausgabe geprüft wurde, steht unter „Mehr“ ganz unten (Version und Bu
 | V1 | Supabase-Dashboard, Edge Functions, Secrets: `ANTHROPIC_API_KEY` gesetzt. In der Anthropic Console ein Monatslimit von 100 $ gesetzt. | Schlüssel: ja (2026-11-15, Name steht in `supabase secrets list`). Limit: |
 | V2 | Supabase-Dashboard, Authentication, Providers, Email: „Confirm email“ aus. | offen (2026-11-15 abgefragt: Bestätigung ist noch an) |
 | V3 | Supabase-Dashboard, Authentication, Email Templates, „Reset Password“: Text enthält `{{ .Token }}` (der sechsstellige Code). | |
-| V4 | GitHub, Settings, Secrets and variables, Actions, Variables: `EXPO_PUBLIC_IMPRINT` gesetzt, Zeilen mit `\|` getrennt (Name, Straße, Ort, E-Mail). Danach einmal neu ausliefern (Deploy-Workflow von Hand starten). | offen (2026-11-15: Variable fehlt) |
+| V4 | Sobald beide Konten bestehen (nach Abschnitt 2): Supabase-Dashboard, Authentication, Sign In / Providers: „Allow new users to sign up“ aus. Dann kann sich niemand Fremdes registrieren, die App bleibt Sache des Haushalts und braucht kein Impressum mit Name und Anschrift. (2026-11-15 abgefragt: Registrierung ist offen.) | |
 | V5 | Beide Handys: Chrome, Adresse öffnen, Menü, „App installieren“. | |
 
 ## 1. Installation, Teilen, Start ohne Netz (offen aus v2.0, Phase 20)
@@ -36,7 +36,7 @@ Welche Ausgabe geprüft wurde, steht unter „Mehr“ ganz unten (Version und Bu
 
 | # | Prüfschritt | Erwartung | Handy A | Handy B | Desktop |
 |---|---|---|---|---|---|
-| 2.1 | Vor dem Anmelden auf dem Startbildschirm „Datenschutz“ und „Impressum“ öffnen | Beide Seiten lesbar, Pfeil führt zurück; im Impressum stehen Name und Anschrift | | | |
+| 2.1 | Vor dem Anmelden auf dem Startbildschirm „Datenschutz“ und „Impressum“ öffnen | Beide Seiten lesbar, Pfeil führt zurück; im Impressum steht, dass die App privat betrieben wird | | | |
 | 2.2 | Neues Konto ohne Einladungscode anlegen | Drei Schritte (Größe, Postleitzahl, Partner einladen) führen zum Plan | | – | |
 | 2.3 | Partnerin registriert sich mit dem Einladungscode aus 2.2 | Sie sieht in unter drei Minuten den gemeinsamen Plan, kein zweiter leerer Garten | – | | – |
 | 2.4 | „Passwort vergessen?“, Code aus der E-Mail eingeben, neues Passwort setzen | Geht ganz in der installierten App, ohne Wechsel in den Browser | | | |

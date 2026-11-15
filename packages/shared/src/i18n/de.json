@@ -1107,7 +1107,7 @@
     },
     "imprint": {
       "operatorTitle": "Betreiber",
-      "missing": "Name und Anschrift des Betreibers sind in dieser Ausgabe der App noch nicht eingetragen.",
+      "private": "Diese Ausgabe der App wird privat für den eigenen Haushalt betrieben und ist nicht für andere gedacht. Name und Anschrift stehen deshalb nicht hier.",
       "about": "Spatenstich ist eine private, nicht kommerzielle App für den eigenen Kleingarten. Es gibt keine Werbung und kein Angebot an Dritte.",
       "liability": "Kalenderzeiten, Aufgaben und Befunde der KI sind Empfehlungen ohne Gewähr. Ob euer Garten die Regeln des Bundeskleingartengesetzes und eures Vereins einhält, bleibt eure Verantwortung."
     },
@@ -1116,7 +1116,7 @@
       "who": {
         "title": "Wer verantwortlich ist",
         "body": [
-          "Verantwortlich ist der Betreiber der App. Name und Anschrift stehen im Impressum."
+          "Verantwortlich ist der Betreiber der App. Die App wird privat für einen Haushalt betrieben; wer sie mitnutzt, wurde vom Betreiber eingeladen und kennt ihn."
         ]
       },
       "stored": {
@@ -1177,7 +1177,7 @@
       "rights": {
         "title": "Deine Rechte",
         "body": [
-          "Du kannst Auskunft über deine Daten verlangen und sie berichtigen oder löschen lassen. Einen Garten löscht sein Besitzer unter „Mehr“ bei „Mein Garten“. Um dein Konto löschen zu lassen, schreib dem Betreiber; die Anschrift steht im Impressum.",
+          "Du kannst Auskunft über deine Daten verlangen und sie berichtigen oder löschen lassen. Einen Garten löscht sein Besitzer unter „Mehr“ bei „Mein Garten“. Um dein Konto löschen zu lassen, wende dich an den Betreiber.",
           "Du kannst dich außerdem bei einer Datenschutz-Aufsichtsbehörde beschweren."
         ]
       },

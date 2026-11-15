@@ -103,7 +103,7 @@ Für den Weg ohne KI-Kosten in der App richtet jede Person ein eigenes Projekt i
 
 - **Auslieferung:** Jeder Push auf `master` läuft durch Geheimnis-Prüfung, Typprüfung, Lint und Tests und wird danach auf Cloudflare Pages ausgeliefert. Welche Ausgabe läuft, steht in der App unter „Mehr“ ganz unten (Version und Build).
 - **Zurück auf einen früheren Stand:** Cloudflare-Dashboard, Workers & Pages, spatenstich, Deployments, „Rollback“.
-- **Impressum:** Name und Anschrift des Betreibers stehen nicht in diesem öffentlichen Repository. Der Deploy liest sie aus der Repository-Variable `EXPO_PUBLIC_IMPRINT` (Zeilen mit `|` getrennt). Fehlt sie, sagt die Seite „Impressum“ das.
+- **Impressum:** Die App wird privat für einen Haushalt betrieben; die Seite „Impressum“ sagt das und nennt weder Name noch Anschrift. Damit das trägt, sollten neue Registrierungen im Supabase-Dashboard aus sein, sobald alle Konten bestehen. Wer die App für andere öffnet, trägt Name und Anschrift in die Repository-Variable `EXPO_PUBLIC_IMPRINT` ein (Zeilen mit `|` getrennt); sie stehen dann auf der Seite und nicht in diesem Repository.
 - **KI-Zugang:** Einrichtung des Schlüssels, Grenzen, Verbrauchsbuch und die Schlüssel-Prüfung in der CI: `docs/betrieb/ki-zugang.md`.
 - **Aufgaben und Wetter:** Regeln der Aufgabenliste und die Wetterquelle: `docs/betrieb/aufgaben-und-wetter.md`.
 - **Backend wach halten:** Ein GitHub-Zeitplan (`supabase-keepalive.yml`) fragt das Backend regelmäßig ab und legt bei einem Ausfall ein Issue an. Der Zeitplan pausiert nach 60 Tagen ohne Aktivität im Repository. Vorgeschichte: `docs/betrieb/2026-10-backend-ausfall.md`.
