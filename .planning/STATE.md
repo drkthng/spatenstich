@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v3.0
 milestone_name: Garten mit KI
-current_phase: 30
-current_phase_name: Feldführer-Fundament und Editor-Kern
-status: planning
-stopped_at: Phase 30 context gathered
-last_updated: "2026-11-14T10:39:41.798Z"
-last_activity: 2026-11-14
-last_activity_desc: Roadmap v3.0 erstellt (10 Phasen, 75/75 Anforderungen zugeordnet)
-state_head: cde7029f70bd05cc2ae4984ce0200ecfbacbe5dd
+current_phase: 39
+current_phase_name: Abnahme und Release
+status: executing
+stopped_at: Phase 38 ausgeliefert; Phase 39 wartet auf die Geräte-Abnahme (2026-11-15)
+last_updated: "2026-11-15T18:00:00.000Z"
+last_activity: 2026-11-15
+last_activity_desc: Phasen 30–38 umgesetzt und ausgeliefert (ohne GSD-Pläne, direkt auf master)
+state_head: aee7d2855f92851d9535fe6d2944840288b44fcd
 progress:
   total_phases: 10
-  completed_phases: 0
+  completed_phases: 9
   total_plans: 0
   completed_plans: 0
-  percent: 0
+  percent: 90
 ---
 
 # Project State
@@ -30,31 +30,31 @@ See: .planning/MASTERPLAN-v2.md (Detail-Spezifikation für Sync WP 21.x, Editor-
 See: docs/specs/M07-claude-ai-bridge.md (Import-Bridge, bleibt als zweiter Weg)
 
 **Core value:** Ein Gartenplan, den beide gemeinsam exakt pflegen können, und eine App, die daraus sagt, was heute zu tun ist (In-App-KI über eigenen API-Schlüssel seit Pivot 2026-11-13)
-**Current focus:** Phase 30 — Feldführer-Fundament und Editor-Kern
+**Current focus:** Phase 39 — Abnahme und Release
 
 ## Current Position
 
-Phase: 30 of 39 (Feldführer-Fundament und Editor-Kern)
-Plan: — (noch nicht geplant)
-Status: Roadmap erstellt, bereit für `/gsd-discuss-phase 30`
-Last activity: 2026-11-14 — Roadmap v3.0 erstellt (10 Phasen, 75/75 Anforderungen zugeordnet)
+Phase: 39 of 39 (Abnahme und Release)
+Plan: — (seit 2026-11-14 wird ohne GSD-Pläne direkt umgesetzt; was je Phase gebaut, entschieden und geprüft wurde, steht in den Commit-Nachrichten `feat(30)` bis `feat(38)`)
+Status: Phasen 30–38 umgesetzt und auf `https://spatenstich.pages.dev` ausgeliefert. Offen ist, was nur an den Geräten geht: Abnahme nach `docs/test-plans/v3-abnahme.md`, Kostenmessung mit echten KI-Anfragen, danach Tag `v3.0.0`.
+Last activity: 2026-11-15 — Phase 38 (Feinschliff) ausgeliefert; Prüfliste, README und Planungsdokumente für Phase 39 aktualisiert
 
-Progress: [░░░░░░░░░░] 0% (0 von 10 Phasen)
+Progress: [█████████░] 90% (9 von 10 Phasen umgesetzt, Geräte-Abnahme offen)
 
 ## Phasen v3.0
 
 | Phase | Name | Anforderungen | Pläne (Schätzung) | Status |
 |-------|------|---------------|-------------------|--------|
-| 30 | Feldführer-Fundament und Editor-Kern | DESIGN3-01..03, EDIT3-01..08 (11) | ~5 | Nicht begonnen |
-| 31 | Editor im Alltag | EDIT3-09, 10, 11, 16, 17, 18 (6) | ~4 | Nicht begonnen |
-| 32 | Präzision und ein Editor | EDIT3-12, 13, 14, 15, 19 (5) | ~4 | Nicht begonnen |
-| 33 | Verlässlicher Sync | SYNC3-01..09 (9) | ~6 | Nicht begonnen |
-| 34 | KI-Zugang mit Verbrauchsgrenze | AI-01..08 (8) | ~4 | Nicht begonnen |
-| 35 | Foto-Abgleich | PHOTO-01..11 (11) | ~7 | Nicht begonnen |
-| 36 | Aufgaben für heute | TASK-01..10 (10) | ~6 | Nicht begonnen |
-| 37 | Navigation, Onboarding, Konto | NAV3-01..07 (7) | ~4 | Nicht begonnen |
-| 38 | Feinschliff | DESIGN3-04..08 (5) | ~4 | Nicht begonnen |
-| 39 | Abnahme und Release | UAT3-01..03 (3) | ~2 | Nicht begonnen |
+| 30 | Feldführer-Fundament und Editor-Kern | DESIGN3-01..03, EDIT3-01..08 (11) | – | Umgesetzt 2026-11-14, Geräte-Abnahme offen |
+| 31 | Editor im Alltag | EDIT3-09, 10, 11, 16, 17, 18 (6) | – | Umgesetzt 2026-11-14, Geräte-Abnahme offen |
+| 32 | Präzision und ein Editor | EDIT3-12, 13, 14, 15, 19 (5) | – | Umgesetzt 2026-11-14, Geräte-Abnahme offen |
+| 33 | Verlässlicher Sync | SYNC3-01..09 (9) | – | Umgesetzt 2026-11-14, Geräte-Abnahme offen |
+| 34 | KI-Zugang mit Verbrauchsgrenze | AI-01..08 (8) | – | Umgesetzt 2026-11-14, Geräte-Abnahme offen |
+| 35 | Foto-Abgleich | PHOTO-01..11 (11) | – | Umgesetzt 2026-11-15, Geräte-Abnahme offen |
+| 36 | Aufgaben für heute | TASK-01..10 (10) | – | Umgesetzt 2026-11-15, Geräte-Abnahme offen |
+| 37 | Navigation, Onboarding, Konto | NAV3-01..07 (7) | – | Umgesetzt 2026-11-15, Geräte-Abnahme offen |
+| 38 | Feinschliff | DESIGN3-04..08 (5) | – | Umgesetzt 2026-11-15, Geräte-Abnahme offen |
+| 39 | Abnahme und Release | UAT3-01..03 (3) | – | In Arbeit (Prüfliste liegt vor) |
 
 Summe: 75 Anforderungen, rund 46 Pläne (Schätzung, wird je Phase in `/gsd-plan-phase` festgelegt).
 
@@ -163,25 +163,27 @@ Keine. (`todos/freier-foto-upload.md` gestrichen — Foto-Upload ist seit M07 ou
 
 ### Blockers/Concerns
 
-- **Backend nicht erreichbar (blockiert SYNC3-01 und alles danach, ab Phase 33):** Der Hostname des Supabase-Projekts `vitrqkzxkiqvadqfzrcx` löst seit Anfang Oktober 2026 nicht mehr auf. Dirk stellt es im Dashboard wieder her. Der Schritt ist von den Phasen 30–32 unabhängig und sollte früh erfolgen, nicht erst vor Phase 33; ob die Wiederherstellung eines pausierten Free-Projekts nur für begrenzte Zeit möglich ist, ist im Dashboard zu prüfen.
-- **Manuelle Schritte (nur Dirk), Details MASTERPLAN-v2.md Kap. 5:** M5 DB-Backup — vor der ersten Migration in Phase 33; M4 E-Mail-Bestätigung aus + Reset-Template mit Code — vor Phase 37 (NAV3-04); M7 Impressum-Text — vor Phase 38 (DESIGN3-08). M1–M3 (Cloudflare, GitHub-Variablen, Supabase Site-URL) gehörten zum Deploy von Phase 20.
-- **KI-Zugang, manuell (Dirk), vor Abschluss von Phase 34:** API-Schlüssel als Edge-Function-Secret hinterlegen (nie in Repository, Log oder Bundle; Repo ist öffentlich) und das 100-$-Monatslimit zusätzlich in der Anthropic Console setzen.
-- **Offene Abnahme aus v2.0 Phase 20** (Installation auf beiden Handys, Teilen-Menü, Offline-Start) → Phase 39 (UAT3-01).
-- Migration 020 (Cleanup) ist destruktiv und bereits live gepusht (Phase 20); künftige Migrationen weiter nach 3-Gate-Push mit vorherigem Backup.
-- SDK-Mix (Expo 53 / RN 0.76.7 / React 18.3.1 / zwei SDK-55-Module) bleibt; SDK-Angleichung ist Backlog (TECH-F1). Web-Export funktioniert damit.
-- Sentry-DSN in `app/.env` zeigt auf US-Ingest, `.env.example` auf EU — bei der nächsten Konfiguration EU-DSN verwenden.
-- Zuschnitt: 10 Phasen und rund 46 Pläne gegen den Zeitpunkt Ende Februar 2027; v1.1 schaffte 23 Pläne in rund 4 Wochen Teilzeit. Phase 35 (11 Anforderungen, ~7 Pläne) ist die größte Einzelphase und der erste Kandidat zum Teilen, falls die Planung sie zu groß findet.
+Stand 2026-11-15. Erledigt und deshalb hier gestrichen: Backend-Ausfall (seit Phase 33 wieder erreichbar und überwacht, `docs/betrieb/2026-10-backend-ausfall.md`).
+
+- **Offen, nur Dirk (Vorbereitung der Abnahme, `docs/test-plans/v3-abnahme.md` Abschnitt 0):** API-Schlüssel als Secret `ANTHROPIC_API_KEY` der Edge Functions und 100-$-Limit in der Anthropic Console; E-Mail-Bestätigung aus und Reset-Vorlage mit `{{ .Token }}` im Supabase-Dashboard; Repository-Variable `EXPO_PUBLIC_IMPRINT` mit Name und Anschrift für das Impressum; App auf beiden Handys installieren.
+- **Noch nie mit echtem Dienst geprüft:** eine echte KI-Anfrage (Test, Foto-Abgleich, Sortierung), die echte Wettervorhersage mit Anmeldung, Registrierung mit Einladungscode, Passwort-Reset mit echter E-Mail, Abgleich zwischen zwei angemeldeten Geräten, Start ohne Netz auf dem Handy. Alles steht in der Prüfliste.
+- **Datenschutztext** (`legal.privacy` in `de.json`) ist ein Entwurf aus dem, was der Code tut; vor der Nutzung zu zweit vom Betreiber lesen.
+- **Lizenz:** Das README nennt AGPL-3.0, eine Datei `LICENSE` liegt nicht im Repository.
+- **Sentry:** Die Datenschutzseite sagt je nach hinterlegter Adresse „EU“ oder „auch außerhalb der EU“. Die lokale `app/.env` zeigte auf den US-Eingang; für die Auslieferung zählt das GitHub-Secret `EXPO_PUBLIC_SENTRY_DSN`.
+- SDK-Mix (Expo 53 / RN 0.76.7 / React 18.3.1) bleibt; SDK-Angleichung ist Backlog (TECH-F1).
+- Migrationen weiter nach 3-Gate-Push; ein Backup vorher ist laut Dirk (2026-11-14) vorerst nicht nötig, solange wenig echte Daten im Garten liegen.
 
 ## Session Continuity
 
-Last session: 2026-11-14T10:39:41.685Z
-Stopped at: Phase 30 context gathered
-Resume file: .planning/phases/30-feldf-hrer-fundament-und-editor-kern/30-CONTEXT.md
+Last session: 2026-11-15
+Stopped at: Phase 38 ausgeliefert; Phase 39 wartet auf die Geräte-Abnahme
+Resume file: docs/test-plans/v3-abnahme.md
 
-Next: `/gsd-ui-phase 30` (Phase 30 hat UI-Anteil), dann `/gsd-plan-phase 30`; Forschung findet je Phase bei der Planung statt
+Next: Vorbereitung V1–V5 der Prüfliste (nur Dirk), dann Abnahme auf beiden Handys und am Desktop; Befunde beheben, jeweils mit Test; Kosten messen und in `docs/betrieb/ki-zugang.md` festhalten; Version auf 3.0.0 setzen und `v3.0.0` taggen.
 
 ## Operator Next Steps
 
-1. Roadmap v3.0 prüfen und freigeben (`.planning/ROADMAP.md`), dann committen.
-2. `/gsd-discuss-phase 30`, danach `/gsd-ui-phase 30` und `/gsd-plan-phase 30`.
-3. Parallel (Dirk, unabhängig von den Editor-Phasen): Supabase-Projekt im Dashboard wiederherstellen; später M5 (Backup), vor Phase 34 den API-Schlüssel und das Console-Limit, vor Phase 37 M4, vor Phase 38 M7.
+1. Vorbereitung V1–V5 aus `docs/test-plans/v3-abnahme.md` erledigen (Schlüssel, Supabase-Einstellungen, Impressum-Variable, Installation).
+2. Prüfliste auf beiden Handys und am Desktop durchgehen; Befunde in die Tabelle am Ende eintragen.
+3. Kosten nach Abschnitt 9 der Prüfliste aus dem Verbrauchsbuch ablesen.
+4. Danach: Befunde beheben lassen (je mit Test), Version auf 3.0.0 setzen, Tag `v3.0.0`.

@@ -66,15 +66,15 @@
 - Heute (36) vor Tabs und Onboarding (37): die Navigation braucht den Inhalt von „Heute“ und die Plan-Vorschau.
 - Abnahme (39) zuletzt.
 
-- [ ] **Phase 30: Feldführer-Fundament und Editor-Kern** - Tokens, Schriften, Plan als Tafel; verschieben, Größe, einseitig ziehen, drehen, umbenennen, Zoom/Pan mit Finger und Maus
-- [ ] **Phase 31: Editor im Alltag** - Palette und Platzieren, Mehrfachauswahl, Rückgängig/Wiederholen, Tastatur, verlässliches Speichern
-- [ ] **Phase 32: Präzision und ein Editor** - Pflanzen folgen dem Beet, Einrasten, freie Umrisse, Parzellengrenze, Skia raus, 200 Elemente flüssig
-- [ ] **Phase 33: Verlässlicher Sync** - Backend zurück und überwacht, echtes Last-Write-Wins, Echtzeit, Konto- und Gartendaten
-- [ ] **Phase 34: KI-Zugang mit Verbrauchsgrenze** - Edge Function, Schlüssel als Server-Secret, Verbrauchsbuch, Monatsgrenze, verständliche Fehler
-- [ ] **Phase 35: Foto-Abgleich** - Fotos gegen den Plan, Befunde über die Sichtung, Katalogvorschlag, Nahaufnahme-Anfrage
-- [ ] **Phase 36: Aufgaben für heute** - Heute-Bildschirm, Tagesliste, „Ich habe N Minuten“, KI-Sortierung, Wetter, Erledigt-Status
-- [ ] **Phase 37: Navigation, Onboarding, Konto** - Tabs, Onboarding, Beitritt per Code, Passwort-Reset, Mehr
-- [ ] **Phase 38: Feinschliff** - ein Icon-Satz, Klartext, Lesbarkeit im Freien, Kalender, Datenschutz und Impressum
+- [x] **Phase 30: Feldführer-Fundament und Editor-Kern** - Tokens, Schriften, Plan als Tafel; verschieben, Größe, einseitig ziehen, drehen, umbenennen, Zoom/Pan mit Finger und Maus (umgesetzt 2026-11-14; Geräte-Abnahme in Phase 39)
+- [x] **Phase 31: Editor im Alltag** - Palette und Platzieren, Mehrfachauswahl, Rückgängig/Wiederholen, Tastatur, verlässliches Speichern (umgesetzt 2026-11-14; Geräte-Abnahme in Phase 39)
+- [x] **Phase 32: Präzision und ein Editor** - Pflanzen folgen dem Beet, Einrasten, freie Umrisse, Parzellengrenze, Skia raus, 200 Elemente flüssig (umgesetzt 2026-11-14; Geräte-Abnahme in Phase 39)
+- [x] **Phase 33: Verlässlicher Sync** - Backend zurück und überwacht, echtes Last-Write-Wins, Echtzeit, Konto- und Gartendaten (umgesetzt 2026-11-14; Geräte-Abnahme in Phase 39)
+- [x] **Phase 34: KI-Zugang mit Verbrauchsgrenze** - Edge Function, Schlüssel als Server-Secret, Verbrauchsbuch, Monatsgrenze, verständliche Fehler (umgesetzt 2026-11-14; Geräte-Abnahme in Phase 39)
+- [x] **Phase 35: Foto-Abgleich** - Fotos gegen den Plan, Befunde über die Sichtung, Katalogvorschlag, Nahaufnahme-Anfrage (umgesetzt 2026-11-15; Geräte-Abnahme in Phase 39)
+- [x] **Phase 36: Aufgaben für heute** - Heute-Bildschirm, Tagesliste, „Ich habe N Minuten“, KI-Sortierung, Wetter, Erledigt-Status (umgesetzt 2026-11-15; Geräte-Abnahme in Phase 39)
+- [x] **Phase 37: Navigation, Onboarding, Konto** - Tabs, Onboarding, Beitritt per Code, Passwort-Reset, Mehr (umgesetzt 2026-11-15; Geräte-Abnahme in Phase 39)
+- [x] **Phase 38: Feinschliff** - ein Icon-Satz, Klartext, Lesbarkeit im Freien, Kalender, Datenschutz und Impressum (umgesetzt 2026-11-15; Geräte-Abnahme in Phase 39)
 - [ ] **Phase 39: Abnahme und Release** - Geräte-Abnahme auf beiden Handys und Desktop, Kostenmessung, Tag v3.0.0
 
 ## Phase Details
@@ -248,16 +248,16 @@ Phasen laufen in numerischer Reihenfolge: 30 → 31 → 32 → 33 → 34 → 35 
 | 1–7.5a (v1.0) | 34/34 | ✅ Shipped | 2026-05-17 |
 | 8–10 (v1.1) | 23/23 | ✅ Shipped | 2026-09-09 |
 | 20 (v2.0; 21–25 in v3.0 aufgegangen) | 4/4 | ✅ Shipped (Geräte-Abnahme → Phase 39) | 2026-09-29 |
-| 30. Feldführer-Fundament und Editor-Kern | 0/~5 | Not started | - |
-| 31. Editor im Alltag | 0/~4 | Not started | - |
-| 32. Präzision und ein Editor | 0/~4 | Not started | - |
-| 33. Verlässlicher Sync | 0/~6 | Not started | - |
-| 34. KI-Zugang mit Verbrauchsgrenze | 0/~4 | Not started | - |
-| 35. Foto-Abgleich | 0/~7 | Not started | - |
-| 36. Aufgaben für heute | 0/~6 | Not started | - |
-| 37. Navigation, Onboarding, Konto | 0/~4 | Not started | - |
-| 38. Feinschliff | 0/~4 | Not started | - |
-| 39. Abnahme und Release | 0/~2 | Not started | - |
+| 30. Feldführer-Fundament und Editor-Kern | ohne GSD-Pläne | Umgesetzt und ausgeliefert, Geräte-Abnahme offen | 2026-11-14 |
+| 31. Editor im Alltag | ohne GSD-Pläne | Umgesetzt und ausgeliefert, Geräte-Abnahme offen | 2026-11-14 |
+| 32. Präzision und ein Editor | ohne GSD-Pläne | Umgesetzt und ausgeliefert, Geräte-Abnahme offen | 2026-11-14 |
+| 33. Verlässlicher Sync | ohne GSD-Pläne | Umgesetzt und ausgeliefert, Geräte-Abnahme offen | 2026-11-14 |
+| 34. KI-Zugang mit Verbrauchsgrenze | ohne GSD-Pläne | Umgesetzt und ausgeliefert, Geräte-Abnahme offen | 2026-11-14 |
+| 35. Foto-Abgleich | ohne GSD-Pläne | Umgesetzt und ausgeliefert, Geräte-Abnahme offen | 2026-11-15 |
+| 36. Aufgaben für heute | ohne GSD-Pläne | Umgesetzt und ausgeliefert, Geräte-Abnahme offen | 2026-11-15 |
+| 37. Navigation, Onboarding, Konto | ohne GSD-Pläne | Umgesetzt und ausgeliefert, Geräte-Abnahme offen | 2026-11-15 |
+| 38. Feinschliff | ohne GSD-Pläne | Umgesetzt und ausgeliefert, Geräte-Abnahme offen | 2026-11-15 |
+| 39. Abnahme und Release | ohne GSD-Pläne | In Arbeit: Prüfliste und README liegen vor; Geräte-Abnahme, Kostenmessung und Tag offen | - |
 
 ## Backlog
 
@@ -277,4 +277,4 @@ Siehe `.planning/BACKLOG.md` (999.x), die „Future Requirements“ in `REQUIREM
 
 ---
 
-*Last updated: 2026-11-14 — Roadmap für Milestone v3.0 „Garten mit KI“ erstellt (Phasen 30–39)*
+*Last updated: 2026-11-15 — Phasen 30–38 umgesetzt und ausgeliefert (ohne GSD-Pläne, direkt auf `master`); Phase 39 wartet auf die Geräte-Abnahme (`docs/test-plans/v3-abnahme.md`)*

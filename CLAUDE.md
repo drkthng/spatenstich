@@ -3,21 +3,23 @@
 
 **Kleingarten-App**
 
-Persönlicher digitaler Kleingarten-Assistent für deutsche Kleingärtner. Die App ermöglicht manuelle Gartenplanung mit interaktivem 2D-Plan-Editor und kombiniert jahreszyklische Aussaat-/Pflanzplanung. Optional: KI-gestützte Analyse über externes Claude.ai-Projekt (Dirks Max-Abo), dessen strukturierte JSON-Ergebnisse per Import-Bridge in die App fließen. MVP für 2 Nutzer (Dirk + Frau) im Shared Garden Model. **Die App selbst macht null ausgehende KI-API-Aufrufe.**
+Persönlicher digitaler Kleingarten-Assistent für deutsche Kleingärtner. Zwei Personen (Dirk + Partnerin) pflegen über eigene Konten und Geräte (Android-Handys + Desktop-Browser) denselben Garten in einem exakten 2D-Plan-Editor, mit Aussaatkalender und Aufgabenliste. **Seit dem Pivot vom 2026-11-13 nutzt die App die Claude-API über Dirks eigenen API-Schlüssel (Budget 100 $/Monat)** für Foto-Abgleich und Aufgaben-Sortierung. Die Claude.ai-Import-Bridge bleibt als zweiter Weg.
 
-**Core Value:** Manueller Plan-Editor + strukturierter Import aus Claude.ai: Dirk plant seine Parzelle digital — per Hand oder beschleunigt durch KI-Analyse im externen Claude.ai-Projekt.
+**Core Value:** Ein Gartenplan, den beide gemeinsam exakt pflegen können, und eine App, die daraus sagt, was heute zu tun ist. Der Editor ist das Herzstück.
 
 ### Constraints
 
-- **Tech Stack:** Expo (React Native) mit Web-Export — eine Codebase für iOS, Android, Desktop-Browser
-- **Backend:** Supabase (Frankfurt, EU) — Postgres + Auth + Storage + Edge Functions. DSGVO-konform.
-- **Keine In-App AI:** Zero outbound AI calls. Kein Anthropic SDK, kein Pl@ntNet, kein Replicate. Import-Bridge für Claude.ai-Ergebnisse ist der einzige KI-Weg.
-- **Offline:** App startet und zeigt letzten Plan ohne Netz; Import-Queue offline. Sync erfordert Verbindung.
-- **Plan-Rendering:** SVG-basiert (react-native-svg / natives SVG im Web). Bei > 50 Elementen: Upgrade auf @shopify/react-native-skia erwogen.
-- **Lokale Persistenz:** expo-sqlite (strukturierte Daten) + expo-file-system. Sync-Layer: eigene simple Operation-Log-Queue, Last-Write-Wins (2-User Shared Garden).
-- **Datenschutz:** Fotos bleiben auf dem Gerät oder im Claude.ai-Chat. Spatenstich importiert Analyse, nicht Bilder. DSGVO-konform (EU-Hosting).
+- **Tech Stack:** Expo (React Native) mit Web-Export — web-first PWA für Android Chrome und Desktop-Browser, kein nativer Build
+- **Backend:** Supabase (Frankfurt, EU) — Postgres + Auth + Realtime + Edge Functions. DSGVO-konform.
+- **KI nur serverseitig:** Claude-API-Aufrufe ausschließlich aus einer Supabase Edge Function mit dem offiziellen Anthropic-SDK. Der API-Schlüssel ist ein Server-Secret und darf nie in Client-Code, Bundle, Commit oder Log stehen (Repo ist public). Jede Anfrage wird pro Garten im Verbrauchsbuch erfasst; Monatsgrenze 100 $. Standardmodell `claude-opus-5-5`.
+- **KI ändert den Plan nie ohne Bestätigung:** Vorschläge laufen durch die bestehende Sichtung.
+- **Offline:** App startet und zeigt letzten Plan und die Grund-Aufgabenliste ohne Netz. Sync, Foto-Abgleich und KI-Sortierung erfordern Verbindung.
+- **Plan-Rendering:** SVG im Web-DOM, ein `PlanEditor` mit Pointer-Events für Finger und Maus; Skia wird entfernt.
+- **Lokale Persistenz:** IndexedDB hinter `StorageAdapter`. Sync-Layer: eigene Outbox, Last-Write-Wins nach Bearbeitungszeit (2-User Shared Garden).
+- **Datenschutz:** Fotos verlassen das Gerät nur zur Analyse (Edge Function → Anthropic API) und werden nicht gespeichert; gespeichert werden nur Befunde. EU-Hosting für gespeicherte Daten.
+- **Design:** „Feldführer" (Sketch 001, `.planning/sketches/MANIFEST.md`, Tokens in `.planning/sketches/themes/feldfuehrer.css`).
 - **Monorepo:** pnpm workspaces mit `app/`, `supabase/` (Migrations + Edge Functions), `packages/shared`.
-- **Timeline:** MVP-Ziel Ende Juni 2026 (realistisch mit Buffer). Harte Deadline: Saison 2026 muss nutzbar sein.
+- **Timeline:** Nutzbar zum Vorkultur-Start der Saison 2027 (Ende Februar 2027). Reihenfolge: Editor zuerst.
 <!-- GSD:project-end -->
 
 <!-- GSD:stack-start source:research/STACK.md -->
@@ -33,14 +35,6 @@ Anhang A genannten Entfernungen/Ergaenzungen):
 Direct Upload aus GitHub Actions bei jedem Push auf `master`); Hosting/Backend bleibt
 Supabase Free (Frankfurt), wach gehalten durch einen GitHub-Zeitplan alle drei Tage plus
 einen taeglichen Task-Scheduler-Ping vom 24/7-PC (Keep-alive).
-
-## Ist-Stack (installiert, `app/package.json`)
-| Library / Tool | Ist-Version | Quelle |
-|---|---|---|
-| Expo SDK | 53.0.27 | `app/package.json` / `node_modules/expo/package.json` |
-| React Native | 0.76.7 | `app/package.json` / `node_modules/react-native/package.json` |
-| React | 18.3.1 | `app/package.json` / `node_modules/react/package.json` |
-| Expo Router | 4.0.22 | `app/package.json` / `node_modules/expo-router/package.json` |
 
 ## Recommended Stack (Zielzustand ab Phase 29 — SDK-Upgrade, siehe MASTERPLAN-v2.md)
 | Library / Tool | Version | Purpose | Confidence |
@@ -63,8 +57,7 @@ einen taeglichen Task-Scheduler-Ping vom 24/7-PC (Keep-alive).
 | expo-secure-store | latest | Token storage for auth | HIGH |
 | TypeScript | 5.x | Type safety throughout | HIGH |
 | pnpm workspaces | 9.x | Monorepo: app/, supabase/, packages/shared | MEDIUM |
-| Deno (Supabase Edge Functions) | 2.x | Server-side utilities (no AI calls) | HIGH |
-## Key Findings
+| Deno (Supabase Edge Functions) | 2.x | Server-side utilities and the only place Claude API calls are made | HIGH |
 ## What NOT to Use
 | Rejected | Why Not |
 |---|---|
@@ -77,26 +70,8 @@ einen taeglichen Task-Scheduler-Ping vom 24/7-PC (Keep-alive).
 | Expo Webpack | Deprecated. Expo Router on Metro is the only supported web path in SDK 52+. |
 | `@supabase/supabase-js` < 2.49.5 | Broken under Metro ES module resolution (RN 0.79+). The `ws` stream import error blocks all Supabase usage, not just Realtime. |
 | react-native-reanimated v4 | Not yet stable with NativeWind v4 on SDK 53-54. Stay on v3 until compatibility is confirmed on SDK 55. |
-| Pl@ntNet client-side | No longer relevant — all AI calls removed (Pivot M07). |
-| Anthropic SDK in client | Zero in-app AI calls. All analysis via external Claude.ai project. |
-## Open Questions
-## Sources
-- [Expo SDK 55 Changelog](https://expo.dev/changelog/sdk-55)
-- [Expo SDK 53 Changelog](https://expo.dev/changelog/sdk-53) — Metro package.json exports default-on
-- [Expo Monorepo Guide](https://docs.expo.dev/guides/monorepos/) — pnpm hoisted config
-- [React Native Skia](https://shopify.github.io/react-native-skia/) — Skia gestures docs
-- [Shopify: Getting Started with RN Skia](https://shopify.engineering/getting-started-with-react-native-skia)
-- [SW Mansion: You Might Not Need react-native-svg](https://blog.swmansion.com/you-might-not-need-react-native-svg-b5c65646d01f)
-- [Supabase JS Metro issue #1403](https://github.com/supabase/supabase-js/issues/1403) — ws/stream error with RN 0.79
-- [Expo: Libraries incompatible with Metro ES Module resolution](https://github.com/expo/expo/discussions/36551)
-- [expo-sqlite SQLite docs](https://docs.expo.dev/versions/latest/sdk/sqlite/)
-- [expo-sqlite web SharedArrayBuffer issue #38481](https://github.com/expo/expo/issues/38481)
-- [NativeWind installation docs](https://www.nativewind.dev/docs/getting-started/installation)
-- [NativeWind vs Tamagui vs twrnc 2026](https://www.pkgpulse.com/blog/nativewind-vs-tamagui-vs-twrnc-react-native-styling-2026)
-- [pnpm + Expo monorepo issue: isolated deps failing](https://github.com/expo/expo/issues/41806)
-- [EAS CLI pnpm lockfile detection issue #3247](https://github.com/expo/eas-cli/issues/3247)
-- [React Native 0.83 release notes](https://reactnative.dev/blog/2025/12/10/react-native-0.83)
-- [TanStack Query offline-first sample (Expo + SQLite)](https://github.com/kapobajza/React_Native_Offline_first_sample)
+| Pl@ntNet client-side | Not used — plant identification goes through the Claude API in the Edge Function. |
+| Anthropic SDK in client | The API key must never reach a device or the bundle. Call Claude only from the Supabase Edge Function. |
 <!-- GSD:stack-end -->
 
 <!-- GSD:conventions-start source:CONVENTIONS.md -->

@@ -1,163 +1,134 @@
-# Spatenstich 🌱
+# Spatenstich
 
-> Persönlicher digitaler Kleingarten-Assistent für deutsche Kleingärtner.
+> Ein Kleingarten, zwei Personen, ein genauer Plan, und eine App, die daraus sagt, was heute zu tun ist.
 
-**Status:** MVP in Entwicklung · Saison 2026 · Milestone v2.0 (Phase 20: Fundament, Aufräumen, PWA-Deploy)
+**Stand:** v3.0 „Garten mit KI“ ist gebaut und ausgeliefert unter `https://spatenstich.pages.dev`. Die Abnahme auf den beiden Handys und am Desktop steht aus (`docs/test-plans/v3-abnahme.md`); danach folgt der Tag `v3.0.0`. Ziel: nutzbar zum Start der Vorkultur Ende Februar 2027.
 
-**v2.0 ist Web-first:** Spatenstich läuft als installierbare PWA in Chrome (Android-Handy + Desktop-Browser). Ein nativer Build (iOS/Android-Store) ist für v2.0 bewusst deaktiviert und kommt erst wieder ab Phase 29.
-
----
-
-## Was ist das?
-
-Spatenstich kombiniert manuellen Gartenplan-Editor mit strukturiertem Import aus Claude.ai und jahreszyklischer Aussaat- und Pflanzplanung mit dem Kontext des Bundeskleingartengesetzes und deiner Vereinssatzung.
-
-**Plan erstellen → Kalender und Empfehlungen raus.**
-
-Kein generisches Garten-App-Feature-Bingo. Sondern ein Assistent, der weiß:
-- dass Walnussbäume im Kleingarten oft verboten sind
-- dass "Mitte Mai nach den Eisheiligen" in München zwei Wochen später ist als in Freiburg
-- dass dein Verein maximal 24 m² Laube erlaubt
+Spatenstich ist eine private, nicht kommerzielle App für einen Kleingarten in Deutschland. Sie läuft als installierbare Web-App in Chrome auf Android und im Desktop-Browser. Eine App aus dem Play Store gibt es nicht.
 
 ---
 
-## Features (MVP)
+## Was die App kann
 
-| Feature | Beschreibung | Status |
-|---------|--------------|--------|
-| **Manueller Plan-Editor** | Interaktiver 2D-Plan mit Drag & Drop von Beeten, Pflanzen, Infrastruktur | 🔜 Geplant |
-| **Claude.ai Import** | Strukturierter Import aus externem Claude.ai-Projekt (zero In-App AI) | 🔜 Geplant |
-| **Saatgut-Inventar** | Manuelle Erfassung von Sorten und Inventar | 🔜 Geplant |
-| **Pflanz-/Aussaatkalender** | Wann was wo pflanzen – auf Basis Inventar, Plan und Klimazone | 🔜 Geplant |
-| **Profil & Vereinsregeln** | PLZ → Klimazone, Archetyp, manuelle Vereinsregeln | 🔜 Geplant |
+| Bereich | Was er tut |
+|---|---|
+| **Plan** | Maßstäblicher 2D-Plan der Parzelle. Beete, Pflanzen und Anlagen setzen, verschieben, in der Größe ändern, drehen, benennen; freie Umrisse; Einrasten an Raster und Nachbarn; Rückgängig. Derselbe Editor für Finger und Maus. |
+| **Gemeinsamer Garten** | Zwei Konten pflegen denselben Garten. Änderungen kommen in Sekunden beim anderen an; wer offline war, gleicht später ab, die spätere Bearbeitung gilt. |
+| **Heute** | Aufgabenliste aus Plan, Kalender, Jahreszeit und Wettervorhersage, mit Zeitbudget („Ich habe 30 Minuten“). Entsteht auf dem Gerät und geht ohne Netz; mit Netz bringt die KI sie in eine sinnvolle Reihenfolge. Abhaken sieht auch der andere. |
+| **Kalender** | Vorziehen, Säen, Auspflanzen und Ernten für rund 90 Pflanzen, nach Klimazone der Postleitzahl. Suche, „In eurem Plan“, „Alle Pflanzen“, Markierung für heute. |
+| **Foto-Abgleich** | Fotos vom Garten werden mit dem Plan verglichen. Heraus kommen Befunde (Größe, Lage, Fehlendes, neue Pflanzen, Schädlinge), die einzeln angenommen oder abgelehnt werden. Ohne Bestätigung ändert sich am Plan nichts. |
+| **KI-Budget** | Jede KI-Anfrage steht mit Kosten im Verbrauchsbuch des Gartens. Eine Monatsgrenze (Vorgabe 100 $) sperrt weitere Anfragen, alles andere geht weiter. |
+| **Import aus Claude.ai** | Zweiter Weg ohne Kosten in der App: Ergebnis aus einem eigenen Claude.ai-Projekt einfügen oder teilen, sichten, übernehmen. |
+| **Ohne Netz** | Die App startet und zeigt den letzten Plan und die Aufgabenliste. Abgleich, Foto-Abgleich und KI-Sortierung brauchen eine Verbindung. |
 
 ---
 
-## Tech Stack
+## Was mit Daten geschieht
+
+- Konto und Garten liegen bei Supabase auf Servern in Frankfurt am Main.
+- Fotos verlassen das Gerät nur für einen Foto-Abgleich. Sie gehen über eine eigene Server-Funktion an die Claude-API von Anthropic (USA) und werden von Spatenstich nicht gespeichert; gespeichert werden nur die Befunde.
+- Der API-Schlüssel liegt ausschließlich als Geheimnis auf dem Server. Er steht in keinem Gerät, keinem Bundle und nicht in diesem Repository; die CI prüft das bei jedem Lauf.
+- Der vollständige Text steht in der App unter „Mehr“, „Datenschutz“ und ist auch vor dem Anmelden lesbar (`/datenschutz`).
+
+---
+
+## Technik
 
 ```
-Client (Expo: iOS / Android / Web)
-  └── expo-sqlite (Offline-Cache)
-        └── Sync-Queue (Operation Log)
-              └── Supabase (Frankfurt, EU)
-                    ├── Postgres + Auth + Storage
-                    ├── Edge Functions
-                    └── (future) Weather API
+Browser (Android Chrome, Desktop)            Supabase (Frankfurt)
+  Expo / React Native Web, als PWA             Postgres mit Zeilenrechten
+  Plan-Editor: SVG, Pointer-Events             Auth, Realtime
+  IndexedDB (letzter Stand, Warteschlange) ──► Edge Function `ai`      ──► Claude-API (Anthropic)
+  Service Worker (Start ohne Netz)             Edge Function `weather` ──► Open-Meteo, Zippopotam
 ```
 
-- **Frontend:** [Expo](https://expo.dev) (React Native) mit Web-Export · TypeScript
-- **Backend:** [Supabase](https://supabase.com) (Frankfurt) · Postgres · Edge Functions
+- **App:** [Expo](https://expo.dev) mit Web-Export, TypeScript, NativeWind, Zustand, TanStack Query
+- **Backend:** [Supabase](https://supabase.com): Postgres, Auth, Realtime, Edge Functions (Deno)
+- **KI:** offizielles Anthropic-SDK, nur in der Edge Function `ai`; Standardmodell `claude-opus-5-5`
+- **Auslieferung:** Cloudflare Pages, bei jedem Push auf `master` nach bestandenen Prüfungen
 - **Monorepo:** pnpm workspaces (`app/`, `supabase/`, `packages/shared`)
-- **Lizenz:** AGPL-3.0
 
 ---
 
 ## Lokale Entwicklung
 
-> Voraussetzungen: Node 20+, pnpm 9+, Expo CLI, Supabase CLI
+Voraussetzungen: Node 22, pnpm 10, für das Backend die Supabase CLI.
 
 ```bash
-# Repo klonen
 git clone https://github.com/drkthng/spatenstich.git
 cd spatenstich
-
-# Abhängigkeiten installieren
 pnpm install
 
-# Supabase lokal starten
-supabase start
+# Adresse und öffentlichen Schlüssel des Supabase-Projekts eintragen
+cp app/.env.example app/.env
 
-# App starten (iOS Simulator / Android / Web)
-pnpm --filter app start
+pnpm --filter app web        # Entwicklungsserver auf Port 8095
 ```
 
-Umgebungsvariablen: siehe `.env.example` (folgt im Setup-Schritt)
+Prüfungen, wie sie auch die CI fährt:
+
+```bash
+pnpm typecheck
+pnpm lint
+pnpm test                    # App und gemeinsames Paket
+pnpm --filter app run build:web
+```
+
+Einige Tests bewachen Regeln der Gestaltung und der Sprache und schlagen bei Rückfällen fehl: nur Farben aus den Tokens (`designTokens.guard`), ein Icon-Satz ohne Emoji und Zeichen als Knöpfe (`iconSet.guard`), alle Texte in `packages/shared/src/i18n/de.json` und ohne Fachwörter (`plainText.guard`), Kontrast, Linienstärke und Größe der Bedienflächen (`readability.guard`).
 
 ---
 
-## Installation auf dem Android-Handy (Chrome)
+## Installation auf dem Android-Handy
 
-Spatenstich ist eine installierbare PWA — kein Play-Store-Download nötig.
+1. `https://spatenstich.pages.dev` in Chrome öffnen.
+2. Im Menü „App installieren“ wählen (die App bietet es nach dem Laden auch selbst an).
+3. Die App über das neue Symbol auf dem Startbildschirm öffnen und einmal anmelden. Danach bleibt die Anmeldung erhalten, auch ohne Netz.
 
-1. Öffne `https://spatenstich.pages.dev` in Chrome auf deinem Android-Handy.
-2. Tippe oben rechts auf das Menü ⋮ und wähle **„App installieren"** (alternativ zeigt die App selbst nach dem Laden ein Installations-Banner mit demselben Weg — beide führen zum gleichen Ergebnis).
-3. Bestätige die Installation. Chrome legt ein Icon auf deinem Startbildschirm an.
-4. Öffne die App über das neue Icon — sie startet jetzt ohne Browser-Adressleiste, wie eine native App.
-5. Melde dich in der installierten App einmal mit deinem Konto an. Danach bleibt die Sitzung erhalten, auch offline.
+Wer eingeladen wurde, gibt den Einladungscode gleich bei der Registrierung ein und landet im gemeinsamen Garten.
 
 ---
 
-## Import aus der Claude-App per Teilen
+## Import aus Claude.ai
 
-Nach der Installation (siehe oben) taucht **„Spatenstich"** im Android-Teilen-Menü auf — vorher nicht, das ist eine Chrome-Voraussetzung für installierte PWAs.
+Für den Weg ohne KI-Kosten in der App richtet jede Person ein eigenes Projekt in [claude.ai](https://claude.ai) ein:
 
-- **Was geteilt werden kann:** entweder eine `.json`-Datei mit einem strukturierten Analyse-Ergebnis aus deinem Claude-Projekt, oder ein kopierter Text (z. B. wenn du das JSON direkt aus dem Chat kopierst).
-- **Wie es funktioniert:** In der Claude-App auf „Teilen" tippen, „Spatenstich" aus der Liste wählen. Die App öffnet sich direkt in der **Import-Vorschau** mit dem geteilten Payload — du musst nichts manuell einfügen.
-- Falls du nicht angemeldet bist, wenn ein Teilen-Versuch ankommt: Spatenstich merkt sich das Ziel und bringt dich nach dem Login automatisch dorthin zurück.
-
----
-
-## Claude-Projekt einrichten
-
-Für die KI-gestützte Analyse (optional, die App selbst macht keine KI-Aufrufe) richtest du ein eigenes Projekt in Claude.ai ein:
-
-1. Bei [claude.ai](https://claude.ai) anmelden (funktioniert sowohl mit einem kostenlosen als auch mit einem bezahlten Konto).
-2. Ein neues Projekt anlegen, z. B. „Spatenstich Garden".
-3. In der Spatenstich-App unter **„Mehr → Claude-Projekt einrichten"** findest du den Prompt und das Import-Schema zum Kopieren — beides in das Claude-Projekt (Anweisungen bzw. Projektwissen) einfügen.
-4. Danach kannst du Fotos oder Beschreibungen deines Kleingartens im Claude-Chat analysieren lassen und das Ergebnis per Teilen (siehe oben) oder Zwischenablage in die App importieren.
+1. Ein Projekt anlegen und den Text aus `prompts/garden-project-system-prompt.md` als Anweisung einfügen, die Vorlage `schemas/spatenstich-import.v1.json` als Projektwissen.
+2. Fotos oder Beschreibungen im Chat auswerten lassen. Das Projekt antwortet mit einem Ergebnisblock.
+3. Den Block kopieren und in der App unter „Mehr“, „Aus Claude.ai importieren“ einfügen, oder aus der Claude-App mit „Teilen“ an Spatenstich schicken (Spatenstich erscheint im Teilen-Menü, sobald die App installiert ist).
+4. In der Vorschau entscheiden, was in den Plan kommt.
 
 ---
 
 ## Betrieb
 
-- **Deploy:** Jeder Merge nach `master` löst automatisch einen Deploy nach Cloudflare Pages aus (`https://spatenstich.pages.dev`).
-- **Rollback:** Über das Cloudflare-Dashboard (Workers & Pages → spatenstich → Deployments → „Rollback") lässt sich jederzeit auf einen früheren Stand zurückspringen.
-- **Supabase-Keep-alive:** Der GitHub-Zeitplan (`supabase-keepalive.yml`) fragt das Backend jeden Morgen ab. Scheitert er, legt er ein Issue an und weist es dem Inhaber des Repositories zu; es schließt sich von selbst, sobald das Backend wieder antwortet. Der Zeitplan pausiert nach **60 Tagen ohne Repo-Aktivität** (dokumentiertes GitHub-Verhalten). Ein täglicher Ping vom 24/7-PC (`scripts/keepalive.ps1`) ist als zweiter, unabhängiger Weg vorgesehen, aber noch nicht eingerichtet. Vorgeschichte: `docs/betrieb/2026-10-backend-ausfall.md`.
-- **KI-Zugang:** Die App ruft die Claude-API nur über die Edge Function `ai` auf; der Schlüssel liegt dort als Secret. Einrichtung, Grenzen, Verbrauchsbuch und die Schlüssel-Prüfung in der CI: `docs/betrieb/ki-zugang.md`.
-- **Backup:** `scripts/backup-supabase.ps1` erstellt ein komprimiertes `pg_dump`-Backup mit 30-Tage-Rotation. Wird vor jeder destruktiven Migration gebraucht (z. B. Migration 021 in Phase 21) — vorher einmal manuell ausführen und das Datenbank-Passwort im Windows Credential Manager hinterlegen.
+- **Auslieferung:** Jeder Push auf `master` läuft durch Geheimnis-Prüfung, Typprüfung, Lint und Tests und wird danach auf Cloudflare Pages ausgeliefert. Welche Ausgabe läuft, steht in der App unter „Mehr“ ganz unten (Version und Build).
+- **Zurück auf einen früheren Stand:** Cloudflare-Dashboard, Workers & Pages, spatenstich, Deployments, „Rollback“.
+- **Impressum:** Name und Anschrift des Betreibers stehen nicht in diesem öffentlichen Repository. Der Deploy liest sie aus der Repository-Variable `EXPO_PUBLIC_IMPRINT` (Zeilen mit `|` getrennt). Fehlt sie, sagt die Seite „Impressum“ das.
+- **KI-Zugang:** Einrichtung des Schlüssels, Grenzen, Verbrauchsbuch und die Schlüssel-Prüfung in der CI: `docs/betrieb/ki-zugang.md`.
+- **Aufgaben und Wetter:** Regeln der Aufgabenliste und die Wetterquelle: `docs/betrieb/aufgaben-und-wetter.md`.
+- **Backend wach halten:** Ein GitHub-Zeitplan (`supabase-keepalive.yml`) fragt das Backend regelmäßig ab und legt bei einem Ausfall ein Issue an. Der Zeitplan pausiert nach 60 Tagen ohne Aktivität im Repository. Vorgeschichte: `docs/betrieb/2026-10-backend-ausfall.md`.
+- **Backup:** `scripts/backup-supabase.ps1` erstellt ein komprimiertes Backup der Datenbank mit 30 Tagen Aufbewahrung.
 
 ---
 
-## Projektstruktur
+## Aufbau des Repositorys
 
 ```
 spatenstich/
-├── app/              # Expo React Native App
-├── supabase/         # Migrations, Edge Functions, Seed
-│   └── migrations/
-├── packages/
-│   └── shared/       # Typen, Sorten-DB, Klimazonen-Lookup
-└── .planning/        # GSD Planung (PROJECT.md, ROADMAP.md, ...)
+├── app/              Expo-App (Bildschirme in app/app, Logik und Komponenten in app/src)
+├── packages/shared/  Typen, Pflanzenkatalog, Klimazonen, Kalenderlogik, deutsche Texte
+├── supabase/         Migrationen und Edge Functions (ai, weather)
+├── prompts/          Anweisung für das Claude.ai-Projekt (Import)
+├── schemas/          Vorlage für den Import
+├── scripts/          Prüfungen und Werkzeuge für Betrieb und Build
+├── docs/             Betrieb, Spezifikationen, Prüflisten
+└── .planning/        Planung (PROJECT.md, ROADMAP.md, REQUIREMENTS.md)
 ```
-
----
-
-## Roadmap
-
-Die detaillierte Planung liegt in [`.planning/ROADMAP.md`](.planning/ROADMAP.md) (wird nach Initialisierung erstellt).
-
-**Grobe Meilensteine:**
-
-- **Woche 1:** Setup, Auth, Onboarding (PLZ, Archetyp)
-- **Woche 2:** Sorten-DB (100 Pflanzen), Klimazonen-Lookup
-- **Woche 3:** Saatgut-Inventar (manuelle Erfassung)
-- **Woche 4:** 2D-Plan-Editor (Canvas, Drag & Drop)
-- **Woche 5:** Claude.ai Import-Bridge
-- **Woche 6:** Plan-Rendering + Vereinsregeln
-- **Woche 7:** Pflanzkalender aus Inventar + Plan
-- **Woche 8:** Polish, Offline-Sync, Dogfooding
-- **Ziel:** MVP-stabil Ende Juni 2026
 
 ---
 
 ## Rechtliches
 
-- **Lizenz:** [AGPL-3.0](LICENSE)
-- **Haftungsausschluss:** Die App gibt Empfehlungen ohne Gewähr. BKleingG-Compliance und Vereinsregelkonformität liegen in der Verantwortung des Nutzers.
-- **Datenschutz:** EU-Hosting (Supabase Frankfurt). Fotos verschlüsselt at-rest. DSGVO-konform.
-
----
-
-## Mitmachen
-
-MVP wird zunächst für den persönlichen Gebrauch entwickelt. Issues und Feedback willkommen — Stars auch. 🌻
+- **Lizenz:** AGPL-3.0
+- **Haftungsausschluss:** Kalenderzeiten, Aufgaben und Befunde der KI sind Empfehlungen ohne Gewähr. Ob ein Garten die Regeln des Bundeskleingartengesetzes und des Vereins einhält, bleibt Verantwortung der Nutzer.
+- **Pflanzendaten:** Quellen und Lizenzen in `packages/shared/src/data/LICENSES.md`.
