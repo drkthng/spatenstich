@@ -18,6 +18,7 @@ import { TodayTasks } from '@/src/components/tasks/TodayTasks';
 import { useDataVersion } from '@/src/lib/sync/dataVersion';
 import { Button } from '@/src/components/ui/button';
 import { InlineBanner } from '@/src/components/InlineBanner';
+import { t as tx } from '@/src/lib/i18n';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
@@ -103,9 +104,9 @@ export default function HomeScreen(): React.JSX.Element {
   }
 
   const statusLabel = mode === 'account'
-    ? (userEmail ?? 'Eingeloggt')
+    ? (userEmail ?? tx('home.signedIn'))
     : mode === 'local'
-      ? 'Lokaler Modus'
+      ? tx('home.localMode')
       : null;
 
   // Has plan: show inline plan view

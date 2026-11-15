@@ -7,6 +7,7 @@ import { Card, CardHeader, CardContent } from '@/src/components/ui/card';
 import { Button } from '@/src/components/ui/button';
 import { TrafficLightBadge, type TrafficLightState } from '@/src/components/TrafficLightBadge';
 import de from '@spatenstich/shared/i18n/de';
+import { t as tx } from '@/src/lib/i18n';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
@@ -22,9 +23,9 @@ function confidenceLabel(state: TrafficLightState, confidence: number | undefine
   if (confidence === undefined) return '';
   const pct = Math.round(confidence * 100);
   switch (state) {
-    case 'green': return `${pct}% sicher`;
-    case 'amber': return `${pct}% — prüfen`;
-    case 'red':   return `${pct}% — niedrig`;
+    case 'green': return tx('import.confidence.high', { percent: pct });
+    case 'amber': return tx('import.confidence.medium', { percent: pct });
+    case 'red':   return tx('import.confidence.low', { percent: pct });
     default: return '';
   }
 }

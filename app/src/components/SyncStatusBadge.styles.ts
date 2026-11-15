@@ -5,5 +5,5 @@ export const syncBadgeClasses: Record<SyncStatusValue, string> = {
   synced: 'text-primary',
   syncing: 'text-primary',
   degraded: 'text-warn',
-  offline: 'text-ink-muted opacity-70',
+  offline: 'text-ink-muted',
 } as const;

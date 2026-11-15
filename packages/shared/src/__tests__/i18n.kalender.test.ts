@@ -6,8 +6,8 @@ import deJson from '../i18n/de.json';
 const de = deJson as unknown as Record<string, any>;
 
 describe('de.json kalender keys', () => {
-  it('kalender.title === "Aussaatkalender"', () => {
-    expect(de['kalender']?.['title']).toBe('Aussaatkalender');
+  it('kalender.title === "Kalender" (the name of the area)', () => {
+    expect(de['kalender']?.['title']).toBe('Kalender');
   });
 
   it('kalender.aufWelchemBeet === "Auf welchem Beet?"', () => {
@@ -34,8 +34,9 @@ describe('de.json kalender keys', () => {
 
   it('alle Pflicht-Keys des kalender-Objekts sind Strings', () => {
     const need = [
-      'title', 'kwLabel', 'dieseWoche', 'jahresuebersicht', 'filterMeinePflanzen',
-      'klimazoneLabel', 'aufWelchemBeet', 'zuPlanHinzufuegen', 'planOeffnen',
+      // Phase 38: search, the two sections and the mark for today replace the old filter.
+      'title', 'kwLabel', 'dieseWoche', 'suche', 'inEuremPlan', 'allePflanzen',
+      'heute', 'aufWelchemBeet', 'zuPlanHinzufuegen', 'planOeffnen',
       'hinzugefuegtBanner', 'nochNichtImPlan', 'plzFehlt', 'plzJetztEingeben',
       'keinBeetImPlan',
     ];

@@ -12,7 +12,6 @@ const CORE_KEYS = [
   'width',
   'height',
   'rotation',
-  'maintainRatio',
   'zOrder',
   'bringToFront',
   'bringForward',
@@ -24,9 +23,6 @@ const CORE_KEYS = [
   'cancel',
   'save',
   'delete',
-  'deleteConfirmTitle',
-  'deleteConfirmYes',
-  'deleteConfirmNo',
 ] as const;
 
 describe('i18n > de.editor.elementEditor (D-23/D-24)', () => {
@@ -126,7 +122,9 @@ describe('i18n > de.editor.elementEditor (D-23/D-24)', () => {
     expect(block.lessFields.length).toBeGreaterThan(0);
   });
 
-  it('defines all 18 core keys', () => {
+  // Phase 38: texts no screen used any more (keeping the ratio, the confirm dialog, the
+  // range messages) were removed from de.json and from this list.
+  it('defines all core keys', () => {
     for (const key of CORE_KEYS) {
       expect(typeof block[key]).toBe('string');
       expect((block[key] as string).length).toBeGreaterThan(0);
@@ -167,16 +165,4 @@ describe('i18n > de.editor.elementEditor (D-23/D-24)', () => {
     }
   });
 
-  it('validation sub-object has widthMin/widthMax/heightMin/heightMax', () => {
-    expect(block.validation).toBeDefined();
-    expect(typeof block.validation).toBe('object');
-    expect(typeof block.validation.widthMin).toBe('string');
-    expect(typeof block.validation.widthMax).toBe('string');
-    expect(typeof block.validation.heightMin).toBe('string');
-    expect(typeof block.validation.heightMax).toBe('string');
-  });
-
-  it('validation widthMin contains numeric value 5', () => {
-    expect(block.validation.widthMin).toMatch(/5/);
-  });
 });

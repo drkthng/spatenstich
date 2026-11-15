@@ -19,7 +19,7 @@ import {
 
 function SectionLabel({ children }: { children: string }): React.JSX.Element {
   return (
-    <Text className="px-4 pt-4 pb-1 text-[11px] uppercase tracking-widest text-ink-muted">{children}</Text>
+    <Text className="px-4 pt-4 pb-1 text-xs uppercase tracking-widest text-ink-muted">{children}</Text>
   );
 }
 
@@ -41,8 +41,8 @@ function Row({
       testID={`palette-${item.key}`}
       className={
         active
-          ? 'flex-row items-center min-h-[44px] px-4 bg-surface-2'
-          : 'flex-row items-center min-h-[44px] px-4'
+          ? 'flex-row items-center min-h-[48px] px-4 bg-surface-2'
+          : 'flex-row items-center min-h-[48px] px-4'
       }
     >
       <View
@@ -72,7 +72,7 @@ function ActionRow({ label, testID, onPress }: { label: string; testID: string; 
       onPress={onPress}
       accessibilityRole="button"
       testID={testID}
-      className="flex-row items-center min-h-[44px] px-4"
+      className="flex-row items-center min-h-[48px] px-4"
     >
       <View className="h-4 w-6 border border-line border-dashed" />
       <Text className="ml-3 flex-1 text-base text-ink" numberOfLines={1}>
@@ -109,7 +109,7 @@ export function PlanPalette({ onPick, activeKey, onDraw, onParcel }: PlanPalette
       <View className="mx-4 mb-1 flex-row items-center border-b border-line">
         <Search size={18} color={tokens.color.inkMuted} strokeWidth={1.5} />
         <TextInput
-          className="ml-2 flex-1 min-w-0 min-h-[44px] text-base text-ink"
+          className="ml-2 flex-1 min-w-0 min-h-[48px] text-base text-ink"
           style={{ outlineStyle: 'none' } as never}
           value={query}
           onChangeText={setQuery}

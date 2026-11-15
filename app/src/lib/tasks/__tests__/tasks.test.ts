@@ -268,6 +268,22 @@ describe('today\'s tasks from plan, calendar and season (TASK-01, TASK-02)', () 
     }
   });
 
+  it('a winter harvest over New Year is on the list in November and in February, until its real end', () => {
+    // Lamb's lettuce: harvest from early October to the end of March.
+    const winter = plant('feldsalat', 'Feldsalat', { harvestDoyStart: 280, harvestDoyEnd: 90 });
+    const plan = [element(BED), plantEl(uuid(20), 'feldsalat', BED, 'Feldsalat')];
+    const key = `cal:Ernte:feldsalat:${BED}`;
+    const november = byKey(buildTasks(inputs({ today: '2026-11-15', elements: plan, plants: [winter] })), key)!;
+    expect(november).toBeDefined();
+    expect(november.reason).toBe('Die Erntezeit läuft bis Ende März.');
+    expect(november.urgency).toBe('low'); // months left, not six weeks to 31 December
+    const february = byKey(buildTasks(inputs({ today: '2027-02-10', elements: plan, plants: [winter] })), key)!;
+    expect(february.reason).toBe('Die Erntezeit läuft bis Ende März.');
+    const lateMarch = byKey(buildTasks(inputs({ today: '2027-03-28', elements: plan, plants: [winter] })), key)!;
+    expect(lateMarch.urgency).toBe('high');
+    expect(byKey(buildTasks(inputs({ today: '2026-06-15', elements: plan, plants: [winter] })), key)).toBeUndefined();
+  });
+
   it('a harvest window that is open gives one harvest task per kind of plant and bed', () => {
     const tasks = buildTasks(inputs());
     const harvest = tasks.filter((task) => task.key.startsWith('cal:Ernte:tomate'));

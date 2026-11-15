@@ -17,6 +17,7 @@ import { useImportStore } from '@/src/stores/importStore';
 import { validatePayload } from '@/src/lib/importValidator';
 import * as shareInbox from '@/src/lib/shareInbox';
 import de from '@spatenstich/shared/i18n/de';
+import { t as tx } from '@/src/lib/i18n';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
@@ -26,7 +27,13 @@ export default function ImportEntryScreen(): React.JSX.Element {
   const { fileUri } = useLocalSearchParams<{ fileUri?: string }>();
   const { from } = useLocalSearchParams<{ from?: string }>();
   const [pasteValue, setPasteValue] = React.useState('');
-  const [errors, setErrors] = React.useState<string[] | null>(null);
+  const [errors, setErrorList] = React.useState<string[] | null>(null);
+  // What the checker found, in its own words; shown small under the message.
+  const [details, setDetails] = React.useState<string[]>([]);
+  const setErrors = React.useCallback((list: string[] | null, technical: string[] = []) => {
+    setErrorList(list);
+    setDetails(technical);
+  }, []);
   const [loading, setLoading] = React.useState(false);
   const [shareLoading, setShareLoading] = React.useState(false);
 
@@ -45,9 +52,9 @@ export default function ImportEntryScreen(): React.JSX.Element {
       useImportStore.getState().setPayload(result.payload);
       router.push('/(app)/import/preview' as any);
     } else {
-      setErrors(result.errors);
+      setErrors([tx('import.errorShape')], result.errors);
     }
-  }, [router]);
+  }, [router, setErrors]);
 
   // Handle incoming file URI from share-intent (T-06-09: same validation path as paste)
   React.useEffect(() => {
@@ -66,7 +73,7 @@ export default function ImportEntryScreen(): React.JSX.Element {
         setLoading(false);
       }
     })();
-  }, [fileUri, handleValidate]);
+  }, [fileUri, handleValidate, setErrors]);
 
   // Web Share Target (T-20-03-02, ASVS V5): Teilen aus einer beliebigen App
   // (z.B. Claude.ai) landet über den Service Worker in der IndexedDB-Inbox
@@ -91,7 +98,7 @@ export default function ImportEntryScreen(): React.JSX.Element {
         setShareLoading(false);
       }
     })();
-  }, [from, handleValidate]);
+  }, [from, handleValidate, setErrors]);
 
   const handleFilePicker = async () => {
     const result = await DocumentPicker.getDocumentAsync({
@@ -148,7 +155,7 @@ export default function ImportEntryScreen(): React.JSX.Element {
           testID="import-paste-textarea"
         />
 
-        {errors && <ImportErrorState errors={errors} testID="import-errors" />}
+        {errors && <ImportErrorState errors={errors} details={details} testID="import-errors" />}
 
         <Button
           onPress={() => handleValidate(pasteValue)}
@@ -161,9 +168,9 @@ export default function ImportEntryScreen(): React.JSX.Element {
         </Button>
 
         <View className="flex-row items-center gap-3 my-2">
-          <View className="flex-1 h-px bg-surface-2" />
-          <Text className="text-sm text-ink-muted">oder</Text>
-          <View className="flex-1 h-px bg-surface-2" />
+          <View className="flex-1 h-px bg-line" />
+          <Text className="text-sm text-ink-muted">{tx('common.or')}</Text>
+          <View className="flex-1 h-px bg-line" />
         </View>
 
         <Button

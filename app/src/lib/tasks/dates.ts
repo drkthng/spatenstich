@@ -48,12 +48,16 @@ export function dayOfYear(day: string): number {
 const MONTH_START = [1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335];
 
 /** "Anfang Mai", "Mitte Oktober", "Ende Juni" for a day of the year. */
-export function doyInWords(doy: number, monthNames: readonly string[]): string {
+export function doyInWords(
+  doy: number,
+  monthNames: readonly string[],
+  parts: readonly [string, string, string] = ['Anfang', 'Mitte', 'Ende'],
+): string {
   const clamped = Math.max(1, Math.min(365, Math.round(doy)));
   let month = 11;
   while (month > 0 && clamped < MONTH_START[month]!) month -= 1;
   const dayInMonth = clamped - MONTH_START[month]! + 1;
-  const part = dayInMonth <= 10 ? 'Anfang' : dayInMonth <= 20 ? 'Mitte' : 'Ende';
+  const part = dayInMonth <= 10 ? parts[0] : dayInMonth <= 20 ? parts[1] : parts[2];
   return `${part} ${monthNames[month]}`;
 }
 

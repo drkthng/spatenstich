@@ -10,6 +10,7 @@ import { Label } from '@/src/components/ui/label';
 import { Button } from '@/src/components/ui/button';
 import { Badge } from '@/src/components/ui/badge';
 import { useProfile } from '@/src/hooks/useProfile';
+import { t as tx } from '@/src/lib/i18n';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
@@ -44,14 +45,14 @@ export default function PlzScreen(): React.JSX.Element {
       contentContainerClassName="flex-grow p-6 gap-4"
     >
       <Text className="text-2xl font-display font-semibold text-ink mb-2">
-        Postleitzahl
+        {tx('profile.plz.title')}
       </Text>
       <Text className="text-sm text-ink-muted">
-        Deine PLZ bestimmt die Klimazone und damit Aussaat- und Pflanzzeitpunkte.
+        {tx('profile.plz.intro')}
       </Text>
 
       <View className="gap-2">
-        <Label nativeID="plz-label">Postleitzahl</Label>
+        <Label nativeID="plz-label">{tx('profile.plz.title')}</Label>
         <Input
           value={plzInput}
           onChangeText={(text) => setPlzInput(text.replace(/[^0-9]/g, ''))}
@@ -67,7 +68,7 @@ export default function PlzScreen(): React.JSX.Element {
       {isComplete && klimazone !== null ? (
         <View className="flex-row">
           <Badge variant="default" testID="plz-klimazone-badge">
-            Klimazone {klimazone}
+            {tx('profile.klimazone', { zone: klimazone })}
           </Badge>
         </View>
       ) : null}
@@ -75,7 +76,7 @@ export default function PlzScreen(): React.JSX.Element {
       {isComplete && klimazone === null ? (
         <View className="flex-row">
           <Badge variant="outline" testID="plz-klimazone-unknown">
-            Klimazone unbekannt
+            {tx('profile.klimazoneUnknown')}
           </Badge>
         </View>
       ) : null}

@@ -1,79 +1,90 @@
-// Phase 10 Plan 03: KalenderWochenCard — "Diese Woche" Aktionsliste.
-// CAL-03: Aktions-Badges distinguishing Vorkultur/Direktsaat/Auspflanzen/Ernte by color+label.
-// UI-SPEC §Screen 1 KalenderWochenCard anatomy.
+// "Diese Woche": what the calendar says is due now, for the plants in the plan or, while the
+// plan has none, for the whole catalog. A long list shows its first entries and opens on request.
+//
+// Phase 38: each entry names its kind of action in words next to a colour swatch (the colour
+// alone does not carry the meaning, and light text on the lighter colours was hard to read).
 import * as React from 'react';
 import { View, Text, Pressable } from 'react-native';
-import de from '@spatenstich/shared/i18n/de';
-import { Badge } from '@/src/components/ui/badge';
+import { tokens } from '@/src/theme/tokens';
 import { FARBEN } from './GanttStreifen';
 import type { PlantRow, KalenderFenster } from '@spatenstich/shared';
-
-// ── i18n helper ───────────────────────────────────────────────────────────────
-const t = (key: string): string =>
-  key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
-
-// ── Component ─────────────────────────────────────────────────────────────────
+import { t } from '@/src/lib/i18n';
 
 export interface KalenderWochenCardProps {
   aktionen: Array<{ plant: PlantRow; fenster: KalenderFenster }>;
   aktuelleKw: number;
   onPlantPress: (slug: string) => void;
+  /** Whether the list is about the plants in the plan (true) or the whole catalog (false). */
+  ausPlan?: boolean;
 }
+
+/** How many entries show before "Alle anzeigen". */
+export const WOCHE_KURZ = 6;
 
 export function KalenderWochenCard({
   aktionen,
   aktuelleKw,
   onPlantPress,
+  ausPlan = true,
 }: KalenderWochenCardProps): React.JSX.Element {
   const year = new Date().getFullYear();
+  const [open, setOpen] = React.useState(false);
+  const shown = open ? aktionen : aktionen.slice(0, WOCHE_KURZ);
 
   return (
-    <View className="bg-surface-2 rounded-xl p-4">
-      {/* Card header: "Diese Woche" title + KW label */}
-      <View className="flex-row justify-between items-center mb-3">
-        <Text className="text-xl font-display font-semibold text-ink">
+    <View className="bg-surface-2 border border-line p-4" testID="kalender-woche">
+      <View className="flex-row justify-between items-baseline">
+        <Text className="font-display text-xl text-ink" accessibilityRole="header">
           {t('kalender.dieseWoche')}
         </Text>
-        <Text className="text-xs text-ink-muted">
-          {t('kalender.kwLabel')
-            .replace('{kw}', String(aktuelleKw))
-            .replace('{year}', String(year))}
-        </Text>
+        <Text className="font-body text-sm text-ink-muted">{t('kalender.kwLabel', { kw: aktuelleKw, year })}</Text>
       </View>
+      <Text className="font-body text-sm text-ink-muted mb-2" testID="kalender-woche-quelle">
+        {ausPlan ? t('kalender.wocheAusPlan') : t('kalender.wocheAusAllen')}
+      </Text>
 
-      {/* Aktionsliste */}
       {aktionen.length === 0 ? (
-        <Text className="text-sm text-ink-muted">
-          {t('kalender.keineAktionenDieseWoche')}
-        </Text>
+        <Text className="font-body text-base text-ink">{t('kalender.keineAktionenDieseWoche')}</Text>
       ) : (
         <>
-          {aktionen.map(({ plant, fenster }) => (
-            <Pressable
-              key={`${plant.slug}-${fenster.typ}`}
-              onPress={() => onPlantPress(plant.slug)}
-              accessibilityRole="button"
-              accessibilityLabel={`${plant.nameDe}, ${fenster.typ} öffnen`}
-              className="flex-row items-center gap-2 min-h-[44px]"
-            >
-              {/* CAL-03: colored badge per Aktionstyp */}
-              <Badge
-                className="border-transparent"
-                style={{ backgroundColor: FARBEN[fenster.typ] }}
+          {shown.map(({ plant, fenster }) => {
+            const aktion = t(`kalender.legende.${fenster.typ.toLowerCase()}`);
+            return (
+              <Pressable
+                key={`${plant.slug}-${fenster.typ}`}
+                onPress={() => onPlantPress(plant.slug)}
+                accessibilityRole="link"
+                accessibilityLabel={t('kalender.aktionLabel', { name: plant.nameDe, aktion })}
+                className="flex-row items-center gap-2"
+                style={{ minHeight: 48 }}
               >
-                <Text className="text-xs text-on-primary font-medium">
-                  {t(`kalender.legende.${fenster.typ.toLowerCase()}`)}
-                </Text>
-              </Badge>
-              <Text className="text-sm text-ink flex-1">
-                {plant.nameDe}
+                <View
+                  style={{
+                    width: 14,
+                    height: 10,
+                    backgroundColor: FARBEN[fenster.typ],
+                    borderWidth: 1,
+                    borderColor: tokens.color.ink,
+                  }}
+                />
+                <Text className="font-body text-base text-ink flex-1">{plant.nameDe}</Text>
+                <Text className="font-body text-sm text-ink-muted">{aktion}</Text>
+              </Pressable>
+            );
+          })}
+          {aktionen.length > WOCHE_KURZ ? (
+            <Pressable
+              onPress={() => setOpen((v) => !v)}
+              accessibilityRole="button"
+              className="justify-center"
+              style={{ minHeight: 48 }}
+              testID="kalender-woche-mehr"
+            >
+              <Text className="font-body text-base text-ink underline">
+                {open ? t('kalender.wocheWeniger') : t('kalender.wocheAlle', { n: aktionen.length })}
               </Text>
             </Pressable>
-          ))}
-          {/* Hint text when at least one action exists */}
-          <Text className="text-xs text-ink-muted mt-2">
-            → Tippe auf eine Pflanze für Details und Gantt-Ansicht
-          </Text>
+          ) : null}
         </>
       )}
     </View>

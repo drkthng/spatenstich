@@ -35,7 +35,7 @@ export function CrossPlatformDatePicker({
           fontSize: 14,
           color: tokens.color.ink,
           backgroundColor: tokens.color.bg,
-          minHeight: 44,
+          minHeight: 48,
           width: '100%',
           boxSizing: 'border-box',
         }}
@@ -72,7 +72,7 @@ export function CrossPlatformDatePicker({
           borderColor: tokens.color.line,
           borderRadius: 6,
           padding: 8,
-          minHeight: 44,
+          minHeight: 48,
           justifyContent: 'center',
         }}
         onTouchEnd={() => setShowPicker(true)}

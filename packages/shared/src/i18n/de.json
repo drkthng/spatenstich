@@ -7,9 +7,11 @@
     "delete": "Löschen",
     "retry": "Erneut versuchen",
     "loading": "Lädt…",
-    "disclaimer_body": "Die App gibt Empfehlungen ohne Gewähr. BKleingG-Compliance liegt in der Verantwortung des Nutzers.",
+    "disclaimer_body": "Die App gibt Empfehlungen ohne Gewähr. Ob euer Garten die Regeln des Bundeskleingartengesetzes und eures Vereins einhält, bleibt eure Verantwortung.",
     "error_network": "Keine Verbindung. Bitte Internetverbindung prüfen.",
-    "accountRequired": "Dafür brauchst du ein Konto."
+    "accountRequired": "Dafür brauchst du ein Konto.",
+    "or": "oder",
+    "close": "Schließen"
   },
   "errors": {
     "network": "Keine Verbindung. Bitte prüfe dein Netz.",
@@ -18,39 +20,46 @@
   },
   "auth": {
     "choice": {
-      "create_account": "Account erstellen",
-      "local_start": "Lokal starten",
+      "create_account": "Konto erstellen",
       "login": "Anmelden",
-      "login_desc": "Mit bestehendem Account einloggen",
+      "login_desc": "Mit einem bestehenden Konto anmelden",
       "join_garden": "Einem Garten beitreten",
-      "join_garden_desc": "Mit Einladungs-Code einem geteilten Garten beitreten",
+      "join_garden_desc": "Mit einem Einladungscode in einen gemeinsamen Garten kommen",
       "tagline": "Dein digitaler Kleingarten-Assistent",
-      "disclaimer_label": "Rechtlicher Hinweis"
+      "disclaimer_label": "Rechtlicher Hinweis",
+      "create_account_desc": "Der Garten auf allen Geräten, auch zu zweit",
+      "privacy": "Datenschutz",
+      "imprint": "Impressum",
+      "back": "Zurück"
     },
     "register": {
       "submit": "Konto erstellen",
-      "error_generic": "Registrierung fehlgeschlagen. Bitte prüfen ob diese E-Mail bereits verwendet wird.",
+      "error_generic": "Die Registrierung hat nicht geklappt. Vielleicht gibt es mit dieser E-Mail-Adresse schon ein Konto.",
       "verify_email": "Bitte bestätige deine E-Mail-Adresse. Wir haben dir eine E-Mail geschickt.",
       "code_label": "Einladungscode (wenn du einen hast)",
       "code_hint": "Mit dem Code landest du direkt im gemeinsamen Garten. Ohne Code legst du einen eigenen an.",
       "code_invalid": "Der Einladungscode hat sechs Zeichen. Lass das Feld leer, wenn du keinen hast.",
       "password_hint": "Mindestens 8 Zeichen.",
-      "password_short": "Das Passwort braucht mindestens 8 Zeichen."
+      "password_short": "Das Passwort braucht mindestens 8 Zeichen.",
+      "to_login": "Schon ein Konto? Jetzt anmelden",
+      "verify_title": "E-Mail bestätigen",
+      "to_login_button": "Zur Anmeldung"
     },
     "login": {
       "submit": "Anmelden",
-      "error_generic": "Anmeldung fehlgeschlagen. Bitte E-Mail und Passwort prüfen."
+      "error_generic": "Die Anmeldung hat nicht geklappt. Bitte prüfe E-Mail und Passwort.",
+      "to_register": "Noch kein Konto? Jetzt erstellen"
     },
     "join": {
-      "title": "Einladungs-Code eingeben",
+      "title": "Einladungscode eingeben",
       "subtitle": "Gib den 6-stelligen Code ein, den dir die Person gegeben hat.",
       "code_label": "6-stelliger Code",
       "code_placeholder": "Z. B. ABC7X9",
       "submit": "Beitreten",
-      "need_account": "Du brauchst einen Account, um einem Garten beizutreten.",
-      "error_invalid": "Code ungültig oder abgelaufen.",
-      "error_full": "Dieser Garten hat bereits 2 Mitglieder.",
-      "error_generic": "Beitritt fehlgeschlagen. Bitte erneut versuchen.",
+      "need_account": "Du brauchst ein Konto, um einem Garten beizutreten.",
+      "error_invalid": "Der Code ist ungültig oder abgelaufen.",
+      "error_full": "Dieser Garten hat schon zwei Mitglieder.",
+      "error_generic": "Der Beitritt hat nicht geklappt. Bitte versuche es noch einmal.",
       "hint": "Frag die Person, die den Garten angelegt hat, nach dem 6-stelligen Code."
     },
     "reset": {
@@ -74,53 +83,111 @@
       "hide": "Verbergen",
       "showPassword": "Passwort anzeigen",
       "hidePassword": "Passwort verbergen"
-    }
+    },
+    "email": "E-Mail",
+    "password": "Passwort"
   },
   "profile": {
     "plz": {
       "submit": "Klimazone übernehmen",
-      "error_invalid": "Bitte eine gültige 5-stellige Postleitzahl eingeben."
+      "error_invalid": "Die Postleitzahl hat fünf Ziffern.",
+      "title": "Postleitzahl",
+      "intro": "Die Postleitzahl bestimmt die Klimazone und damit, wann gesät, gepflanzt und geerntet wird."
     },
     "archetype": {
-      "submit": "Auswahl bestätigen"
+      "submit": "Auswahl bestätigen",
+      "title": "Was für ein Garten ist es?",
+      "intro": "Der Gartentyp beschreibt euren Garten. Am Plan und am Kalender ändert er bisher nichts."
     },
     "banner": {
-      "plz_missing": "PLZ noch nicht gesetzt — Klimazone unbekannt.",
-      "plz_action": "Jetzt eingeben",
-      "archetype_missing": "Kein Garten-Archetyp ausgewählt. Beeinflusst Pflanzenvorschläge.",
-      "rules_missing": "Keine Vereinsregeln hinterlegt. Regelwarnungen im Plan-Editor sind inaktiv."
+      "plz_missing": "Die Postleitzahl fehlt noch. Ohne sie ist die Klimazone unbekannt.",
+      "plz_action": "Postleitzahl eintragen",
+      "archetype_missing": "Noch kein Gartentyp gewählt.",
+      "rules_missing": "Noch keine Vereinsregeln hinterlegt."
     },
-    "bkleingg": {
-      "no_plan": "Plan noch nicht vorhanden",
-      "tooltip": "Die Nutz/Zier-Berechnung steht bereit, sobald du deinen Gartenplan in Phase 4 angelegt hast."
+    "section": {
+      "location": "Standort",
+      "type": "Gartentyp",
+      "rules": "Vereinsregeln"
+    },
+    "plzValue": "Postleitzahl {plz}",
+    "klimazone": "Klimazone {zone}",
+    "klimazoneUnknown": "Klimazone unbekannt",
+    "change": "Ändern",
+    "typeChoose": "Jetzt auswählen",
+    "rulesSetUp": "Regeln einrichten",
+    "rulesCountOne": "Eine Regel hinterlegt",
+    "rulesCountMany": "{n} Regeln hinterlegt",
+    "rulesEdit": "Bearbeiten",
+    "archetypes": {
+      "selbstversorger": {
+        "label": "Selbstversorger",
+        "description": "Viel Ertrag, viele Beete, intensiv genutzt"
+      },
+      "familien_naschgarten": {
+        "label": "Familien-Naschgarten",
+        "description": "Für Kinder geeignet, robuste Sorten, viel Naschobst"
+      },
+      "mix_ausgewogen": {
+        "label": "Ausgewogen gemischt",
+        "description": "Nutzgarten, Blumen und Platz zum Sitzen im Gleichgewicht"
+      },
+      "zier_erholung": {
+        "label": "Zier- und Erholungsgarten",
+        "description": "Sitzplatz, Stauden und Gestaltung stehen vorn"
+      },
+      "biodiversitaet": {
+        "label": "Naturgarten",
+        "description": "Wildblumen, gut für Insekten, möglichst naturnah"
+      },
+      "kraeuter_apotheker": {
+        "label": "Kräutergarten",
+        "description": "Heil- und Küchenkräuter, kompakte Hochbeete"
+      }
     }
   },
   "rules": {
     "confirm": {
       "submit": "Regeln speichern",
-      "empty": "Keine Regeln erkannt. Du kannst sie manuell hinzufügen.",
+      "empty": "Noch keine Regeln. Du kannst sie über die Checkliste hinzufügen.",
       "empty_cta": "Zur Checkliste",
-      "bkleingg_group": "Gesetzliche Grundregeln (BKleingG)",
+      "bkleingg_group": "Gesetzliche Grundregeln (Bundeskleingartengesetz)",
       "user_group": "Deine Vereinsregeln",
-      "delete_rule": "Regel löschen",
       "edit": {
         "titel_label": "Titel",
         "wert_label": "Wert",
         "einheit_label": "Einheit",
         "save": "Übernehmen",
         "cancel": "Abbrechen"
-      }
+      },
+      "noGarden": "Es wurde kein Garten gefunden. Bitte lade die App neu.",
+      "saveFailed": "Das Speichern hat nicht geklappt. Bitte versuche es noch einmal."
+    },
+    "title": "Vereinsregeln",
+    "checklist": {
+      "cardTitle": "Checkliste ausfüllen",
+      "cardHint": "Übliche Vereinsregeln auswählen und Werte eintragen.",
+      "title": "Checkliste",
+      "intro": "Wähle die Regeln aus eurer Vereinssatzung und trage die Werte ein.",
+      "valueLabel": "Wert für {label}"
+    },
+    "row": {
+      "base": "Gesetzliche Grundregel, lässt sich nicht abschalten",
+      "active": "Regel {title} gilt",
+      "edit": "Regel bearbeiten",
+      "delete": "Regel löschen"
     }
   },
   "settings": {
     "logout": "Abmelden",
     "logout_confirm": "Wirklich abmelden?",
-    "login_existing": "Mit bestehendem Account anmelden",
-    "login_existing_desc": "Du hast bereits einen Account? Melde dich an und deine lokalen Daten bleiben erhalten.",
+    "login_existing": "Mit bestehendem Konto anmelden",
+    "login_existing_desc": "Du hast schon ein Konto? Melde dich an. Deine Angaben auf diesem Gerät bleiben erhalten.",
     "migration": {
-      "cta": "Account erstellen und Daten übertragen",
-      "error_partial": "Account angelegt, aber Datenübertragung fehlgeschlagen. Bitte erneut versuchen.",
-      "error_already_account": "Du bist bereits angemeldet."
+      "cta": "Konto erstellen und Angaben übertragen",
+      "error_partial": "Das Konto ist angelegt, aber die Angaben wurden nicht übertragen. Bitte versuche es noch einmal.",
+      "error_already_account": "Du bist bereits angemeldet.",
+      "intro": "Mit einem Konto sind deine Angaben (Postleitzahl, Gartentyp) auch auf anderen Geräten da, und ihr könnt den Garten zu zweit pflegen."
     },
     "logout_yes": "Ja, abmelden",
     "logout_unsynced_one": "Eine Änderung ist noch nicht abgeglichen. Wenn du dich jetzt abmeldest, geht sie verloren.",
@@ -130,38 +197,32 @@
     "sync_status": "Speicherstatus",
     "ai_link": "KI und Verbrauch"
   },
-  "app": {
-    "index": {
-      "placeholder": "Dein Gartenplan entsteht hier.",
-      "placeholder_sub": "Zuerst: PLZ und Archetyp eintragen, dann Fotos aufnehmen."
-    }
-  },
   "garden": {
     "settings_link": "Mein Garten",
     "section_title": "Garten",
     "name_label": "Name des Gartens",
-    "plz_label": "PLZ",
+    "plz_label": "Postleitzahl",
     "members_title": "Mitglieder",
     "owner_badge": "Besitzer",
     "member_badge": "Mitglied",
     "empty_state": "Noch kein Garten angelegt.",
     "not_found": "Garten nicht gefunden.",
-    "local_mode_notice": "Gärten sind nur im Account-Modus verfügbar.",
-    "choice_join_desc": "Mit Einladungs-Code einem geteilten Garten beitreten",
+    "local_mode_notice": "Gärten gibt es nur mit einem Konto.",
+    "choice_join_desc": "Mit einem Einladungscode in einen gemeinsamen Garten kommen",
     "invite": {
       "create": "Person einladen",
-      "code_display_title": "Dein Einladungs-Code",
-      "code_display_hint": "Gib diesen Code an die Person weiter, die deinem Garten beitreten soll. Er ist 24 Stunden gültig.",
+      "code_display_title": "Dein Einladungscode",
+      "code_display_hint": "Gib diesen Code der Person, die in deinen Garten kommen soll. Er gilt 24 Stunden.",
       "copy": "Kopieren",
       "copied": "Kopiert",
       "share": "Teilen",
       "share_message": "Tritt meinem Garten bei mit Code: {code}",
       "regenerate": "Neuen Code erzeugen",
-      "regenerate_confirm": "Neuer Code wird erzeugt — der alte Code wird ungültig.",
+      "regenerate_confirm": "Ein neuer Code wird erzeugt. Der alte gilt dann nicht mehr.",
       "expires_in_hours": "Gültig für 24 Stunden",
-      "error_not_owner": "Nur der Besitzer kann Einladungs-Codes erzeugen.",
-      "error_already_full": "Dein Garten hat bereits 2 Mitglieder.",
-      "error_generic": "Code konnte nicht erzeugt werden.",
+      "error_not_owner": "Nur der Besitzer kann Einladungscodes erzeugen.",
+      "error_already_full": "Dein Garten hat schon zwei Mitglieder.",
+      "error_generic": "Der Code konnte nicht erzeugt werden. Bitte versuche es noch einmal.",
       "copy_failed": "Der Code ließ sich nicht kopieren. Tippe ihn bitte ab."
     },
     "member": {
@@ -174,11 +235,11 @@
       "leave_cancel": "Abbrechen"
     },
     "transferOwnership": {
-      "button": "Besitzer-Status abgeben",
+      "button": "Garten an ein Mitglied übergeben",
       "confirm": "An wen übertragen?",
       "success": "Übertragen an {name}",
-      "error_generic": "Übertragung fehlgeschlagen. Bitte erneut versuchen.",
-      "error_self": "Du bist bereits Besitzer — Ziel muss ein anderes Mitglied sein.",
+      "error_generic": "Die Übergabe hat nicht geklappt. Bitte versuche es noch einmal.",
+      "error_self": "Du bist schon Besitzer. Wähle ein anderes Mitglied.",
       "error_target_not_member": "Das gewählte Mitglied gehört nicht zu diesem Garten."
     },
     "delete": {
@@ -189,7 +250,7 @@
       "disabledHint": "Erst alle anderen Mitglieder entfernen",
       "success": "Garten gelöscht",
       "error_has_members": "Entferne erst alle anderen Mitglieder.",
-      "error_generic": "Löschen fehlgeschlagen. Bitte erneut versuchen."
+      "error_generic": "Das Löschen hat nicht geklappt. Bitte versuche es noch einmal."
     },
     "name_save": "Namen speichern",
     "name_saved": "Der Name ist gespeichert.",
@@ -199,42 +260,34 @@
   },
   "audit": {
     "last_edited_by": "zuletzt bearbeitet von {name}, {time}",
-    "last_edited_by_unknown": "zuletzt bearbeitet, {time}",
-    "last_edited_self": "von dir bearbeitet, {time}",
     "time_just_now": "gerade eben",
     "time_minutes_ago": "vor {n} Min.",
     "time_hours_ago": "vor {n} h",
-    "time_days_ago": "vor {n} Tagen",
-    "time_on": "am {date}"
+    "time_days_ago": "vor {n} Tagen"
   },
   "import": {
     "title": "Aus Claude.ai importieren",
-    "pasteHint": "JSON-Ergebnis hier einfügen …",
-    "pasteLabel": "JSON einfügen",
+    "pasteHint": "Ergebnis aus Claude.ai hier einfügen …",
     "importButton": "Importieren",
-    "filePickerButton": "JSON-Datei öffnen",
+    "filePickerButton": "Datei öffnen",
     "confirmButton": "Ausgewählte übernehmen",
     "cancelButton": "Zurück zur Eingabe",
-    "schemaCopy": "Schema kopieren",
-    "schemaCopied": "Kopiert!",
-    "errorTitle": "Ungültiger Payload",
-    "errorJsonSyntax": "Ungültiges JSON-Format. Prüfe ob der komplette Block kopiert wurde.",
-    "successBanner": "{count} Entwürfe gespeichert — im Editor verfügbar",
-    "saveError": "Speichern fehlgeschlagen. Versuche es erneut.",
+    "errorJsonSyntax": "Das ist kein vollständiges Ergebnis aus Claude.ai. Prüfe, ob du den ganzen Block kopiert hast.",
+    "saveError": "Das Speichern hat nicht geklappt. Bitte versuche es noch einmal.",
     "saving": "Wird gespeichert …",
-    "noPayload": "Kein Import-Payload vorhanden.",
+    "noPayload": "Es gibt nichts zu importieren.",
     "share": {
-      "loading": "Geteilten Inhalt wird gelesen …",
-      "empty": "Kein geteilter Inhalt gefunden. Bitte erneut aus der Claude-App teilen.",
-      "error": "Geteilter Inhalt konnte nicht gelesen werden. Bitte erneut versuchen."
+      "loading": "Der geteilte Inhalt wird gelesen …",
+      "empty": "Es wurde kein geteilter Inhalt gefunden. Bitte teile ihn noch einmal aus der Claude-App.",
+      "error": "Der geteilte Inhalt ließ sich nicht lesen. Bitte versuche es noch einmal."
     },
     "sections": {
       "beds": "Beete",
       "plants": "Pflanzen",
       "observations": "Beobachtungen",
       "compliance": "Regelprüfung",
-      "complianceHint": "Wird in zukünftiger Version angezeigt",
-      "notes": "Freitext-Notizen"
+      "complianceHint": "Wird noch nicht ausgewertet.",
+      "notes": "Notizen"
     },
     "home": {
       "importButton": "Aus Claude.ai importieren",
@@ -242,19 +295,19 @@
       "emptyBody": "Plane manuell oder importiere eine Analyse aus deinem Claude.ai-Projekt."
     },
     "preview": {
-      "title": "Vorschau importieren",
-      "source": "Quelle: Claude.ai Projekt"
+      "title": "Vorschau des Imports",
+      "source": "Quelle: Claude.ai-Projekt"
     },
     "review": {
-      "title": "Importierte Drafts sichten",
+      "title": "Import-Vorschläge sichten",
       "accept": "Annehmen",
       "dismiss": "Verwerfen",
-      "edit": "Editieren",
+      "edit": "Bearbeiten",
       "done": "Fertig",
-      "autoPromoteToggle": "Sichere Drafts automatisch annehmen (≥ 80%)",
-      "emptyState": "Keine Drafts zur Sichtung",
+      "autoPromoteToggle": "Sichere Vorschläge automatisch übernehmen (ab 80 %)",
+      "emptyState": "Keine Vorschläge zu sichten",
       "promoting": "Wird übernommen …",
-      "promoteError": "Übernahme fehlgeschlagen. Versuche es erneut.",
+      "promoteError": "Das Übernehmen hat nicht geklappt. Bitte versuche es noch einmal.",
       "editForm": {
         "labelPlaceholder": "Bezeichnung",
         "lengthPlaceholder": "Länge (cm)",
@@ -262,49 +315,31 @@
         "save": "Speichern",
         "cancel": "Abbrechen"
       }
-    }
-  },
-  "home": {
-    "emptyTitle": "Noch kein Gartenplan",
-    "emptySubtitle": "Import-Funktion kommt bald.",
-    "profileButtonLabel": "Profil und Einstellungen",
-    "settingsButtonLabel": "Einstellungen"
+    },
+    "confidence": {
+      "high": "{percent} % sicher",
+      "medium": "{percent} %, bitte prüfen",
+      "low": "{percent} %, unsicher"
+    },
+    "selectLabel": "{label} auswählen",
+    "lowConfidence": "Unsicher erkannt. Bitte selbst prüfen.",
+    "templateCopy": "Vorlage für Claude.ai kopieren",
+    "templateCopied": "Kopiert",
+    "errorShape": "Das Ergebnis hat nicht die Form, die Spatenstich erwartet. Kopiere die Vorlage, gib sie dem Claude.ai-Projekt und lass es das Ergebnis neu ausgeben.",
+    "errorDetails": "Technische Angabe:",
+    "errorDetailsMore": "und {n} weitere"
   },
   "editor": {
-    "title": "Plan-Editor",
-    "save": "Speichern",
     "saving": "Wird gespeichert …",
     "saved": "Gespeichert",
-    "saveError": "Speichern fehlgeschlagen. Versuche es erneut.",
     "undo": "Rückgängig",
     "redo": "Wiederholen",
-    "toggleGrid": "Gitter ein-/ausblenden",
-    "toggleLayerInfrastructure": "Infrastruktur-Layer ein-/ausblenden",
-    "toggleLayerSeasonal": "Jahresplan-Layer ein-/ausblenden",
-    "polygonStart": "Beet zeichnen",
-    "polygonFinish": "Beet abschließen",
-    "polygonCancel": "Zeichnen abbrechen",
-    "polygonHint": "Tippe auf den Plan, um Ecken zu setzen (mind. 3).",
-    "delete": "Löschen",
-    "deleteConfirmTitle": "Element löschen?",
-    "deleteConfirmBody": "Dieses Element wird aus dem Plan entfernt. Du kannst die Aktion sofort rückgängig machen.",
-    "deleteConfirmCta": "Ja, löschen",
-    "deleteCancel": "Abbrechen",
-    "rotate": "Drehen",
-    "scale": "Skalieren",
     "webFallback": {
-      "title": "Plan-Ansicht",
-      "banner": "Der interaktive Editor ist zurzeit nur in der App verfügbar (iOS/Android). Hier siehst du deinen Plan als Vorschau.",
       "reviewCta": "Importe sichten",
       "emptyTitle": "Noch kein Plan",
       "emptyBody": "Importiere eine Analyse aus deinem Claude.ai-Projekt oder lege Elemente in der App an."
     },
     "palette": {
-      "tabBeete": "Beete",
-      "tabPflanzen": "Pflanzen",
-      "tabInfrastruktur": "Infrastruktur",
-      "longPressHint": "Lang drücken und auf den Plan ziehen.",
-      "emptyPlants": "Pflanzen erscheinen, sobald ein Beet angelegt ist.",
       "items": {
         "Beet": "Beet",
         "Rasen": "Rasen",
@@ -325,81 +360,31 @@
       "noPlants": "Keine Pflanze gefunden.",
       "close": "Schließen"
     },
-    "spacing": {
-      "warning": "Mindestabstand unterschritten",
-      "warningBody": "Trotzdem platziert — Pflanze steht zu nah an einer anderen.",
-      "okHint": "Abstand passt."
-    },
-    "trayChip": "Letzte Importe ({count})",
-    "tray": {
-      "title": "Letzte Importe",
-      "empty": "Keine offenen Importe.",
-      "filterAll": "Alle",
-      "filterFresh": "Aktuell",
-      "filterStale": "Stale",
-      "staleBadge": "Stale",
-      "staleHint": "Älter als 30 Tage — prüfe vor dem Übernehmen.",
-      "bedDragHint": "Auf den Plan ziehen, um das Beet zu setzen.",
-      "plantApplyCta": "Auf Beet anwenden",
-      "applyPlantModalTitle": "Auf welches Beet?",
-      "applyPlantModalEmpty": "Lege zuerst ein Beet an.",
-      "applyPlantConfirm": "Übernehmen",
-      "applyPlantCancel": "Abbrechen"
-    },
-    "emptyPlan": {
-      "heading": "Leerer Plan",
-      "body": "Wähle ein Element aus der Palette unten oder ziehe einen Import aus dem Tray.",
-      "cta": "Erstes Beet zeichnen"
-    },
-    "viewport": {
-      "resetLabel": "Ansicht zurücksetzen",
-      "zoomInLabel": "Hineinzoomen",
-      "zoomOutLabel": "Hinauszoomen"
-    },
     "home": {
       "openPlan": "Plan öffnen"
     },
     "elementEditor": {
       "title": "Element bearbeiten",
       "name": "Name",
-      "namePlaceholder": "z.B. Tomatenbeet",
       "width": "Breite",
       "height": "Höhe",
-      "unitCm": "cm",
-      "unitDeg": "°",
-      "rotation": "Rotation",
-      "rotationPlaceholder": "0–359",
-      "maintainRatio": "Verhältnis beibehalten",
+      "rotation": "Drehung",
       "zOrder": "Ebene",
       "bringToFront": "Ganz nach vorne",
       "bringForward": "Eine Ebene vor",
       "sendBackward": "Eine Ebene zurück",
       "sendToBack": "Ganz nach hinten",
-      "moreFields": "Erweitert",
-      "lessFields": "Weniger",
+      "moreFields": "Mehr Angaben",
+      "lessFields": "Weniger Angaben",
       "note": "Notiz",
-      "notePlaceholder": "Bemerkung zum Element …",
       "plantedAt": "Pflanzdatum",
-      "accentColor": "Akzentfarbe",
-      "accentColorReset": "Zurücksetzen",
+      "accentColor": "Farbe",
       "cancel": "Abbrechen",
       "save": "Speichern",
-      "delete": "Löschen",
-      "deleteConfirmTitle": "Element löschen?",
-      "deleteConfirmBody": "Du kannst die Aktion sofort rückgängig machen.",
-      "deleteConfirmYes": "Ja, löschen",
-      "deleteConfirmNo": "Abbrechen",
-      "validation": {
-        "widthMin": "Breite muss mindestens 5 cm sein",
-        "widthMax": "Breite darf höchstens 500 cm sein",
-        "heightMin": "Höhe muss mindestens 5 cm sein",
-        "heightMax": "Höhe darf höchstens 500 cm sein"
-      }
+      "delete": "Löschen"
     },
     "done": "Fertig",
     "add": "Hinzufügen",
-    "addTitle": "Was soll auf den Plan?",
-    "addClose": "Schließen",
     "fit": "Ganzen Plan zeigen",
     "props": {
       "name": "Name",
@@ -472,13 +457,13 @@
   "plan": {
     "new": {
       "title": "Neuen Garten anlegen",
-      "intro": "Lege die Größe deiner Parzelle fest. Danach kannst du im Editor Beete zeichnen.",
+      "intro": "Lege die Größe eurer Parzelle fest. Danach kannst du im Plan Beete anlegen.",
       "widthLabel": "Breite (m)",
-      "heightLabel": "Höhe (m)",
+      "heightLabel": "Tiefe (m)",
       "submit": "Garten anlegen",
-      "error_invalid": "Bitte gültige Maße eingeben (0,5–100 m).",
-      "account_required": "Zum Anlegen eines Gartens wird ein Account benötigt.",
-      "account_required_cta": "Zu den Einstellungen"
+      "error_invalid": "Bitte gib beide Maße in Metern an, zwischen 0,5 und 100.",
+      "account_required": "Um einen Garten anzulegen, brauchst du ein Konto.",
+      "account_required_cta": "Zum Konto"
     },
     "view": {
       "title": "Plan",
@@ -491,10 +476,8 @@
     }
   },
   "companion": {
-    "conflict_single": "⚠ Konflikt: {{plantA}} verträgt sich nicht mit {{plantB}}",
-    "conflict_multi": "⚠ Konflikt: {{plantA}} verträgt sich nicht mit {{others}}",
-    "good_single": "✓ Gute Nachbarschaft: {{plantA}} + {{plantB}}",
-    "good_multi": "✓ Gute Nachbarschaft: {{plantA}} + {{others}}",
+    "conflict": "{plant} verträgt sich nicht mit {others}.",
+    "good": "Gute Nachbarn: {plant} und {others}.",
     "dismiss": "Hinweis schließen"
   },
   "sync": {
@@ -509,7 +492,6 @@
     "detail": {
       "title": "Speicherstatus",
       "allSynced": "Alles ist gespeichert und abgeglichen.",
-      "empty": "Alles ist gespeichert und abgeglichen.",
       "pendingOne": "Eine Änderung wartet auf den Abgleich.",
       "pendingMany": "{n} Änderungen warten auf den Abgleich.",
       "failedOne": "Eine Änderung konnte nicht abgeglichen werden.",
@@ -531,8 +513,6 @@
       "discardConfirmYes": "Verwerfen",
       "discardConfirmNo": "Abbrechen",
       "lastError": "Technische Angabe",
-      "attemptsLabel": "Versuche: {n}",
-      "conflictLabel": "Konflikt — älterer Stand, wurde verworfen.",
       "what": {
         "plan_elements": "Element im Plan",
         "garden_dimensions": "Größe der Parzelle",
@@ -566,40 +546,97 @@
       "conflictTaken": "Änderung von {name} übernommen. Deine ältere Änderung wurde verworfen.",
       "someone": "Jemand",
       "dismiss": "Schließen"
-    },
-    "offlineStart": "Keine Verbindung. Dein Garten wird geladen, sobald das Netz wieder da ist."
+    }
   },
   "kalender": {
-    "title": "Aussaatkalender",
+    "title": "Kalender",
     "kwLabel": "KW {kw} · {year}",
     "dieseWoche": "Diese Woche",
-    "jahresuebersicht": "Alle Pflanzen (Jahresübersicht)",
-    "filterMeinePflanzen": "Nur meine Pflanzen",
-    "klimazoneLabel": "Klimazone: {zone} ({name})",
     "aufWelchemBeet": "Auf welchem Beet?",
-    "zuPlanHinzufuegen": "Zu Plan hinzufügen",
+    "zuPlanHinzufuegen": "Zum Plan hinzufügen",
     "planOeffnen": "Plan öffnen",
-    "hinzugefuegtBanner": "{name} wurde dem Plan hinzugefügt",
+    "hinzugefuegtBanner": "{name} steht jetzt im Plan.",
     "nochNichtImPlan": "Noch nicht im Plan",
-    "plzFehlt": "PLZ noch nicht gesetzt — Klimazone unbekannt.",
-    "plzJetztEingeben": "Jetzt eingeben",
-    "keinBeetImPlan": "Noch kein Beet im Plan — lege zuerst ein Beet im Plan-Editor an.",
-    "keineAktionenDieseWoche": "Diese Woche keine Aussaat- oder Ernteaktionen.",
-    "keinePflanzenImPlan": "Keine Pflanzen im Plan",
-    "keinePflanzenImPlanBody": "Füge Pflanzen im Plan-Editor hinzu, um deinen persönlichen Kalender zu sehen.",
-    "ohneKalenderDaten": "Diese Pflanzen wurden vor Phase 9 angelegt und haben keine Kalender-Verknüpfung.",
+    "plzFehlt": "Ohne Postleitzahl rechnet der Kalender mit mittleren Zeiten für Deutschland.",
+    "plzJetztEingeben": "Postleitzahl eintragen",
+    "keinBeetImPlan": "Im Plan gibt es noch kein Beet. Lege zuerst im Plan ein Beet an.",
+    "keineAktionenDieseWoche": "Diese Woche steht im Kalender nichts an.",
+    "keinePflanzenImPlanBody": "Im Plan stehen noch keine Pflanzen. Sobald welche darin stehen, erscheinen sie hier.",
     "legende": {
       "vorkultur": "Vorkultur",
       "direktsaat": "Direktsaat",
       "auspflanzen": "Auspflanzen",
       "ernte": "Ernte"
     },
-    "nichtGefunden": "Pflanze \"{slug}\" nicht gefunden.",
-    "hinzufuegenFehler": "Hinzufügen fehlgeschlagen. Versuche es erneut.",
+    "nichtGefunden": "Diese Pflanze gibt es im Katalog nicht.",
+    "hinzufuegenFehler": "Das Hinzufügen hat nicht geklappt. Bitte versuche es noch einmal.",
     "detail": {
-      "mindestabstand": "Mindestabstand: {cm} cm",
-      "sonnenbedarf": "Sonnenbedarf: {value}",
-      "familie": "Familie: {family}"
+      "mindestabstand": "Abstand zur nächsten Pflanze: {cm}",
+      "sonnenbedarf": "Standort: {value}",
+      "familie": "Pflanzenfamilie: {family}",
+      "wasserbedarf": "Wasserbedarf: {value}",
+      "unbekannt": "nicht angegeben"
+    },
+    "suche": "Pflanze suchen",
+    "sucheLeeren": "Suche leeren",
+    "inEuremPlan": "In eurem Plan",
+    "allePflanzen": "Alle Pflanzen",
+    "imPlanTag": "im Plan",
+    "keineTreffer": "Keine Pflanze gefunden.",
+    "keineTrefferImPlan": "Keine Pflanze im Plan passt zur Suche.",
+    "heute": "Heute",
+    "heuteHinweis": "Die senkrechte Linie zeigt den heutigen Tag.",
+    "jetzt": "jetzt",
+    "monateKurz": "J F M A M J J A S O N D",
+    "zeileLabel": "{name}, Kalender öffnen",
+    "stripLabel": "Jahresverlauf für {name}",
+    "aktionLabel": "{name}, {aktion}, Kalender öffnen",
+    "wocheAusPlan": "Für die Pflanzen in eurem Plan.",
+    "wocheAusAllen": "Aus allen Pflanzen, solange im Plan noch keine stehen.",
+    "wocheAlle": "Alle {n} anzeigen",
+    "wocheWeniger": "Weniger anzeigen",
+    "fensterBis": "{from} bis {to}",
+    "teil": {
+      "anfang": "Anfang",
+      "mitte": "Mitte",
+      "ende": "Ende"
+    },
+    "keineZeiten": "Für diese Pflanze sind keine Kalenderzeiten hinterlegt.",
+    "beetOhneName": "Beet ohne Namen",
+    "zuPlanHinzufuegenLabel": "{name} zum Plan hinzufügen",
+    "fruchtfolge": "In „{bed}“ steht schon {other} aus derselben Pflanzenfamilie. Verwandte Pflanzen im selben Beet laugen den Boden einseitig aus und stecken sich leichter an.",
+    "fruchtfolgeAndere": "eine verwandte Pflanze",
+    "sonne": {
+      "sonnig": "sonnig",
+      "halb_schattig": "halbschattig",
+      "schattig": "schattig"
+    },
+    "wasser": {
+      "niedrig": "gering",
+      "mittel": "mittel",
+      "hoch": "hoch"
+    },
+    "familie": {
+      "Rosaceae": "Rosengewächse",
+      "Asteraceae": "Korbblütler",
+      "Solanaceae": "Nachtschattengewächse",
+      "Lamiaceae": "Lippenblütler",
+      "Brassicaceae": "Kreuzblütler",
+      "Boraginaceae": "Raublattgewächse",
+      "Fabaceae": "Hülsenfrüchtler",
+      "Apiaceae": "Doldenblütler",
+      "Caprifoliaceae": "Geißblattgewächse",
+      "Amaryllidaceae": "Amaryllisgewächse",
+      "Cucurbitaceae": "Kürbisgewächse",
+      "Ericaceae": "Heidekrautgewächse",
+      "Adoxaceae": "Moschuskrautgewächse",
+      "Grossulariaceae": "Stachelbeergewächse",
+      "Tropaeolaceae": "Kapuzinerkressengewächse",
+      "Poaceae": "Süßgräser",
+      "Amaranthaceae": "Fuchsschwanzgewächse",
+      "Hydrophyllaceae": "Wasserblattgewächse",
+      "Elaeagnaceae": "Ölweidengewächse",
+      "Juglandaceae": "Walnussgewächse"
     }
   },
   "pwa": {
@@ -696,7 +733,6 @@
     "resultOne": "Ein Befund wartet auf deine Entscheidung.",
     "resultMany": "{n} Befunde warten auf deine Entscheidung.",
     "showFindings": "Befunde ansehen",
-    "again": "Weitere Fotos abgleichen",
     "openOne": "Ein offener Befund",
     "openMany": "{n} offene Befunde",
     "home": {
@@ -834,13 +870,8 @@
     ]
   },
   "tasks": {
-    "title": "Heute",
     "heading": "Was heute zu tun ist",
-    "intro": "Aus eurem Plan, dem Kalender, der Jahreszeit und dem Wetter. Die Liste entsteht auf dem Gerät und geht auch ohne Netz.",
     "show": "Aufgaben für heute anzeigen",
-    "hide": "Aufgaben ausblenden",
-    "accountOnly": "Die Aufgabenliste braucht einen Garten in einem Konto.",
-    "noPlan": "Sobald Beete und Pflanzen im Plan stehen, ergeben sich daraus Aufgaben.",
     "empty": "Für heute steht nichts an.",
     "allDone": "Alles erledigt, was für heute anstand.",
     "budget": {
@@ -865,10 +896,8 @@
     "ai": {
       "sorted": "Von der KI sortiert",
       "base": "Grundliste, ohne KI sortiert",
-      "button": "Mit KI sortieren",
       "running": "Die KI sortiert die Liste …",
-      "offline": "Ohne Netz gilt die Grundliste.",
-      "hint": "Die KI bringt die Aufgaben in eine sinnvolle Reihenfolge und begründet sie. Das kostet einen kleinen Betrag aus dem Monatsbudget und wird für heute gemerkt."
+      "offline": "Ohne Netz gilt die Grundliste."
     },
     "weather": {
       "line": "Heute {min} bis {max}, {rain}{place}.",
@@ -931,7 +960,6 @@
       "add": "Eigene Aufgabe anlegen",
       "heading": "Eigene Aufgabe",
       "listHeading": "Eigene Aufgaben",
-      "listEmpty": "Noch keine eigenen Aufgaben.",
       "title": "Was ist zu tun?",
       "where": "Wo? (kann leer bleiben)",
       "duration": "Dauer in Minuten",
@@ -966,7 +994,8 @@
     "section": {
       "garden": "Garten",
       "tools": "Werkzeuge",
-      "account": "Konto und App"
+      "account": "Konto und App",
+      "legal": "Rechtliches"
     },
     "garden": {
       "title": "Mein Garten",
@@ -1000,8 +1029,8 @@
       "title": "Aus Claude.ai importieren",
       "hint": "Analyse aus eurem Claude.ai-Projekt übernehmen",
       "howTitle": "So geht der Import",
-      "how1": "Lade im Claude.ai-Projekt Fotos hoch und lass dir das Ergebnis als JSON ausgeben.",
-      "how2": "Kopiere das JSON oder teile es aus Claude.ai mit Spatenstich.",
+      "how1": "Lade im Claude.ai-Projekt Fotos hoch. Das Projekt antwortet mit einem Ergebnisblock.",
+      "how2": "Kopiere den ganzen Block oder teile ihn aus Claude.ai mit Spatenstich.",
       "how3": "Füge es hier ein. Du siehst eine Vorschau und entscheidest bei jedem Eintrag, ob er in den Plan kommt."
     },
     "ai": {
@@ -1015,6 +1044,14 @@
     "account": {
       "title": "Konto",
       "hint": "Anmeldung, Abmelden, App installieren"
+    },
+    "privacy": {
+      "title": "Datenschutz",
+      "hint": "Was gespeichert wird und was mit Fotos geschieht"
+    },
+    "imprint": {
+      "title": "Impressum",
+      "hint": "Wer die App betreibt, Version"
     }
   },
   "onboarding": {
@@ -1053,6 +1090,98 @@
       "copied": "Kopiert",
       "notOwner": "Nur wer den Garten angelegt hat, kann einladen.",
       "full": "Der Garten hat schon zwei Mitglieder."
+    }
+  },
+  "home": {
+    "signedIn": "Angemeldet",
+    "localMode": "Ohne Konto, nur auf diesem Gerät"
+  },
+  "legal": {
+    "version": {
+      "title": "Version",
+      "version": "Version {version}",
+      "unknown": "Version unbekannt",
+      "build": "Build {build}",
+      "buildDated": "Build {build} vom {date}",
+      "localBuild": "von Hand gebaut"
+    },
+    "imprint": {
+      "operatorTitle": "Betreiber",
+      "missing": "Name und Anschrift des Betreibers sind in dieser Ausgabe der App noch nicht eingetragen.",
+      "about": "Spatenstich ist eine private, nicht kommerzielle App für den eigenen Kleingarten. Es gibt keine Werbung und kein Angebot an Dritte.",
+      "liability": "Kalenderzeiten, Aufgaben und Befunde der KI sind Empfehlungen ohne Gewähr. Ob euer Garten die Regeln des Bundeskleingartengesetzes und eures Vereins einhält, bleibt eure Verantwortung."
+    },
+    "privacy": {
+      "lead": "Spatenstich ist eine private App für einen gemeinsamen Garten. Es gibt keine Werbung, keine Auswertung deines Verhaltens und keinen Verkauf von Daten. Gespeichert wird, was du für den Garten einträgst.",
+      "who": {
+        "title": "Wer verantwortlich ist",
+        "body": [
+          "Verantwortlich ist der Betreiber der App. Name und Anschrift stehen im Impressum."
+        ]
+      },
+      "stored": {
+        "title": "Was gespeichert wird",
+        "body": [
+          "Für dein Konto: deine E-Mail-Adresse, dein Passwort (nur als Prüfwert, nicht lesbar) und der Name, den du dir gibst.",
+          "Für den Garten: Plan, Pflanzen, Aufgaben, Befunde aus dem Foto-Abgleich, Einladungscodes und das Verbrauchsbuch der KI. Wer mit dir Mitglied im Garten ist, sieht diese Daten und deinen Namen.",
+          "Diese Daten liegen beim Dienst Supabase auf Servern in Frankfurt am Main."
+        ]
+      },
+      "device": {
+        "title": "Was auf deinem Gerät liegt",
+        "body": [
+          "Die App legt eine Kopie des Gartens im Speicher deines Browsers ab, damit sie auch ohne Netz startet. Damit du angemeldet bleibst, liegt dort auch ein Anmeldeschlüssel. Beim Abmelden wird beides gelöscht.",
+          "Cookies für Werbung oder Statistik gibt es nicht."
+        ]
+      },
+      "photos": {
+        "title": "Fotos und KI: Übermittlung an Anthropic",
+        "body": [
+          "Beim Foto-Abgleich schickt die App deine Fotos verkleinert an den eigenen Server und von dort an die KI Claude des Anbieters Anthropic in den USA. Mitgeschickt wird eine Beschreibung des Plans: Maße, Beete und Pflanzennamen. Deine E-Mail-Adresse und dein Name werden nicht mitgeschickt.",
+          "Spatenstich speichert die Fotos nicht, weder auf dem Server noch im Verbrauchsbuch. Gespeichert werden nur die Befunde, die die KI zurückgibt, und was die Anfrage gekostet hat.",
+          "Anthropic verarbeitet die Fotos, um die Antwort zu erzeugen. Nach den Bedingungen von Anthropic für diesen Zugang werden die Inhalte nicht zum Training der KI verwendet und nach einer begrenzten Frist gelöscht. Einzelheiten stehen in den Datenschutzhinweisen von Anthropic.",
+          "In den USA gilt nicht derselbe Datenschutz wie in der EU. Fotos gehen nur dorthin, wenn du einen Foto-Abgleich startest. Wer das nicht möchte, nutzt die App ohne Foto-Abgleich; alles andere funktioniert weiter.",
+          "Achte darauf, dass auf den Fotos keine Personen, keine Kennzeichen und möglichst keine Nachbargärten zu erkennen sind."
+        ]
+      },
+      "tasks": {
+        "title": "Aufgaben sortieren mit KI",
+        "body": [
+          "Wenn die KI die Aufgaben des Tages sortiert, geht Text an Anthropic: die Aufgabenliste, die Wettervorhersage und Namen von Beeten und Pflanzen. Fotos, E-Mail-Adresse und dein Name sind nicht dabei."
+        ]
+      },
+      "weather": {
+        "title": "Wettervorhersage",
+        "body": [
+          "Für die Vorhersage fragt der Server mit der Postleitzahl des Gartens zwei Dienste: zippopotam.us nennt den Ort zur Postleitzahl, open-meteo.com die Vorhersage. Dein Gerät hat mit diesen Diensten keinen Kontakt. Sie erfahren nur die Postleitzahl oder die Lage des Ortes."
+        ]
+      },
+      "delivery": {
+        "title": "Auslieferung der App",
+        "body": [
+          "Die Dateien der App liefert der Dienst Cloudflare aus. Wie bei jedem Aufruf einer Webseite sieht Cloudflare dabei die IP-Adresse deines Geräts."
+        ]
+      },
+      "reports": {
+        "title": "Fehlerberichte",
+        "off": "Fehlerberichte sind in dieser Ausgabe der App ausgeschaltet. Bei einem Absturz verlässt nichts dein Gerät.",
+        "eu": "Stürzt die App ab, geht ein technischer Bericht an den Dienst Sentry auf Servern in der EU: welcher Fehler an welcher Stelle der App auftrat, mit Browser und Gerätetyp. Inhalte deines Gartens stehen nicht darin.",
+        "elsewhere": "Stürzt die App ab, geht ein technischer Bericht an den Dienst Sentry, dessen Server auch außerhalb der EU stehen können: welcher Fehler an welcher Stelle der App auftrat, mit Browser und Gerätetyp. Inhalte deines Gartens stehen nicht darin."
+      },
+      "claudeImport": {
+        "title": "Import aus Claude.ai",
+        "body": [
+          "Wenn du Ergebnisse aus einem eigenen Claude.ai-Projekt importierst, lädst du die Fotos dort selbst hoch. Dafür gelten die Bedingungen deines Kontos bei Claude.ai. Spatenstich bekommt nur das Ergebnis, das du einfügst."
+        ]
+      },
+      "rights": {
+        "title": "Deine Rechte",
+        "body": [
+          "Du kannst Auskunft über deine Daten verlangen und sie berichtigen oder löschen lassen. Einen Garten löscht sein Besitzer unter „Mehr“ bei „Mein Garten“. Um dein Konto löschen zu lassen, schreib dem Betreiber; die Anschrift steht im Impressum.",
+          "Du kannst dich außerdem bei einer Datenschutz-Aufsichtsbehörde beschweren."
+        ]
+      },
+      "asOf": "Stand: November 2026"
     }
   }
 }

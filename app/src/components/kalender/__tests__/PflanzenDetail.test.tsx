@@ -161,11 +161,11 @@ describe('PflanzenDetailScreen', () => {
   it('(a) renders Phase-8 plant info: Mindestabstand, Sonnenbedarf, Familie', () => {
     const { getByText } = render(<PflanzenDetailScreen />);
     // Mindestabstand with the plant's minSpacingCm value
-    expect(getByText(/Mindestabstand: 60 cm/)).toBeTruthy();
+    expect(getByText(/Abstand zur nächsten Pflanze: 60 cm/)).toBeTruthy();
     // Sonnenbedarf
-    expect(getByText(/Sonnenbedarf: sonnig/)).toBeTruthy();
+    expect(getByText(/Standort: sonnig/)).toBeTruthy();
     // Familie
-    expect(getByText(/Familie: Solanaceae/)).toBeTruthy();
+    expect(getByText(/Pflanzenfamilie: Nachtschattengewächse/)).toBeTruthy();
   });
 
   // (b) hasBeetImPlan=false → keinBeetImPlan warning, no add button
@@ -177,7 +177,7 @@ describe('PflanzenDetailScreen', () => {
     });
     const { queryByTestId, getByText } = render(<PflanzenDetailScreen />);
     // keinBeetImPlan text is present
-    expect(getByText(/Noch kein Beet im Plan/)).toBeTruthy();
+    expect(getByText(/Im Plan gibt es noch kein Beet/)).toBeTruthy();
     // add button is absent
     expect(queryByTestId('detail-add-to-plan-button')).toBeNull();
   });
@@ -280,6 +280,6 @@ describe('PflanzenDetailScreen', () => {
 
     const { getByText } = render(<PflanzenDetailScreen />);
     // Banner text contains the slug (via kalender.nichtGefunden de.json key)
-    expect(getByText(/unbekannt/)).toBeTruthy();
+    expect(getByText(/Diese Pflanze gibt es im Katalog nicht/)).toBeTruthy();
   });
 });

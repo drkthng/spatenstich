@@ -252,4 +252,66 @@ describe('kalenderEngine', () => {
       expect(result.grund).toBeNull();
     });
   });
+
+  // ── Phase 38 (WR-08): windows that run over New Year ─────────────────────
+  describe('Fenster über den Jahreswechsel', () => {
+    // Feldsalat-like: harvest from early October (280) to the end of March (90).
+    const winterMock = { ...nullPflanzeMock, harvestDoyStart: 280, harvestDoyEnd: 90, slug: 'feldsalat' };
+
+    it('comes as two parts, to the end of the year and from its start', () => {
+      const ernte = getFensterFuerPflanze(winterMock, 4).filter((f) => f.typ === 'Ernte');
+      expect(ernte.map((f) => [f.startDoy, f.endDoy])).toEqual([[280, 365], [1, 90]]);
+      for (const f of ernte) {
+        expect(f.startKw).toBeLessThanOrEqual(f.endKw);
+        expect(f.ueberJahreswechsel).toEqual({ startDoy: 280, endDoy: 90 });
+      }
+    });
+
+    it('is active in November and in February, not in June', () => {
+      const fenster = getFensterFuerPflanze(winterMock, 4);
+      expect(filterAktiveAktionen(fenster, 46)).toHaveLength(1);
+      expect(filterAktiveAktionen(fenster, 6)).toHaveLength(1);
+      expect(filterAktiveAktionen(fenster, 24)).toHaveLength(0);
+    });
+
+    it('moves with the climate zone and wraps instead of being cut off', () => {
+      // Zone 7 is 30 days later: 310 to 120.
+      const ernte = getFensterFuerPflanze(winterMock, 7).filter((f) => f.typ === 'Ernte');
+      expect(ernte.map((f) => [f.startDoy, f.endDoy])).toEqual([[310, 365], [1, 120]]);
+      // Zone 1 is 30 days earlier: 250 to 60.
+      const frueh = getFensterFuerPflanze(winterMock, 1).filter((f) => f.typ === 'Ernte');
+      expect(frueh.map((f) => [f.startDoy, f.endDoy])).toEqual([[250, 365], [1, 60]]);
+    });
+
+    it('a window inside the year is unchanged and carries no mark', () => {
+      const ernte = getFensterFuerPflanze(tomateMock, 4).find((f) => f.typ === 'Ernte')!;
+      expect([ernte.startDoy, ernte.endDoy]).toEqual([200, 270]);
+      expect(ernte.ueberJahreswechsel).toBeUndefined();
+    });
+
+    it('every plant of the catalog gives windows that can be drawn', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const bundle = require('../../data/plants.json') as { plants: (typeof tomateMock)[] };
+      for (const plant of bundle.plants) {
+        for (const zone of [1, 4, 7]) {
+          for (const f of getFensterFuerPflanze(plant, zone)) {
+            expect(f.startDoy).toBeGreaterThanOrEqual(1);
+            expect(f.endDoy).toBeLessThanOrEqual(365);
+            expect(f.startDoy).toBeLessThanOrEqual(f.endDoy);
+            expect(f.startKw).toBeLessThanOrEqual(f.endKw);
+          }
+        }
+      }
+    });
+  });
+
+  describe('pruefeEinfacheFruchtfolge names the plant in the way', () => {
+    it('gives the slug of the plant of the same family', () => {
+      const result = pruefeEinfacheFruchtfolge(
+        { family: 'Solanaceae', slug: 'tomate' },
+        [{ family: 'Solanaceae', slug: 'kartoffel' }],
+      );
+      expect(result.konfliktSlug).toBe('kartoffel');
+    });
+  });
 });

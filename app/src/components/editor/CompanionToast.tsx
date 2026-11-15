@@ -6,6 +6,7 @@ import * as React from 'react';
 import { View, Pressable, Text } from 'react-native';
 import { AlertTriangle, CheckCircle, X } from 'lucide-react-native';
 import { cn } from '@/src/lib/utils';
+import { t as tx } from '@/src/lib/i18n';
 
 export interface CompanionToastProps {
   variant: 'error' | 'success';
@@ -67,8 +68,8 @@ export function CompanionToast({
         <Pressable
           onPress={onDismiss}
           accessibilityRole="button"
-          accessibilityLabel="Hinweis schließen"
-          className="min-h-[44px] min-w-[44px] items-center justify-center"
+          accessibilityLabel={tx('companion.dismiss')}
+          className="min-h-[48px] min-w-[48px] items-center justify-center"
           hitSlop={8}
         >
           <X size={16} color={tokens.color.inkMuted} />

@@ -27,6 +27,7 @@ import {
   saveVereinsregeln,
   deleteVereinsregel,
 } from '@/src/lib/vereinsregelnRepo';
+import { t as tx } from '@/src/lib/i18n';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
@@ -150,9 +151,9 @@ export default function VereinsregelnConfirmScreen(): React.JSX.Element {
       // Surface save error to the user instead of silently swallowing it.
       const msg = e instanceof Error ? e.message : String(e);
       if (msg === 'no_active_garden') {
-        setSaveError('Kein aktiver Garten gefunden. Bitte starte die App neu.');
+        setSaveError(tx('rules.confirm.noGarden'));
       } else {
-        setSaveError('Speichern fehlgeschlagen. Bitte versuche es erneut.');
+        setSaveError(tx('rules.confirm.saveFailed'));
       }
     } finally {
       setSaving(false);

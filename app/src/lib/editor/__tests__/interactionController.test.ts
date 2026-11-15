@@ -223,7 +223,7 @@ describe('touch: select first (D-01)', () => {
   });
 
   it('a small selected element can still be dragged by its body (D-21)', () => {
-    // 0.4 m at 50 px/m is 20 px: smaller than one 44 px touch area.
+    // 0.4 m at 50 px/m is 20 px: smaller than one 48 px touch area.
     const h = harness([makeEl('a', { widthM: 0.4, heightM: 0.4 })]);
     tap(h, 100, 100, 'touch');
     drag(h, [100, 100], [150, 100], 'touch');

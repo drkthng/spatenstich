@@ -10,6 +10,7 @@ import { countOpenFindings } from '@/src/lib/photo/openFindings';
 import { useDataVersion } from '@/src/lib/sync/dataVersion';
 import { tokens } from '@/src/theme/tokens';
 import { t } from '@/src/lib/i18n';
+import { buildLine, currentBuild } from '@/src/components/legal/LegalScreens';
 
 interface Entry {
   key: string;
@@ -71,7 +72,15 @@ export default function MoreScreen(): React.JSX.Element {
         { key: 'account', title: t('more.account.title'), hint: t('more.account.hint'), href: '/(app)/settings' },
       ],
     },
+    {
+      title: t('more.section.legal'),
+      entries: [
+        { key: 'privacy', title: t('more.privacy.title'), hint: t('more.privacy.hint'), href: '/datenschutz' },
+        { key: 'imprint', title: t('more.imprint.title'), hint: t('more.imprint.hint'), href: '/impressum' },
+      ],
+    },
   ];
+  const build = currentBuild();
 
   return (
     <ScrollView className="flex-1 bg-bg" contentContainerClassName="px-4 pt-4 pb-12" testID="more-screen">
@@ -105,6 +114,9 @@ export default function MoreScreen(): React.JSX.Element {
             </View>
           );
         })}
+        <Text className="font-body text-sm text-ink-muted mt-8" testID="more-version" selectable>
+          {t('nav.appName')} · {buildLine(build)}
+        </Text>
       </View>
     </ScrollView>
   );

@@ -17,26 +17,20 @@ describe('de.json', () => {
   });
 
   // ── Phase 2 new keys ─────────────────────────────────────────
-  it('auth.choice.create_account === "Account erstellen"', () => {
-    expect(de['auth']?.['choice']?.['create_account']).toBe('Account erstellen');
+  // Phase 38: plain German. "Account" is "Konto"; texts no screen used are gone
+  // (auth.choice.local_start, profile.bkleingg.*, app.index.*).
+  it('auth.choice.create_account === "Konto erstellen"', () => {
+    expect(de['auth']?.['choice']?.['create_account']).toBe('Konto erstellen');
   });
 
-  it('auth.choice.local_start === "Lokal starten"', () => {
-    expect(de['auth']?.['choice']?.['local_start']).toBe('Lokal starten');
-  });
-
-  it('common.disclaimer_body matches /Empfehlungen ohne Gewähr/ AND /BKleingG-Compliance/', () => {
+  it('common.disclaimer_body says: no warranty, and names the law in full', () => {
     const body: string = de['common']?.['disclaimer_body'];
     expect(body).toMatch(/Empfehlungen ohne Gewähr/);
-    expect(body).toMatch(/BKleingG-Compliance/);
+    expect(body).toMatch(/Bundeskleingartengesetz/);
   });
 
   it('common.error_network exists', () => {
     expect(de['common']?.['error_network']).toBeTruthy();
-  });
-
-  it('profile.bkleingg.no_plan exists', () => {
-    expect(de['profile']?.['bkleingg']?.['no_plan']).toBeTruthy();
   });
 
   it('auth.register.submit === "Konto erstellen"', () => {
@@ -51,16 +45,12 @@ describe('de.json', () => {
     expect(de['profile']?.['plz']?.['submit']).toBe('Klimazone übernehmen');
   });
 
-  it('rules.confirm.bkleingg_group references BKleingG', () => {
-    expect(de['rules']?.['confirm']?.['bkleingg_group']).toMatch(/BKleingG/);
+  it('rules.confirm.bkleingg_group names the law in full', () => {
+    expect(de['rules']?.['confirm']?.['bkleingg_group']).toMatch(/Bundeskleingartengesetz/);
   });
 
   it('settings.logout === "Abmelden"', () => {
     expect(de['settings']?.['logout']).toBe('Abmelden');
-  });
-
-  it('app.index.placeholder exists', () => {
-    expect(de['app']?.['index']?.['placeholder']).toBeTruthy();
   });
 
   it('rules.confirm.edit keys exist for inline edit UI', () => {

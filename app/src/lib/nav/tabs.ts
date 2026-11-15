@@ -54,6 +54,16 @@ export function isFullScreen(segments: readonly string[]): boolean {
   return false;
 }
 
+/**
+ * Pages anyone may read, signed in or not: privacy notes and Impressum. The sign-in guard
+ * leaves them alone.
+ */
+export const PUBLIC_ROUTES = ['datenschutz', 'impressum'] as const;
+
+export function isPublicRoute(segments: readonly string[]): boolean {
+  return segments.length > 0 && (PUBLIC_ROUTES as readonly string[]).includes(segments[0]!);
+}
+
 /** Titles of the screens, by route name inside the (app) group (i18n keys). */
 export const SCREEN_TITLES: Record<string, string> = {
   index: 'nav.heute',

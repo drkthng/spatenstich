@@ -33,7 +33,7 @@ export function TrafficLightBadge({
   const content = (
     <View
       className="flex-row items-center gap-2"
-      accessibilityLabel={`BKleingG-Status: ${label}`}
+      accessibilityLabel={label}
     >
       <View
         className="w-7 h-7 rounded-full"
@@ -48,10 +48,10 @@ export function TrafficLightBadge({
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel={`BKleingG-Status: ${label}`}
+        accessibilityLabel={label}
         testID={testID}
         className={cn(
-          'min-h-[44px] flex-row items-center active:opacity-80 px-2'
+          'min-h-[48px] flex-row items-center active:opacity-80 px-2'
         )}
         hitSlop={8}
       >

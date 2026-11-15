@@ -10,6 +10,7 @@ import { ChevronsUp, ChevronUp, ChevronDown, ChevronsDown } from 'lucide-react-n
 import type { PlanElementRow } from '@spatenstich/shared';
 import { bringToFront, bringForward, sendBackward, sendToBack } from '@/src/lib/editor/zOrder';
 import { useEditorStore } from '@/src/stores/editorStore';
+import { t as tx } from '@/src/lib/i18n';
 
 export interface ZOrderButtonsProps {
   elementId: string;
@@ -35,7 +36,7 @@ export function ZOrderButtons({ elementId }: ZOrderButtonsProps): React.JSX.Elem
         testID="zorder-front"
         onPress={() => apply(bringToFront)}
         className="p-2 rounded-md border border-line"
-        accessibilityLabel="Ganz nach vorne"
+        accessibilityLabel={tx('editor.elementEditor.bringToFront')}
       >
         <ChevronsUp size={18} color={tokens.color.ink} />
       </Pressable>
@@ -43,7 +44,7 @@ export function ZOrderButtons({ elementId }: ZOrderButtonsProps): React.JSX.Elem
         testID="zorder-forward"
         onPress={() => apply(bringForward)}
         className="p-2 rounded-md border border-line"
-        accessibilityLabel="Eine Ebene vor"
+        accessibilityLabel={tx('editor.elementEditor.bringForward')}
       >
         <ChevronUp size={18} color={tokens.color.ink} />
       </Pressable>
@@ -51,7 +52,7 @@ export function ZOrderButtons({ elementId }: ZOrderButtonsProps): React.JSX.Elem
         testID="zorder-backward"
         onPress={() => apply(sendBackward)}
         className="p-2 rounded-md border border-line"
-        accessibilityLabel="Eine Ebene zurück"
+        accessibilityLabel={tx('editor.elementEditor.sendBackward')}
       >
         <ChevronDown size={18} color={tokens.color.ink} />
       </Pressable>
@@ -59,7 +60,7 @@ export function ZOrderButtons({ elementId }: ZOrderButtonsProps): React.JSX.Elem
         testID="zorder-back"
         onPress={() => apply(sendToBack)}
         className="p-2 rounded-md border border-line"
-        accessibilityLabel="Ganz nach hinten"
+        accessibilityLabel={tx('editor.elementEditor.sendToBack')}
       >
         <ChevronsDown size={18} color={tokens.color.ink} />
       </Pressable>

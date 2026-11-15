@@ -16,7 +16,7 @@ export const Input = React.forwardRef<TextInput, InputProps>(({ className, ...pr
       ref={ref}
       placeholderTextColor={tokens.color.inkMuted}
       className={cn(
-        'min-h-[44px] px-3 py-2 rounded-lg border border-line',
+        'min-h-[48px] px-3 py-2 rounded-lg border border-line',
         'bg-bg text-base text-ink',
         'focus:border-primary',
         className

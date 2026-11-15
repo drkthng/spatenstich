@@ -8,6 +8,7 @@
 import * as React from 'react';
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Check } from 'lucide-react-native';
 import type { AiCode, GardenTaskRow, TaskDoneRow } from '@spatenstich/shared';
 import { useAuthStore } from '@/src/stores/authStore';
 import { useProfileStore } from '@/src/stores/profileStore';
@@ -73,14 +74,14 @@ function TaskRow({
         accessibilityState={{ checked: done !== null }}
         accessibilityLabel={t(done ? 'tasks.uncheck' : 'tasks.check', { title: task.title })}
         className="items-center justify-center"
-        style={{ width: 44, height: 44 }}
+        style={{ width: 48, height: 48 }}
         testID={`task-check-${task.key}`}
       >
         <View
           className={`items-center justify-center border ${done ? 'bg-primary border-primary' : 'bg-bg border-ink'}`}
           style={{ width: 26, height: 26 }}
         >
-          {done ? <Text className="font-body text-base text-on-primary">✓</Text> : null}
+          {done ? <Check size={18} color={tokens.color.onPrimary} strokeWidth={2.6} /> : null}
         </View>
       </Pressable>
       <View className="flex-1">
@@ -280,7 +281,7 @@ export function TodayTasks(): React.JSX.Element | null {
   const ownTasks = (data?.ownTasks ?? []).filter((task) => task.deletedAt === null);
   const shortest = split.open.reduce((min, task) => Math.min(min, task.durationMin), Infinity);
   const chip = (active: boolean): string =>
-    `min-h-[44px] px-4 items-center justify-center border ${active ? 'bg-primary border-primary' : 'border-line bg-bg'}`;
+    `min-h-[48px] px-4 items-center justify-center border ${active ? 'bg-primary border-primary' : 'border-line bg-bg'}`;
   const chipText = (active: boolean): string => `font-body text-base ${active ? 'text-on-primary' : 'text-ink'}`;
 
   return (
@@ -294,7 +295,7 @@ export function TodayTasks(): React.JSX.Element | null {
         <Pressable
           onPress={() => router.push('/(app)/profile/plz' as never)}
           accessibilityRole="button"
-          className="min-h-[44px] justify-center"
+          className="min-h-[48px] justify-center"
           testID="today-weather-noplz"
         >
           <Text className="font-body text-sm text-ink-muted">
@@ -455,7 +456,7 @@ export function TodayTasks(): React.JSX.Element | null {
             onChangeText={(text) => setDraft({ ...draft, title: text })}
             accessibilityLabel={t('tasks.own.title')}
             maxLength={120}
-            className="min-h-[44px] px-3 py-2 border border-line bg-bg font-body text-base text-ink"
+            className="min-h-[48px] px-3 py-2 border border-line bg-bg font-body text-base text-ink"
             testID="today-own-title"
           />
           <Text className="font-body text-xs text-ink-muted mt-2 mb-1">{t('tasks.own.where')}</Text>
@@ -464,7 +465,7 @@ export function TodayTasks(): React.JSX.Element | null {
             onChangeText={(text) => setDraft({ ...draft, where: text })}
             accessibilityLabel={t('tasks.own.where')}
             maxLength={120}
-            className="min-h-[44px] px-3 py-2 border border-line bg-bg font-body text-base text-ink"
+            className="min-h-[48px] px-3 py-2 border border-line bg-bg font-body text-base text-ink"
             testID="today-own-where"
           />
           <View className="flex-row flex-wrap gap-3">
@@ -475,7 +476,7 @@ export function TodayTasks(): React.JSX.Element | null {
                 onChangeText={(text) => setDraft({ ...draft, duration: text })}
                 inputMode="numeric"
                 accessibilityLabel={t('tasks.own.duration')}
-                className="min-h-[44px] w-28 px-3 py-2 border border-line bg-bg font-body text-base text-ink"
+                className="min-h-[48px] w-28 px-3 py-2 border border-line bg-bg font-body text-base text-ink"
                 testID="today-own-duration"
               />
             </View>
@@ -488,7 +489,7 @@ export function TodayTasks(): React.JSX.Element | null {
                 data-testid="today-own-due"
                 onChange={(e) => setDraft({ ...draft, due: e.currentTarget.value })}
                 style={{
-                  minHeight: 44,
+                  minHeight: 48,
                   padding: '6px 10px',
                   border: `1px solid ${tokens.color.line}`,
                   background: tokens.color.bg,
@@ -519,7 +520,7 @@ export function TodayTasks(): React.JSX.Element | null {
             <Pressable
               onPress={() => void submit()}
               accessibilityRole="button"
-              className="min-h-[44px] px-4 items-center justify-center bg-primary"
+              className="min-h-[48px] px-4 items-center justify-center bg-primary"
               testID="today-own-save"
             >
               <Text className="font-body text-base text-on-primary">{t('tasks.own.save')}</Text>
@@ -530,7 +531,7 @@ export function TodayTasks(): React.JSX.Element | null {
                 setFormNote(null);
               }}
               accessibilityRole="button"
-              className="min-h-[44px] px-4 items-center justify-center border border-line"
+              className="min-h-[48px] px-4 items-center justify-center border border-line"
               testID="today-own-cancel"
             >
               <Text className="font-body text-base text-ink">{t('tasks.own.cancel')}</Text>
@@ -546,7 +547,7 @@ export function TodayTasks(): React.JSX.Element | null {
               setDraft((current) => ({ ...current, due: today }));
             }}
             accessibilityRole="button"
-            className="min-h-[44px] px-4 items-center justify-center border border-line"
+            className="min-h-[48px] px-4 items-center justify-center border border-line"
             testID="today-own-add"
           >
             <Text className="font-body text-base text-ink">{t('tasks.own.add')}</Text>
@@ -556,7 +557,7 @@ export function TodayTasks(): React.JSX.Element | null {
               onPress={() => setOwnOpen((open) => !open)}
               accessibilityRole="button"
               accessibilityState={{ expanded: ownOpen }}
-              className="min-h-[44px] px-4 items-center justify-center border border-line"
+              className="min-h-[48px] px-4 items-center justify-center border border-line"
               testID="today-own-toggle"
             >
               <Text className="font-body text-base text-ink">
@@ -583,7 +584,7 @@ export function TodayTasks(): React.JSX.Element | null {
                 onPress={() => void remove(task)}
                 accessibilityRole="button"
                 accessibilityLabel={t('tasks.own.deleteLabel', { title: task.title })}
-                className="min-h-[44px] px-3 items-center justify-center border border-line"
+                className="min-h-[48px] px-3 items-center justify-center border border-line"
                 testID={`own-task-delete-${task.id}`}
               >
                 <Text className="font-body text-sm text-ink">{t('tasks.own.delete')}</Text>

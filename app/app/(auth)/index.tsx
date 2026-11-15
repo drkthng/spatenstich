@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import { UserPlus, LogIn, UsersRound, ChevronDown, ChevronUp } from 'lucide-react-native';
 import de from '@spatenstich/shared/i18n/de';
 import { AuthChoiceCard } from '@/src/components/AuthChoiceCard';
+import { t as tx } from '@/src/lib/i18n';
 
 // Phase-2 inline i18n helper (no full i18n library yet; a later phase will swap this out).
 // Keys like 'auth.choice.tagline' are read from the shared de.json bundle.
@@ -24,7 +25,7 @@ export default function AuthChoiceScreen(): React.JSX.Element {
     >
       <View className="w-full max-w-md items-center">
         <Text className="text-3xl font-display font-semibold text-ink">
-          Spatenstich
+          {tx('nav.appName')}
         </Text>
         <Text className="text-sm text-ink-muted mt-2 mb-8 text-center">
           {t('auth.choice.tagline')}
@@ -34,7 +35,7 @@ export default function AuthChoiceScreen(): React.JSX.Element {
           <AuthChoiceCard
             icon={UserPlus}
             title={t('auth.choice.create_account')}
-            description="Daten in der Cloud, geräteübergreifend"
+            description={tx('auth.choice.create_account_desc')}
             onPress={() => router.push('/(auth)/register')}
             testID="auth-choice-account"
           />
@@ -59,7 +60,7 @@ export default function AuthChoiceScreen(): React.JSX.Element {
           accessibilityRole="button"
           accessibilityLabel={t('auth.choice.disclaimer_label')}
           onPress={() => setDisclaimerOpen((v) => !v)}
-          className="flex-row items-center mt-8 min-h-[44px] px-2 active:opacity-80"
+          className="flex-row items-center mt-8 min-h-[48px] px-2 active:opacity-80"
         >
           <Text className="text-sm text-ink-muted">
             {t('auth.choice.disclaimer_label')}
@@ -71,10 +72,32 @@ export default function AuthChoiceScreen(): React.JSX.Element {
           )}
         </Pressable>
         {disclaimerOpen ? (
-          <Text className="text-xs text-ink-muted mt-2 px-2 text-center">
+          <Text className="text-sm text-ink-muted mt-2 px-2 text-center">
             {t('common.disclaimer_body')}
           </Text>
         ) : null}
+
+        {/* Phase 38 (DESIGN3-08): what happens with data can be read before signing up. */}
+        <View className="flex-row gap-6 mt-2">
+          <Pressable
+            accessibilityRole="link"
+            onPress={() => router.push('/datenschutz' as never)}
+            className="justify-center px-2"
+            style={{ minHeight: 48 }}
+            testID="auth-privacy-link"
+          >
+            <Text className="text-sm text-ink underline">{tx('auth.choice.privacy')}</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="link"
+            onPress={() => router.push('/impressum' as never)}
+            className="justify-center px-2"
+            style={{ minHeight: 48 }}
+            testID="auth-imprint-link"
+          >
+            <Text className="text-sm text-ink underline">{tx('auth.choice.imprint')}</Text>
+          </Pressable>
+        </View>
       </View>
     </ScrollView>
   );

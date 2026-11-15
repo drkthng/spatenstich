@@ -6,6 +6,7 @@
 import * as React from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
+import { X } from 'lucide-react-native';
 import { PHOTO_MAX_PHOTOS } from '@spatenstich/shared';
 import { useAuthStore } from '@/src/stores/authStore';
 import { useSharedPlants } from '@/src/hooks/usePlants';
@@ -222,10 +223,10 @@ export default function PhotoCheckScreen(): React.JSX.Element {
                   accessibilityRole="button"
                   accessibilityLabel={t('photo.removePhoto', { n: index + 1 })}
                   className="absolute top-0 right-0 items-center justify-center bg-bg border-l border-b border-line"
-                  style={{ width: 44, height: 44 }}
+                  style={{ width: 48, height: 48 }}
                   testID={`photo-remove-${index}`}
                 >
-                  <Text className="font-body text-lg text-ink">×</Text>
+                  <X size={20} color={tokens.color.ink} />
                 </Pressable>
               ) : null}
             </View>
@@ -261,7 +262,7 @@ export default function PhotoCheckScreen(): React.JSX.Element {
             <Pressable
               onPress={() => void run()}
               accessibilityRole="button"
-              className="self-start mt-3 min-h-[44px] px-4 items-center justify-center border border-line"
+              className="self-start mt-3 min-h-[48px] px-4 items-center justify-center border border-line"
               testID="photo-retry"
             >
               <Text className="font-body text-sm text-ink">{t('photo.retry')}</Text>

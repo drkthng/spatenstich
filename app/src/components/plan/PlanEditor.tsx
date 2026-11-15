@@ -518,8 +518,8 @@ function NorthGlyph({ deg }: { deg: number }): React.JSX.Element {
 }
 
 const uiButton: React.CSSProperties = {
-  width: 44,
-  height: 44,
+  width: 48,
+  height: 48,
   background: C.bg,
   border: `1px solid ${C.line}`,
   borderRadius: 0,
@@ -589,7 +589,7 @@ function NorthPanel({
           onBlur={() => setDraft(null)}
           style={{
             width: 56,
-            height: 44,
+            height: 48,
             boxSizing: 'border-box',
             textAlign: 'center',
             font: `400 16px ${tokens.font.body}`,

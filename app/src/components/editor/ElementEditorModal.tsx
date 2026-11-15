@@ -158,7 +158,7 @@ export function ElementEditorModal({
                   testID="kern-name"
                   value={labelField}
                   onChangeText={setLabelField}
-                  className="border border-line rounded-md p-2 min-h-[44px] text-ink bg-bg"
+                  className="border border-line rounded-md p-2 min-h-[48px] text-ink bg-bg"
                   placeholderTextColor={tokens.color.inkMuted}
                   placeholder={t('editor.elementEditor.name')}
                 />
@@ -174,7 +174,7 @@ export function ElementEditorModal({
                   value={widthCm}
                   onChangeText={setWidthCm}
                   keyboardType="numeric"
-                  className="border border-line rounded-md p-2 min-h-[44px] text-ink bg-bg"
+                  className="border border-line rounded-md p-2 min-h-[48px] text-ink bg-bg"
                   placeholderTextColor={tokens.color.inkMuted}
                   placeholder="100"
                 />
@@ -190,7 +190,7 @@ export function ElementEditorModal({
                   value={heightCm}
                   onChangeText={setHeightCm}
                   keyboardType="numeric"
-                  className="border border-line rounded-md p-2 min-h-[44px] text-ink bg-bg"
+                  className="border border-line rounded-md p-2 min-h-[48px] text-ink bg-bg"
                   placeholderTextColor={tokens.color.inkMuted}
                   placeholder="100"
                 />
@@ -206,7 +206,7 @@ export function ElementEditorModal({
                   value={rotationDeg}
                   onChangeText={setRotationDeg}
                   keyboardType="numeric"
-                  className="border border-line rounded-md p-2 min-h-[44px] text-ink bg-bg"
+                  className="border border-line rounded-md p-2 min-h-[48px] text-ink bg-bg"
                   placeholderTextColor={tokens.color.inkMuted}
                   placeholder="0"
                 />

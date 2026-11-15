@@ -1,22 +1,27 @@
-// ImportErrorState — Phase 6 Plan 06-03.
-// Displays validation errors with actionable InlineBanner items.
-// D-12 from 06-CONTEXT.md: "Schema kopieren" button copies JSON schema to clipboard.
-// 2-second "Kopiert!" feedback after copy (T-06-11 accepted: copies public schema only).
+// ImportErrorState — what went wrong with an import, in a sentence, with a button that copies
+// the template the Claude.ai project should answer in (the public import schema, T-06-11).
+//
+// Phase 38 (DESIGN3-05): the checker's own messages ("/beds/0/label: must be string") are
+// no longer the message. They are listed below it as a technical note, small, for whoever
+// wants to hand them back to Claude.ai.
 import * as React from 'react';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import { InlineBanner } from '@/src/components/InlineBanner';
 import * as Clipboard from 'expo-clipboard';
 import schema from '../../../schemas/spatenstich-import.v1.json';
-import de from '@spatenstich/shared/i18n/de';
+import { t } from '@/src/lib/i18n';
 
-const t = (key: string): string =>
-  key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
+/** How many technical lines are listed before "und {n} weitere". */
+const MAX_DETAILS = 5;
 
 export function ImportErrorState({
   errors,
+  details,
   testID,
 }: {
   errors: string[];
+  /** The checker's own lines, shown small under the message. */
+  details?: string[];
   testID?: string;
 }): React.JSX.Element {
   const [copied, setCopied] = React.useState(false);
@@ -33,12 +38,27 @@ export function ImportErrorState({
         <InlineBanner
           key={i}
           message={err}
-          actionLabel={copied ? t('import.schemaCopied') : t('import.schemaCopy')}
+          actionLabel={copied ? t('import.templateCopied') : t('import.templateCopy')}
           onAction={handleCopy}
           variant="warning"
           testID={`import-error-${i}`}
         />
       ))}
+      {details && details.length > 0 ? (
+        <View className="mt-2" testID="import-error-details">
+          <Text className="font-body text-sm text-ink-muted">{t('import.errorDetails')}</Text>
+          {details.slice(0, MAX_DETAILS).map((line, i) => (
+            <Text key={i} className="font-body text-sm text-ink-muted" selectable>
+              {line}
+            </Text>
+          ))}
+          {details.length > MAX_DETAILS ? (
+            <Text className="font-body text-sm text-ink-muted">
+              {t('import.errorDetailsMore', { n: details.length - MAX_DETAILS })}
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
     </View>
   );
 }

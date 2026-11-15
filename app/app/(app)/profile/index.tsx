@@ -1,28 +1,20 @@
 // Profil-Übersicht — mode-agnostic summary with InlineBanners for missing data.
 // Pattern: 02-UI-SPEC.md §"Profil-Übersicht". BKleingG status is D-10 placeholder (neutral state).
 import * as React from 'react';
-import { View, Text, ScrollView, Alert } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import de from '@spatenstich/shared/i18n/de';
-import { ARCHETYPES, FEATURES, type Archetype } from '@spatenstich/shared';
+import { FEATURES } from '@spatenstich/shared';
 import { InlineBanner } from '@/src/components/InlineBanner';
-import { TrafficLightBadge } from '@/src/components/TrafficLightBadge';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { Badge } from '@/src/components/ui/badge';
 import { Separator } from '@/src/components/ui/separator';
 import { useProfile } from '@/src/hooks/useProfile';
+import { t as tx } from '@/src/lib/i18n';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
 
-const ARCHETYPE_LABELS: Record<Archetype, string> = {
-  [ARCHETYPES.SELBSTVERSORGER]: 'Selbstversorger',
-  [ARCHETYPES.FAMILIE]: 'Familien-Naschgarten',
-  [ARCHETYPES.MIX]: 'Mix ausgewogen',
-  [ARCHETYPES.ZIER]: 'Zier- & Erholungsgarten',
-  [ARCHETYPES.BIODIVERSITAET]: 'Biodiversitäts- / Naturgarten',
-  [ARCHETYPES.KRAEUTER]: 'Kräuter- / Apothekergarten',
-};
 
 export default function ProfileOverviewScreen(): React.JSX.Element {
   const router = useRouter();
@@ -35,7 +27,7 @@ export default function ProfileOverviewScreen(): React.JSX.Element {
     >
       {/* Section 1 — Standort */}
       <View className="gap-2">
-        <Text className="text-xs font-semibold uppercase text-ink-muted">Standort</Text>
+        <Text className="text-xs font-semibold uppercase text-ink-muted">{tx('profile.section.location')}</Text>
         {plz === null ? (
           <InlineBanner
             message={t('profile.banner.plz_missing')}
@@ -45,21 +37,19 @@ export default function ProfileOverviewScreen(): React.JSX.Element {
           />
         ) : (
           <Card>
-            <CardContent className="p-4 pt-4 flex-row items-center justify-between">
-              <View className="flex-row items-center gap-3">
-                <Text className="text-base text-ink">
-                  PLZ {plz}
-                </Text>
+            <CardContent className="p-4 pt-4 flex-row flex-wrap items-center justify-between gap-x-3">
+              <View className="flex-row flex-wrap items-center gap-3">
+                <Text className="text-base text-ink">{tx('profile.plzValue', { plz })}</Text>
                 {klimazone !== null ? (
-                  <Badge variant="secondary">Klimazone {klimazone}</Badge>
+                  <Badge variant="secondary">{tx('profile.klimazone', { zone: klimazone })}</Badge>
                 ) : null}
               </View>
               <Text
                 accessibilityRole="link"
                 onPress={() => router.push('/(app)/profile/plz')}
-                className="text-sm text-primary min-h-[44px] py-3"
+                className="text-base text-primary underline min-h-[48px] min-w-[48px] py-3"
               >
-                Ändern
+                {tx('profile.change')}
               </Text>
             </CardContent>
           </Card>
@@ -70,26 +60,26 @@ export default function ProfileOverviewScreen(): React.JSX.Element {
 
       {/* Section 2 — Garten-Archetyp */}
       <View className="gap-2">
-        <Text className="text-xs font-semibold uppercase text-ink-muted">Garten-Archetyp</Text>
+        <Text className="text-xs font-semibold uppercase text-ink-muted">{tx('profile.section.type')}</Text>
         {archetype === null ? (
           <InlineBanner
             message={t('profile.banner.archetype_missing')}
-            actionLabel="Jetzt auswählen"
+            actionLabel={tx('profile.typeChoose')}
             onAction={() => router.push('/(app)/profile/archetype')}
             testID="profile-banner-archetype"
           />
         ) : (
           <Card>
-            <CardContent className="p-4 pt-4 flex-row items-center justify-between">
+            <CardContent className="p-4 pt-4 flex-row flex-wrap items-center justify-between gap-x-3">
               <Text className="text-base text-ink">
-                {ARCHETYPE_LABELS[archetype]}
+                {tx(`profile.archetypes.${archetype}.label`)}
               </Text>
               <Text
                 accessibilityRole="link"
                 onPress={() => router.push('/(app)/profile/archetype')}
-                className="text-sm text-primary min-h-[44px] py-3"
+                className="text-base text-primary underline min-h-[48px] min-w-[48px] py-3"
               >
-                Ändern
+                {tx('profile.change')}
               </Text>
             </CardContent>
           </Card>
@@ -102,26 +92,28 @@ export default function ProfileOverviewScreen(): React.JSX.Element {
 
           {/* Section 3 — Vereinsregeln (hinter FEATURES.vereinsregeln, D-05) */}
           <View className="gap-2">
-            <Text className="text-xs font-semibold uppercase text-ink-muted">Vereinsregeln</Text>
+            <Text className="text-xs font-semibold uppercase text-ink-muted">{tx('profile.section.rules')}</Text>
             {vereinsregeln.length === 0 ? (
               <InlineBanner
                 message={t('profile.banner.rules_missing')}
-                actionLabel="Regeln einrichten"
+                actionLabel={tx('profile.rulesSetUp')}
                 onAction={() => router.push('/(app)/profile/vereinsregeln' as any)}
                 testID="profile-banner-rules"
               />
             ) : (
               <Card>
-                <CardContent className="p-4 pt-4 flex-row items-center justify-between">
+                <CardContent className="p-4 pt-4 flex-row flex-wrap items-center justify-between gap-x-3">
                   <Text className="text-base text-ink">
-                    {vereinsregeln.length} Regel{vereinsregeln.length === 1 ? '' : 'n'} hinterlegt
+                    {vereinsregeln.length === 1
+                      ? tx('profile.rulesCountOne')
+                      : tx('profile.rulesCountMany', { n: vereinsregeln.length })}
                   </Text>
                   <Text
                     accessibilityRole="link"
                     onPress={() => router.push('/(app)/profile/vereinsregeln' as any)}
-                    className="text-sm text-primary min-h-[44px] py-3"
+                    className="text-base text-primary underline min-h-[48px] min-w-[48px] py-3"
                   >
-                    Bearbeiten
+                    {tx('profile.rulesEdit')}
                   </Text>
                 </CardContent>
               </Card>
@@ -130,18 +122,6 @@ export default function ProfileOverviewScreen(): React.JSX.Element {
         </>
       ) : null}
 
-      <Separator />
-
-      {/* Section 4 — BKleingG-Status (D-10, Phase-2 placeholder — always neutral) */}
-      <View className="gap-2">
-        <Text className="text-xs font-semibold uppercase text-ink-muted">BKleingG-Status</Text>
-        <TrafficLightBadge
-          state="neutral"
-          label={t('profile.bkleingg.no_plan')}
-          onPress={() => Alert.alert('', t('profile.bkleingg.tooltip'))}
-          testID="profile-bkleingg-badge"
-        />
-      </View>
     </ScrollView>
   );
 }

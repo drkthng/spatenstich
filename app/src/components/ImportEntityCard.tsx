@@ -7,6 +7,7 @@ import { View, Text } from 'react-native';
 import { Card, CardHeader, CardContent } from '@/src/components/ui/card';
 import { TrafficLightBadge, type TrafficLightState } from '@/src/components/TrafficLightBadge';
 import { Switch } from '@/src/components/ui/switch';
+import { t as tx } from '@/src/lib/i18n';
 
 function confidenceToState(confidence: number | undefined): TrafficLightState {
   if (confidence === undefined) return 'neutral';
@@ -19,9 +20,9 @@ function confidenceLabel(state: TrafficLightState, confidence: number | undefine
   if (confidence === undefined) return '';
   const pct = Math.round(confidence * 100);
   switch (state) {
-    case 'green': return `${pct}% sicher`;
-    case 'amber': return `${pct}% — prüfen`;
-    case 'red': return `${pct}% — niedrig`;
+    case 'green': return tx('import.confidence.high', { percent: pct });
+    case 'amber': return tx('import.confidence.medium', { percent: pct });
+    case 'red': return tx('import.confidence.low', { percent: pct });
     default: return '';
   }
 }
@@ -61,7 +62,7 @@ export function ImportEntityCard({
           <Switch
             value={isSelected}
             onValueChange={(v) => onToggle(entity.localId, v)}
-            accessibilityLabel={`${entity.label} auswählen`}
+            accessibilityLabel={tx('import.selectLabel', { label: entity.label })}
           />
         </View>
         <TrafficLightBadge
@@ -70,7 +71,7 @@ export function ImportEntityCard({
         />
         {showWarning && (
           <Text className="text-sm text-danger mt-1">
-            Niedrige Erkennungssicherheit — bitte manuell prüfen
+            {tx('import.lowConfidence')}
           </Text>
         )}
       </CardHeader>

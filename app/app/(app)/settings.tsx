@@ -12,6 +12,8 @@
 import * as React from 'react';
 import { View, Text, ScrollView, Pressable, Platform } from 'react-native';
 import { useRouter, Link } from 'expo-router';
+import { ChevronRight } from 'lucide-react-native';
+import { tokens } from '@/src/theme/tokens';
 import * as Sentry from '@sentry/react-native';
 import de from '@spatenstich/shared/i18n/de';
 import { Button } from '@/src/components/ui/button';
@@ -208,7 +210,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
         contentContainerClassName="p-6 gap-4"
       >
         <Text className="text-2xl font-display font-semibold text-ink">
-          Konto
+          {t('more.account.title')}
         </Text>
 
         {showInstallBanner ? (
@@ -223,7 +225,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
 
         {email ? (
           <View className="gap-1">
-            <Text className="text-xs uppercase text-ink-muted">E-Mail</Text>
+            <Text className="text-xs uppercase text-ink-muted">{t('auth.email')}</Text>
             <Text
               selectable
               className="text-base text-ink"
@@ -250,7 +252,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
           testID="settings-join-garden-link"
         >
           <Text className="text-ink font-semibold">
-            Garten beitreten
+            {t('more.join.title')}
           </Text>
         </Button>
 
@@ -258,13 +260,13 @@ export default function SettingsScreen(): React.JSX.Element | null {
           <Pressable
             className="py-3 border-b border-line flex-row items-center justify-between"
             accessibilityRole="button"
-            accessibilityLabel="Sync-Status"
+            accessibilityLabel={t('settings.sync_status')}
             testID="settings-link-sync"
           >
             <Text className="text-base text-ink font-semibold">
               {t('settings.sync_status')}
             </Text>
-            <Text className="text-ink-muted">›</Text>
+            <ChevronRight size={20} color={tokens.color.inkMuted} />
           </Pressable>
         </Link>
 
@@ -279,7 +281,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
             <Text className="text-base text-ink font-semibold">
               {t('settings.ai_link')}
             </Text>
-            <Text className="text-ink-muted">›</Text>
+            <ChevronRight size={20} color={tokens.color.inkMuted} />
           </Pressable>
         </Link>
 
@@ -355,7 +357,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
       contentContainerClassName="p-6 gap-4"
     >
       <Text className="text-2xl font-display font-semibold text-ink">
-        Account erstellen
+        {t('auth.choice.create_account')}
       </Text>
 
       {showInstallBanner ? (
@@ -369,12 +371,11 @@ export default function SettingsScreen(): React.JSX.Element | null {
       ) : null}
 
       <Text className="text-sm text-ink-muted">
-        Übertrage deine Daten (PLZ, Archetyp, Vereinsregeln) in einen Account,
-        damit sie auf anderen Geräten verfügbar sind.
+        {t('settings.migration.intro')}
       </Text>
 
       <View className="gap-2">
-        <Label nativeID="mig-email-label">E-Mail</Label>
+        <Label nativeID="mig-email-label">{t('auth.email')}</Label>
         <Input
           value={migEmail}
           onChangeText={setMigEmail}
@@ -388,7 +389,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
       </View>
 
       <View className="gap-2">
-        <Label nativeID="mig-password-label">Passwort</Label>
+        <Label nativeID="mig-password-label">{t('auth.password')}</Label>
         <Input
           value={migPassword}
           onChangeText={setMigPassword}
@@ -437,7 +438,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
         ) : (
           <View className="gap-2 p-4 rounded-lg border border-line">
             <View className="gap-2">
-              <Label nativeID="login-email-label">E-Mail</Label>
+              <Label nativeID="login-email-label">{t('auth.email')}</Label>
               <Input
                 value={loginEmail}
                 onChangeText={setLoginEmail}
@@ -451,7 +452,7 @@ export default function SettingsScreen(): React.JSX.Element | null {
             </View>
 
             <View className="gap-2">
-              <Label nativeID="login-password-label">Passwort</Label>
+              <Label nativeID="login-password-label">{t('auth.password')}</Label>
               <Input
                 value={loginPassword}
                 onChangeText={setLoginPassword}

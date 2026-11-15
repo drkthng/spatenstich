@@ -19,6 +19,12 @@ jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
 }));
 
+// The badge shows its state with an icon from the icon set; the icons are not under test.
+jest.mock('lucide-react-native', () => {
+  const React = require('react');
+  return new Proxy({}, { get: () => () => React.createElement('Icon', null) });
+});
+
 // Mock useSyncStatus — fully controlled per test
 const mockUseSyncStatus = jest.fn();
 jest.mock('../../../hooks/useSyncStatus', () => ({

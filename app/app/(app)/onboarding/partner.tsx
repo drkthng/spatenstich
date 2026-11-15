@@ -70,7 +70,7 @@ export default function OnboardingPartnerScreen(): React.JSX.Element {
           <Pressable
             onPress={() => void copy()}
             accessibilityRole="button"
-            className="self-start mt-3 min-h-[44px] px-4 items-center justify-center border border-line"
+            className="self-start mt-3 min-h-[48px] px-4 items-center justify-center border border-line"
             testID="onboarding-code-copy"
           >
             <Text className="font-body text-base text-ink">

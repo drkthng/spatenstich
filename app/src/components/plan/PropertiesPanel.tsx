@@ -47,10 +47,10 @@ export function Field({
   const [draft, setDraft] = React.useState<string | null>(null);
   return (
     <View className="flex-1 min-w-0">
-      <Text className="text-[11px] uppercase tracking-widest text-ink-muted">{label}</Text>
+      <Text className="text-xs uppercase tracking-widest text-ink-muted">{label}</Text>
       <View className="flex-row items-center border-b border-line">
         <TextInput
-          className="flex-1 min-w-0 min-h-[44px] text-base text-ink"
+          className="flex-1 min-w-0 min-h-[48px] text-base text-ink"
           style={{ outlineStyle: 'none' } as never}
           value={draft ?? value}
           inputMode={inputMode}
@@ -110,8 +110,8 @@ export function SelectionActions({
           testID={`action-${key}`}
           className={
             showLabels
-              ? 'flex-row items-center min-h-[44px] px-1'
-              : 'flex-1 h-11 items-center justify-center border border-line'
+              ? 'flex-row items-center min-h-[48px] px-1'
+              : 'flex-1 min-h-[48px] items-center justify-center border border-line'
           }
         >
           <Icon size={20} color={danger ? tokens.color.danger : tokens.color.ink} strokeWidth={1.5} />
@@ -154,7 +154,7 @@ export function PropertiesPanel({
       onPress={onOutline}
       accessibilityRole="button"
       testID="props-outline"
-      className="min-h-[44px] items-center justify-center border border-line px-3"
+      className="min-h-[48px] items-center justify-center border border-line px-3"
     >
       <Text className="text-base text-ink">{t('editor.outline.edit')}</Text>
     </Pressable>
@@ -224,7 +224,7 @@ export function PropertiesPanel({
       accessibilityRole="button"
       accessibilityLabel={t('editor.props.moreLabel')}
       testID="props-more"
-      className="min-h-[44px] min-w-[56px] items-center justify-center border border-line px-3"
+      className="min-h-[48px] min-w-[56px] items-center justify-center border border-line px-3"
     >
       <Text className="text-base text-ink">{t('editor.props.more')}</Text>
     </Pressable>

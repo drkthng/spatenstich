@@ -36,6 +36,12 @@ module.exports = {
         'warn-soft': c.warnSoft,
         'ok-soft': c.okSoft,
       },
+      // Phase 38 (DESIGN3-06): the smallest text is 13 px, not 12; outdoors on a phone the
+      // serif face was hard to read below that. Sizes are in rem, so they follow the
+      // font size set on the device.
+      fontSize: {
+        xs: ['0.8125rem', { lineHeight: '1.125rem' }],
+      },
       fontFamily: {
         display: ['Fraunces', 'Georgia', 'serif'],
         body: ['Newsreader', 'Georgia', 'serif'],

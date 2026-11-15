@@ -14,7 +14,7 @@ jest.mock('@spatenstich/shared', () => {
     getFensterFuerPflanze: jest.fn().mockReturnValue([
       // Invertiertes Fenster: startKw=30 > endKw=5 — zweite Verteidigungslinie, nach Engine-Fix
       // theoretisch nicht mehr möglich, aber defensiv abzusichern.
-      { typ: 'Vorkultur' as const, startDoy: 1, endDoy: 10, startKw: 30, endKw: 5 },
+      { typ: 'Vorkultur' as const, startDoy: 205, endDoy: 30, startKw: 30, endKw: 5 },
       // Gültiges Fenster: soll normal gerendert werden
       { typ: 'Ernte' as const, startDoy: 200, endDoy: 260, startKw: 29, endKw: 37 },
     ]),

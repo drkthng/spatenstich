@@ -7,6 +7,7 @@
 import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { Platform, View, Modal, Pressable, Text } from 'react-native';
+import { t as tx } from '@/src/lib/i18n';
 
 // T-09.1-XSS-COLOR mitigation: reject any non-hex value silently (ASVS V5.1.3)
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
@@ -41,7 +42,7 @@ export function CrossPlatformColorPicker({
           border: `1px solid ${tokens.color.line}`,
           borderRadius: 6,
           padding: 4,
-          height: 44,
+          height: 48,
           width: '100%',
           cursor: 'pointer',
           backgroundColor: tokens.color.bg,
@@ -72,7 +73,7 @@ export function CrossPlatformColorPicker({
           borderColor: tokens.color.line,
           borderRadius: 6,
           padding: 8,
-          minHeight: 44,
+          minHeight: 48,
           gap: 8,
         }}
       >
@@ -131,7 +132,7 @@ export function CrossPlatformColorPicker({
                   alignItems: 'center',
                 }}
               >
-                <Text style={{ color: tokens.color.onPrimary, fontWeight: '600' }}>Schließen</Text>
+                <Text style={{ color: tokens.color.onPrimary, fontWeight: '600' }}>{tx('common.close')}</Text>
               </Pressable>
             </View>
           </View>

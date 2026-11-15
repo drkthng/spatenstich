@@ -14,6 +14,12 @@ export interface KalenderFenster {
   endDoy: number;    // klimazonenkorrigiert, geklammert 1..365
   startKw: number;   // ISO-Kalenderwoche, geklammert 1..53
   endKw: number;     // ISO-Kalenderwoche, geklammert 1..53
+  /**
+   * Set when the window runs over New Year (harvest of winter crops, October to March).
+   * Such a window comes as two parts, one to the end of the year and one from its start;
+   * both carry the whole window here, so a text can say "bis Ende März" in November.
+   */
+  ueberJahreswechsel?: { startDoy: number; endDoy: number };
 }
 
 // ── Klimazonenoffset-Tabelle ──────────────────────────────────────────────────
@@ -76,15 +82,12 @@ export function getFensterFuerPflanze(
 
   const windows: KalenderFenster[] = [];
 
-  const addWindow = (
+  const pushWindow = (
     typ: AktionsTyp,
-    start: number | null,
-    end: number | null,
+    s: number,
+    e: number,
+    ueberJahreswechsel?: { startDoy: number; endDoy: number },
   ): void => {
-    if (start == null || end == null) return;
-    // Fallstrick 1: DOY clamp 1..365
-    const s = Math.max(1, Math.min(365, start));
-    const e = Math.max(1, Math.min(365, end));
     // Fallstrick 4: KW clamp 1..53
     let startKw = Math.min(53, doyToIsoKw(s));
     let endKw = Math.min(53, doyToIsoKw(e));
@@ -97,7 +100,34 @@ export function getFensterFuerPflanze(
       if (s <= 7) startKw = 1;   // Früh-Januar → auf KW 1 pinnen
       if (e >= 359) endKw = 53;  // Spät-Dezember → auf KW 53 pinnen
     }
-    windows.push({ typ, startDoy: s, endDoy: e, startKw, endKw });
+    windows.push({ typ, startDoy: s, endDoy: e, startKw, endKw, ...(ueberJahreswechsel ? { ueberJahreswechsel } : {}) });
+  };
+
+  const addWindow = (
+    typ: AktionsTyp,
+    start: number | null,
+    end: number | null,
+  ): void => {
+    if (start == null || end == null) return;
+    // Phase 38 (WR-08): a window whose end lies before its start in the data runs over New
+    // Year. It used to come out as one inverted window that no screen could show and no week
+    // could match. Shifted by the climate zone, each bound wraps around the year instead of
+    // being clamped, and the window is given as two parts.
+    if (start > end) {
+      const wrap = (doy: number): number => ((((Math.round(doy) - 1) % 365) + 365) % 365) + 1;
+      const s = wrap(start);
+      const e = wrap(end);
+      if (s > e) {
+        const whole = { startDoy: s, endDoy: e };
+        pushWindow(typ, s, 365, whole);
+        pushWindow(typ, 1, e, whole);
+        return;
+      }
+      pushWindow(typ, s, e);
+      return;
+    }
+    // Fallstrick 1: DOY clamp 1..365
+    pushWindow(typ, Math.max(1, Math.min(365, start)), Math.max(1, Math.min(365, end)));
   };
 
   addWindow('Vorkultur', shift(plant.sowIndoorDoyStart), shift(plant.sowIndoorDoyEnd));
@@ -144,7 +174,7 @@ export function filterAktiveAktionen(
 export function pruefeEinfacheFruchtfolge(
   neuePflanze: { family: string; slug: string },
   beetPflanzen: Array<{ family: string; slug: string }>,
-): { warnung: boolean; grund: string | null } {
+): { warnung: boolean; grund: string | null; konfliktSlug?: string } {
   const konflikt = beetPflanzen.find(
     p => p.family === neuePflanze.family && p.slug !== neuePflanze.slug,
   );
@@ -152,6 +182,7 @@ export function pruefeEinfacheFruchtfolge(
     return {
       warnung: true,
       grund: `Fruchtfolge: ${neuePflanze.family} bereits im Beet (${konflikt.slug})`,
+      konfliktSlug: konflikt.slug,
     };
   }
   return { warnung: false, grund: null };

@@ -16,20 +16,21 @@ describe('i18n review-keys', () => {
   it('defines title', () => {
     expect(typeof review.title).toBe('string');
     expect(review.title.length).toBeGreaterThan(0);
-    expect(review.title).toBe('Importierte Drafts sichten');
+    expect(review.title).toBe('Import-Vorschläge sichten');
   });
 
   it('defines accept / dismiss / edit / done', () => {
     expect(review.accept).toBe('Annehmen');
     expect(review.dismiss).toBe('Verwerfen');
-    expect(review.edit).toBe('Editieren');
+    expect(review.edit).toBe('Bearbeiten');
     expect(review.done).toBe('Fertig');
   });
 
-  it('defines autoPromoteToggle with >= symbol', () => {
+  it('defines autoPromoteToggle and names the threshold in words', () => {
     expect(typeof review.autoPromoteToggle).toBe('string');
-    // The literal U+2265 ≥ character must be present.
-    expect(review.autoPromoteToggle).toMatch(/\u2265/);
+    // Phase 38: "ab 80 %" instead of the sign for "greater than or equal".
+    expect(review.autoPromoteToggle).toMatch(/ab 80 %/);
+    expect(review.autoPromoteToggle).not.toMatch(/≥/);
   });
 
   it('defines emptyState / promoting / promoteError', () => {

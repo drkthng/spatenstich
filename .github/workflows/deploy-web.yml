@@ -17,8 +17,15 @@ jobs:
       EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
       EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
       EXPO_PUBLIC_SENTRY_DSN: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
+      # Shown under "Mehr": which commit runs, and who operates the app (Impressum).
+      # The operator's name and address are a repository variable, not a file in this
+      # public repository: lines separated by "|", e.g. "Name|Straße 1|12345 Ort|mail@…".
+      EXPO_PUBLIC_BUILD_SHA: ${{ github.sha }}
+      EXPO_PUBLIC_IMPRINT: ${{ vars.EXPO_PUBLIC_IMPRINT }}
     steps:
       - uses: actions/checkout@v4
+      - name: Note the day of the build
+        run: echo "EXPO_PUBLIC_BUILD_DATE=$(date -u +%Y-%m-%d)" >> "$GITHUB_ENV"
       - uses: pnpm/action-setup@v4
         with:
           version: 10.33.0

@@ -182,13 +182,13 @@ export default function AiSettingsScreen(): React.JSX.Element {
               inputMode="decimal"
               accessibilityLabel={t('ai.limit.label')}
               placeholderTextColor={tokens.color.inkMuted}
-              className="min-h-[44px] w-28 px-3 py-2 border border-line bg-bg font-body text-base text-ink"
+              className="min-h-[48px] w-28 px-3 py-2 border border-line bg-bg font-body text-base text-ink"
               testID="ai-limit-input"
             />
             <Pressable
               onPress={() => void saveLimit()}
               disabled={savingLimit}
-              className="min-h-[44px] px-4 items-center justify-center bg-primary"
+              className="min-h-[48px] px-4 items-center justify-center bg-primary"
               testID="ai-limit-save"
             >
               <Text className="font-body text-sm text-on-primary">
@@ -235,7 +235,7 @@ export default function AiSettingsScreen(): React.JSX.Element {
         <Pressable
           onPress={() => void runTest()}
           disabled={test.phase === 'running'}
-          className="self-start mt-3 min-h-[44px] px-4 items-center justify-center bg-primary"
+          className="self-start mt-3 min-h-[48px] px-4 items-center justify-center bg-primary"
           testID="ai-test-button"
         >
           <Text className="font-body text-sm text-on-primary">

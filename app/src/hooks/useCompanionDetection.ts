@@ -11,6 +11,7 @@ import plantsBundle from '@spatenstich/shared/data/plants';
 import type { PlanElementRow, PlantRow, PlantDbBundle } from '@spatenstich/shared';
 import { pointInPolygon, type Point2D } from '../lib/geometry/bedLayout';
 import { elementPolygon } from '../lib/editor/outline';
+import { t } from '../lib/i18n';
 
 // ---- Exported types ----
 
@@ -154,12 +155,11 @@ export function computeConflicts(
 }
 
 /**
- * Build display name for a plant (with emoji if available).
+ * Display name for a plant. The hint already carries an icon for its kind, so the name
+ * stands alone (Phase 38: no emoji in front of it).
  */
 function displayName(slug: string, plantBySlug: Map<string, PlantRow>): string {
-  const plant = plantBySlug.get(slug);
-  if (!plant) return slug;
-  return plant.iconEmoji ? `${plant.iconEmoji} ${plant.nameDe}` : plant.nameDe;
+  return plantBySlug.get(slug)?.nameDe ?? slug;
 }
 
 /**
@@ -207,24 +207,16 @@ export function computeToastForElement(
 
   // D-08: conflict has priority
   if (incompatibleNames.length > 0) {
-    const others = incompatibleNames.join(', ');
     return {
       variant: 'error',
-      message:
-        incompatibleNames.length === 1
-          ? `\u26A0 Konflikt: ${changedName} vertr\u00E4gt sich nicht mit ${others}`
-          : `\u26A0 Konflikt: ${changedName} vertr\u00E4gt sich nicht mit ${others}`,
+      message: t('companion.conflict', { plant: changedName, others: incompatibleNames.join(', ') }),
     };
   }
 
   if (companionNames.length > 0) {
-    const others = companionNames.join(', ');
     return {
       variant: 'success',
-      message:
-        companionNames.length === 1
-          ? `\u2713 Gute Nachbarschaft: ${changedName} + ${others}`
-          : `\u2713 Gute Nachbarschaft: ${changedName} + ${others}`,
+      message: t('companion.good', { plant: changedName, others: companionNames.join(', ') }),
     };
   }
 

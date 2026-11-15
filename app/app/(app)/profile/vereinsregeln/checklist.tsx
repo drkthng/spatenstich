@@ -28,6 +28,7 @@ import { useAuthStore } from '@/src/stores/authStore';
 import { useProfileStore } from '@/src/stores/profileStore';
 import { useVereinsregeln } from '@/src/hooks/useVereinsregeln';
 import { saveVereinsregeln } from '@/src/lib/vereinsregelnRepo';
+import { t as tx } from '@/src/lib/i18n';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
@@ -107,10 +108,10 @@ export default function VereinsregelnChecklistScreen(): React.JSX.Element {
     <View className="flex-1 bg-bg">
       <ScrollView contentContainerClassName="p-4 gap-3">
         <Text className="text-2xl font-display font-semibold text-ink">
-          Checkliste
+          {tx('rules.checklist.title')}
         </Text>
         <Text className="text-sm text-ink-muted">
-          Wähle zutreffende Regeln aus deiner Vereinssatzung und trage Werte ein.
+          {tx('rules.checklist.intro')}
         </Text>
 
         {rows.map((row) => (
@@ -123,7 +124,7 @@ export default function VereinsregelnChecklistScreen(): React.JSX.Element {
               accessibilityRole="checkbox"
               accessibilityState={{ checked: row.checked }}
               testID={`checklist-toggle-${row.item.id}`}
-              className="flex-row items-center gap-3 min-h-[44px]"
+              className="flex-row items-center gap-3 min-h-[48px]"
             >
               <View
                 className={`w-6 h-6 rounded border-2 items-center justify-center ${
@@ -144,9 +145,9 @@ export default function VereinsregelnChecklistScreen(): React.JSX.Element {
                   value={row.wert}
                   onChangeText={(v) => setRowWert(row.item.id, v)}
                   keyboardType="numeric"
-                  accessibilityLabel={`Wert für ${row.item.label}`}
+                  accessibilityLabel={tx('rules.checklist.valueLabel', { label: row.item.label })}
                   testID={`checklist-input-${row.item.id}`}
-                  className="min-h-[40px] min-w-[80px] px-3 rounded border border-line text-base text-ink bg-bg"
+                  className="min-h-[48px] min-w-[80px] px-3 rounded border border-line text-base text-ink bg-bg"
                 />
                 <Text className="text-sm text-ink-muted">
                   {row.item.einheit}

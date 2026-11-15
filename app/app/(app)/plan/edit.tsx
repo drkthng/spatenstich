@@ -28,11 +28,14 @@ import {
 import { useRouter, Stack } from 'expo-router';
 import {
   ArrowLeft,
+  Check,
   Magnet,
   Maximize,
   Plus,
   Redo2,
+  RefreshCw,
   SquareDashedMousePointer,
+  TriangleAlert,
   Undo2,
   X,
 } from 'lucide-react-native';
@@ -164,8 +167,8 @@ function IconButton({
       testID={testID}
       className={
         active
-          ? 'h-11 w-11 items-center justify-center bg-surface-2 border border-line'
-          : 'h-11 w-11 items-center justify-center'
+          ? 'h-[48px] w-[48px] items-center justify-center bg-surface-2 border border-line'
+          : 'h-[48px] w-[48px] items-center justify-center'
       }
       style={disabled ? { opacity: 0.35 } : undefined}
     >
@@ -662,30 +665,47 @@ export default function PlanEditScreen(): React.JSX.Element {
           <ArrowLeft size={20} color={tokens.color.ink} strokeWidth={1.5} />
           <Text className="ml-1 text-base font-medium text-ink">{t('editor.done')}</Text>
         </Pressable>
-        <View className="flex-1 min-w-0 items-center">
-          <Text className="text-lg font-display font-medium text-ink" accessibilityRole="header" numberOfLines={1}>
-            {t('plan.view.title')}
-            {wide
-              ? ` · ${t('plan.view.parcelSize', {
-                  width: formatLength(dimensions.widthM),
-                  depth: formatLength(dimensions.heightM),
-                })}`
-              : ''}
-          </Text>
-          <Pressable
-            onPress={saveState === 'error' ? retryFailedSaves : undefined}
-            disabled={saveState !== 'error'}
-            accessibilityRole={saveState === 'error' ? 'button' : 'text'}
+        {wide ? (
+          <View className="flex-1 min-w-0 items-center">
+            <Text className="text-lg font-display font-medium text-ink" accessibilityRole="header" numberOfLines={1}>
+              {t('plan.view.title')}
+              {` · ${t('plan.view.parcelSize', {
+                width: formatLength(dimensions.widthM),
+                depth: formatLength(dimensions.heightM),
+              })}`}
+            </Text>
+            <Pressable
+              onPress={saveState === 'error' ? retryFailedSaves : undefined}
+              disabled={saveState !== 'error'}
+              accessibilityRole={saveState === 'error' ? 'button' : 'text'}
+              testID="editor-save-state"
+            >
+              <Text
+                className={saveState === 'error' ? 'text-xs text-danger' : 'text-xs text-ink-muted'}
+                numberOfLines={1}
+              >
+                {saveLabel}
+              </Text>
+            </Pressable>
+          </View>
+        ) : (
+          // Phase 38: on a phone five buttons leave no room for a title and a sentence. The
+          // save state is a quiet icon here; a failed save gets its own line below the bar.
+          <View
+            className="flex-1 min-w-0 items-center justify-center"
+            accessibilityRole="text"
+            accessibilityLabel={saveLabel}
             testID="editor-save-state"
           >
-            <Text
-              className={saveState === 'error' ? 'text-xs text-danger' : 'text-xs text-ink-muted'}
-              numberOfLines={1}
-            >
-              {saveLabel}
-            </Text>
-          </Pressable>
-        </View>
+            {saveState === 'saving' ? (
+              <RefreshCw size={18} color={tokens.color.inkMuted} strokeWidth={1.5} />
+            ) : saveState === 'error' ? (
+              <TriangleAlert size={18} color={tokens.color.danger} strokeWidth={1.8} />
+            ) : (
+              <Check size={18} color={tokens.color.inkMuted} strokeWidth={1.8} />
+            )}
+          </View>
+        )}
         <IconButton label={t('editor.undo')} testID="editor-undo" onPress={undo} disabled={!canUndo}>
           <Undo2 size={20} color={tokens.color.ink} strokeWidth={1.5} />
         </IconButton>
@@ -719,6 +739,20 @@ export default function PlanEditScreen(): React.JSX.Element {
           <Magnet size={20} color={tokens.color.ink} strokeWidth={1.5} />
         </IconButton>
       </View>
+
+      {/* A save that failed says so in words and can be tried again with one tap (phone). */}
+      {!wide && saveState === 'error' ? (
+        <Pressable
+          onPress={retryFailedSaves}
+          accessibilityRole="button"
+          className="flex-row items-center gap-2 px-4 bg-danger-soft border-b border-line"
+          style={{ minHeight: 48 }}
+          testID="editor-save-retry"
+        >
+          <TriangleAlert size={18} color={tokens.color.danger} strokeWidth={1.8} />
+          <Text className="flex-1 text-sm text-ink py-2">{t('editor.notSaved')}</Text>
+        </Pressable>
+      ) : null}
 
       <View className="flex-1 flex-row">
         {wide ? (
@@ -765,7 +799,7 @@ export default function PlanEditScreen(): React.JSX.Element {
               accessibilityRole="button"
               accessibilityLabel={t('editor.fit')}
               testID="editor-fit"
-              className="h-11 w-11 items-center justify-center border border-line bg-bg"
+              className="h-[48px] w-[48px] items-center justify-center border border-line bg-bg"
             >
               <Maximize size={20} color={tokens.color.ink} strokeWidth={1.5} />
             </Pressable>
@@ -795,7 +829,7 @@ export default function PlanEditScreen(): React.JSX.Element {
                 }}
                 accessibilityRole="button"
                 testID="delete-undo"
-                className="min-h-[44px] justify-center pl-4"
+                className="min-h-[48px] justify-center pl-4"
               >
                 <Text className="text-base font-semibold text-accent">{t('editor.undoDelete')}</Text>
               </Pressable>
@@ -829,7 +863,7 @@ export default function PlanEditScreen(): React.JSX.Element {
               disabled={!ghost}
               accessibilityRole="button"
               testID="placing-set"
-              className="min-h-[44px] items-center justify-center bg-primary px-4"
+              className="min-h-[48px] items-center justify-center bg-primary px-4"
               style={ghost ? undefined : { opacity: 0.4 }}
             >
               <Text className="text-base font-semibold text-on-primary">{t('editor.placing.set')}</Text>
@@ -838,7 +872,7 @@ export default function PlanEditScreen(): React.JSX.Element {
               onPress={stopPlacing}
               accessibilityRole="button"
               testID="placing-done"
-              className="min-h-[44px] items-center justify-center border border-line px-4"
+              className="min-h-[48px] items-center justify-center border border-line px-4"
             >
               <Text className="text-base text-ink">
                 {placing.plantSlug ? t('editor.placing.done') : t('editor.placing.cancel')}
@@ -869,7 +903,7 @@ export default function PlanEditScreen(): React.JSX.Element {
               disabled={drawPoints.length === 0}
               accessibilityRole="button"
               testID="draw-remove-last"
-              className="flex-1 min-h-[44px] items-center justify-center border border-line px-2"
+              className="flex-1 min-h-[48px] items-center justify-center border border-line px-2"
               style={drawPoints.length === 0 ? { opacity: 0.4 } : undefined}
             >
               <Text className="text-base text-ink">{t('editor.draw.removeLast')}</Text>
@@ -878,7 +912,7 @@ export default function PlanEditScreen(): React.JSX.Element {
               onPress={() => setDrawPoints(null)}
               accessibilityRole="button"
               testID="draw-cancel"
-              className="min-h-[44px] items-center justify-center border border-line px-3"
+              className="min-h-[48px] items-center justify-center border border-line px-3"
             >
               <Text className="text-base text-ink">{t('editor.draw.cancel')}</Text>
             </Pressable>
@@ -887,7 +921,7 @@ export default function PlanEditScreen(): React.JSX.Element {
               disabled={drawPoints.length < 3}
               accessibilityRole="button"
               testID="draw-finish"
-              className="min-h-[44px] items-center justify-center bg-primary px-3"
+              className="min-h-[48px] items-center justify-center bg-primary px-3"
               style={drawPoints.length < 3 ? { opacity: 0.4 } : undefined}
             >
               <Text className="text-base font-semibold text-on-primary">{t('editor.draw.finish')}</Text>
@@ -911,7 +945,7 @@ export default function PlanEditScreen(): React.JSX.Element {
               onPress={() => setOutlineTarget(null)}
               accessibilityRole="button"
               testID="outline-done"
-              className="min-h-[44px] items-center justify-center bg-primary px-4"
+              className="min-h-[48px] items-center justify-center bg-primary px-4"
             >
               <Text className="text-base font-semibold text-on-primary">{t('editor.outline.done')}</Text>
             </Pressable>

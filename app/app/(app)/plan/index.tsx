@@ -108,7 +108,7 @@ export default function PlanScreen(): React.JSX.Element {
           accessibilityRole="button"
           accessibilityLabel={t('plan.view.fit')}
           testID="plan-view-fit"
-          className="h-12 w-12 items-center justify-center border border-line"
+          className="h-[48px] w-[48px] items-center justify-center border border-line"
         >
           <Maximize size={20} color={tokens.color.ink} strokeWidth={1.5} />
         </Pressable>

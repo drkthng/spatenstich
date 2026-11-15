@@ -14,6 +14,7 @@ import { AuthProvider, useAuth } from '@/src/lib/auth';
 import { useAuthStore } from '@/src/stores/authStore';
 import { consumeInviteCode, ensureDefaultGardenForUser } from '@/src/lib/inviteCodeRepo';
 import { resolveGarden } from '@/src/lib/nav/startRoute';
+import { isPublicRoute } from '@/src/lib/nav/tabs';
 import { t } from '@/src/lib/i18n';
 import { registerSyncTriggers } from '@/src/lib/sync/SyncTriggers';
 import { getSyncWorker } from '@/src/lib/sync/SyncWorker';
@@ -69,6 +70,8 @@ function GuardedStack(): React.JSX.Element {
 
     const inAuthGroup = segments[0] === '(auth)';
     const inAppGroup = segments[0] === '(app)';
+    // Privacy notes and Impressum are open to everyone, signed in or not (Phase 38).
+    if (isPublicRoute(segments)) return;
 
     if (identity === null && !inAuthGroup) {
       // Web Share Target (DEPLOY-04): ein POST /share-target trifft ein,

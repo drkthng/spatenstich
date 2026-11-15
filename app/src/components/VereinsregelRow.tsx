@@ -11,6 +11,7 @@ import * as React from 'react';
 import { View, Switch, Pressable, Text } from 'react-native';
 import { Lock, Pencil, Trash2 } from 'lucide-react-native';
 import type { VereinsRegel } from '@spatenstich/shared';
+import { t as tx } from '@/src/lib/i18n';
 
 export interface VereinsregelRowProps {
   rule: VereinsRegel;
@@ -35,7 +36,7 @@ export function VereinsregelRow({
         testID={testID}
         className="flex-row items-center gap-3 py-3 px-3 min-h-[52px]"
       >
-        <Lock size={14} color={tokens.color.inkMuted} accessibilityLabel="BKleingG-Grundregel, nicht deaktivierbar" />
+        <Lock size={14} color={tokens.color.inkMuted} accessibilityLabel={tx('rules.row.base')} />
         <View className="flex-1">
           <Text className="text-base text-ink-muted">{rule.titel}</Text>
           {rule.wert != null ? (
@@ -57,7 +58,7 @@ export function VereinsregelRow({
       <Switch
         value={rule.aktiv}
         onValueChange={() => onToggle?.(rule.id)}
-        accessibilityLabel={`Regel ${rule.titel} aktiv`}
+        accessibilityLabel={tx('rules.row.active', { title: rule.titel })}
       />
       <View className="flex-1">
         <Text className="text-base text-ink">
@@ -73,8 +74,8 @@ export function VereinsregelRow({
         <Pressable
           onPress={() => onEdit(rule.id)}
           accessibilityRole="button"
-          accessibilityLabel="Regel bearbeiten"
-          className="min-h-[44px] min-w-[44px] items-center justify-center"
+          accessibilityLabel={tx('rules.row.edit')}
+          className="min-h-[48px] min-w-[48px] items-center justify-center"
           hitSlop={8}
         >
           <Pencil size={18} color={tokens.color.inkMuted} />
@@ -84,8 +85,8 @@ export function VereinsregelRow({
         <Pressable
           onPress={() => onDelete(rule.id)}
           accessibilityRole="button"
-          accessibilityLabel="Regel löschen"
-          className="min-h-[44px] min-w-[44px] items-center justify-center"
+          accessibilityLabel={tx('rules.row.delete')}
+          className="min-h-[48px] min-w-[48px] items-center justify-center"
           hitSlop={8}
         >
           <Trash2 size={18} color={tokens.color.danger} />

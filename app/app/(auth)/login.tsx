@@ -10,6 +10,7 @@ import { useAuthStore } from '@/src/stores/authStore';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
+import { t as tx } from '@/src/lib/i18n';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
@@ -52,7 +53,7 @@ export default function LoginScreen(): React.JSX.Element {
       </Text>
 
       <View className="gap-2">
-        <Label nativeID="login-email-label">E-Mail</Label>
+        <Label nativeID="login-email-label">{tx('auth.email')}</Label>
         <Input
           value={email}
           onChangeText={setEmail}
@@ -66,7 +67,7 @@ export default function LoginScreen(): React.JSX.Element {
       </View>
 
       <View className="gap-2">
-        <Label nativeID="login-password-label">Passwort</Label>
+        <Label nativeID="login-password-label">{tx('auth.password')}</Label>
         <Input
           value={password}
           onChangeText={setPassword}
@@ -91,7 +92,7 @@ export default function LoginScreen(): React.JSX.Element {
       <Text
         accessibilityRole="link"
         onPress={() => router.push('/(auth)/reset-request' as never)}
-        className="text-sm text-primary min-h-[44px] py-3"
+        className="text-base text-primary underline min-h-[48px] min-w-[48px] py-3"
         testID="login-forgot"
       >
         {t('auth.reset.link')}
@@ -107,9 +108,9 @@ export default function LoginScreen(): React.JSX.Element {
         <Text
           accessibilityRole="link"
           onPress={() => router.replace('/(auth)/register')}
-          className="text-sm text-primary min-h-[44px] py-3"
+          className="text-base text-primary underline min-h-[48px] min-w-[48px] py-3"
         >
-          Noch kein Konto? Jetzt erstellen
+          {tx('auth.login.to_register')}
         </Text>
       </View>
     </ScrollView>

@@ -35,8 +35,8 @@ export function ParcelPanel({ widthM, heightM, free, onSize, onShape, onDone }: 
       testID={`parcel-${key}`}
       className={
         active
-          ? 'flex-1 min-h-[44px] items-center justify-center border border-primary bg-surface-2 px-2'
-          : 'flex-1 min-h-[44px] items-center justify-center border border-line px-2'
+          ? 'flex-1 min-h-[48px] items-center justify-center border border-primary bg-surface-2 px-2'
+          : 'flex-1 min-h-[48px] items-center justify-center border border-line px-2'
       }
     >
       <Text className={active ? 'text-base font-semibold text-ink' : 'text-base text-ink'}>{label}</Text>
@@ -76,7 +76,7 @@ export function ParcelPanel({ widthM, heightM, free, onSize, onShape, onDone }: 
           onPress={onDone}
           accessibilityRole="button"
           testID="parcel-done"
-          className="min-h-[44px] items-center justify-center bg-primary px-4"
+          className="min-h-[48px] items-center justify-center bg-primary px-4"
         >
           <Text className="text-base font-semibold text-on-primary">{t('editor.parcel.done')}</Text>
         </Pressable>

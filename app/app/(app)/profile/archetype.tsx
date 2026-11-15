@@ -8,6 +8,7 @@ import { ARCHETYPES, type Archetype } from '@spatenstich/shared';
 import { ArchetypeCard } from '@/src/components/ArchetypeCard';
 import { Button } from '@/src/components/ui/button';
 import { useProfile } from '@/src/hooks/useProfile';
+import { t as tx } from '@/src/lib/i18n';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
@@ -22,33 +23,33 @@ interface ArchetypeOption {
 const ARCHETYPE_OPTIONS: readonly ArchetypeOption[] = [
   {
     archetype: ARCHETYPES.SELBSTVERSORGER,
-    label: 'Selbstversorger',
-    description: 'Maximaler Ertrag, viele Beete, intensive Nutzung',
+    label: tx('profile.archetypes.selbstversorger.label'),
+    description: tx('profile.archetypes.selbstversorger.description'),
   },
   {
     archetype: ARCHETYPES.FAMILIE,
-    label: 'Familien-Naschgarten',
-    description: 'Kindgerecht, robuste Sorten, viel Naschobst',
+    label: tx('profile.archetypes.familien_naschgarten.label'),
+    description: tx('profile.archetypes.familien_naschgarten.description'),
   },
   {
     archetype: ARCHETYPES.MIX,
-    label: 'Mix ausgewogen',
-    description: 'Gleichgewicht aus Nutzgarten, Zier- und Erholungsbereich',
+    label: tx('profile.archetypes.mix_ausgewogen.label'),
+    description: tx('profile.archetypes.mix_ausgewogen.description'),
   },
   {
     archetype: ARCHETYPES.ZIER,
-    label: 'Zier- & Erholungsgarten',
-    description: 'Sitzplatz, Stauden, dekorative Gestaltung im Vordergrund',
+    label: tx('profile.archetypes.zier_erholung.label'),
+    description: tx('profile.archetypes.zier_erholung.description'),
   },
   {
     archetype: ARCHETYPES.BIODIVERSITAET,
-    label: 'Biodiversitäts- / Naturgarten',
-    description: 'Wildblumen, Insektenfreundlich, möglichst naturnah',
+    label: tx('profile.archetypes.biodiversitaet.label'),
+    description: tx('profile.archetypes.biodiversitaet.description'),
   },
   {
     archetype: ARCHETYPES.KRAEUTER,
-    label: 'Kräuter- / Apothekergarten',
-    description: 'Heil- und Küchenkräuter, kompakte Hochbeete',
+    label: tx('profile.archetypes.kraeuter_apotheker.label'),
+    description: tx('profile.archetypes.kraeuter_apotheker.description'),
   },
 ] as const;
 
@@ -75,10 +76,10 @@ export default function ArchetypeScreen(): React.JSX.Element {
       contentContainerClassName="flex-grow p-6 gap-4"
     >
       <Text className="text-xl font-display font-semibold text-ink">
-        Wähle deinen Garten-Stil
+        {tx('profile.archetype.title')}
       </Text>
       <Text className="text-sm text-ink-muted">
-        Der Archetyp beeinflusst Pflanzenvorschläge und die Flächenverteilung im Plan.
+        {tx('profile.archetype.intro')}
       </Text>
 
       <View className="flex-row flex-wrap gap-4">

@@ -1,7 +1,7 @@
 // Phase 30: handle layout and hit testing in screen pixels.
 //
 // Handles keep a constant on-screen size whatever the zoom (EDIT3-08). Their touch areas are
-// at least 44 px, sit mostly outside the element and reach inward at most a quarter of the
+// at least 48 px, sit mostly outside the element and reach inward at most a quarter of the
 // element, so the middle of even a small selected element stays free for dragging and
 // double-tapping (PROJECT D-21, Sketch 001 findings). Side handles are dropped on sides
 // shorter than 36 px on screen.
@@ -29,7 +29,7 @@ export interface HitProfile {
   inwardPx: number;
 }
 
-export const TOUCH_HIT: HitProfile = { hitPx: 44, inwardPx: 14 };
+export const TOUCH_HIT: HitProfile = { hitPx: 48, inwardPx: 14 };
 export const MOUSE_HIT: HitProfile = { hitPx: 24, inwardPx: 8 };
 
 export interface HandleSpot {

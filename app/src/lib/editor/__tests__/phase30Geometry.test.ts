@@ -130,11 +130,11 @@ describe('handles (EDIT3-08, D-21)', () => {
     expect(ids).not.toContain('w');
   });
 
-  it('touch areas are 44 px and reach inward at most a quarter of the element', () => {
+  it('touch areas are 48 px and reach inward at most a quarter of the element', () => {
     for (const size of [20, 42, 80, 300]) {
       const r = handleHitRect('se', size, size, TOUCH_HIT);
-      expect(r.x.max - r.x.min).toBe(44);
-      expect(r.y.max - r.y.min).toBe(44);
+      expect(r.x.max - r.x.min).toBe(48);
+      expect(r.y.max - r.y.min).toBe(48);
       const inward = size / 2 - r.x.min;
       expect(inward).toBeLessThanOrEqual(size / 4 + 1e-9);
       expect(inward).toBeLessThanOrEqual(TOUCH_HIT.inwardPx);

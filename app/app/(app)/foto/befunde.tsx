@@ -303,7 +303,7 @@ export default function FindingsScreen(): React.JSX.Element {
                         }}
                         disabled={isBusy}
                         accessibilityRole="button"
-                        className={`self-start mt-2 min-h-[44px] px-3 items-center justify-center bg-primary ${isBusy ? 'opacity-50' : ''}`}
+                        className={`self-start mt-2 min-h-[48px] px-3 items-center justify-center bg-primary ${isBusy ? 'opacity-50' : ''}`}
                         testID={`finding-closeup-button-${finding.id}`}
                       >
                         <Text className="font-body text-sm text-on-primary">{t('photo.findings.closeupButton')}</Text>
@@ -323,7 +323,7 @@ export default function FindingsScreen(): React.JSX.Element {
                             }
                             inputMode={isNumericField(field) ? 'decimal' : 'text'}
                             accessibilityLabel={fieldLabel(field)}
-                            className="min-h-[44px] px-3 py-2 border border-line bg-bg font-body text-base text-ink"
+                            className="min-h-[48px] px-3 py-2 border border-line bg-bg font-body text-base text-ink"
                             testID={`finding-field-${field}-${finding.id}`}
                           />
                         </View>
@@ -338,7 +338,7 @@ export default function FindingsScreen(): React.JSX.Element {
                           onPress={() => void saveEdit(finding)}
                           disabled={isBusy}
                           accessibilityRole="button"
-                          className="min-h-[44px] px-4 items-center justify-center bg-primary"
+                          className="min-h-[48px] px-4 items-center justify-center bg-primary"
                           testID={`finding-edit-save-${finding.id}`}
                         >
                           <Text className="font-body text-sm text-on-primary">{t('photo.findings.editSave')}</Text>
@@ -346,7 +346,7 @@ export default function FindingsScreen(): React.JSX.Element {
                         <Pressable
                           onPress={() => setEditing(null)}
                           accessibilityRole="button"
-                          className="min-h-[44px] px-4 items-center justify-center border border-line"
+                          className="min-h-[48px] px-4 items-center justify-center border border-line"
                           testID={`finding-edit-cancel-${finding.id}`}
                         >
                           <Text className="font-body text-sm text-ink">{t('photo.findings.editCancel')}</Text>
@@ -360,7 +360,7 @@ export default function FindingsScreen(): React.JSX.Element {
                           onPress={() => void accept(finding)}
                           disabled={isBusy}
                           accessibilityRole="button"
-                          className={`min-h-[44px] px-4 items-center justify-center bg-primary ${isBusy ? 'opacity-50' : ''}`}
+                          className={`min-h-[48px] px-4 items-center justify-center bg-primary ${isBusy ? 'opacity-50' : ''}`}
                           testID={`finding-accept-${finding.id}`}
                         >
                           <Text className="font-body text-sm text-on-primary">{acceptLabel(finding)}</Text>
@@ -371,7 +371,7 @@ export default function FindingsScreen(): React.JSX.Element {
                           onPress={() => setEditing({ id: finding.id, values: editValues(finding), invalid: false })}
                           disabled={isBusy}
                           accessibilityRole="button"
-                          className="min-h-[44px] px-4 items-center justify-center border border-line"
+                          className="min-h-[48px] px-4 items-center justify-center border border-line"
                           testID={`finding-edit-button-${finding.id}`}
                         >
                           <Text className="font-body text-sm text-ink">{t('photo.findings.edit')}</Text>
@@ -381,7 +381,7 @@ export default function FindingsScreen(): React.JSX.Element {
                         onPress={() => void dismiss(finding)}
                         disabled={isBusy}
                         accessibilityRole="button"
-                        className={`min-h-[44px] px-4 items-center justify-center border border-line ${isBusy ? 'opacity-50' : ''}`}
+                        className={`min-h-[48px] px-4 items-center justify-center border border-line ${isBusy ? 'opacity-50' : ''}`}
                         testID={`finding-dismiss-${finding.id}`}
                       >
                         <Text className="font-body text-sm text-ink">{t('photo.findings.dismiss')}</Text>

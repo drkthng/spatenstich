@@ -137,9 +137,13 @@ function calendarTasks(input: TaskInputs, frostAhead: ForecastDay | null): Task[
     for (const window of windows) {
       if (doy < window.startDoy || doy > window.endDoy) continue;
       const rule = CALENDAR[window.typ];
-      const daysLeft = window.endDoy - doy;
+      // A window over New Year (winter harvest) ends next year, not on 31 December.
+      const whole = window.ueberJahreswechsel;
+      const endsNextYear = whole !== undefined && window.endDoy === 365 && whole.endDoy < whole.startDoy;
+      const lastDoy = whole ? whole.endDoy : window.endDoy;
+      const daysLeft = endsNextYear ? 365 - doy + lastDoy : window.endDoy - doy;
       let urgency = windowUrgency(daysLeft);
-      let reason = t(`tasks.reason.${window.typ}`, { until: doyInWords(window.endDoy, names) });
+      let reason = t(`tasks.reason.${window.typ}`, { until: doyInWords(lastDoy, names) });
       // Nothing goes out into a frost night.
       if (frostAhead && (window.typ === 'Auspflanzen' || window.typ === 'Direktsaat')) {
         urgency = 'low';

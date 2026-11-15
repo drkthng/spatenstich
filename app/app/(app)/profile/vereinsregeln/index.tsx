@@ -5,6 +5,7 @@ import { Text, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ClipboardList } from 'lucide-react-native';
 import { AuthChoiceCard } from '@/src/components/AuthChoiceCard';
+import { t as tx } from '@/src/lib/i18n';
 
 export default function VereinsregelnEntryScreen(): React.JSX.Element {
   const router = useRouter();
@@ -15,13 +16,13 @@ export default function VereinsregelnEntryScreen(): React.JSX.Element {
       contentContainerClassName="p-4 gap-4"
     >
       <Text className="text-2xl font-display font-semibold text-ink">
-        Vereinsregeln
+        {tx('rules.title')}
       </Text>
 
       <AuthChoiceCard
         icon={ClipboardList}
-        title="Checkliste ausfüllen"
-        description="Typische Vereinsregeln manuell auswählen und Werte eintragen."
+        title={tx('rules.checklist.cardTitle')}
+        description={tx('rules.checklist.cardHint')}
         onPress={() => router.push('/(app)/profile/vereinsregeln/checklist' as any)}
         testID="vereinsregeln-checklist"
       />

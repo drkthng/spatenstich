@@ -128,7 +128,7 @@ export default function GardenPlantEditScreen(): React.JSX.Element {
             onChangeText={(text) => change(field, text)}
             inputMode={isNumericField(field) ? 'numeric' : 'text'}
             accessibilityLabel={fieldLabel(field)}
-            className="min-h-[44px] px-3 py-2 border border-line bg-bg font-body text-base text-ink"
+            className="min-h-[48px] px-3 py-2 border border-line bg-bg font-body text-base text-ink"
             testID={`garden-plant-field-${field}`}
           />
         </View>

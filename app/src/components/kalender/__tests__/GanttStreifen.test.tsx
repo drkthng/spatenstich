@@ -80,7 +80,7 @@ describe('GanttStreifen', () => {
     const bars = queryAllByTestId('gantt-bar');
     expect(bars).toHaveLength(0);
     // Track View still renders (outer container)
-    expect(getByLabelText('Gantt-Diagramm für Leerpflanze')).toBeTruthy();
+    expect(getByLabelText('Jahresverlauf für Leerpflanze')).toBeTruthy();
   });
 
   it('outer track View carries accessibilityLabel that includes the plant nameDe', () => {
@@ -88,14 +88,14 @@ describe('GanttStreifen', () => {
       <GanttStreifen plant={MOCK_PLANT} klimazone={4} />
     );
     // accessibilityLabel must contain the plant name
-    expect(getByLabelText('Gantt-Diagramm für Tomate')).toBeTruthy();
+    expect(getByLabelText('Jahresverlauf für Tomate')).toBeTruthy();
   });
 
   it('each bar has a backgroundColor matching the FARBEN map for its Aktionstyp', () => {
     const EXPECTED_COLORS: Record<string, string> = {
-      Vorkultur: '#8A6A1C',
+      Vorkultur: '#785C15',
       Auspflanzen: '#2F4B3A',
-      Ernte: '#B4532A',
+      Ernte: '#A64B25',
     };
     const { getAllByTestId } = render(
       <GanttStreifen plant={MOCK_PLANT} klimazone={4} />
