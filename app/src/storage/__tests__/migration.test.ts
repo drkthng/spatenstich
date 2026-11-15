@@ -17,4 +17,14 @@ describe('migrations (Wave 0 stub)', () => {
     await v6!.up({ clearSyncState: cleared } as any);
     expect(cleared).toHaveBeenCalledTimes(1);
   });
+
+  it('version 7 creates the stores for photo findings and garden plants (Phase 35)', async () => {
+    const create = jest.fn().mockResolvedValue(undefined);
+    const v7 = MIGRATIONS.find((entry) => entry.version === 7);
+    expect(v7).toBeTruthy();
+    await v7!.up({ __createRowTablesV7: create } as never);
+    expect(create).toHaveBeenCalledTimes(1);
+    // An adapter that cannot create them must not pass silently.
+    await expect(v7!.up({} as never)).rejects.toThrow(/v7/);
+  });
 });

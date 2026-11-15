@@ -31,6 +31,8 @@ import {
   planElementToDb,
   planElementToLocal,
   importEntityToDb,
+  plainRowFromDb,
+  plainRowToDb,
   importEntityFromDb,
 } from '../mappers/rowMappers';
 
@@ -56,6 +58,8 @@ export const PULL_ENTITIES: EntityName[] = [
   'bed_drafts',
   'plant_drafts',
   'observation_drafts',
+  'photo_findings',
+  'garden_plants',
 ];
 
 export const PAGE_SIZE = 500;
@@ -91,6 +95,13 @@ const importSpec = (entity: EntityName): CursorSpec => ({
   toLocal: (r) => importEntityFromDb(r, entity) as unknown as AnyRow,
 });
 
+const plainSpec = (entity: EntityName): CursorSpec => ({
+  table: entity,
+  select: '*',
+  gardenScoped: true,
+  toLocal: (r) => plainRowFromDb(r) as unknown as AnyRow,
+});
+
 const CURSOR_SPECS: Partial<Record<EntityName, CursorSpec>> = {
   gardens: {
     table: 'gardens',
@@ -121,6 +132,8 @@ const CURSOR_SPECS: Partial<Record<EntityName, CursorSpec>> = {
   bed_drafts: importSpec('bed_drafts'),
   plant_drafts: importSpec('plant_drafts'),
   observation_drafts: importSpec('observation_drafts'),
+  photo_findings: plainSpec('photo_findings'),
+  garden_plants: plainSpec('garden_plants'),
 };
 
 export interface PullResult {
@@ -357,6 +370,9 @@ export class SyncWorker {
       case 'plant_drafts':
       case 'observation_drafts':
         return this.pushImportEntity(entry);
+      case 'photo_findings':
+      case 'garden_plants':
+        return this.pushPlainRow(entry);
       default:
         throw new Error(`Unknown entity for push: ${(entry as { entity: string }).entity}`);
     }
@@ -366,6 +382,12 @@ export class SyncWorker {
     const userId = useAuthStore.getState().userId;
     if (!userId) throw new Error('no_user');
     return userId;
+  }
+
+  private async pushPlainRow(entry: OutboxEntry): Promise<void> {
+    const row = plainRowToDb(entry.payload);
+    const { error } = await this.supabase.from(entry.entity as never).upsert(row as never, { onConflict: 'id' });
+    if (error) throw error;
   }
 
   private async pushImportEntity(entry: OutboxEntry): Promise<void> {

@@ -565,3 +565,26 @@ export function importEntityFromDb(
 
   return result;
 }
+
+// ── Plain rows (Phase 35: photo_findings, garden_plants) ─────────────────────
+// Rows whose fields map one to one: camelCase here, snake_case in the database. Only
+// the top-level keys are renamed; what sits inside a JSON column (a finding's proposal)
+// stays as it is.
+
+const toSnake = (key: string): string => key.replace(/[A-Z]/g, (c) => '_' + c.toLowerCase());
+const toCamel = (key: string): string => key.replace(/_([a-z])/g, (_m, c: string) => c.toUpperCase());
+
+export function plainRowToDb(row: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(row)) {
+    if (key === 'serverUpdatedAt') continue; // set by the server, never sent
+    result[toSnake(key)] = value;
+  }
+  return result;
+}
+
+export function plainRowFromDb(row: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(row)) result[toCamel(key)] = value;
+  return result;
+}

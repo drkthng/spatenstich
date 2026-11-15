@@ -13,6 +13,7 @@ interface RowTableCreator {
   __createRowTablesV4?: () => Promise<void>;
   __createRowTablesV5?: () => Promise<void>;
   __migrateV6?: () => Promise<void>;
+  __createRowTablesV7?: () => Promise<void>;
 }
 
 // Phase 1: initial bootstrap migration (no local schema needed yet,
@@ -88,6 +89,21 @@ export const MIGRATIONS: LocalMigration[] = [
         await creator.__migrateV6();
       }
       await adapter.clearSyncState();
+    },
+  },
+  {
+    version: 7,
+    up: async (adapter) => {
+      // Phase 35: photo findings and garden-own catalog entries.
+      const creator = adapter as StorageAdapter & RowTableCreator;
+      if (typeof creator.__createRowTablesV7 === 'function') {
+        await creator.__createRowTablesV7();
+      } else {
+        throw new Error(
+          'Migration v7 requires adapter to implement __createRowTablesV7(). ' +
+          'Update SqliteAdapter/IndexedDbAdapter.',
+        );
+      }
     },
   },
 ];

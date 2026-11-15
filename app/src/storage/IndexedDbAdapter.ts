@@ -17,7 +17,7 @@ const SCHEMA_VERSION_KEY = '__schema_version__';
 const ROW_STORES: EntityName[] = [
   'gardens', 'garden_members', 'profiles', 'vereinsregeln', 'invite_codes',
   'garden_dimensions', 'plan_elements', 'imports', 'import_items', 'bed_drafts',
-  'plant_drafts', 'observation_drafts',
+  'plant_drafts', 'observation_drafts', 'photo_findings', 'garden_plants',
 ];
 
 // Which entities have a garden_id field (in camelCase JS objects)?
@@ -35,7 +35,12 @@ const GARDEN_ID_COLUMN: Record<EntityName, string | null> = {
   bed_drafts: 'gardenId',
   plant_drafts: 'gardenId',
   observation_drafts: 'gardenId',
+  photo_findings: 'gardenId',
+  garden_plants: 'gardenId',
 };
+
+/** Phase 35 (local schema version 7). */
+const V7_ENTITIES: EntityName[] = ['photo_findings', 'garden_plants'];
 
 // Monotonic counter for Outbox created_at (prevents FIFO collisions at same ms)
 let outboxCounter = 0;
@@ -44,7 +49,16 @@ export class IndexedDbAdapter implements StorageAdapter {
   private dbPromise: Promise<IDBPDatabase>;
 
   constructor(dbName: string) {
-    this.dbPromise = openDB(dbName, 4, {
+    this.dbPromise = openDB(dbName, 5, {
+      // Another tab was opened with a newer version of the app and has to upgrade the
+      // database. Holding on to the connection would leave that tab hanging at start,
+      // so this older one lets go and loads the new version as well.
+      blocking(_currentVersion, _blockedVersion, event) {
+        (event.target as IDBDatabase | null)?.close();
+        if (typeof window !== 'undefined' && typeof window.location?.reload === 'function') {
+          window.location.reload();
+        }
+      },
       upgrade(db, oldVersion) {
         // Fallthrough pattern for future versions.
         if (oldVersion < 1) {
@@ -103,6 +117,15 @@ export class IndexedDbAdapter implements StorageAdapter {
               if (gidCol && gidCol !== 'id') {
                 store.createIndex('by_gardenId', 'gardenId', { unique: false });
               }
+            }
+          }
+        }
+        if (oldVersion < 5) {
+          // Phase 35: photo findings and garden-own catalog entries
+          for (const entity of V7_ENTITIES) {
+            if (!db.objectStoreNames.contains(entity)) {
+              const store = db.createObjectStore(entity, { keyPath: 'id' });
+              store.createIndex('by_gardenId', 'gardenId', { unique: false });
             }
           }
         }
@@ -191,6 +214,18 @@ export class IndexedDbAdapter implements StorageAdapter {
     if (missing.length > 0) {
       throw new Error(
         `IndexedDbAdapter: v5 stores missing after upgrade: ${missing.join(', ')}. ` +
+        'Delete dev database and retry.',
+      );
+    }
+  }
+
+  // ---- Migration hook V7 (Phase 35: photo findings, garden plants) ----
+  async __createRowTablesV7(): Promise<void> {
+    const db = await this.dbPromise;
+    const missing = V7_ENTITIES.filter((s) => !db.objectStoreNames.contains(s));
+    if (missing.length > 0) {
+      throw new Error(
+        `IndexedDbAdapter: v7 stores missing after upgrade: ${missing.join(', ')}. ` +
         'Delete dev database and retry.',
       );
     }

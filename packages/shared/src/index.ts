@@ -8,6 +8,7 @@ export * from './constants/vereinsregeln';
 export * from './lib/kalenderEngine';
 export * from './utils';
 export * from './ai/contract';
+export * from './ai/photo';
 // Phase 3: Row-Types + Entity-Definitions
 export type {
   EntityName,
@@ -28,6 +29,9 @@ export type {
   BedDraftRow,
   PlantDraftRow,
   ObservationDraftRow,
+  // Phase 35: photo findings and garden-own catalog entries
+  PhotoFindingRow,
+  GardenPlantRow,
   ImportPayload,
   ImportPayloadBed,
   ImportPayloadPlant,

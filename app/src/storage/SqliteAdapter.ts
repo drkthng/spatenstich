@@ -24,6 +24,8 @@ const ROW_ENTITIES: EntityName[] = [
   'bed_drafts',
   'plant_drafts',
   'observation_drafts',
+  'photo_findings',
+  'garden_plants',
 ];
 
 // Which entities have a garden_id column?
@@ -41,6 +43,8 @@ const GARDEN_ID_COLUMN: Record<EntityName, string | null> = {
   bed_drafts: 'garden_id',
   plant_drafts: 'garden_id',
   observation_drafts: 'garden_id',
+  photo_findings: 'garden_id',
+  garden_plants: 'garden_id',
 };
 
 // camelCase field name that maps to the garden_id column in the row object
@@ -57,6 +61,8 @@ const GARDEN_ID_FIELD: Record<EntityName, string | null> = {
   bed_drafts: 'gardenId',
   plant_drafts: 'gardenId',
   observation_drafts: 'gardenId',
+  photo_findings: 'gardenId',
+  garden_plants: 'gardenId',
 };
 
 // Monotonic counter for Outbox created_at (prevents FIFO collisions at same Date.now())
@@ -492,6 +498,25 @@ export class SqliteAdapter implements StorageAdapter {
       await tx.runAsync('DELETE FROM sync_outbox');
       await tx.runAsync('DELETE FROM sync_state');
     });
+  }
+
+  // ---- Migration hook V7 (Phase 35: photo findings, garden plants) ----
+  async __createRowTablesV7(): Promise<void> {
+    const db = await this.dbPromise;
+    for (const entity of ['photo_findings', 'garden_plants'] as EntityName[]) {
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS ${entity} (
+          id TEXT PRIMARY KEY NOT NULL,
+          data TEXT NOT NULL,
+          garden_id TEXT,
+          deleted_at TEXT,
+          updated_at TEXT NOT NULL
+        );
+      `);
+      await db.execAsync(
+        `CREATE INDEX IF NOT EXISTS idx_${entity}_garden_id ON ${entity}(garden_id) WHERE deleted_at IS NULL;`,
+      );
+    }
   }
 
   // ---- Migration hook V6 (Phase 33: outbox retry time) ----

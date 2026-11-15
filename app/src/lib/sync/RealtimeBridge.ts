@@ -26,6 +26,8 @@ export const REALTIME_TABLES: EntityName[] = [
   'bed_drafts',
   'plant_drafts',
   'observation_drafts',
+  'photo_findings',
+  'garden_plants',
 ];
 
 export const PULL_DEBOUNCE_MS = 300;

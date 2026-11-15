@@ -239,5 +239,47 @@ export function runStorageContractTests(
         expect(await adapter.getSchemaVersion()).toBe(version);
       });
     });
+
+    describe('photo findings and garden plants (Phase 35)', () => {
+      const base = {
+        createdAt: '2026-11-15T10:00:00.000Z', updatedAt: '2026-11-15T10:00:00.000Z',
+        updatedByUserId: 'u-1', deletedAt: null,
+      };
+      const finding = (id: string, gardenId: string) => ({
+        ...base, id, gardenId, checkId: 'c-1', kind: 'catalog_plant' as const, targetElementId: null,
+        title: 'Yacon steht nicht im Katalog', detail: '', confidence: 0.8, closeupOf: null,
+        status: 'open' as const, resolvedAt: null, taskRequested: false, createdByUserId: 'u-1',
+        proposal: { plantName: 'Yacon', catalog: { nameDe: 'Yacon', plantStartMonth: 5, plantEndMonth: 6 } },
+      });
+
+      it('a finding is stored with its proposal as it is, per garden, and queued for sync', async () => {
+        const row = finding('f-1', 'g-1');
+        await adapter.writeWithOutbox('photo_findings', row as never, {
+          entity: 'photo_findings', rowId: row.id, operation: 'insert', payload: row as never,
+        });
+        await adapter.upsertRowsFromServer('photo_findings', [finding('f-2', 'g-2') as never]);
+        const mine = await adapter.getRowsByGarden('photo_findings', 'g-1');
+        expect(mine.map((r) => r.id)).toEqual(['f-1']);
+        expect((mine[0] as unknown as { proposal: unknown }).proposal).toEqual(row.proposal);
+        expect((await adapter.listOutboxEntries()).map((e) => e.entity)).toEqual(['photo_findings']);
+      });
+
+      it('a garden plant is stored per garden and gone once deleted', async () => {
+        const plant = {
+          ...base, id: 'p-1', gardenId: 'g-1', slug: 'yacon', nameDe: 'Yacon', nameBotanical: null, family: '',
+          category: 'Gemüse', minSpacingCm: 80, sowOutdoorDoyStart: null, sowOutdoorDoyEnd: null,
+          plantDoyStart: 121, plantDoyEnd: 181, harvestDoyStart: null, harvestDoyEnd: null,
+          notesDe: null, source: 'photo' as const,
+        };
+        await adapter.upsertRowsFromServer('garden_plants', [plant as never]);
+        expect(await adapter.getRowsByGarden('garden_plants', 'g-1')).toHaveLength(1);
+        expect(await adapter.getRowsByGarden('garden_plants', 'g-2')).toHaveLength(0);
+        await adapter.upsertRowsFromServer(
+          'garden_plants',
+          [{ ...plant, deletedAt: '2026-11-15T11:00:00.000Z', updatedAt: '2026-11-15T11:00:00.000Z' } as never],
+        );
+        expect(await adapter.getRowsByGarden('garden_plants', 'g-1')).toHaveLength(0);
+      });
+    });
   });
 }

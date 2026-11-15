@@ -2,6 +2,8 @@
 // Wichtig: camelCase für TypeScript-Usage. Die Adapter-Impl speichert snake_case
 // in SQLite/IndexedDB (via toRow/fromRow-Mapper in den Repos).
 
+import type { PhotoFindingKind, PhotoProposal } from '../ai/photo';
+
 export type EntityName =
   | 'gardens'
   | 'garden_members'
@@ -14,7 +16,9 @@ export type EntityName =
   | 'import_items'
   | 'bed_drafts'
   | 'plant_drafts'
-  | 'observation_drafts';
+  | 'observation_drafts'
+  | 'photo_findings'
+  | 'garden_plants';
 
 /** Gemeinsame Basis-Felder für alle LWW-managed Rows (Plan 03-01 Migration 013). */
 export interface RowBase {
@@ -95,7 +99,53 @@ export type AnyRow =
   | ImportItemRow
   | BedDraftRow
   | PlantDraftRow
-  | ObservationDraftRow;
+  | ObservationDraftRow
+  | PhotoFindingRow
+  | GardenPlantRow;
+
+/**
+ * Phase 35: one finding of a photo check. A proposal: nothing in the plan or the catalog
+ * changes until someone accepts it. Open findings are synced, so the partner sees them.
+ */
+export interface PhotoFindingRow extends RowBase {
+  gardenId: string;
+  /** All findings of one photo check share this id. */
+  checkId: string;
+  kind: PhotoFindingKind;
+  /** The plan element the finding is about (for add_plant: the bed). */
+  targetElementId: string | null;
+  title: string;
+  detail: string;
+  proposal: PhotoProposal;
+  /** 0 to 1. */
+  confidence: number;
+  /** What to photograph from close up, when the check could not tell. */
+  closeupOf: string | null;
+  status: 'open' | 'accepted' | 'dismissed';
+  resolvedAt: string | null;
+  /** The person wants a task from this finding (becomes one in Phase 36). */
+  taskRequested: boolean;
+  createdByUserId: string | null;
+}
+
+/** Phase 35: a catalog entry that belongs to one garden (accepted from a finding). */
+export interface GardenPlantRow extends RowBase {
+  gardenId: string;
+  slug: string;
+  nameDe: string;
+  nameBotanical: string | null;
+  family: string;
+  category: string;
+  minSpacingCm: number | null;
+  sowOutdoorDoyStart: number | null;
+  sowOutdoorDoyEnd: number | null;
+  plantDoyStart: number | null;
+  plantDoyEnd: number | null;
+  harvestDoyStart: number | null;
+  harvestDoyEnd: number | null;
+  notesDe: string | null;
+  source: 'photo' | 'manual';
+}
 
 /** Phase 6: Import header row (per D-17, D-18) */
 export interface ImportRow extends RowBase {

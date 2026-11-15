@@ -16,6 +16,61 @@ runStorageContractTests(
 );
 
 describe('IndexedDbAdapter Web-specific', () => {
+  it('an open tab with this version does not block a newer version from upgrading', async () => {
+    const name = `blocking-test-${Date.now()}-${Math.random()}`;
+    const adapter = new IndexedDbAdapter(name);
+    await runMigrations(adapter);
+    // A later release opens the same database with a higher version.
+    const opened = await new Promise<string>((resolve) => {
+      const request = indexedDB.open(name, 99);
+      request.onsuccess = () => {
+        request.result.close();
+        resolve('opened');
+      };
+      request.onerror = () => resolve('error');
+      setTimeout(() => resolve('still blocked'), 3000);
+    });
+    expect(opened).toBe('opened');
+  });
+
+  it('upgrading from the previous version keeps the stored rows and adds the Phase 35 stores', async () => {
+    const name = `upgrade-4-5-${Date.now()}-${Math.random()}`;
+    // The database as the previous release left it: version 4 with a plan element.
+    await new Promise<void>((resolve, reject) => {
+      const request = indexedDB.open(name, 4);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        db.createObjectStore('kv');
+        for (const store of ['gardens', 'garden_members', 'profiles', 'vereinsregeln', 'invite_codes',
+          'garden_dimensions', 'plan_elements', 'imports', 'import_items', 'bed_drafts', 'plant_drafts', 'observation_drafts']) {
+          const s = db.createObjectStore(store, { keyPath: 'id' });
+          if (store !== 'gardens' && store !== 'profiles') s.createIndex('by_gardenId', 'gardenId', { unique: false });
+        }
+        db.createObjectStore('sync_outbox', { keyPath: 'id' }).createIndex('by_createdAt', 'createdAt', { unique: false });
+        db.createObjectStore('sync_state', { keyPath: 'entity' });
+      };
+      request.onsuccess = () => {
+        const db = request.result;
+        const tx = db.transaction(['plan_elements', 'kv'], 'readwrite');
+        tx.objectStore('plan_elements').put({ id: 'e-1', gardenId: 'g-1', label: 'Beet', deletedAt: null, updatedAt: '2026-11-01T00:00:00.000Z' });
+        tx.objectStore('kv').put('6', '__schema_version__');
+        tx.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+        tx.onerror = () => reject(tx.error);
+      };
+      request.onerror = () => reject(request.error);
+    });
+
+    const adapter = new IndexedDbAdapter(name);
+    await runMigrations(adapter);
+    expect(await adapter.getSchemaVersion()).toBe(7);
+    expect((await adapter.getRowsByGarden('plan_elements', 'g-1')).map((r) => r.id)).toEqual(['e-1']);
+    expect(await adapter.getRowsByGarden('photo_findings', 'g-1')).toEqual([]);
+    expect(await adapter.getRowsByGarden('garden_plants', 'g-1')).toEqual([]);
+  });
+
   it('Version-Upgrade 1 → 2 legt alle Row-Stores + Outbox + State an', async () => {
     const adapter = new IndexedDbAdapter(`upgrade-test-${Date.now()}-${Math.random()}`);
     await runMigrations(adapter);
