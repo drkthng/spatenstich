@@ -50,6 +50,7 @@ jest.mock('react-native-svg', () => {
 
 const mockLoadDimensions = jest.fn();
 const mockLoadAcceptedElements = jest.fn();
+jest.mock('@/src/components/tasks/TodayTasks', () => ({ TodayTasks: () => null }));
 jest.mock('@/src/lib/photo/openFindings', () => ({
   countOpenFindings: jest.fn().mockResolvedValue(0),
   loadFindings: jest.fn().mockResolvedValue([]),

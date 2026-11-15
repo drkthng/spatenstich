@@ -514,7 +514,10 @@
         "garden_members": "Mitglied",
         "invite_codes": "Einladungscode",
         "photo_findings": "Befund aus dem Foto-Abgleich",
-        "garden_plants": "Eigener Katalogeintrag"
+        "garden_plants": "Eigener Katalogeintrag",
+        "garden_tasks": "Eigene Aufgabe",
+        "task_done": "Erledigte Aufgabe",
+        "task_sorts": "Reihenfolge der Tagesliste"
       },
       "reason": {
         "notAllowed": "Du darfst in diesem Garten nichts mehr ändern.",
@@ -796,5 +799,126 @@
       "November",
       "Dezember"
     ]
+  },
+  "tasks": {
+    "title": "Heute",
+    "heading": "Was heute zu tun ist",
+    "intro": "Aus eurem Plan, dem Kalender, der Jahreszeit und dem Wetter. Die Liste entsteht auf dem Gerät und geht auch ohne Netz.",
+    "show": "Aufgaben für heute anzeigen",
+    "hide": "Aufgaben ausblenden",
+    "accountOnly": "Die Aufgabenliste braucht einen Garten in einem Konto.",
+    "noPlan": "Sobald Beete und Pflanzen im Plan stehen, ergeben sich daraus Aufgaben.",
+    "empty": "Für heute steht nichts an.",
+    "allDone": "Alles erledigt, was für heute anstand.",
+    "budget": {
+      "label": "Wie viel Zeit hast du?",
+      "minutes": "{n} Min.",
+      "none": "Egal",
+      "sumOne": "Eine Aufgabe, etwa {min} Minuten",
+      "sumMany": "{n} Aufgaben, zusammen etwa {min} Minuten",
+      "nothingFits": "In {min} Minuten passt keine der Aufgaben ganz. Die kürzeste dauert etwa {shortest} Minuten."
+    },
+    "rest": "Wenn noch Zeit bleibt",
+    "doneToday": "Heute erledigt",
+    "duration": "etwa {min} Min.",
+    "urgency": {
+      "high": "dringend",
+      "medium": "diese Woche",
+      "low": "wenn Zeit ist"
+    },
+    "check": "Als erledigt abhaken: {title}",
+    "uncheck": "Doch nicht erledigt: {title}",
+    "doneBy": "erledigt von {name}",
+    "ai": {
+      "sorted": "Von der KI sortiert",
+      "base": "Grundliste, ohne KI sortiert",
+      "button": "Mit KI sortieren",
+      "running": "Die KI sortiert die Liste …",
+      "offline": "Ohne Netz gilt die Grundliste.",
+      "hint": "Die KI bringt die Aufgaben in eine sinnvolle Reihenfolge und begründet sie. Das kostet einen kleinen Betrag aus dem Monatsbudget und wird für heute gemerkt."
+    },
+    "weather": {
+      "line": "Heute {min} bis {max}, {rain}{place}.",
+      "place": " in {place}",
+      "rain": "etwa {mm} mm Regen",
+      "dry": "kaum Regen",
+      "none": "Keine aktuelle Wettervorhersage. Die Liste rechnet ohne Wetter.",
+      "noPlz": "Für die Wettervorhersage fehlt die Postleitzahl des Gartens.",
+      "setPlz": "Postleitzahl eintragen"
+    },
+    "where": {
+      "garden": "im ganzen Garten",
+      "plantedBeds": "{n} bepflanzte Beete"
+    },
+    "rule": {
+      "presow": "{plant} vorziehen",
+      "sow": "{plant} säen",
+      "plantOut": "{plant} auspflanzen",
+      "harvest": "{plant} ernten",
+      "water": "Gießen",
+      "weed": "Unkraut jäten",
+      "prepareBed": "Beet vorbereiten",
+      "compost": "Kompost umsetzen",
+      "mow": "Rasen mähen",
+      "prune": "Bäume und Sträucher schneiden",
+      "leaves": "Laub rechen und Beete mulchen",
+      "waterOff": "Wasser abstellen und Leitungen entleeren",
+      "tools": "Werkzeug reinigen und ölen",
+      "planSeason": "Anbau planen und Saatgut besorgen",
+      "frost": "Empfindliche Pflanzen vor Frost schützen"
+    },
+    "reason": {
+      "Vorkultur": "Die Zeit zum Vorziehen läuft bis {until}.",
+      "Direktsaat": "Das Aussaatfenster ist bis {until} offen.",
+      "Auspflanzen": "Auspflanzen geht bis {until}.",
+      "Ernte": "Die Erntezeit läuft bis {until}.",
+      "waitForFrost": "Am {day} sind {temp} angesagt. Warte damit, bis der Frost vorbei ist.",
+      "waterHeat": "Heute werden {temp} erwartet. Gieß am besten abends.",
+      "waterDry": "Heute ist kaum Regen angesagt.",
+      "waterNoForecast": "In dieser Jahreszeit brauchen bepflanzte Beete regelmäßig Wasser.",
+      "weed": "Alle zwei Wochen jäten hält das Beet frei, bevor Unkraut Samen bildet.",
+      "prepareBed": "Vor der Saison den Boden lockern und Kompost einarbeiten.",
+      "compostSpring": "Im Frühjahr umgesetzt wird der Kompost schneller reif.",
+      "compostAutumn": "Vor dem Winter umgesetzt ist Platz für Laub und Schnittgut.",
+      "mowGrowing": "Der Rasen wächst jetzt schnell. Einmal in der Woche reicht.",
+      "mowSlow": "Der Rasen wächst langsam. Alle anderthalb Wochen reicht.",
+      "prune": "Schneiden geht am besten, solange noch nichts austreibt.",
+      "leaves": "Laub auf dem Rasen schadet, auf den Beeten schützt es den Boden.",
+      "waterOff": "Vor dem ersten Frost müssen Leitungen und Schläuche leer sein.",
+      "waterOffFrost": "Am {day} sind {temp} angesagt. Leitungen und Schläuche müssen vorher leer sein.",
+      "tools": "Im Winter ist Zeit dafür, und im Frühjahr ist alles bereit.",
+      "planSeason": "Wer jetzt plant, hat das Saatgut rechtzeitig zum Vorziehen.",
+      "frost": "Am {day} sind {temp} angesagt. Vlies oder Eimer über die empfindlichen Pflanzen.",
+      "finding": "Beim Foto-Abgleich gefunden: {title}",
+      "ownRepeating": "Eigene Aufgabe, alle {n} Tage.",
+      "ownToday": "Eigene Aufgabe, heute fällig.",
+      "ownLate": "Eigene Aufgabe, fällig seit dem {day}"
+    },
+    "own": {
+      "add": "Eigene Aufgabe anlegen",
+      "heading": "Eigene Aufgabe",
+      "listHeading": "Eigene Aufgaben",
+      "listEmpty": "Noch keine eigenen Aufgaben.",
+      "title": "Was ist zu tun?",
+      "where": "Wo? (kann leer bleiben)",
+      "duration": "Dauer in Minuten",
+      "due": "Fällig am",
+      "repeat": "Wiederholen",
+      "repeatOnce": "einmalig",
+      "repeatDaily": "jeden Tag",
+      "repeatWeekly": "jede Woche",
+      "repeatTwoWeeks": "alle zwei Wochen",
+      "repeatMonthly": "jeden Monat",
+      "save": "Aufgabe speichern",
+      "cancel": "Abbrechen",
+      "delete": "Löschen",
+      "deleteLabel": "Aufgabe löschen: {title}",
+      "saved": "Die Aufgabe ist gespeichert.",
+      "deleted": "Die Aufgabe ist gelöscht.",
+      "invalid": "Bitte prüfe die Angaben: Die Aufgabe braucht einen Namen, die Dauer liegt zwischen 1 und 600 Minuten, und sie braucht ein Datum.",
+      "summaryOnce": "einmalig am {day}, etwa {min} Min.",
+      "summaryRepeat": "alle {n} Tage, etwa {min} Min."
+    },
+    "failed": "Das hat nicht geklappt. Bitte versuche es noch einmal."
   }
 }

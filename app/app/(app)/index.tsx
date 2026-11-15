@@ -16,6 +16,7 @@ import { loadAcceptedElements, loadDimensions } from '@/src/lib/gardenPlanRepo';
 import { PlanEditor } from '@/src/components/plan/PlanEditor';
 import { usePlanVersion } from '@/src/lib/editor/planRefresh';
 import { countOpenFindings } from '@/src/lib/photo/openFindings';
+import { TodayTasks } from '@/src/components/tasks/TodayTasks';
 import { useDataVersion } from '@/src/lib/sync/dataVersion';
 import { Button } from '@/src/components/ui/button';
 import { InlineBanner } from '@/src/components/InlineBanner';
@@ -158,6 +159,8 @@ export default function HomeScreen(): React.JSX.Element {
               <ProfileButton />
             </View>
           </View>
+          {/* Phase 36: the home screen opens with today's tasks and the time budget. */}
+          <TodayTasks />
           {/* Still picture of the plan in the same drawing style as the editor. */}
           <View className="self-stretch h-[300px] border border-line">
             <PlanEditor
