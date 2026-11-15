@@ -1,7 +1,7 @@
 // Mein Garten — Plan 02.5-04.
 // Pattern: settings.tsx (inline-confirmation-expansion) + profile/plz.tsx (form).
 // Features (SC-1..SC-4 + D-16 Owner-Rights):
-//   - Garden-Name (read-only, edit deferred)
+//   - Garden-Name, editable (Phase 37, NAV3-06)
 //   - Members list with display_name + Owner-Badge + Remove-Button (owner only)
 //   - Invite-Code: create (owner), display, Copy + Share buttons
 //   - Leave-Garden (member)
@@ -9,7 +9,7 @@
 //   - D-16: Garten löschen (owner only, disabled wenn members > 1)
 //   - LWW label: "zuletzt bearbeitet von <Name>, <time>"
 import * as React from 'react';
-import { View, Text, ScrollView, Share } from 'react-native';
+import { View, Text, ScrollView, Share, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
 import de from '@spatenstich/shared/i18n/de';
@@ -18,6 +18,7 @@ import { useAuthStore } from '@/src/stores/authStore';
 import {
   loadGarden,
   loadMembers,
+  updateGarden,
   removeMember,
   leaveGarden,
   deleteGarden,
@@ -68,6 +69,10 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
   const [creatingCode, setCreatingCode] = React.useState(false);
   const [confirmRemove, setConfirmRemove] = React.useState<string | null>(null);
   const [confirmLeave, setConfirmLeave] = React.useState(false);
+  // Phase 37 (NAV3-06): the garden's name can be changed; copying the code says so.
+  const [nameDraft, setNameDraft] = React.useState<string | null>(null);
+  const [nameState, setNameState] = React.useState<'idle' | 'saving' | 'saved' | 'invalid'>('idle');
+  const [copied, setCopied] = React.useState(false);
 
   // D-16 state
   const [transferExpanded, setTransferExpanded] = React.useState(false);
@@ -95,7 +100,8 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
           setMembers(m);
         }
       } catch (e) {
-        if (!cancelled) setError((e as Error).message);
+        if (!cancelled) setError(t('garden.error_load'));
+        if (__DEV__) console.warn('garden: load failed', e);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -144,7 +150,35 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
   };
 
   const handleCopy = async (): Promise<void> => {
-    if (code) await Clipboard.setStringAsync(code);
+    if (!code) return;
+    try {
+      await Clipboard.setStringAsync(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 4000);
+    } catch {
+      setError(t('garden.invite.copy_failed'));
+    }
+  };
+
+  const handleSaveName = async (): Promise<void> => {
+    if (!activeGardenId || !userId || nameDraft === null) return;
+    const name = nameDraft.trim();
+    if (name.length < 1 || name.length > 60) {
+      setNameState('invalid');
+      return;
+    }
+    setNameState('saving');
+    setError(null);
+    try {
+      await updateGarden('account', activeGardenId, userId, { name });
+      setGarden((prev) => (prev ? { ...prev, name } : prev));
+      setNameDraft(null);
+      setNameState('saved');
+    } catch (e) {
+      setNameState('idle');
+      setError(t('garden.error_generic'));
+      if (__DEV__) console.warn('garden: rename failed', e);
+    }
   };
 
   const handleShare = async (): Promise<void> => {
@@ -165,7 +199,8 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
       setMembers((prev) => prev.filter((m) => m.userId !== memberUserId));
       setConfirmRemove(null);
     } catch (e) {
-      setError((e as Error).message);
+      setError(t('garden.error_generic'));
+      if (__DEV__) console.warn('garden: remove member failed', e);
     }
   };
 
@@ -176,7 +211,8 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
       setActiveGarden(null);
       router.replace('/(app)' as any);
     } catch (e) {
-      setError((e as Error).message);
+      setError(t('garden.error_generic'));
+      if (__DEV__) console.warn('garden: leave failed', e);
     }
   };
 
@@ -254,9 +290,40 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
       className="flex-1 bg-bg"
       contentContainerClassName="flex-grow p-6 gap-4"
     >
-      <Text className="text-2xl font-display font-semibold text-ink">
-        {garden.name}
-      </Text>
+      <View className="gap-2">
+        <Text className="text-xs uppercase text-ink-muted">{t('garden.name_label')}</Text>
+        <TextInput
+          value={nameDraft ?? garden.name}
+          onChangeText={(text) => {
+            setNameDraft(text);
+            setNameState('idle');
+          }}
+          maxLength={60}
+          accessibilityLabel={t('garden.name_label')}
+          className="min-h-[48px] px-3 py-2 border border-line bg-bg font-display text-2xl text-ink"
+          testID="settings-garden-name-input"
+        />
+        {nameDraft !== null && nameDraft.trim() !== garden.name ? (
+          <Button
+            onPress={handleSaveName}
+            disabled={nameState === 'saving'}
+            className="self-start"
+            testID="settings-garden-name-save"
+          >
+            <Text className="text-on-primary font-semibold">{t('garden.name_save')}</Text>
+          </Button>
+        ) : null}
+        {nameState === 'invalid' ? (
+          <Text className="text-sm text-danger" testID="settings-garden-name-invalid">
+            {t('garden.name_invalid')}
+          </Text>
+        ) : null}
+        {nameState === 'saved' ? (
+          <Text className="text-sm text-ink" testID="settings-garden-name-saved">
+            {t('garden.name_saved')}
+          </Text>
+        ) : null}
+      </View>
       {garden.plz ? (
         <Text className="text-sm text-ink-muted">
           {t('garden.plz_label')}: {garden.plz}
@@ -370,7 +437,7 @@ export default function GardenSettingsScreen(): React.JSX.Element | null {
                   onPress={handleCopy}
                   testID="settings-garden-copy-btn"
                 >
-                  <Text>{t('garden.invite.copy')}</Text>
+                  <Text>{copied ? t('garden.invite.copied') : t('garden.invite.copy')}</Text>
                 </Button>
                 <Button
                   variant="outline"

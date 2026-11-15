@@ -134,7 +134,8 @@
       "expires_in_hours": "Gültig für 24 Stunden",
       "error_not_owner": "Nur der Besitzer kann Einladungs-Codes erzeugen.",
       "error_already_full": "Dein Garten hat bereits 2 Mitglieder.",
-      "error_generic": "Code konnte nicht erzeugt werden."
+      "error_generic": "Code konnte nicht erzeugt werden.",
+      "copy_failed": "Der Code ließ sich nicht kopieren. Tippe ihn bitte ab."
     },
     "member": {
       "remove": "Entfernen",
@@ -162,7 +163,12 @@
       "success": "Garten gelöscht",
       "error_has_members": "Entferne erst alle anderen Mitglieder.",
       "error_generic": "Löschen fehlgeschlagen. Bitte erneut versuchen."
-    }
+    },
+    "name_save": "Namen speichern",
+    "name_saved": "Der Name ist gespeichert.",
+    "name_invalid": "Der Name braucht 1 bis 60 Zeichen.",
+    "error_generic": "Das hat nicht geklappt. Bitte versuche es noch einmal.",
+    "error_load": "Der Garten ließ sich nicht laden. Bitte versuche es noch einmal."
   },
   "audit": {
     "last_edited_by": "zuletzt bearbeitet von {name}, {time}",
@@ -920,5 +926,68 @@
       "summaryRepeat": "alle {n} Tage, etwa {min} Min."
     },
     "failed": "Das hat nicht geklappt. Bitte versuche es noch einmal."
+  },
+  "nav": {
+    "appName": "Spatenstich",
+    "heute": "Heute",
+    "plan": "Plan",
+    "kalender": "Kalender",
+    "mehr": "Mehr"
+  },
+  "more": {
+    "intro": "Garten, Konto und alles, was man nicht jeden Tag braucht.",
+    "section": {
+      "garden": "Garten",
+      "tools": "Werkzeuge",
+      "account": "Konto und App"
+    },
+    "garden": {
+      "title": "Mein Garten",
+      "hint": "Name, Mitglieder, Einladungscode"
+    },
+    "profile": {
+      "title": "Standort und Gartentyp",
+      "hint": "Postleitzahl, Klimazone, Gartentyp"
+    },
+    "plz": {
+      "title": "Postleitzahl"
+    },
+    "archetype": {
+      "title": "Gartentyp"
+    },
+    "join": {
+      "title": "Einem Garten beitreten",
+      "hint": "Mit einem Einladungscode"
+    },
+    "photo": {
+      "title": "Foto-Abgleich",
+      "hint": "Fotos mit dem Plan vergleichen"
+    },
+    "findings": {
+      "title": "Befunde",
+      "hintNone": "Keine offenen Befunde",
+      "hintOne": "Ein offener Befund",
+      "hintMany": "{n} offene Befunde"
+    },
+    "import": {
+      "title": "Aus Claude.ai importieren",
+      "hint": "Analyse aus eurem Claude.ai-Projekt übernehmen",
+      "howTitle": "So geht der Import",
+      "how1": "Lade im Claude.ai-Projekt Fotos hoch und lass dir das Ergebnis als JSON ausgeben.",
+      "how2": "Kopiere das JSON oder teile es aus Claude.ai mit Spatenstich.",
+      "how3": "Füge es hier ein. Du siehst eine Vorschau und entscheidest bei jedem Eintrag, ob er in den Plan kommt."
+    },
+    "ai": {
+      "title": "KI und Verbrauch",
+      "hint": "Monatsbudget, Verbrauchsbuch, Verbindungstest"
+    },
+    "sync": {
+      "title": "Speicherstatus",
+      "hint": "Was gespeichert und abgeglichen ist"
+    },
+    "account": {
+      "title": "Konto",
+      "hint": "Anmeldung, Abmelden, App installieren"
+    }
   }
 }

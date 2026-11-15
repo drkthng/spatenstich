@@ -120,9 +120,12 @@ export default function ImportEntryScreen(): React.JSX.Element {
     <View className="flex-1 bg-bg">
       <Stack.Screen options={{ headerTitle: t('import.title') }} />
       <ScrollView contentContainerClassName="p-4 gap-4">
-        <Text className="text-base text-ink-muted text-center">
-          JSON-Datei teilen oder einfügen
-        </Text>
+        <View className="p-3 border border-line bg-surface-2" testID="import-howto">
+          <Text className="font-display text-lg text-ink">{t('more.import.howTitle')}</Text>
+          <Text className="text-sm text-ink mt-1">1. {t('more.import.how1')}</Text>
+          <Text className="text-sm text-ink mt-1">2. {t('more.import.how2')}</Text>
+          <Text className="text-sm text-ink mt-1">3. {t('more.import.how3')}</Text>
+        </View>
 
         {shareLoading && (
           <Text

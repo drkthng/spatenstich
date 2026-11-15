@@ -3,11 +3,9 @@
 // Phase 6 Plan 06-03: "Aus Claude.ai importieren" Button in Empty State + Plan View.
 // Quick 260611-jrl: Profil-Icon in beiden Render-Branches ergänzt.
 // Quick 260616-iuu: Zahnrad-Icon (Settings) in beiden Render-Branches ergänzt.
-import { tokens } from '@/src/theme/tokens';
 import * as React from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Settings, User } from 'lucide-react-native';
 import de from '@spatenstich/shared/i18n/de';
 import type { GardenDimensionsRow, PlanElementRow } from '@spatenstich/shared';
 import { useAuthStore } from '@/src/stores/authStore';
@@ -23,36 +21,6 @@ import { InlineBanner } from '@/src/components/InlineBanner';
 
 const t = (key: string): string =>
   key.split('.').reduce<any>((o, k) => (o ? o[k] : undefined), de as any) ?? key;
-
-function ProfileButton(): React.JSX.Element {
-  const router = useRouter();
-  return (
-    <Pressable
-      onPress={() => router.push('/(app)/profile' as any)}
-      accessibilityRole="button"
-      accessibilityLabel={t('home.profileButtonLabel')}
-      testID="home-profile-button"
-      className="min-w-[44px] min-h-[44px] items-center justify-center"
-    >
-      <User size={24} color={tokens.color.inkMuted} />
-    </Pressable>
-  );
-}
-
-function SettingsButton(): React.JSX.Element {
-  const router = useRouter();
-  return (
-    <Pressable
-      onPress={() => router.push('/(app)/settings' as any)}
-      accessibilityRole="button"
-      accessibilityLabel={t('home.settingsButtonLabel')}
-      testID="home-settings-button"
-      className="min-w-[44px] min-h-[44px] items-center justify-center"
-    >
-      <Settings size={24} color={tokens.color.inkMuted} />
-    </Pressable>
-  );
-}
 
 export default function HomeScreen(): React.JSX.Element {
   const mode = useAuthStore((s) => s.mode);
@@ -154,10 +122,7 @@ export default function HomeScreen(): React.JSX.Element {
             ) : (
               <View />
             )}
-            <View className="flex-row items-center gap-3">
-              <SettingsButton />
-              <ProfileButton />
-            </View>
+            <View />
           </View>
           {/* Phase 36: the home screen opens with today's tasks and the time budget. */}
           <TodayTasks />
@@ -215,16 +180,6 @@ export default function HomeScreen(): React.JSX.Element {
               {t('editor.home.openPlan')}
             </Text>
           </Button>
-          <Button
-            variant="outline"
-            onPress={() => router.push('/(app)/kalender' as any)}
-            className="mt-2 w-full"
-            testID="home-kalender-button"
-          >
-            <Text className="font-semibold text-ink">
-              {t('kalender.title')}
-            </Text>
-          </Button>
         </ScrollView>
       </View>
     );
@@ -237,8 +192,6 @@ export default function HomeScreen(): React.JSX.Element {
         {statusLabel ? (
           <Text className="text-xs text-ink-muted" testID="home-auth-status">{statusLabel}</Text>
         ) : null}
-        <SettingsButton />
-        <ProfileButton />
       </View>
       <View className="flex-1 items-center justify-center p-6">
         <Text className="text-lg font-display font-semibold text-ink mb-2">

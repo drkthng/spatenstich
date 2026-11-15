@@ -1,25 +1,30 @@
-// (app) group layout — Stack with headers (Phase 4 will add tabs).
-// Pattern: 02-PATTERNS.md §"app/app/(auth)/_layout.tsx and app/app/(app)/_layout.tsx".
-// Plan 03-06: SyncStatusBadge added to headerRight for all authenticated routes.
-// Plan 20-02 (D-06): expo-share-intent + ShareIntentProvider entfernt — der
-// Teilen-Weg wird in 20-03 durch den PWA Web Share Target + Service Worker ersetzt.
+// (app) group layout (Phase 37, NAV3-01): every signed-in screen sits in the navigation
+// frame (bar at the bottom on a phone, sidebar on a wide window) and has a title in
+// its header. The editor and the onboarding steps take the whole window.
 import { Stack } from 'expo-router';
 import { SyncStatusBadge } from '@/src/components/SyncStatusBadge';
+import { AppNav } from '@/src/components/nav/AppNav';
+import { SCREEN_TITLES } from '@/src/lib/nav/tabs';
 import { tokens } from '@/src/theme/tokens';
+import { t } from '@/src/lib/i18n';
 
 export default function AppLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: true,
-        headerTitle: '',
-        headerRight: () => <SyncStatusBadge />,
-        // Feldführer: ink on warm white, no shadow under the header, hairline instead.
-        headerStyle: { backgroundColor: tokens.color.bg },
-        headerTintColor: tokens.color.ink,
-        headerShadowVisible: false,
-        contentStyle: { backgroundColor: tokens.color.bg },
-      }}
-    />
+    <AppNav>
+      <Stack
+        screenOptions={({ route }) => ({
+          headerShown: true,
+          // A screen may set its own title; this is the one it has without doing so.
+          headerTitle: SCREEN_TITLES[route.name] ? t(SCREEN_TITLES[route.name]!) : '',
+          headerRight: () => <SyncStatusBadge />,
+          // Feldführer: ink on warm white, no shadow under the header, hairline instead.
+          headerStyle: { backgroundColor: tokens.color.bg },
+          headerTintColor: tokens.color.ink,
+          headerTitleStyle: { fontFamily: tokens.font.display },
+          headerShadowVisible: false,
+          contentStyle: { backgroundColor: tokens.color.bg },
+        })}
+      />
+    </AppNav>
   );
 }
