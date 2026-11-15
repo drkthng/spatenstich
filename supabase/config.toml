@@ -390,6 +390,9 @@ static_files = [ "../packages/shared/src/data/plants.json:./plants.json" ]
 
 # Phase 34: the only place that calls the Claude API. The function checks the sign-in
 # token itself (auth.getUser), so the gateway check is off and the CORS preflight passes.
+[functions.weather]
+verify_jwt = false  # The function checks the sign-in token itself (handler.ts)
+
 [functions.ai]
 verify_jwt = false
 

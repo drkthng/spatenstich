@@ -3,7 +3,7 @@
 // the function from being usable as a general-purpose proxy on Dirk's API key.
 //
 // Phase 34: the connection test. Phase 35: photo comparison and its close-up follow-up.
-// Task sorting (Phase 36) adds its feature here.
+// Phase 36: the order of today's tasks.
 // Pure TypeScript without imports from outside this folder (see pricing.ts for why).
 
 import {
@@ -15,6 +15,7 @@ import {
   RESULT_SCHEMA,
   type ContentBlock,
 } from './photo.ts';
+import { normalizeSort, readTaskSortInput, SORT_SCHEMA, taskSortPrompt } from './tasks.ts';
 
 export type Effort = 'low' | 'medium' | 'high';
 
@@ -89,6 +90,22 @@ export const FEATURES: Record<string, FeatureBuilder> = {
         return result && result.findings.length > 0 ? result : null;
       },
       timeoutMs: PHOTO_TIMEOUT_MS,
+    };
+  },
+
+  // The order of today's tasks, with one sentence of reason each (tasks.ts). The list
+  // itself comes from the app; the model cannot add, drop or change a task.
+  task_sort: (raw) => {
+    const input = readTaskSortInput(raw);
+    if (!input) return null;
+    const prompt = taskSortPrompt(input);
+    return {
+      system: prompt.system,
+      messages: [{ role: 'user', content: prompt.text }],
+      maxTokens: 6000,
+      effort: 'low',
+      schema: SORT_SCHEMA,
+      parse: (text) => normalizeSort(text, input.tasks),
     };
   },
 };

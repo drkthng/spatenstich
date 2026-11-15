@@ -52,6 +52,9 @@ jobs:
       - name: Edge function — tests
         working-directory: supabase/functions/ai
         run: deno test
+      - name: Weather function — type-check and tests
+        working-directory: supabase/functions/weather
+        run: deno check index.ts && deno test
 
       - name: Web export (for bundle scan)
         run: pnpm --filter app exec expo export --platform web
