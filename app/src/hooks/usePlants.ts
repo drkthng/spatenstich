@@ -2,10 +2,15 @@
 // Pattern: useFlag.ts (only existing useQuery hook in app) extended with
 //   initialData (JSON-bundle cold-start) + initialDataUpdatedAt: 0 (Pitfall 2).
 
+import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import plantsBundle from '@spatenstich/shared/data/plants';
 import { loadAllPlants } from '../lib/plantRepo';
-import type { PlantRow } from '@spatenstich/shared';
+import type { GardenPlantRow, PlantRow } from '@spatenstich/shared';
+import { storage } from '../storage';
+import { useAuthStore } from '../stores/authStore';
+import { useDataVersion } from '../lib/sync/dataVersion';
+import { mergeCatalog } from '../lib/photo/gardenPlants';
 
 const QUERY_KEY = ['plants', 'all'] as const;
 const EPOCH_ISO = '1970-01-01T00:00:00Z';
@@ -50,7 +55,45 @@ function initialDataFromBundle(): PlantRow[] {
   }));
 }
 
+/**
+ * The garden's own catalog entries (Phase 35), from local storage: available offline
+ * and updated when a sync brings a change from the partner.
+ */
+export function useGardenPlants(): GardenPlantRow[] {
+  const gardenId = useAuthStore((s) => s.activeGardenId);
+  const version = useDataVersion('garden_plants');
+  const [rows, setRows] = React.useState<GardenPlantRow[]>([]);
+  React.useEffect(() => {
+    let alive = true;
+    if (!gardenId) {
+      setRows([]);
+      return;
+    }
+    storage
+      .getRowsByGarden<GardenPlantRow>('garden_plants', gardenId)
+      .then((found) => {
+        if (alive) setRows(found);
+      })
+      .catch(() => {
+        if (alive) setRows([]);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [gardenId, version]);
+  return rows;
+}
+
+/** The shared catalog plus the garden's own entries, for palette and calendar. */
 export function usePlants() {
+  const shared = useSharedPlants();
+  const own = useGardenPlants();
+  const data = React.useMemo(() => mergeCatalog(shared.data ?? [], own), [shared.data, own]);
+  return { ...shared, data };
+}
+
+/** The shared, read-only catalog. */
+export function useSharedPlants() {
   return useQuery({
     queryKey: QUERY_KEY,
     // An empty answer (not signed in yet, or a backend without the plant rows) must not

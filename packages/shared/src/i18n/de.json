@@ -512,7 +512,9 @@
         "observation_drafts": "Beobachtung",
         "vereinsregeln": "Vereinsregeln",
         "garden_members": "Mitglied",
-        "invite_codes": "Einladungscode"
+        "invite_codes": "Einladungscode",
+        "photo_findings": "Befund aus dem Foto-Abgleich",
+        "garden_plants": "Eigener Katalogeintrag"
       },
       "reason": {
         "notAllowed": "Du darfst in diesem Garten nichts mehr ändern.",
@@ -636,5 +638,163 @@
       "unavailable": "Die KI hat nicht rechtzeitig geantwortet. Bitte versuche es noch einmal.",
       "service_error": "Bei der KI-Anfrage ist etwas schiefgegangen. Bitte versuche es noch einmal."
     }
+  },
+  "photo": {
+    "title": "Foto-Abgleich",
+    "intro": "Mach Fotos von deinem Garten. Die App vergleicht sie mit dem Plan und zeigt dir, was abweicht. Am Plan ändert sich nichts, bevor du einen Befund annimmst.",
+    "privacy": "Die Fotos werden zur Auswertung an die KI geschickt und danach verworfen. Gespeichert werden nur die Befunde.",
+    "tips": "Am besten klappt es mit zwei bis sechs Fotos aus verschiedenen Blickwinkeln, auf denen Wege oder Zäune zu sehen sind.",
+    "takePhoto": "Foto aufnehmen",
+    "choosePhotos": "Aus Galerie oder Datei wählen",
+    "countNone": "Noch kein Foto gewählt",
+    "count": "{n} von {max} Fotos",
+    "removePhoto": "Foto {n} entfernen",
+    "photoAlt": "Foto {n}",
+    "tooMany": "In einen Abgleich gehen höchstens {max} Fotos. Die übrigen wurden nicht übernommen.",
+    "start": "Mit dem Plan abgleichen",
+    "running": "Die Fotos werden ausgewertet. Das kann bis zu zwei Minuten dauern.",
+    "accountOnly": "Der Foto-Abgleich braucht ein Konto, weil die Auswertung über den Server läuft.",
+    "retry": "Noch einmal versuchen",
+    "cost": "Dieser Abgleich hat {cost} gekostet.",
+    "resultNone": "Die Fotos passen zum Plan. Es gibt keine Befunde.",
+    "resultOne": "Ein Befund wartet auf deine Entscheidung.",
+    "resultMany": "{n} Befunde warten auf deine Entscheidung.",
+    "showFindings": "Befunde ansehen",
+    "again": "Weitere Fotos abgleichen",
+    "openOne": "Ein offener Befund",
+    "openMany": "{n} offene Befunde",
+    "home": {
+      "button": "Foto-Abgleich",
+      "findingsOne": "Ein offener Befund aus dem Foto-Abgleich",
+      "findingsMany": "{n} offene Befunde aus dem Foto-Abgleich"
+    },
+    "error": {
+      "no_garden": "Lege zuerst die Größe deines Gartens im Plan fest. Ohne Plan gibt es nichts zum Abgleichen.",
+      "no_photos": "Wähle mindestens ein Foto.",
+      "too_many_photos": "Das sind zu viele Fotos für einen Abgleich.",
+      "photo_unreadable": "Eines der Bilder ließ sich nicht öffnen. Bitte wähle ein anderes Foto."
+    },
+    "findings": {
+      "title": "Befunde",
+      "intro": "Jeder Befund ist ein Vorschlag. Am Plan und am Katalog ändert sich nur, was du annimmst.",
+      "empty": "Keine offenen Befunde.",
+      "emptyHint": "Nach einem Foto-Abgleich stehen hier die Vorschläge, auch die deines Partners.",
+      "newCheck": "Neuer Foto-Abgleich",
+      "checkFrom": "Abgleich vom {date}",
+      "checkBy": "Abgleich vom {date} von {name}",
+      "kind": {
+        "resize": "Größe weicht ab",
+        "move": "Lage weicht ab",
+        "rename": "Anderer Inhalt als im Plan",
+        "remove": "Nicht mehr vorhanden",
+        "add_element": "Fehlt im Plan",
+        "add_plant": "Pflanze fehlt im Plan",
+        "catalog_plant": "Neue Pflanze für den Katalog",
+        "pest": "Schädlinge",
+        "disease": "Krankheit",
+        "stage": "Entwicklungsstand",
+        "unclear": "Nicht sicher erkannt"
+      },
+      "confidence": {
+        "high": "Sicher ({percent} %)",
+        "medium": "Ziemlich sicher ({percent} %)",
+        "low": "Unsicher ({percent} %)"
+      },
+      "uncertain": "Unsicher",
+      "closeupAsk": "Für eine sichere Aussage braucht die App eine Nahaufnahme: {what}",
+      "closeupButton": "Nahaufnahme nachreichen",
+      "closeupRunning": "Die Nahaufnahme wird ausgewertet …",
+      "closeupDone": "Der Befund wurde mit der Nahaufnahme aktualisiert.",
+      "accept": "Annehmen",
+      "acceptTask": "Als Aufgabe vormerken",
+      "acceptCatalog": "In den Katalog aufnehmen",
+      "dismiss": "Ablehnen",
+      "edit": "Vorher bearbeiten",
+      "editSave": "Vorschlag ändern",
+      "editCancel": "Abbrechen",
+      "editInvalid": "Bitte prüfe die Angaben. Maße sind Zahlen in Metern, zum Beispiel 2,5.",
+      "proposal": {
+        "resize": "Vorschlag: {width} × {height} m statt {oldWidth} × {oldHeight} m",
+        "move": "Vorschlag: Mittelpunkt {x} m von links und {y} m von oben",
+        "rename": "Vorschlag: „{label}“ statt „{old}“",
+        "remove": "Vorschlag: „{label}“ aus dem Plan entfernen",
+        "add_element": "Vorschlag: {type} „{label}“, {width} × {height} m",
+        "add_plant": "Vorschlag: {plant} in den Plan setzen",
+        "add_plant_bed": "Vorschlag: {plant} in „{bed}“ setzen",
+        "notInCatalog": "Diese Pflanze steht noch nicht im Katalog. Sie kommt mit ihrem Namen auf den Plan, ohne Kalenderdaten.",
+        "action": "Was zu tun ist: {action}",
+        "botanical": "Botanischer Name: {value}",
+        "family": "Familie: {value}",
+        "spacing": "Pflanzabstand: {value} cm",
+        "sow": "Aussaat: {from} bis {to}",
+        "plant": "Pflanzung: {from} bis {to}",
+        "harvest": "Ernte: {from} bis {to}"
+      },
+      "mark": {
+        "element": "Im Plan markiert: {label}",
+        "proposed": "Im Plan markiert: {label}, gestrichelt der Vorschlag",
+        "box": "Im Plan markiert: die vorgeschlagene Stelle",
+        "spot": "Im Plan markiert: die Stelle der Pflanze"
+      },
+      "field": {
+        "label": "Name",
+        "width": "Breite in Metern",
+        "height": "Tiefe in Metern",
+        "x": "Mittelpunkt von links in Metern",
+        "y": "Mittelpunkt von oben in Metern",
+        "plant": "Pflanze",
+        "action": "Was zu tun ist",
+        "nameDe": "Name",
+        "botanical": "Botanischer Name",
+        "family": "Familie",
+        "spacing": "Pflanzabstand in cm",
+        "sowFrom": "Aussaat von (Monat 1–12)",
+        "sowTo": "Aussaat bis (Monat 1–12)",
+        "plantFrom": "Pflanzung von (Monat 1–12)",
+        "plantTo": "Pflanzung bis (Monat 1–12)",
+        "harvestFrom": "Ernte von (Monat 1–12)",
+        "harvestTo": "Ernte bis (Monat 1–12)"
+      },
+      "done": {
+        "plan": "Angenommen. Der Plan ist geändert.",
+        "catalog": "„{name}“ steht jetzt im Katalog, in der Palette und im Kalender.",
+        "task": "Als Aufgabe vorgemerkt.",
+        "dismissed": "Abgelehnt. Am Plan hat sich nichts geändert."
+      },
+      "problem": {
+        "not_open": "Dieser Befund ist schon erledigt.",
+        "needs_closeup": "Dieser Befund ist noch nicht sicher genug. Reiche eine Nahaufnahme nach oder lehne ihn ab.",
+        "target_missing": "Das Element gibt es im Plan nicht mehr. Der Befund lässt sich nur noch ablehnen.",
+        "incomplete": "Dem Vorschlag fehlt eine Angabe. Bitte bearbeite ihn vor dem Annehmen.",
+        "already_in_catalog": "Diese Pflanze steht inzwischen im Katalog.",
+        "not_authenticated": "Bitte melde dich an, um Befunde anzunehmen.",
+        "failed": "Das hat nicht geklappt. Bitte versuche es noch einmal."
+      }
+    },
+    "plant": {
+      "title": "Katalogeintrag bearbeiten",
+      "intro": "Dieser Eintrag gehört zu eurem Garten. Änderungen sieht auch dein Partner.",
+      "ownBadge": "Eigener Eintrag",
+      "editLink": "Eintrag bearbeiten",
+      "save": "Speichern",
+      "saved": "Gespeichert.",
+      "notFound": "Diesen Eintrag gibt es nicht mehr.",
+      "notes": "Notizen",
+      "invalid": "Bitte prüfe die Angaben: Der Name darf nicht leer sein, Monate liegen zwischen 1 und 12, der Abstand zwischen 1 und 1000 cm."
+    },
+    "months": [
+      "Januar",
+      "Februar",
+      "März",
+      "April",
+      "Mai",
+      "Juni",
+      "Juli",
+      "August",
+      "September",
+      "Oktober",
+      "November",
+      "Dezember"
+    ]
   }
 }

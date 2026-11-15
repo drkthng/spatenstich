@@ -19,6 +19,7 @@ jest.mock('expo-router', () => ({
 // ── usePlants mock ────────────────────────────────────────────────────────────
 jest.mock('@/src/hooks/usePlants', () => ({
   usePlants: jest.fn(),
+  useGardenPlants: () => [],
 }));
 
 // ── useKalenderData mock ──────────────────────────────────────────────────────

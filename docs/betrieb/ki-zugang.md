@@ -1,6 +1,6 @@
 # KI-Zugang einrichten und betreiben
 
-Stand: 14. November 2026 (Phase 34).
+Stand: 15. November 2026 (Phase 35).
 
 Die App ruft die Claude-API nie selbst auf. Sie fragt die Edge Function `ai` im Supabase-Projekt; nur dort liegt der API-Schlüssel. Jede Anfrage wird im Verbrauchsbuch festgehalten und gegen die Monatsgrenze des Gartens geprüft.
 
@@ -24,9 +24,22 @@ Solange kein Schlüssel hinterlegt ist, sagt die App: „Die KI ist noch nicht e
 4. Stundengrenze: 20 Anfragen pro Person und Stunde.
 5. Erst dann geht die Anfrage an das Modell (`claude-opus-5-5`).
 
-Die App schickt nur den Namen einer Funktion (bisher: `test`) und deren Eingaben. Prompt, Modell und Token-Grenzen stehen in `supabase/functions/ai/features.ts`. Die Funktion lässt sich also nicht als allgemeiner Zugang zum Schlüssel benutzen.
+Die App schickt nur den Namen einer Funktion (`test`, `photo_check`, `photo_closeup`) und deren Eingaben. Prompt, Modell und Token-Grenzen stehen in `supabase/functions/ai/features.ts`. Die Funktion lässt sich also nicht als allgemeiner Zugang zum Schlüssel benutzen.
 
 Lehnt die Sicherheitsprüfung des Modells eine Anfrage ab, versucht die API sie im selben Aufruf auf einem Ausweichmodell (`fallbacks: "default"`). Abgerechnet wird nach dem Modell, das geantwortet hat.
+
+## Foto-Abgleich (Phase 35)
+
+`photo_check` bekommt bis zu sechs verkleinerte Fotos (JPEG, längste Kante 1568 px), eine Kurzbeschreibung des Plans und die Namen der Katalogpflanzen. `photo_closeup` bekommt bis zu drei Nahaufnahmen und den Befund, zu dem sie gehören. Die Antwort ist eine Liste von Befunden in einer festen JSON-Form (`photo.ts`); alles, was nicht in diese Form passt oder auf ein Element zeigt, das es im Plan nicht gibt, wird verworfen.
+
+- **Fotos werden nirgends gespeichert.** Die Funktion reicht sie an das Modell weiter und schreibt sie weder in die Datenbank noch in ein Log. Gespeichert werden nur die Befunde (Tabelle `photo_findings`), und zwar von der App, nicht von der Funktion.
+- **Der Plan ändert sich nur durch Annehmen.** Die Funktion schreibt nie in den Plan oder den Katalog. Das macht die App, wenn jemand einen Befund annimmt.
+- **Elemente gehen unter Kurzzeichen (E1, E2, …) an das Modell,** nicht mit ihren echten Kennungen. Die Zuordnung bleibt auf dem Gerät.
+- **Kosten:** Ein Abgleich mit sechs Fotos liegt nach der Preistabelle grob bei 0,10 bis 0,20 $ (rund 15 000 Token für die Bilder, dazu Plan und Antwort). Das ist eine Rechnung, keine Messung; die echten Zahlen stehen nach den ersten Abgleichen im Verbrauchsbuch.
+- **Dauer:** Die Funktion wartet höchstens 125 Sekunden auf das Modell und versucht es bei Fotos nicht ein zweites Mal, weil eine Edge Function nach 150 Sekunden abgebrochen wird.
+- **Eigene Katalogeinträge** aus angenommenen Vorschlägen liegen in `garden_plants` und gehören zum Garten. Der gemeinsame Katalog (`plants`) bleibt unverändert.
+
+Prompt und Antwortform lassen sich erst mit echten Fotos beurteilen. Bis ein Schlüssel hinterlegt ist, ist der Abgleich nur mit nachgestellten Antworten geprüft.
 
 ## Verbrauchsbuch und Kosten
 

@@ -15,6 +15,8 @@ import { supabase } from '@/src/lib/supabase';
 import { loadAcceptedElements, loadDimensions } from '@/src/lib/gardenPlanRepo';
 import { PlanEditor } from '@/src/components/plan/PlanEditor';
 import { usePlanVersion } from '@/src/lib/editor/planRefresh';
+import { countOpenFindings } from '@/src/lib/photo/openFindings';
+import { useDataVersion } from '@/src/lib/sync/dataVersion';
 import { Button } from '@/src/components/ui/button';
 import { InlineBanner } from '@/src/components/InlineBanner';
 
@@ -61,6 +63,24 @@ export default function HomeScreen(): React.JSX.Element {
   const [elements, setElements] = React.useState<PlanElementRow[]>([]);
   const [dimensions, setDimensions] = React.useState<GardenDimensionsRow | null>(null);
   const [loading, setLoading] = React.useState(true);
+  // Phase 35: open findings of the photo checks, also those of the partner.
+  const findingsVersion = useDataVersion('photo_findings');
+  const [openFindings, setOpenFindings] = React.useState(0);
+  React.useEffect(() => {
+    let alive = true;
+    if (mode !== 'account' || !activeGardenId) {
+      setOpenFindings(0);
+      return;
+    }
+    countOpenFindings(activeGardenId)
+      .then((n) => {
+        if (alive) setOpenFindings(n);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [mode, activeGardenId, findingsVersion]);
   // Plan 20-02 Task 3 (D-04): Lokal-Modus hat nie einen activeGardenId (D-13),
   // daher werden diese drei Buttons nur im leeren Zustand erreicht. Statt zu
   // navigieren (und dort in eine Exception zu laufen) zeigen sie den Hinweis.
@@ -148,10 +168,34 @@ export default function HomeScreen(): React.JSX.Element {
               testID="home-garden-plan"
             />
           </View>
+          {mode === 'account' && openFindings > 0 ? (
+            <Pressable
+              onPress={() => router.push('/(app)/foto/befunde' as any)}
+              accessibilityRole="button"
+              className="self-stretch mt-4 p-3 border border-line bg-warn-soft"
+              testID="home-open-findings"
+            >
+              <Text className="font-body text-sm text-ink">
+                {openFindings === 1
+                  ? t('photo.home.findingsOne')
+                  : t('photo.home.findingsMany').replace('{n}', String(openFindings))}
+              </Text>
+            </Pressable>
+          ) : null}
+          {mode === 'account' ? (
+            <Button
+              variant="outline"
+              onPress={() => router.push('/(app)/foto' as any)}
+              className="mt-4 w-full"
+              testID="home-photo-button"
+            >
+              <Text className="font-semibold text-ink">{t('photo.home.button')}</Text>
+            </Button>
+          ) : null}
           <Button
             variant="outline"
             onPress={() => router.push('/(app)/import' as any)}
-            className="mt-4 w-full"
+            className="mt-2 w-full"
             testID="home-import-button-plan"
           >
             <Text className="font-semibold text-ink">

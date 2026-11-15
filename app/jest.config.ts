@@ -25,6 +25,7 @@ const config: Config = {
         '**/src/lib/__tests__/**/*.test.ts?(x)',
         '**/src/lib/sync/__tests__/**/*.test.ts?(x)',
         '**/src/lib/ai/__tests__/**/*.test.ts?(x)',
+        '**/src/lib/photo/__tests__/**/*.test.ts?(x)',
       ],
       moduleNameMapper: {
         '^@spatenstich/shared$': '<rootDir>/../packages/shared/src/index.ts',

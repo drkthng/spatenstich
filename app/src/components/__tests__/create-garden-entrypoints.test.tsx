@@ -50,6 +50,10 @@ jest.mock('react-native-svg', () => {
 
 const mockLoadDimensions = jest.fn();
 const mockLoadAcceptedElements = jest.fn();
+jest.mock('@/src/lib/photo/openFindings', () => ({
+  countOpenFindings: jest.fn().mockResolvedValue(0),
+  loadFindings: jest.fn().mockResolvedValue([]),
+}));
 jest.mock('@/src/lib/gardenPlanRepo', () => ({
   loadDimensions: (...a: unknown[]) => mockLoadDimensions(...a),
   loadAcceptedElements: (...a: unknown[]) => mockLoadAcceptedElements(...a),

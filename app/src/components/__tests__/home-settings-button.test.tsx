@@ -45,6 +45,10 @@ jest.mock('react-native-svg', () => {
   };
 });
 
+jest.mock('@/src/lib/photo/openFindings', () => ({
+  countOpenFindings: jest.fn().mockResolvedValue(0),
+  loadFindings: jest.fn().mockResolvedValue([]),
+}));
 jest.mock('@/src/lib/gardenPlanRepo', () => ({
   loadDimensions: jest.fn(),
   loadAcceptedElements: jest.fn(),

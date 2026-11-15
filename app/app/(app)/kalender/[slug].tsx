@@ -7,10 +7,10 @@
 // Threat: T-10-09 (addPlantToPlan delegates to plan-02 hook → assertAccount + RLS)
 // Threat: T-10-10 (family lookup via getPlantSlug type-guard — malformed data skipped)
 import * as React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useRouter, Stack, useLocalSearchParams } from 'expo-router';
 import de from '@spatenstich/shared/i18n/de';
-import { usePlants } from '@/src/hooks/usePlants';
+import { useGardenPlants, usePlants } from '@/src/hooks/usePlants';
 import { useKalenderData } from '@/src/hooks/useKalenderData';
 import { findBeeteForPlant, findPflanzenInBeet, getPlantSlug } from '@/src/lib/kalenderBeete';
 import { pruefeEinfacheFruchtfolge } from '@spatenstich/shared';
@@ -40,6 +40,8 @@ export default function PflanzenDetailScreen(): React.JSX.Element {
   const router = useRouter();
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const { data: plants = [] } = usePlants();
+  // Phase 35: entries the garden added itself can be edited.
+  const ownPlants = useGardenPlants();
   const {
     elements,
     klimazone,
@@ -49,6 +51,7 @@ export default function PflanzenDetailScreen(): React.JSX.Element {
   } = useKalenderData();
 
   const plant = plants.find((p) => p.slug === slug);
+  const ownPlant = ownPlants.find((p) => p.slug === slug && p.id === plant?.id);
 
   // State for CTA loading/success/error
   const [addLoading, setAddLoading] = React.useState(false);
@@ -181,6 +184,21 @@ export default function PflanzenDetailScreen(): React.JSX.Element {
             <Text className="text-sm text-ink">
               {t('kalender.detail.familie', { family: plant.family })}
             </Text>
+            {ownPlant ? (
+              <View className="flex-row flex-wrap items-center gap-3 mt-1" testID="pflanze-own-entry">
+                <Text className="text-xs text-ink px-2 py-[2px] bg-ok-soft border border-line">
+                  {t('photo.plant.ownBadge')}
+                </Text>
+                <Pressable
+                  onPress={() => router.push(('/(app)/foto/pflanze?id=' + ownPlant.id) as any)}
+                  accessibilityRole="button"
+                  className="min-h-[44px] justify-center"
+                  testID="pflanze-own-edit"
+                >
+                  <Text className="text-sm text-ink underline">{t('photo.plant.editLink')}</Text>
+                </Pressable>
+              </View>
+            ) : null}
             {/* CAL-06: Fruchtfolge warning */}
             {fruchtfolgeGrund ? (
               <FruchtfolgeWarnung grund={fruchtfolgeGrund} />

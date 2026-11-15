@@ -105,11 +105,13 @@ jest.mock('@spatenstich/shared/data/plants', () => ({
 }));
 
 // Mock authStore (transitive dep from editorStore auto-save subscription)
-jest.mock('../../stores/authStore', () => ({
-  useAuthStore: {
-    getState: () => ({ mode: 'account', userId: 'test-user' }),
-  },
-}));
+jest.mock('../../stores/authStore', () => {
+  const state = { mode: 'account', userId: 'test-user', activeGardenId: null };
+  // Used as a hook (usePlants reads the active garden) and through getState().
+  const useAuthStore = (selector?: (s: typeof state) => unknown) => (selector ? selector(state) : state);
+  useAuthStore.getState = () => state;
+  return { useAuthStore };
+});
 
 // Mock saveDebounce (transitive dep from editorStore)
 jest.mock('../../lib/editor/saveDebounce', () => ({
