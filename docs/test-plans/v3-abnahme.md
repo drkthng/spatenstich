@@ -16,10 +16,10 @@ Welche Ausgabe geprüft wurde, steht unter „Mehr“ ganz unten (Version und Bu
 
 | # | Schritt | erledigt |
 |---|---|---|
-| V1 | Supabase-Dashboard, Edge Functions, Secrets: `ANTHROPIC_API_KEY` gesetzt. In der Anthropic Console ein Monatslimit von 100 $ gesetzt. | Schlüssel: ja (2026-11-15, Name steht in `supabase secrets list`). Limit: |
-| V2 | Supabase-Dashboard, Authentication, Providers, Email: „Confirm email“ aus. | offen (2026-11-15 abgefragt: Bestätigung ist noch an) |
-| V3 | Supabase-Dashboard, Authentication, Email Templates, „Reset Password“: Text enthält `{{ .Token }}` (der sechsstellige Code). | |
-| V4 | Sobald beide Konten bestehen (nach Abschnitt 2): Supabase-Dashboard, Authentication, Sign In / Providers: „Allow new users to sign up“ aus. Dann kann sich niemand Fremdes registrieren, die App bleibt Sache des Haushalts und braucht kein Impressum mit Name und Anschrift. (2026-11-15 abgefragt: Registrierung ist offen.) | |
+| V1 | `ANTHROPIC_API_KEY` ist als Secret der Edge Functions gesetzt. | ja (2026-11-15, Name steht in `supabase secrets list`) |
+| V2 | Neue Konten brauchen keine Bestätigungs-E-Mail („Confirm email“ aus). | ja (2026-11-16 übertragen aus `supabase/config.toml`, am Dienst abgefragt) |
+| V3 | Die E-Mail zum Zurücksetzen des Passworts nennt einen sechsstelligen Code (`{{ .Token }}`) statt eines Links. | ja (2026-11-16 übertragen; der Dienst stand vorher auf acht Ziffern, die App nimmt sechs). Ob die E-Mail ankommt, zeigt Schritt 2.4 |
+| V4 | Sobald beide Konten bestehen (nach Abschnitt 2): Registrierung schließen, siehe `docs/betrieb/anmeldung.md`. Dann kann sich niemand Fremdes registrieren, die App bleibt Sache des Haushalts und braucht kein Impressum mit Name und Anschrift. | |
 | V5 | Beide Handys: Chrome, Adresse öffnen, Menü, „App installieren“. | |
 
 ## 1. Installation, Teilen, Start ohne Netz (offen aus v2.0, Phase 20)

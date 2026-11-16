@@ -165,7 +165,7 @@ Keine. (`todos/freier-foto-upload.md` gestrichen — Foto-Upload ist seit M07 ou
 
 Stand 2026-11-15. Erledigt und deshalb hier gestrichen: Backend-Ausfall (seit Phase 33 wieder erreichbar und überwacht, `docs/betrieb/2026-10-backend-ausfall.md`).
 
-- **Offen, nur Dirk (Vorbereitung der Abnahme, `docs/test-plans/v3-abnahme.md` Abschnitt 0):** Der API-Schlüssel ist als Secret `ANTHROPIC_API_KEY` hinterlegt (2026-11-15 am Namen in `supabase secrets list` geprüft; ob er gilt, zeigt erst die erste echte Anfrage). Offen: 100-$-Limit in der Anthropic Console (von hier nicht einsehbar); E-Mail-Bestätigung aus (2026-11-15 abgefragt: noch an) und Reset-Vorlage mit `{{ .Token }}` im Supabase-Dashboard; neue Registrierungen ausschalten, sobald beide Konten bestehen (das Impressum nennt seit 2026-11-15 keine Anschrift mehr, weil die App privat für einen Haushalt läuft; das trägt nur, solange sich niemand Fremdes registrieren kann); App auf beiden Handys installieren.
+- **Vorbereitung der Abnahme (`docs/test-plans/v3-abnahme.md` Abschnitt 0):** Erledigt sind der API-Schlüssel (Secret `ANTHROPIC_API_KEY`, 2026-11-15 am Namen geprüft; ob er gilt, zeigt die erste echte Anfrage) und die Einstellungen des Anmeldedienstes (2026-11-16 aus `supabase/config.toml` übertragen: keine Bestätigungs-E-Mail, Reset-Code mit sechs statt acht Ziffern, Reset-E-Mail mit Code; `docs/betrieb/anmeldung.md`). Das Limit beim Anbieter lässt Dirk bewusst weg (2026-11-16). Offen, nur Dirk: App auf beiden Handys installieren. Offen danach: Registrierung schließen, sobald beide Konten bestehen (das Impressum nennt keine Anschrift, weil die App privat für einen Haushalt läuft; das trägt nur, solange sich niemand Fremdes registrieren kann).
 - **Noch nie mit echtem Dienst geprüft:** eine echte KI-Anfrage (Test, Foto-Abgleich, Sortierung), die echte Wettervorhersage mit Anmeldung, Registrierung mit Einladungscode, Passwort-Reset mit echter E-Mail, Abgleich zwischen zwei angemeldeten Geräten, Start ohne Netz auf dem Handy. Alles steht in der Prüfliste.
 - **Datenschutztext** (`legal.privacy` in `de.json`) ist ein Entwurf aus dem, was der Code tut; vor der Nutzung zu zweit vom Betreiber lesen.
 - **Lizenz:** Das README nennt AGPL-3.0, eine Datei `LICENSE` liegt nicht im Repository.
@@ -183,7 +183,7 @@ Next: Vorbereitung V1–V5 der Prüfliste (nur Dirk), dann Abnahme auf beiden Ha
 
 ## Operator Next Steps
 
-1. Vorbereitung V1–V5 aus `docs/test-plans/v3-abnahme.md` erledigen. Der Schlüssel liegt schon; offen sind das Limit beim Anbieter, die zwei Supabase-Einstellungen, die Installation und am Ende das Schließen der Registrierung.
+1. App auf beiden Handys installieren (V5 der Prüfliste); alles andere aus der Vorbereitung ist erledigt.
 2. Prüfliste auf beiden Handys und am Desktop durchgehen; Befunde in die Tabelle am Ende eintragen.
 3. Kosten nach Abschnitt 9 der Prüfliste aus dem Verbrauchsbuch ablesen.
 4. Danach: Befunde beheben lassen (je mit Test), Version auf 3.0.0 setzen, Tag `v3.0.0`.
