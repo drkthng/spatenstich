@@ -136,4 +136,5 @@ Monatskosten = 8 × Abgleich + 4 × Nahaufnahme + 60 × Sortierung = `________ $
 
 | Nr. | Schritt | Gerät | Was ist passiert | Behoben in (Commit) | Test, der es künftig findet |
 |---|---|---|---|---|---|
+| 1 | 2.3 | – (beim Durchlesen des Codes gefunden, 2026-11-17) | Wer mit Einladungscode beitritt, bekam kein Profil: In der Mitgliederliste stand „?“, bei „Heute erledigt“ und im Verbrauchsbuch fehlte der Name. | Migration `20261117000026_invite_join_profile.sql` | `supabase/tests/invite_join_profile.sql` |
 | | | | | | |
